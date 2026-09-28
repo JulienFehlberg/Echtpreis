@@ -54,7 +54,7 @@ assert(html.includes("echtpreis_feedback_queue_v1"),"offline feedback queue miss
 assert(html.includes("flushFeedbackQueue"),"queued feedback retry missing");
 assert(html.includes("items:valid.map"),"local receipt history must retain line items for future insights");
 assert(html.includes("typicalQty=medianNumber(priorQty)"),"household forecast must normalize latest quantity against typical purchase quantity");
-assert(html.includes("if(!storeCanCarry(store,wish,key))return null"),"primary price comparison must enforce retailer assortment");
+assert(html.includes("if(storeCanCarry(store,wish,key))"),"primary price comparison must enforce retailer assortment");
 assert(html.includes("reward.ok&&!reward.duplicate&&receiptTotalVerified"),"duplicate or server-unverified receipts must never contribute market prices");
 assert(html.includes("Number(r.packAmount||0)*(Number(r.count)||1)"),"multipack receipt observations must normalize by total purchased quantity");
 assert(html.includes("lineTotal:Number(x.price)||0,price:Number(x.price)||0,count:Number(x.count)||1"),"receipt sync must preserve line total so multipacks are not divided twice after reload");
