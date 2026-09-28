@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.3.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.3.1</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -120,7 +120,27 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
   else{let sum=0,parts=[];items.forEach(i=>{const opts=prices[i.key].filter(p=>p.unit===i.unit).sort((a,b)=>a.price-b.price);sum+=opts[0].price*i.amount;parts.push(opts[0].store+": "+i.label)});st.textContent=money(sum);sd.textContent=parts.join(" · ");ss.textContent=complete.length?"Vergleich mit einem Laden möglich.":"Günstigste belegte Kombination; kein vollständiger Ein-Laden-Vergleich.";}
   r.scrollIntoView({behavior:"smooth"});
  }
- document.addEventListener("DOMContentLoaded",function(){const b=document.getElementById("compareBtn");if(b)b.addEventListener("click",compareStable);});
+ let stableBasket=[];
+ function renderStable(){
+  const box=document.getElementById("list"); if(!box)return;
+  box.innerHTML=stableBasket.length?stableBasket.map((x,i)=>'<div class="item"><div class="itemname">'+x.raw.replace(/[&<>"]/g,"")+'<div class="qty">'+(x.key?"✓ erkannt":"⚠ Noch kein Preis-Match")+'</div></div><button class="x" data-stable-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';
+  box.querySelectorAll("[data-stable-del]").forEach(b=>b.onclick=function(){stableBasket.splice(Number(b.dataset.stableDel),1);renderStable();});
+ }
+ function addStable(raw){
+  raw=String(raw||"").trim();if(!raw)return;
+  stableBasket.push(parseLine(raw));renderStable();
+  const inp=document.getElementById("productInput");if(inp)inp.value="";
+ }
+ function stableItems(){return stableBasket.length?stableBasket:listItems();}
+ listItems=function(){return stableBasket.slice();}
+ document.addEventListener("DOMContentLoaded",function(){
+  const b=document.getElementById("compareBtn"),add=document.getElementById("addBtn"),inp=document.getElementById("productInput"),demo=document.getElementById("demoListBtn");
+  if(b)b.addEventListener("click",compareStable);
+  if(add)add.addEventListener("click",function(){addStable(inp&&inp.value);});
+  if(inp)inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();addStable(inp.value);}});
+  if(demo)demo.addEventListener("click",function(){stableBasket=[parseLine("500 g Rinderhack"),parseLine("1 kg Bananen")];renderStable();});
+  renderStable();
+ });
  window.compareStable=compareStable;
 })();
 </script>
