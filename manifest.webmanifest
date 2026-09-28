@@ -1,0 +1,13 @@
+{
+  "name": "ECHTPREIS",
+  "short_name": "ECHTPREIS",
+  "description": "Versteh, was du bezahlst. Bons analysieren, Einkaufsverhalten verstehen und Preise vergleichen.",
+  "lang": "de-DE",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f8f6",
+  "theme_color": "#087443",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "finance", "lifestyle"]
+}
