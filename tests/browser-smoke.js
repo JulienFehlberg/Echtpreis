@@ -16,6 +16,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(w.identifyReceiptProduct("Red Bull 0,25").key,"energydrink");
  const rb=w.inferPackFromName("Red Bull 0,25");assert.strictEqual(rb.packAmount,0.25);assert.strictEqual(rb.packUnit,"l");
  const receipt=w.parseReceiptText("G&G Mini-Hörnchen 1,49\nOetker Ristorante 3,49\nRed Bull 0,25 1,49 x 2 2,98\nPfand 0,25 x 2 0,50\nSUMME 8,46");
+ await w.addEchtpreisBarcode("Testprodukt","250 g","12345678");assert.strictEqual(d.querySelectorAll("#list .item").length,1,"barcode product should enter the primary basket");w.replaceEchtpreisList([]);
  assert(receipt.length>=4,"receipt parser lost rows");
  assert(receipt.some(x=>x.isDeposit),"deposit line not recognized");
  w.localStorage.removeItem("echtpreis_open_purchase");d.getElementById("compareBtn").click();assert.strictEqual(w.localStorage.getItem("echtpreis_open_purchase"),null,"failed comparison must not open a purchase");
