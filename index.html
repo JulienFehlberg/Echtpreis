@@ -127,16 +127,20 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
      toilettenpapier:["toilettenpapier","klopapier"],kuechenrolle:["kuchenrolle","kuchenpapier"],waschmittel:["waschmittel"],
      zahnpasta:["zahnpasta","zahncreme"],katzenfutter:["katzenfutter"],hundefutter:["hundefutter"]
     };
-    const key=Object.keys(matchMap).find(k=>matchMap[k].some(v=>n.includes(v)))||null;
+    const apiKey=String(o.key||"").trim();
+    const key=apiKey||Object.keys(matchMap).find(k=>matchMap[k].some(v=>n.includes(v)))||null;
     const store=String(o.store||o.merchant||o.merchant_name||"").trim();
-    const price=Number(o.unit_price||o.price_per_unit||o.price);
-    const unit=String(o.pack_unit||o.unit||"").toLowerCase();
-    if(!key||!store||!Number.isFinite(price)||price<=0)return;
+    const price=Number(o.price||o.unit_price||o.price_per_unit);
+    const unit=String(o.per||o.pack_unit||o.unit||"").toLowerCase();
+    const observed=String(o.date||o.observed_at||o.createdAt||"").slice(0,10);
+    if(!key||!store||!Number.isFinite(price)||price<=0||!observed)return;
     let u=unit==="g"?"kg":unit==="ml"?"l":unit;
     let p=price;if(unit==="g")p*=1000;if(unit==="ml")p*=1000;
     if(!["kg","l","piece"].includes(u))return;
+    const until=new Date(observed+"T12:00:00");until.setDate(until.getDate()+30);
+    const validTo=until.toISOString().slice(0,10);
     prices[key]=prices[key]||[];
-    prices[key].push({store,unit:u,price:p,label:raw,source:"ECHTPREIS Bon-Daten",validFrom:String(o.observed_at||o.date||"").slice(0,10)||undefined});
+    prices[key].push({store,unit:u,price:p,label:raw||key,source:o.source||"ECHTPREIS Bon-Daten",validFrom:observed,validTo,trust:Number(o.trust||60),status:o.status||"observed"});
     try{const learned=JSON.parse(localStorage.getItem("echtpreis_product_learning")||"{}");learned[n]=key;localStorage.setItem("echtpreis_product_learning",JSON.stringify(learned));}catch(e){}
    });
   }catch(e){}
