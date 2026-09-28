@@ -134,9 +134,9 @@ const {JSDOM,VirtualConsole}=require("jsdom");
 
  const exactOwnBrand=w.parseWish("1 G&G Mini-Hörnchen");assert.strictEqual(exactOwnBrand.matchMode,"exact","retailer own-brand receipt items must remain exact");
  const observationDate=new Date().toISOString().slice(0,10);
- w.localStorage.setItem("echtpreis_community_observations_v2",JSON.stringify([1,2].map(n=>({key:"zahnpasta",store:"dm",price:1.99,per:"piece",date:observationDate,kind:"community",proof:"independent_"+n,trust:60}))));
+ [1,2].forEach(n=>w.addCommunityObservation({key:"zahnpasta",store:"dm",price:1.99,per:"piece",date:observationDate,proof:"independent_"+n}));
  assert(w.activePrice("zahnpasta","dm",w.parseWish("1 Zahnpasta")),"two current independent observations should enable a drugstore comparison");
- w.localStorage.removeItem("echtpreis_community_observations_v2");
+ w.localStorage.removeItem("echtpreis_community_observations_v2");w.invalidateDataEngine();w.resetPriceLookupMemo();
  let restored=w.restoreBasketItem({raw:"Lachs",choice:{Art:"frozen",Menge:"500g"},checked:true});assert.strictEqual(restored.needsClarification,false,"saved product choice must survive reload");assert.strictEqual(restored.checked,true);
  restored=w.restoreBasketItem({raw:"250 g Testprodukt",ean:"12345678",label:"Testprodukt · 250 g"});assert.strictEqual(restored.key,"ean:12345678","barcode identity must survive reload");
  assert.strictEqual(w.identifyReceiptProduct("Red Bull 0,25").key,"energydrink");
