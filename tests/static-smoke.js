@@ -27,6 +27,8 @@ assert(html.includes('href="privacy.html"'),"privacy entry point missing");
 assert(html.includes("function buildReceiptInsight"),"personal receipt insight engine missing");
 assert(html.includes("function renderStatsBreakdown"),"monthly spending breakdown missing");
 assert(html.includes("echtpreis_insight_history_v1"),"personal insight history missing");
+assert(html.includes("function renderStatsMarketProfile"),"personal market profile missing");
+assert(html.includes("gleiche")||html.includes("identisch"),"market profile must explain direct-product comparison");
 assert(html.includes("function renderStatsTrend"),"month-over-month shopping trend missing");
 assert(html.includes('API_BASE+"/v1/feedback"'),"tester feedback endpoint is not wired into the UI");
 assert(html.includes("items:valid.map"),"local receipt history must retain line items for future insights");
