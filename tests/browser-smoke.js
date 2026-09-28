@@ -162,6 +162,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(new Set(w.getEchtpreisRawList().map(raw=>w.parseWish(raw).key)).size,24,"quick suggestions should avoid repeated products");
  w.replaceEchtpreisList([]);
  assert(receipt.length>=4,"receipt parser lost rows");
+ const longReceipt=Array.from({length:55},(_,i)=>"Milch "+String(i+1)+" 1,00").join("\n")+"\nSUMME 55,00";assert.strictEqual(w.parseReceiptText(longReceipt).length,55,"normal large grocery receipts must not be truncated at 40 lines");
+
  assert(receipt.some(x=>x.isDeposit),"deposit line not recognized");
  const prof=w.receiptItemProfile({name:"Pfand",price:.5,isDeposit:true});assert.strictEqual(prof.isDeposit,true,"deposit analytics flag missing");assert.strictEqual(prof.category,"Pfand","deposit must not enter normal spending categories");
  const searchRows=w.searchPersonalPurchases("Red Bull",[{id:"a",store:"EDEKA",date:"2026-09-28",items:[{name:"Red Bull 0,25",price:2.98,count:2,unitLinePrice:1.49}]},{id:"b",store:"Lidl",date:"2026-09-20",items:[{name:"Red Bull 0,25",price:1.49,count:1}]}]);assert.strictEqual(searchRows[0].price,1.49,"purchase search must compare multipacks per unit");
