@@ -975,21 +975,21 @@ function renderStatsRhythm(receipts){
 }
 function searchPersonalPurchases(query,receipts=getPersonalReceipts()){
  const q=normalizeProduct(query);if(!q)return [];
- const rows=[];(receipts||[]).forEach(r=>(r.items||[]).forEach(i=>{if(i.isDeposit)return;const n=normalizeProduct(i.name||"");if(!n.includes(q))return;const price=Number(i.price)||0;if(price<=0)return;rows.push({name:i.name,price,date:r.date||"",store:r.store||"",receiptId:r.id})}));
+ const rows=[];(receipts||[]).forEach(r=>(r.items||[]).forEach(i=>{if(i.isDeposit)return;const n=normalizeProduct(i.name||"");if(!n.includes(q))return;const lineTotal=Number(i.price)||0,price=comparableItemPrice(i);if(price<=0)return;rows.push({name:i.name,price,lineTotal,count:Math.max(1,Number(i.count)||1),date:r.date||"",store:r.store||"",receiptId:r.id})}));
  return rows.sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,50);
 }
 function renderPurchaseSearch(query){
  const box=$("statsPurchaseSearchResults");if(!box)return;const rows=searchPersonalPurchases(query);if(!normalizeProduct(query)){box.innerHTML="";return}
  if(!rows.length){box.innerHTML='<div class="detail" style="margin-top:8px">Noch kein passender Artikel in deinen gespeicherten Bons.</div>';return}
  const min=rows.reduce((a,b)=>b.price<a.price?b:a),max=rows.reduce((a,b)=>b.price>a.price?b:a),latest=rows[0];
- box.innerHTML='<div class="detail" style="margin:8px 0"><b>'+rows.length+' Treffer</b> · günstigster erfasster Kauf '+eur(min.price)+(min.store?' bei '+escHtml(min.store):'')+' · höchster '+eur(max.price)+'</div>'+rows.slice(0,12).map(x=>'<div style="display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid #edf0ee"><div><b>'+escHtml(x.name)+'</b><div class="detail">'+escHtml(formatReceiptDate(x.date))+(x.store?' · '+escHtml(x.store):'')+'</div></div><b>'+eur(x.price)+'</b></div>').join("")+(rows.length>12?'<div class="detail">Weitere '+(rows.length-12)+' Treffer vorhanden.</div>':'');
+ box.innerHTML='<div class="detail" style="margin:8px 0"><b>'+rows.length+' Treffer</b> · günstigster vergleichbarer Einzelpreis '+eur(min.price)+(min.store?' bei '+escHtml(min.store):'')+' · höchster '+eur(max.price)+'</div>'+rows.slice(0,12).map(x=>'<div style="display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid #edf0ee"><div><b>'+escHtml(x.name)+'</b><div class="detail">'+escHtml(formatReceiptDate(x.date))+(x.store?' · '+escHtml(x.store):'')+(x.count>1?' · '+x.count+' Stück':'')+'</div></div><b>'+eur(x.price)+(x.count>1?' / Stück':'')+'</b></div>').join("")+(rows.length>12?'<div class="detail">Weitere '+(rows.length-12)+' Treffer vorhanden.</div>':'');
 }
 function renderStatsDiscoveries(){
  const box=$("statsDiscoveries");if(!box)return;let rows=[];try{rows=JSON.parse(localStorage.getItem("echtpreis_insight_history_v1")||"[]")}catch(e){}
  rows=Array.isArray(rows)?rows.slice(0,4):[];box.innerHTML=rows.length?'<div style="font-weight:900;margin-bottom:7px">Letzte Entdeckungen</div>'+rows.map(x=>'<div style="padding:9px 0;border-bottom:1px solid #edf0ee"><b>'+escHtml(x.title)+'</b><div class="detail">'+escHtml([formatReceiptDate(x.date),x.store].filter(Boolean).join(" · "))+(x.detail?' · '+escHtml(x.detail):'')+'</div></div>').join(""):"";
 }
 function renderStatsBreakdown(receipts){
- const box=$("statsBreakdown");if(!box)return;const month=new Date().toISOString().slice(0,7),rows=(receipts||[]).filter(r=>String(r.date||"").startsWith(month)),cats={},products={};let recognized=0;
+ const box=$("statsBreakdown");if(!box)return;const month=window.echtpreisLocalDateKey().slice(0,7),rows=(receipts||[]).filter(r=>String(r.date||"").startsWith(month)),cats={},products={};let recognized=0;
  rows.forEach(r=>(r.items||[]).forEach(i=>{const x=receiptItemProfile(i);if(x.price<=0||x.isDeposit)return;recognized+=x.price;cats[x.category]=(cats[x.category]||0)+x.price;let n=normalizeProduct(x.name);if(n){products[n]=products[n]||{name:x.name,total:0,count:0};products[n].total+=x.price;products[n].count++}}));
  if(!recognized){box.innerHTML='<div class="detail">Mit deinen nächsten gescannten Bons zeigen wir hier, welche Produktgruppen deine Ausgaben bestimmen.</div>';return}
  const topCats=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,4),topProducts=Object.values(products).sort((a,b)=>b.total-a.total).slice(0,3);
