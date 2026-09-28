@@ -69,7 +69,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}.receipt-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #e5eae7;text-align:left}.receipt-item strong{white-space:nowrap}.receipt-item-name{min-width:0;overflow-wrap:anywhere}.receipt-item small{display:block;color:#68736d;margin-top:3px}.ocrbox #receiptTotalCheck,.ocrbox #receiptPaymentDetail{font-size:14px;margin:10px 0;text-align:left}.insight-card{margin:16px 0;padding:18px;border-radius:20px;background:#fff8e8;border:1px solid #f0dfb7;text-align:left}.insight-card .insight-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:900;color:#8a6a18}.insight-card strong{display:block;font-size:20px;line-height:1.25;margin:5px 0}.insight-card .detail{font-size:13px}.feedback-box{max-width:560px;margin:22px auto 6px;text-align:left;color:#66736c;font-size:12px}.feedback-box summary{cursor:pointer;text-align:center;font-weight:800}.feedback-box textarea{width:100%;box-sizing:border-box;margin-top:10px;min-height:82px;resize:vertical}.feedback-box button{width:100%;margin-top:8px;padding:10px}.feedback-status{text-align:center;margin-top:7px;font-size:12px}@media(max-width:430px){.insight-card{padding:15px}.insight-card strong{font-size:18px}}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.121.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.122.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -218,6 +218,28 @@ const openPricesCacheKey="echtpreis_openprices_cache_v1";
 const dataMachineState={openPrices:"noch nicht synchronisiert",loaded:0,rejected:0,lastSync:null};
 function loadJson(key,fallback=[]){try{let value=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));return Array.isArray(fallback)&&!Array.isArray(value)?fallback:value}catch(e){return fallback}}
 function saveJson(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch(e){}}
+function choiceMatchesProductText(choice,text){
+ const n=normalizeProduct(text||"");if(!choice)return true;
+ const maps={Lagen:{any:null,"2ply":["2 lag","2-lag"],"3ply":["3 lag","3-lag"],"4ply":["4 lag","4-lag"]},Packung:{any:null,"4roll":["4 rollen","4er"],"8roll":["8 rollen","8er"],"10roll":["10 rollen","10er"],"16roll":["16 rollen","16er"]},Sorte:{any:null,vine:["rispe","rispen","strauch"],cherry:["cherry","kirschtom"],cocktail:["cocktail"],roma:["roma","pflaumen"],beef:["fleisch"],black:["schwarz"],white:["weiss"],mixed:["bunt","mix"],kidney:["kidney"],green:["grun","brech"]},Form:{ground:["gemahlen","pulver"],whole:["korn","korner","muhle"]},Art:{canned:["dose","glas","konserve"],dry:["trocken","getrocknet"],fresh:["frisch","tk","tiefkuhl"]}};
+ for(const [group,val] of Object.entries(choice)){const words=maps[group]&&maps[group][val];if(words&&!words.some(x=>n.includes(normalizeProduct(x))))return false}return true;
+}
+const productComparisonProfiles={toilettenpapier:{identity:["Lagen"],valueUnit:"100 Blatt"},waschmittel:{identity:[],valueUnit:"Waschladung"},wasser:{identity:["Sorte"],valueUnit:"l"},tomaten:{identity:["Sorte"],valueUnit:"kg"},pfeffer:{identity:["Sorte","Form"],valueUnit:"kg"},bohnen:{identity:["Sorte","Art"],valueUnit:"kg"},lachs:{identity:["Art"],valueUnit:"kg"}};
+function comparisonProfile(key){return productComparisonProfiles[key]||{identity:[],valueUnit:catalog[key]?.unit||"piece"}}
+function productMatchLevel(wish,observation){
+ if(!wish||!observation||wish.key!==observation.key)return "none";const text=observation.product||"";
+ if(wish.matchMode==="exact"&&wish.exactBrand&&!normalizeProduct(text).includes(normalizeProduct(wish.exactBrand)))return "none";
+ if(wish.choice&&Object.keys(wish.choice).length&&!choiceMatchesProductText(wish.choice,text))return "none";
+ return wish.matchMode==="exact"?"exact":(wish.choice&&Object.values(wish.choice).some(v=>v&&v!=="any")?"variant":"category");
+}
+function inferComparablePack(key,text){
+ const n=normalizeProduct(text||"");if(key==="toilettenpapier"){let rolls=(n.match(/\b(\d{1,2})\s*(?:rollen|rolle|er)\b/)||[])[1],sheets=(n.match(/\b(\d{2,4})\s*(?:blatt|blaetter|blatter)\b/)||[])[1];return {rolls:Number(rolls)||null,sheetsPerRoll:Number(sheets)||null,totalSheets:rolls&&sheets?Number(rolls)*Number(sheets):null}}
+ if(key==="waschmittel"){let washes=(n.match(/\b(\d{1,3})\s*(?:wl|waschladungen|waeschen|waschen)\b/)||[])[1];return {washes:Number(washes)||null}}return null;
+}
+function normalizedValuePrice(key,price,text){
+ const pack=inferComparablePack(key,text),p=Number(price);if(!(p>0)||!pack)return null;
+ if(key==="toilettenpapier"){if(pack.totalSheets)return {price:p/pack.totalSheets*100,unit:"100 Blatt",amount:pack.totalSheets};if(pack.rolls)return {price:p/pack.rolls,unit:"Rolle",amount:pack.rolls}}
+ if(key==="waschmittel"&&pack.washes)return {price:p/pack.washes,unit:"Waschladung",amount:pack.washes};return null;
+}
 function canonicalStoreName(store){
  const raw=String(store||"").trim(),n=normalizeProduct(raw);if(!n)return null;
  if(n.includes("aldi sud")||n.includes("aldi sued"))return "ALDI Süd";if(n.includes("aldi nord"))return "ALDI Nord";
