@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.3</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.4</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="tabs"><button class="tab active" id="planTab">Einkauf planen</button><button class="tab" id="receiptTab">Bon prüfen</button></div>
 
@@ -37,13 +37,13 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <div class="chips" id="suggestions"></div><div id="list"></div><button class="ghost" id="demoListBtn" style="width:100%;margin-top:12px">Beispielliste einsetzen</button></div>
 
 <div class="card"><h2>Welche Märkte?</h2><div class="muted">Später: automatisch nach Standort und Entfernung. Heute kannst du auswählen.</div><div class="chips" id="stores"></div>
-<div class="notice"><b>Wichtig:</b> Die freie Liste wird bereits strukturiert. Der Händlervergleich nutzt dort, wo noch keine belastbaren Live-Daten vorhanden sind, klar gekennzeichnete DEMO-PREISE. Es werden keine Händlerpreise als aktuell ausgegeben. Live-Preisdaten kommen als eigener Daten-Layer.</div>
+<div class="notice"><b>Wichtig:</b> Die freie Liste wird strukturiert. Händlerpreise erscheinen nur, wenn eine verifizierte und für den Zeitraum gültige Preisquelle vorhanden ist. Fehlende Preise bleiben fehlend. Es werden keine Händlerpreise als aktuell ausgegeben. Live-Preisdaten kommen als eigener Daten-Layer.</div>
 <button class="green" id="compareBtn">Einkauf vergleichen</button></div>
 
 <section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
 <div class="card"><h2>Alle Märkte</h2><div class="muted">Nur bekannte Positionen werden summiert. Fehlende Preise werden nicht erfunden.</div><div id="merchantResults"></div></div>
 <div class="card"><h2>Lohnt sich Aufteilen?</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
-<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.3 · vollständige Abdeckung vor Preisurteil</span></div></section>
+<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.4 · nur verifizierte Preisquellen</span></div></section>
 </section>
 
 <section class="receipt" id="receipt"><div class="card"><h2>Nach dem Einkauf: Bon prüfen</h2><div class="muted">Damit schließt sich der Kreis: geplant → gekauft → tatsächlich bezahlt. Die bestehende OCR bleibt erhalten und wird als nächstes mit deiner Einkaufsliste verbunden.</div><label class="upload" for="receiptFile">📷 Bon auswählen</label><input id="receiptFile" type="file" accept="image/*" capture="environment" style="display:none"><div id="receiptMsg" class="detail"></div></div></section>
@@ -51,16 +51,27 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </main>
 <script>
 const catalog={
-"bananen":{label:"Bananen",unit:"kg",unitWeight:.18,prices:{Lidl:1.79,Kaufland:1.69,REWE:1.99,EDEKA:2.09}},
-"rote paprika":{label:"Rote Paprika",unit:"kg",unitWeight:.18,prices:{Lidl:2.49,Kaufland:2.39,REWE:2.79,EDEKA:2.89}},
-"rinderhack":{label:"Rinderhack",unit:"kg",prices:{Lidl:9.98,Kaufland:9.58,REWE:10.98,EDEKA:11.18}},
-"hackfleisch":{label:"Hackfleisch",unit:"kg",prices:{Lidl:9.98,Kaufland:9.58,REWE:10.98,EDEKA:11.18}},
-"eier":{label:"Eier",unit:"piece",prices:{Lidl:.339,Kaufland:.329,REWE:.379,EDEKA:.389}},
-"milch":{label:"Milch",unit:"l",prices:{Lidl:1.09,Kaufland:1.05,REWE:1.15,EDEKA:1.19}},
-"haferdrink":{label:"Haferdrink",unit:"l",prices:{Lidl:.99,Kaufland:1.09,REWE:1.19,EDEKA:1.29}},
-"kartoffeln":{label:"Kartoffeln",unit:"kg",prices:{Lidl:1.495,Kaufland:1.395,REWE:1.745,EDEKA:1.795}},
-"skyr":{label:"Skyr",unit:"kg",prices:{Lidl:2.98,Kaufland:2.78,REWE:3.18,EDEKA:3.38}}
+"bananen":{label:"Bananen",unit:"kg",unitWeight:.18},
+"rote paprika":{label:"Rote Paprika",unit:"kg",unitWeight:.18},
+"rinderhack":{label:"Rinderhack",unit:"kg"},
+"hackfleisch":{label:"Hackfleisch",unit:"kg"},
+"eier":{label:"Eier",unit:"piece"},
+"milch":{label:"Milch",unit:"l"},
+"haferdrink":{label:"Haferdrink",unit:"l"},
+"kartoffeln":{label:"Kartoffeln",unit:"kg"},
+"skyr":{label:"Skyr",unit:"kg"}
 };
+// Verifizierte Preisbeobachtungen. Kein Eintrag = kein Preis.
+// Gültigkeit/Region sind Teil des Datensatzes; historische Werte werden NICHT als "heute" verkauft.
+const verifiedPrices=[
+ {key:"bananen",store:"Kaufland",price:0.88,per:"kg",date:"2026-09-10",validTo:"2026-09-16",region:"Deutschland",kind:"Angebot",source:"Kaufland"},
+ {key:"hackfleisch",store:"Kaufland",price:6.98,per:"kg",date:"2026-09-10",validTo:"2026-09-16",region:"Deutschland",kind:"Angebot",source:"Kaufland"}
+];
+function activePrice(key,store){
+ const today=new Date().toISOString().slice(0,10);
+ const p=verifiedPrices.filter(x=>x.key===key&&x.store===store&&x.date<=today&&(!x.validTo||x.validTo>=today)).sort((a,b)=>b.date.localeCompare(a.date))[0];
+ return p||null;
+}
 const storeNames=["Lidl","Kaufland","REWE","EDEKA"];async function lookupBarcode(){
  const code=$("barcodeInput").value.replace(/\D/g,"");
  if(code.length<8){$("liveStatus").textContent="Bitte einen gültigen Barcode mit mindestens 8 Ziffern eingeben.";return}
@@ -123,33 +134,14 @@ function drawList(){ $("list").innerHTML=basket.length?basket.map((w,i)=>'<div c
 function compare(){
  if(!basket.length)return alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");
  if(!selected.size)return alert("Bitte mindestens einen Markt auswählen.");
- let rows=[...selected].map(store=>{let total=0,known=0,missing=[];basket.forEach(w=>{let c=w.key?catalog[w.key]:null;if(c&&c.prices[store]!=null){total+=c.prices[store]*w.calcAmount;known++}else missing.push(w.label)});return{store,total,known,missing,coverage:known/basket.length}});
- let complete=[...rows].filter(r=>r.known===basket.length).sort((x,y)=>x.total-y.total);
- if(complete.length){
-   let win=complete[0];
-   $("winnerLabel").textContent="Günstigster vollständiger Demo-Warenkorb · 1 Markt";
-   $("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);
-   $("winnerCoverage").textContent="100 % Abdeckung · "+basket.length+" von "+basket.length+" Positionen · DEMO-PREISBASIS";
- }else{
-   let best=[...rows].sort((x,y)=>y.coverage-x.coverage||x.total-y.total)[0];
-   $("winnerLabel").textContent="Noch kein vollständiger Preisvergleich möglich";
-   $("winnerName").textContent="Bei allen ausgewählten Märkten fehlen Preise";
-   $("winnerPrice").textContent="—";
-   $("winnerCoverage").textContent="Beste Datenabdeckung: "+Math.round(best.coverage*100)+" % bei "+best.store+". Zwischensummen werden nicht als Warenkorbpreis gewertet.";
- }
- $("merchantResults").innerHTML=[...rows].sort((x,y)=>y.coverage-x.coverage||x.total-y.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+'/'+basket.length+' Positionen · '+Math.round(r.coverage*100)+'% Abdeckung · DEMO'+(r.missing.length?'<br>Fehlt: '+r.missing.map(escHtml).join(", "):'<br>Vollständig vergleichbar')+'</div></div><div class="price">'+(r.coverage===1?eur(r.total):eur(r.total)+'<div class="coverage" style="text-align:right">Zwischensumme</div>')+'</div></div>').join("");
- let allSplitKnown=basket.every(w=>{let c=w.key?catalog[w.key]:null;return c&&[...selected].some(st=>c.prices[st]!=null)});
- if(!allSplitKnown){
-   $("splitTitle").textContent="Noch nicht vollständig berechenbar";
-   $("splitDetail").textContent="Mindestens eine Position hat bei keinem ausgewählten Markt einen bekannten Preis.";
-   $("splitSave").textContent="Keine Ersparnis berechnet.";
- }else{
-   let split=0,alloc={};basket.forEach(w=>{let c=catalog[w.key],opts=[...selected].filter(st=>c.prices[st]!=null).map(st=>[st,c.prices[st]]).sort((x,y)=>x[1]-y[1]);split+=opts[0][1]*w.calcAmount;(alloc[opts[0][0]]??=[]).push(w.label)});
-   $("splitTitle").textContent=eur(split)+" bei günstigster Produkt-Aufteilung";
-   $("splitDetail").textContent=Object.entries(alloc).map(([st,names])=>st+": "+names.join(", ")).join(" · ");
-   if(complete.length){let saving=Math.max(0,complete[0].total-split);$("splitSave").textContent=saving>0?"Demo-Ersparnis ggü. "+complete[0].store+": "+eur(saving):"Kein zusätzlicher Demo-Vorteil";}
-   else $("splitSave").textContent="Aufteilung vollständig berechenbar, aber kein vollständiger Ein-Markt-Vergleich als Referenz.";
- }
+ let rows=[...selected].map(store=>{let total=0,known=0,missing=[],sources=[];basket.forEach(w=>{let p=w.key?activePrice(w.key,store):null;if(p){total+=p.price*w.calcAmount;known++;sources.push(p)}else missing.push(w.label)});return{store,total,known,missing,sources,coverage:known/basket.length}});
+ let complete=rows.filter(r=>r.known===basket.length).sort((a,b)=>a.total-b.total);
+ if(complete.length){let win=complete[0];$("winnerLabel").textContent="Günstigster vollständig belegter Warenkorb";$("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);$("winnerCoverage").textContent="100 % Abdeckung · Preise mit Quelle und Gültigkeit";}
+ else{$("winnerLabel").textContent="Noch kein vollständiger aktueller Preisvergleich möglich";$("winnerName").textContent="Für mindestens eine Position fehlen gültige Preisdaten";$("winnerPrice").textContent="—";let best=[...rows].sort((a,b)=>b.coverage-a.coverage)[0];$("winnerCoverage").textContent="Beste aktuelle Datenabdeckung: "+Math.round(best.coverage*100)+" % bei "+best.store+". Keine fehlenden Preise werden geschätzt."}
+ $("merchantResults").innerHTML=[...rows].sort((a,b)=>b.coverage-a.coverage||a.total-b.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+'/'+basket.length+' aktuell belegte Positionen · '+Math.round(r.coverage*100)+'% Abdeckung'+(r.missing.length?'<br>Keine gültigen Daten: '+r.missing.map(escHtml).join(", "):'<br>Vollständig belegt')+(r.sources.length?'<br>Quelle: '+[...new Set(r.sources.map(x=>x.source+" · "+x.date+(x.validTo?"–"+x.validTo:"")))].join("; "):"")+'</div></div><div class="price">'+(r.known?eur(r.total)+'<div class="coverage" style="text-align:right">'+(r.coverage===1?"Gesamt":"belegte Zwischensumme")+'</div>':"—")+'</div></div>').join("");
+ let allSplitKnown=basket.every(w=>w.key&&[...selected].some(st=>activePrice(w.key,st)));
+ if(!allSplitKnown){$("splitTitle").textContent="Noch nicht vollständig berechenbar";$("splitDetail").textContent="Für mindestens eine Position gibt es bei keinem ausgewählten Markt einen aktuell gültigen, belegten Preis.";$("splitSave").textContent="Keine Ersparnis berechnet."}
+ else{let split=0,alloc={};basket.forEach(w=>{let opts=[...selected].map(st=>[st,activePrice(w.key,st)]).filter(x=>x[1]).sort((a,b)=>a[1].price-b[1].price);split+=opts[0][1].price*w.calcAmount;(alloc[opts[0][0]]??=[]).push(w.label)});$("splitTitle").textContent=eur(split)+" bei günstigster belegter Produkt-Aufteilung";$("splitDetail").textContent=Object.entries(alloc).map(([st,n])=>st+": "+n.join(", ")).join(" · ");$("splitSave").textContent=complete.length?"Ersparnis ggü. "+complete[0].store+": "+eur(Math.max(0,complete[0].total-split)):"Kein vollständiger Ein-Markt-Vergleich als Referenz."}
  $("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});
 }
 $("demoListBtn").onclick=()=>{basket=["5 Bananen","3 rote Paprika","500 g Rinderhack","10 Eier","2 Liter Milch"].map(parseWish);drawList()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=compare;
