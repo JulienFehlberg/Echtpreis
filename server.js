@@ -14,7 +14,13 @@ async function dbSelfTest(){if(!pool)return{ok:false,storage:"fallback",reason:"
 function mapsUrl(store){let destination=[store.merchant,store.address,store.postalCode,store.city].filter(Boolean).join(", ");let q="https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(destination);if(store.googlePlaceId)q+="&destination_place_id="+encodeURIComponent(store.googlePlaceId);return q}
 function receiptCodeHash(b){let v=clean(b.receiptBarcode||b.transactionId);return v?crypto.createHash("sha256").update(clean(b.store).toLowerCase()+"|"+v).digest("hex"):null}
 function receiptHash(b){const stable=[clean(b.store).toLowerCase(),clean(b.purchasedAt||b.date),clean(b.receiptNumber),clean(b.total),...(b.items||[]).slice(0,100).map(x=>[clean(x.rawName||x.product||x.key).toLowerCase(),Number(x.lineTotal||x.price||0).toFixed(2)].join(":"))].join("|");return crypto.createHash("sha256").update(stable).digest("hex")}
-function validReceiptPayload(b){const total=Number(b&&b.total),items=Array.isArray(b&&b.items)?b.items:[];return !!(b&&items.length&&clean(b.store)&&Number.isFinite(total)&&total>0&&total<=100000&&!items.some(x=>!clean(x.rawName||x.product||x.key)||!Number.isFinite(Number(x.lineTotal||x.price))||Number(x.lineTotal||x.price)<=0))}
+function validReceiptPayload(b){
+ const total=Number(b&&b.total),items=Array.isArray(b&&b.items)?b.items:[];
+ if(!(b&&items.length&&clean(b.store)&&Number.isFinite(total)&&total>0&&total<=100000))return false;
+ if(items.some(x=>!clean(x.rawName||x.product||x.key)||!Number.isFinite(Number(x.lineTotal??x.price))||Number(x.lineTotal??x.price)<=0))return false;
+ const sum=Number(items.reduce((n,x)=>n+Number(x.lineTotal??x.price),0).toFixed(2));
+ return Math.abs(sum-total)<=0.02;
+}
 function rewardScore({itemCount=0,recentCount=0,isDuplicate=false}){if(isDuplicate)return{dataValue:0,xp:0,rewardPoints:0,fraudScore:100,rewardStatus:"duplicate"};let fraud=Math.min(90,recentCount>20?70+(recentCount-20):recentCount>8?25+(recentCount-8)*3:0),dataValue=Math.min(100,10+Math.min(itemCount,60)),xp=Math.max(5,Math.round(dataValue*(fraud>=70?.25:fraud>=40?.5:1))),reward=fraud>=40?0:Math.max(1,Math.floor(xp/20));return{dataValue,xp,rewardPoints:reward,fraudScore:fraud,rewardStatus:fraud>=70?"review":fraud>=40?"xp-only":"eligible"}}
 function validObs(x){return x&&x.pricingConfidence==="confirmed"&&clean(x.store)&&/^[a-z0-9 äöüß-]{2,60}$/i.test(x.key||"")&&Number.isFinite(+x.price)&&+x.price>0&&+x.price<10000&&["kg","l","piece"].includes(x.per)&&/^20\d\d-\d\d-\d\d$/.test(x.date||"")&&clean(x.proof)}
 const MERCHANT_SEED=[
