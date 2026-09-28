@@ -37,7 +37,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <div class="chips" id="suggestions"></div><div id="list"></div><button class="ghost" id="demoListBtn" style="width:100%;margin-top:12px">Beispielliste einsetzen</button></div>
 
 <div class="card"><h2>Welche Märkte?</h2><div class="muted">Später: automatisch nach Standort und Entfernung. Heute kannst du auswählen.</div><div class="chips" id="stores"></div>
-<div class="notice"><b>Wichtig:</b> Die freie Liste wird strukturiert. Händlerpreise erscheinen nur, wenn eine verifizierte und für den Zeitraum gültige Preisquelle vorhanden ist. Fehlende Preise bleiben fehlend. Es werden keine Händlerpreise als aktuell ausgegeben. Live-Preisdaten kommen als eigener Daten-Layer.</div>
+<div class="notice"><b>Wichtig:</b> Die Datenmaschine kombiniert offizielle Händlerdaten, Open Prices und später Community-Bons. Jede Zahl braucht Quelle, Datum und Vertrauensstatus. Fehlende Preise bleiben fehlend.</div><div class="card" style="margin:12px 0 0;padding:12px"><div id="dataMachineStatus" class="muted"><b>Datenmaschine:</b> startet …</div></div>
 <button class="green" id="compareBtn">Einkauf vergleichen</button></div>
 
 <section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
@@ -54,47 +54,78 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </main>
 <script>
 const catalog={
-"bananen":{label:"Bananen",unit:"kg",unitWeight:.18},
-"rote paprika":{label:"Rote Paprika",unit:"kg",unitWeight:.18},
-"rinderhack":{label:"Rinderhack",unit:"kg"},
-"hackfleisch":{label:"Hackfleisch",unit:"kg"},
-"eier":{label:"Eier",unit:"piece"},
-"milch":{label:"Milch",unit:"l"},
+"bananen":{label:"Bananen",unit:"kg",unitWeight:.18,openPricesCategory:"en:bananas"},
+"rote paprika":{label:"Rote Paprika",unit:"kg",unitWeight:.18,openPricesCategory:"en:red-bell-peppers"},
+"rinderhack":{label:"Rinderhack",unit:"kg",openPricesCategory:"en:ground-beef"},
+"hackfleisch":{label:"Hackfleisch",unit:"kg",openPricesCategory:"en:ground-meat"},
+"eier":{label:"Eier",unit:"piece",openPricesCategory:"en:eggs"},
+"milch":{label:"Milch",unit:"l",openPricesCategory:"en:milks"},
 "haferdrink":{label:"Haferdrink",unit:"l"},
 "kartoffeln":{label:"Kartoffeln",unit:"kg"},
 "skyr":{label:"Skyr",unit:"kg"}
 };
-// ECHTPREIS Data Engine v1
-// Einheitliches Schema: jede Zahl braucht Quelle, Datum, Ort/Region und Vertrauensstatus.
+// ECHTPREIS Data Engine v2
+// Ein Preis ist immer eine Beobachtung: Produkt + Händler + Betrag + Einheit + Datum + Quelle + Trust.
 const seedPrices=[
  {key:"bananen",store:"Kaufland",price:1.99,per:"kg",date:"2026-09-24",validTo:"2026-09-30",region:"Berlin",kind:"official",source:"Kaufland offiziell",product:"Chiquita Bananen",trust:100},
  {key:"rinderhack",store:"REWE",price:13.96,per:"kg",date:"2026-09-28",validTo:"2026-10-04",region:"Berlin",kind:"official",source:"REWE offiziell",product:"Rinder-Hackfleisch 250 g",trust:100}
 ];
-const communityKey="echtpreis_community_observations_v1";
-function loadCommunity(){try{return JSON.parse(localStorage.getItem(communityKey)||"[]")}catch(e){return[]}}
-function saveCommunity(rows){try{localStorage.setItem(communityKey,JSON.stringify(rows))}catch(e){}}
+const communityKey="echtpreis_community_observations_v2";
+const openPricesCacheKey="echtpreis_openprices_cache_v1";
+const dataMachineState={openPrices:"noch nicht synchronisiert",loaded:0,rejected:0,lastSync:null};
+function loadJson(key,fallback=[]){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback))}catch(e){return fallback}}
+function saveJson(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch(e){}}
 function normalizeObservation(x){
- return {id:x.id||("ep_"+Date.now()+"_"+Math.random().toString(36).slice(2)),key:x.key||null,store:x.store||null,price:Number(x.price),per:x.per||"piece",date:x.date||null,validTo:x.validTo||null,region:x.region||null,kind:x.kind||"community",source:x.source||"ECHTPREIS Bon",product:x.product||x.key||"Unbekannt",proof:x.proof||null,trust:Number(x.trust||0),status:x.status||"observed"};
+ return {id:x.id||("ep_"+Date.now()+"_"+Math.random().toString(36).slice(2)),key:x.key||null,store:x.store||null,price:Number(x.price),per:x.per||"piece",date:x.date||null,validTo:x.validTo||null,region:x.region||null,kind:x.kind||"community",source:x.source||"ECHTPREIS Bon",product:x.product||x.key||"Unbekannt",proof:x.proof||null,locationId:x.locationId||null,trust:Number(x.trust||0),status:x.status||"observed"};
+}
+function freshnessDays(x){return x.kind==="official"?null:7}
+function usableObservation(x){
+ const today=new Date().toISOString().slice(0,10);if(!x.key||!x.store||!x.date||!Number.isFinite(x.price)||x.price<=0)return false;
+ if(x.date>today)return false;if(x.validTo&&x.validTo<today)return false;
+ const max=freshnessDays(x);if(max!=null&&!x.validTo&&((new Date(today)-new Date(x.date))/86400000)>max)return false;
+ return true;
 }
 function dataEngine(){
- const all=[...seedPrices,...loadCommunity()].map(normalizeObservation).filter(x=>x.key&&x.store&&Number.isFinite(x.price)&&x.price>=0&&x.date);
- const seen=new Set(); return all.filter(x=>{let sig=[x.key,x.store,x.price,x.per,x.date,x.proof||x.source].join("|");if(seen.has(sig))return false;seen.add(sig);return true});
+ const all=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey)].map(normalizeObservation).filter(usableObservation);
+ const seen=new Set();return all.filter(x=>{let sig=[x.key,x.store,x.price,x.per,x.date,x.proof||x.source,x.locationId||""].join("|");if(seen.has(sig))return false;seen.add(sig);return true});
 }
 function trustedPrice(key,store){
- const today=new Date().toISOString().slice(0,10);
- const rows=dataEngine().filter(x=>x.key===key&&x.store===store&&x.date<=today&&(!x.validTo||x.validTo>=today));
- // Offizielle Quellen dürfen allein referenzfähig sein. Community braucht mehrere unabhängige Nachweise.
- const official=rows.filter(x=>x.kind==="official"&&x.trust>=90).sort((a,b)=>b.date.localeCompare(a.date));
- if(official.length)return {...official[0],confidence:"hoch"};
+ const rows=dataEngine().filter(x=>x.key===key&&x.store===store);
+ const official=rows.filter(x=>x.kind==="official"&&x.trust>=90).sort((a,b)=>b.date.localeCompare(a.date));if(official.length)return {...official[0],confidence:"hoch"};
+ const open=rows.filter(x=>x.kind==="openprices"&&x.proof&&x.trust>=70).sort((a,b)=>b.date.localeCompare(a.date));if(open.length)return {...open[0],confidence:"mittel"};
  const groups={};rows.filter(x=>x.kind==="community"&&x.proof).forEach(x=>{let k=[x.price,x.per,x.date].join("|");(groups[k]??=[]).push(x)});
  const confirmed=Object.values(groups).filter(g=>new Set(g.map(x=>x.proof)).size>=2).sort((a,b)=>b.length-a.length);
- if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:80,status:"confirmed",confidence:"mittel"}}
+ if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:85,status:"confirmed",confidence:"mittel"}}
  return null;
 }
 function activePrice(key,store){return trustedPrice(key,store)}
 function addCommunityObservation(obs){
- const x=normalizeObservation(obs); if(!x.proof||!x.key||!x.store||!Number.isFinite(x.price)||!x.date)return false;
- let rows=loadCommunity();rows.push(x);saveCommunity(rows);return true;
+ const x=normalizeObservation({...obs,kind:"community",trust:60});if(!x.proof||!x.key||!x.store||!Number.isFinite(x.price)||!x.date)return false;
+ const rows=loadJson(communityKey);rows.push(x);saveJson(communityKey,rows);drawDataMachine();return true;
+}
+function retailerFromLocation(x){
+ const t=((x?.location?.osm_brand||"")+" "+(x?.location?.osm_name||"")+" "+(x?.location?.osm_display_name||"")).toLowerCase();
+ if(t.includes("kaufland"))return"Kaufland";if(t.includes("lidl"))return"Lidl";if(t.includes("rewe"))return"REWE";if(t.includes("edeka"))return"EDEKA";return null;
+}
+function normalizePer(p){p=String(p||"").toUpperCase();if(["KG","KILOGRAM"].includes(p))return"kg";if(["L","LITER"].includes(p))return"l";if(["UNIT","PIECE"].includes(p))return"piece";return null}
+async function ingestOpenPrices(){
+ const fresh=[];dataMachineState.loaded=0;dataMachineState.rejected=0;
+ const jobs=Object.entries(catalog).filter(([,c])=>c.openPricesCategory).map(async([key,c])=>{
+  const url="https://prices.openfoodfacts.org/api/v1/prices?category_tag="+encodeURIComponent(c.openPricesCategory)+"&currency=EUR&size=30&order_by=-date";
+  const r=await fetch(url);if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json(),items=d.items||d.results||[];
+  items.forEach(x=>{const store=retailerFromLocation(x),per=normalizePer(x.price_per),country=(x.location?.osm_address_country_code||"").toLowerCase();
+   if(!store||per!==c.unit||(country&&country!=="de")||!x.proof_id){dataMachineState.rejected++;return}
+   const o=normalizeObservation({key,store,price:+x.price,per,date:x.date,region:x.location?.osm_address_city||"Deutschland",kind:"openprices",source:"Open Prices",product:x.product_name||c.label,proof:"op:"+x.proof_id,locationId:x.location_id,trust:75});
+   if(usableObservation(o)){fresh.push(o);dataMachineState.loaded++}else dataMachineState.rejected++;
+  });
+ });
+ const results=await Promise.allSettled(jobs),ok=results.filter(x=>x.status==="fulfilled").length;
+ if(ok){saveJson(openPricesCacheKey,fresh);dataMachineState.openPrices="verbunden · "+ok+"/"+jobs.length+" Kategorien geprüft"}else dataMachineState.openPrices="nicht erreichbar · Cache bleibt aktiv";
+ dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();
+}
+function drawDataMachine(){
+ const el=$("dataMachineStatus");if(!el)return;const rows=dataEngine(),by={};rows.forEach(x=>by[x.source]=(by[x.source]||0)+1);
+ el.innerHTML="<b>Datenmaschine aktiv:</b> "+rows.length+" aktuell nutzbare Beobachtungen<br><span class='detail'>Open Prices: "+escHtml(dataMachineState.openPrices)+(dataMachineState.lastSync?" · Sync "+dataMachineState.lastSync:"")+"<br>"+(Object.entries(by).map(([k,v])=>escHtml(k)+": "+v).join(" · ")||"Noch keine nutzbaren Quellen")+"</span>";
 }
 const storeNames=["Lidl","Kaufland","REWE","EDEKA"];
 function escHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -146,5 +177,5 @@ $("receiptFile").onchange=e=>{let file=e.target.files[0];$("receiptMsg").textCon
 function closePurchase(){try{localStorage.removeItem("echtpreis_open_purchase")}catch(e){}}
 $("finishPurchaseBtn").onclick=()=>{if(!$("receiptFile").files[0])return;let proofId="receipt_"+Date.now();try{localStorage.setItem("echtpreis_last_proof",JSON.stringify({id:proofId,type:"RECEIPT",file:$("receiptFile").files[0].name,created:new Date().toISOString(),consent:$("contribute").checked}))}catch(e){};closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Danke für deinen Bon.";$("finishPurchaseBtn").textContent="✓ Einkauf abgeschlossen";$("finishPurchaseBtn").disabled=true;$("noReceiptBtn").style.display="none";$("receiptMsg").textContent+=$("contribute").checked?" · Danke! Anonymisierte Preisdaten dürfen ECHTPREIS verbessern.":" · Bon nur für deinen Einkauf – keine Community-Freigabe.";};
 $("noReceiptBtn").onclick=()=>{if(!confirm("Bon verloren oder nicht mehr vorhanden? Du kannst den Einkauf trotzdem abschließen. Diesmal können daraus nur keine Preise zur ECHTPREIS-Datenbasis beitragen."))return;closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Diesmal ohne Bon – kein Problem.";$("receiptMsg").textContent="Keine Preisdaten beigetragen.";$("noReceiptBtn").style.display="none";$("finishPurchaseBtn").style.display="none";};
-drawSuggestions();drawStores();drawList();
+drawSuggestions();drawStores();drawList();drawDataMachine();ingestOpenPrices();
 </script></body></html>
