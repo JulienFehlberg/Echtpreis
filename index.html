@@ -548,7 +548,7 @@ function referencePrice(key,store,wish=null){
  if(!storeCanCarry(store,wish,key))return null;
  const today=new Date().toISOString().slice(0,10);
  let history=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation)
-  .filter(x=>x.key===key&&x.store===store&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0);
+  .filter(x=>x.key===key&&x.store===store&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0&&((new Date(today+"T12:00:00")-new Date(x.date+"T12:00:00"))/86400000)<=60);
  if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);history=history.filter(x=>normalizeProduct(x.product||"").includes(brand));}
  history.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  if(store==="dm"||store==="Rossmann")return null;
@@ -915,7 +915,7 @@ function parseReceiptText(text){
   if(/^\s*(?:summe|gesamt(?:betrag)?|zu zahlen)\b/i.test(line))break;
   if(/\b(?:mwst|netto|umsatz|steuer)\b/i.test(line)||/^\s*[AB]\s*(?:7|19)\s*%/i.test(line))continue;
   let discount=line.match(/(?:aktionsrabatt|preisvorteil|rabatt)\s*-?\s*(\d+[,.]\d{2})\s*(?:€|EUR)?/i);
-  if(discount&&last){let d=parseReceiptNumber(discount[1]);last.discount=Number(((last.discount||0)+d).toFixed(2));last.regularTotal=Number((Number(last.price)+last.discount).toFixed(2));continue}
+  if(discount&&last){let d=parseReceiptNumber(discount[1]),before=Number(last.price)||0;last.discount=Number(((last.discount||0)+d).toFixed(2));last.regularTotal=Number((before+(last.discount-d)).toFixed(2));last.price=String(Number(Math.max(0,before-d).toFixed(2)));continue}
   let pf=line.match(/^pfand(?:\s+\d+[,.]\d{2})?\s+(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)\s+(\d+[,.]\d{2})/i)||line.match(/^pfand\s+(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)\s+(\d+[,.]\d{2})/i);
   let pfBasic=line.match(/^pfand\s+(\d+[,.]\d{2})\s*(?:€|EUR)?\s*[x×]\s*(\d+)/i);
   if(pfBasic){let unitPrice=parseReceiptNumber(pfBasic[1]),count=Number(pfBasic[2]);last={name:"Pfand",price:String(Number((unitPrice*count).toFixed(2))),packAmount:count,packUnit:"piece",count,unitLinePrice:unitPrice,isDeposit:true,pricingType:"deposit"};rows.push(last);continue}
@@ -927,7 +927,7 @@ function parseReceiptText(text){
   let weighted=line.match(/(\d+[,.]\d{2,3})\s*kg\s*[x×]?\s*(\d+[,.]\d{2})\s*€?\s*\/\s*kg/i);
   if(weighted&&last){last.packAmount=parseReceiptNumber(weighted[1]);last.packUnit="kg";last.detectedUnitPrice=parseReceiptNumber(weighted[2]);last.quantitySource="receipt-weight";continue}
   let mult=line.match(/(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)/i);
-  if(mult&&last){last.count=Number(mult[2]);last.unitLinePrice=parseReceiptNumber(mult[1]);last.quantitySource="receipt-multipack";continue}
+  if(mult&&last&&!last.isDeposit){last.count=Number(mult[2]);last.unitLinePrice=parseReceiptNumber(mult[1]);last.quantitySource="receipt-multipack";let lineTotal=Number((last.unitLinePrice*last.count).toFixed(2));last.price=String(lineTotal);last.regularTotal=lineTotal;continue}
   let m=line.match(/^(.{2,48}?)\s+(\d+[,.]\d{2})\s*(?:€|EUR)?\s*[AB]?$/i);
   if(m&&!/summe|gesamt|bar|cash|karte|kartenzahlung|girocard|visa|mastercard|mwst|pfand(?:rückgabe)?|gegeben|rückgeld|payback/i.test(m[1])){
    let pack=inferPackFromName(m[1]);last={name:m[1].trim(),price:String(parseReceiptNumber(m[2])),discount:0,regularTotal:parseReceiptNumber(m[2]),...pack};rows.push(last);
@@ -956,9 +956,11 @@ function extractReceiptCash(text){
  return out;
 }
 function detectReceiptDate(text){
- const m=String(text||"").match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2}|\d{2})\b/);if(!m)return "";
- const year=m[3].length===2?"20"+m[3]:m[3],iso=year+"-"+m[2]+"-"+m[1],d=new Date(iso+"T12:00:00");
- return Number.isNaN(d.getTime())?"":iso;
+ const s=String(text||"");let m=s.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2}|\d{2})\b/),iso="";
+ if(m){const year=m[3].length===2?"20"+m[3]:m[3];iso=year+"-"+m[2]+"-"+m[1]}
+ else{m=s.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);if(m)iso=m[1]+"-"+m[2]+"-"+m[3]}
+ if(!iso)return "";const parts=iso.split("-").map(Number),d=new Date(Date.UTC(parts[0],parts[1]-1,parts[2]));
+ return d.getUTCFullYear()===parts[0]&&d.getUTCMonth()===parts[1]-1&&d.getUTCDate()===parts[2]?iso:"";
 }
 function plausibleReceiptItemName(name){
  const n=normalizeProduct(name),letters=(n.match(/[a-z]/g)||[]).length;
@@ -1000,7 +1002,7 @@ function detectReceiptStore(text){
  if(/\bedeka\b/.test(head))return "EDEKA";
  if(/\bpenny\b/.test(head))return "PENNY";
  if(/\baldi(?:\s+nord)?\b/.test(head))return "ALDI Nord";
- if(/netto\s+(?:marken|filiale|discount)|netto-marken/i.test(head))return "Netto";
+ if(/netto\s+(?:marken|filiale|discount)|netto-marken/i.test(head)||lines.slice(0,5).some(x=>/^netto\b/i.test(x)))return "Netto";
  if(/\bnorma\b/.test(head))return "NORMA";
  if(/\brossmann\b/.test(head))return "Rossmann";
  if(/(?:^|\s)dm(?:\s|$)|dm-drogerie/i.test(head))return "dm";
