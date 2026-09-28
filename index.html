@@ -22,8 +22,8 @@ h2{font-size:29px;letter-spacing:-.035em;margin:12px 0}.row{display:flex;justify
 .warn{background:#fff7e7;border-radius:16px;padding:14px;margin-top:15px;color:#6d5119;line-height:1.4}.good{background:#eef8f1;color:#245d35}.error{background:#fff0f0;color:#8d2323}.foot{text-align:center;color:#9aa0aa;font-size:12px;margin-top:25px}
 </style></head>
 <body><main class="app">
-<div class="brand">ECHTPREIS</div><h1 class="hero">Was hast du wirklich bezahlt?</h1>
-<div class="sub">Bon fotografieren. ECHTPREIS erkennt Kaufpositionen, Artikelcodes und prüft die Rechnung rechnerisch.</div>
+<div class="brand">ECHTPREIS</div><h1 class="hero">Ist der Preis wirklich fair?</h1>
+<div class="sub">Preis, Bon oder Rechnung fotografieren. ECHTPREIS erkennt, was du gekauft hast – und schafft die Grundlage für einen echten Preisvergleich.</div>
 <section class="card">
 <button class="primary" id="cam">📷 Kassenbon fotografieren</button><button class="secondary" id="lib">Foto auswählen</button>
 <input id="cameraInput" type="file" accept="image/*" capture="environment"><input id="libraryInput" type="file" accept="image/*">
@@ -31,15 +31,15 @@ h2{font-size:29px;letter-spacing:-.035em;margin:12px 0}.row{display:flex;justify
 <p class="tiny">Texterkennung im Browser. Das Bonfoto wird von dieser Testversion nicht an ECHTPREIS hochgeladen oder gespeichert.</p>
 </section>
 <section id="result" class="result">
-<span class="badge">ECHTPREIS 0.5</span><h2>Bon erkannt</h2>
+<span class="badge">ECHTPREIS 0.6</span><h2>Bon erkannt</h2>
 <div class="row"><span class="label">Händler</span><span class="value" id="merchant">–</span></div>
 <div class="row"><span class="label">Datum</span><span class="value" id="date">–</span></div>
 <div class="row"><span class="label">Gesamtbetrag</span><span class="value total" id="total">–</span></div><div class="row"><span class="label">Aus Artikeln berechnet</span><span class="value" id="calcTotal">–</span></div><div class="row"><span class="label">Rechencheck</span><span class="value" id="check">–</span></div>
 <div class="items"><b>Erkannte Kaufpositionen</b><div id="items"></div></div>
-<div class="warn good"><b>Rechnung wird geprüft.</b><br>ECHTPREIS gleicht die Summe der erkannten Kaufpositionen mit dem Gesamtbetrag ab. Preisvergleiche werden erst angezeigt, wenn dafür eine belastbare externe Quelle vorhanden ist.</div>
+<div class="warn good"><b>Erkennung abgeschlossen.</b><br>ECHTPREIS ordnet Artikelcode, Produktname und Preis zusammen und prüft die Summe. Eine Fairness-Bewertung erscheint erst, wenn ein belastbarer Vergleichspreis vorhanden ist.</div>
 <details style="margin-top:17px"><summary><b>Erkannten Bon-Text anzeigen</b></summary><div id="raw" class="raw"></div></details>
 </section>
-<section id="error" class="result error"></section><div class="foot">ECHTPREIS · v0.5 · Testversion</div>
+<section id="error" class="result error"></section><div class="foot">ECHTPREIS · v0.6 · Testversion</div>
 </main>
 <script>
 const $=s=>document.querySelector(s);
@@ -55,24 +55,42 @@ function articleId(line){
  if(m)return m[0];
  m=line.match(/\b\d{6,14}\b/);return m?m[0]:""
 }
+function cleanProductName(line){
+ return line
+  .replace(/\b\d{2}[.]\d{2}[.]\d{3}[.]\d{4}\b/g,"")
+  .replace(/\b\d{6,14}\b/g,"")
+  .replace(/^\s*\d+\s*[xX]\s*/,"")
+  .replace(/\s+[a-zA-Z]\s*$/,"")
+  .replace(/[<>]{2,}/g,"")
+  .trim()
+}
+function looksLikeProductName(line,reject){
+ return !!line && !reject.test(line) && /[\p{L}]{2}/u.test(line) && !euro.test(line) && !articleId(line)
+}
 function parseItems(text){
  const lines=text.split("\n").map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean), out=[];
- const reject=/gesamt|summe|total|betrag|zu zahlen|bar\b|cash|ec\b|karte|visa|master|wechsel|rückgeld|gegeben|datum|uhr|mwst|ust|steuer|eur\b|filiale|kasse|beleg|bon|transaktion/i;
+ const reject=/gesamt|summe|total|betrag|zu zahlen|bar\b|cash|ec\b|karte|visa|master|wechsel|zurück|rückgeld|gegeben|datum|uhr|mwst|ust|steuer|eur\b|filiale|kasse|beleg|bon|transaktion|umtausch|telefon|geschäft|geschäfts|prüfwert|signatur|startdatum|enddatum|danke|website|new yorker/i;
  for(let i=0;i<lines.length;i++){
    const line=lines[i], m=line.match(euro); if(!m||reject.test(line))continue;
-   const price=norm(m[1])+" €";
-   let name=line.slice(0,m.index)
- .replace(/\b\d{2}[.]\d{2}[.]\d{3}[.]\d{4}\b/g,"")
- .replace(/\b\d{6,14}\b/g,"")
- .replace(/^\s*\d+\s*[xX]\s*/,"")
- .replace(/\s+[a-zA-Z]\s*$/,"").trim();
-   let id=articleId(line);
-   if((name.length<2||!/[\p{L}]/u.test(name))&&i>0&&!reject.test(lines[i-1])){
-     const prev=lines[i-1]; if(/[\p{L}]{2}/u.test(prev)){name=prev.replace(/\b\d{6,14}\b/g,"").trim();id=id||articleId(prev)}
+   const price=norm(m[1])+" €", id=articleId(line);
+   let name="";
+   // Viele Bons (u.a. NEW YORKER): Positionszeile enthält Menge/Artikelcode/Preis,
+   // die Produktbezeichnung steht direkt DARUNTER.
+   if(id && i+1<lines.length && looksLikeProductName(lines[i+1],reject)){
+      name=cleanProductName(lines[i+1]);
    }
-   if(name.length>1&&/[\p{L}]/u.test(name))out.push({name:name.slice(0,55),price,id});
+   // Falls der Produktname bereits auf derselben Zeile steht.
+   if(!name){
+      const same=cleanProductName(line.slice(0,m.index));
+      if(same.length>1 && /[\p{L}]/u.test(same)) name=same;
+   }
+   // Allgemeiner Fallback: vorherige Textzeile.
+   if(!name && i>0 && looksLikeProductName(lines[i-1],reject)) name=cleanProductName(lines[i-1]);
+   if(!name && id) name="Artikel "+id;
+   if(name) out.push({name:name.slice(0,60),price,id});
  }
- const seen=new Set();return out.filter(x=>{const k=x.name+"|"+x.price;if(seen.has(k))return false;seen.add(k);return true}).slice(0,20)
+ const seen=new Set();
+ return out.filter(x=>{const k=(x.id||x.name)+"|"+x.price;if(seen.has(k))return false;seen.add(k);return true}).slice(0,20)
 }
 function cents(v){return Math.round(parseFloat(v.replace(" €","").replace(",","."))*100)}
 function formatCents(c){return (c/100).toFixed(2).replace(".",",")+" €"}
@@ -86,7 +104,7 @@ async function read(e){
   const detectedTotal=totalOf(text), calc=items.reduce((n,x)=>n+cents(x.price),0), detectedCents=totalNumber(detectedTotal);
   $("#merchant").textContent=merchant(text);$("#date").textContent=dateOf(text);$("#total").textContent=detectedTotal;
   $("#calcTotal").textContent=items.length?formatCents(calc):"–";
-  $("#check").textContent=!items.length?"–":(detectedCents===null?"Summe aus Positionen":(Math.abs(detectedCents-calc)<=1?"✓ stimmt überein":"⚠ Abweichung"));
+  $("#check").textContent=!items.length?"–":(detectedCents===null?"✓ "+formatCents(calc)+" aus Positionen":(Math.abs(detectedCents-calc)<=1?"✓ "+formatCents(calc)+" bestätigt":"⚠ Abweichung"));
   if(detectedCents===null && items.length) $("#total").textContent=formatCents(calc)+"*";
   $("#raw").textContent=text||"Kein Text erkannt.";
   $("#items").innerHTML=items.length?items.map(x=>`<div class="item"><div class="itemtop"><span class="itemname">${esc(x.name)}</span><span class="itemprice">${x.price}</span></div>${x.id?`<div class="meta">Erkannter Artikelcode: ${x.id}</div>`:""}</div>`).join(""):`<div class="warn">Noch keine Kaufposition sicher erkannt. Öffne unten den Bon-Text – damit können wir den Parser gezielt verbessern.</div>`;
