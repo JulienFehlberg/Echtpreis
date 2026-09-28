@@ -27,27 +27,23 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.1</span></div>
-<section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Liste erstellen, Märkte vergleichen und sehen, ob sich ein zweiter Stopp wirklich lohnt.</p></section>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.2</span></div>
+<section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="tabs"><button class="tab active" id="planTab">Einkauf planen</button><button class="tab" id="receiptTab">Bon prüfen</button></div>
 
 <section id="planner">
-<div class="card"><h2>Deine Einkaufsliste</h2><div class="muted">Schreib einfach, was du brauchst. Für den Prototyp funktionieren die Demo-Produkte unten bereits.</div>
-<div class="inputrow"><input id="productInput" placeholder="z. B. Eier, Bananen, Haferdrink"><select id="qty"><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select><button class="primary" id="addBtn">+</button></div>
-<div class="chips" id="suggestions"></div><div id="list"></div></div>
-
-<div class="card"><h2>🔎 Echtes Produkt prüfen</h2><div class="muted">EAN/Barcode eingeben. ECHTPREIS lädt die Produktidentität aus Open Food Facts und sucht anschließend echte beobachtete Preise in Open Prices.</div>
-<div class="inputrow"><input id="barcodeInput" inputmode="numeric" placeholder="EAN / Barcode, z. B. 13 Ziffern"><button class="primary" id="barcodeBtn">Prüfen</button></div>
-<div id="liveStatus" class="detail"></div><div id="liveProduct"></div></div>
+<div class="card"><h2>Deine Einkaufsliste</h2><div class="muted">Menge, Einheit und Produkt dürfen zusammen in ein Feld. Beispiele: „5 Bananen“, „3 rote Paprika“, „500 g Rinderhack“, „2 Liter Milch“.</div>
+<div class="inputrow"><input id="productInput" placeholder="z. B. 5 Bananen oder 500 g Rinderhack"><button class="primary" id="addBtn">Hinzufügen</button></div><div class="detail">Du musst keine Packungsgröße oder Marke kennen.</div>
+<div class="chips" id="suggestions"></div><div id="list"></div><button class="ghost" id="demoListBtn" style="width:100%;margin-top:12px">Beispielliste einsetzen</button></div>
 
 <div class="card"><h2>Welche Märkte?</h2><div class="muted">Später: automatisch nach Standort und Entfernung. Heute kannst du auswählen.</div><div class="chips" id="stores"></div>
-<div class="notice"><b>Wichtig:</b> Der Warenkorbvergleich nutzt für diesen UX-Test klar gekennzeichnete DEMO-PREISE. Es werden keine Händlerpreise als aktuell ausgegeben. Live-Preisdaten kommen als eigener Daten-Layer.</div>
+<div class="notice"><b>Wichtig:</b> Die freie Liste wird bereits strukturiert. Der Händlervergleich nutzt dort, wo noch keine belastbaren Live-Daten vorhanden sind, klar gekennzeichnete DEMO-PREISE. Es werden keine Händlerpreise als aktuell ausgegeben. Live-Preisdaten kommen als eigener Daten-Layer.</div>
 <button class="green" id="compareBtn">Einkauf vergleichen</button></div>
 
 <section class="results" id="results"><div class="winner"><div class="smallcap">Günstigster Demo-Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
 <div class="card"><h2>Alle Märkte</h2><div class="muted">Nur bekannte Positionen werden summiert. Fehlende Preise werden nicht erfunden.</div><div id="merchantResults"></div></div>
 <div class="card"><h2>Lohnt sich Aufteilen?</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
-<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.1 · Demo-Warenkorb + echte Barcode-Abfrage</span></div></section>
+<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.2 · freie Einkaufsliste · Demo-Preisbasis</span></div></section>
 </section>
 
 <section class="receipt" id="receipt"><div class="card"><h2>Nach dem Einkauf: Bon prüfen</h2><div class="muted">Damit schließt sich der Kreis: geplant → gekauft → tatsächlich bezahlt. Die bestehende OCR bleibt erhalten und wird als nächstes mit deiner Einkaufsliste verbunden.</div><label class="upload" for="receiptFile">📷 Bon auswählen</label><input id="receiptFile" type="file" accept="image/*" capture="environment" style="display:none"><div id="receiptMsg" class="detail"></div></div></section>
@@ -55,14 +51,15 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </main>
 <script>
 const catalog={
-"Eier 10er":{Lidl:3.39,Kaufland:3.29,REWE:3.79,EDEKA:3.89},
-"Bananen 1 kg":{Lidl:1.79,Kaufland:1.69,REWE:1.99,EDEKA:2.09},
-"Haferdrink 1 l":{Lidl:.99,Kaufland:1.09,REWE:1.19,EDEKA:1.29},
-"Hackfleisch 500 g":{Lidl:4.99,Kaufland:4.79,REWE:5.49,EDEKA:5.59},
-"Skyr 500 g":{Lidl:1.49,Kaufland:1.39,REWE:1.59,EDEKA:1.69},
-"Kartoffeln 2 kg":{Lidl:2.99,Kaufland:2.79,REWE:3.49,EDEKA:3.59},
-"Coca-Cola Zero 1,5 l":{Lidl:1.49,Kaufland:1.39,REWE:1.59,EDEKA:1.59},
-"Milch 1 l":{Lidl:1.09,Kaufland:1.05,REWE:1.15,EDEKA:1.19}
+"bananen":{label:"Bananen",unit:"kg",unitWeight:.18,prices:{Lidl:1.79,Kaufland:1.69,REWE:1.99,EDEKA:2.09}},
+"rote paprika":{label:"Rote Paprika",unit:"kg",unitWeight:.18,prices:{Lidl:2.49,Kaufland:2.39,REWE:2.79,EDEKA:2.89}},
+"rinderhack":{label:"Rinderhack",unit:"kg",prices:{Lidl:9.98,Kaufland:9.58,REWE:10.98,EDEKA:11.18}},
+"hackfleisch":{label:"Hackfleisch",unit:"kg",prices:{Lidl:9.98,Kaufland:9.58,REWE:10.98,EDEKA:11.18}},
+"eier":{label:"Eier",unit:"piece",prices:{Lidl:.339,Kaufland:.329,REWE:.379,EDEKA:.389}},
+"milch":{label:"Milch",unit:"l",prices:{Lidl:1.09,Kaufland:1.05,REWE:1.15,EDEKA:1.19}},
+"haferdrink":{label:"Haferdrink",unit:"l",prices:{Lidl:.99,Kaufland:1.09,REWE:1.19,EDEKA:1.29}},
+"kartoffeln":{label:"Kartoffeln",unit:"kg",prices:{Lidl:1.495,Kaufland:1.395,REWE:1.745,EDEKA:1.795}},
+"skyr":{label:"Skyr",unit:"kg",prices:{Lidl:2.98,Kaufland:2.78,REWE:3.18,EDEKA:3.38}}
 };
 const storeNames=["Lidl","Kaufland","REWE","EDEKA"];async function lookupBarcode(){
  const code=$("barcodeInput").value.replace(/\D/g,"");
@@ -103,19 +100,37 @@ function locationLabel(x){
 }
 let basket=[];let selected=new Set(storeNames);
 const $=id=>document.getElementById(id), eur=n=>n.toLocaleString("de-DE",{style:"currency",currency:"EUR"});
-function drawSuggestions(){ $("suggestions").innerHTML=Object.keys(catalog).slice(0,6).map(x=>'<span class="chip" data-add="'+x+'">+ '+x+'</span>').join("");document.querySelectorAll("[data-add]").forEach(e=>e.onclick=()=>add(e.dataset.add));}
-function drawStores(){ $("stores").innerHTML=storeNames.map(s=>'<span class="chip '+(selected.has(s)?"on":"")+'" data-store="'+s+'">'+s+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores()});}
-function add(name){name=(name||$("productInput").value).trim();if(!name)return;let canonical=Object.keys(catalog).find(x=>x.toLowerCase()===name.toLowerCase())||name;let found=basket.find(x=>x.name===canonical);let q=+$("qty").value;if(found)found.qty+=q;else basket.push({name:canonical,qty:q});$("productInput").value="";drawList();}
-function drawList(){ $("list").innerHTML=basket.length?basket.map((x,i)=>'<div class="item"><div class="itemname">'+x.name+'<div class="qty">'+x.qty+'×</div></div><button class="x" data-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
-function compare(){if(!basket.length){basket=[{name:"Eier 10er",qty:1},{name:"Bananen 1 kg",qty:1},{name:"Haferdrink 1 l",qty:2},{name:"Hackfleisch 500 g",qty:1},{name:"Skyr 500 g",qty:2}];drawList()}if(!selected.size)return alert("Bitte mindestens einen Markt auswählen.");
-let rows=[...selected].map(store=>{let total=0,known=0;basket.forEach(i=>{if(catalog[i.name]&&catalog[i.name][store]!=null){total+=catalog[i.name][store]*i.qty;known++}});return{store,total,known,coverage:known/basket.length}});
-let complete=rows.filter(r=>r.coverage===1).sort((a,b)=>a.total-b.total);let eligible=complete.length?complete:rows.sort((a,b)=>b.coverage-a.coverage||a.total-b.total);let win=eligible[0];
-$("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);$("winnerCoverage").textContent=win.known+" von "+basket.length+" Produkten mit Preis · DEMO";
-$("merchantResults").innerHTML=rows.sort((a,b)=>a.total-b.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+'/'+basket.length+' Preise bekannt · '+Math.round(r.coverage*100)+'% Abdeckung</div></div><div class="price">'+eur(r.total)+'</div></div>').join("");
-let split=0,alloc={};basket.forEach(i=>{let opts=[...selected].filter(s=>catalog[i.name]?.[s]!=null).map(s=>[s,catalog[i.name][s]]).sort((a,b)=>a[1]-b[1]);if(opts.length){split+=opts[0][1]*i.qty;(alloc[opts[0][0]]??=[]).push(i.name)}});let saving=Math.max(0,win.total-split);
-$("splitTitle").textContent=eur(split)+" bei günstigster Produkt-Aufteilung";$("splitDetail").textContent=Object.entries(alloc).map(([s,a])=>s+": "+a.length+" Position"+(a.length===1?"":"en")).join(" · ");$("splitSave").textContent=saving>0?"Demo-Ersparnis ggü. "+win.store+": "+eur(saving):"Kein zusätzlicher Demo-Vorteil";$("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});
+function normalizeProduct(t){return t.toLowerCase().replace(/[.,]/g," ").replace(/\s+/g," ").trim()}
+function parseWish(raw){
+ let t=normalizeProduct(raw), amount=1, unit="piece", explicit=false;
+ let m=t.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stck|x)?\s+(.+)$/i);
+ if(m){amount=parseFloat(m[1].replace(",","."));let u=(m[2]||"stück").toLowerCase(),rest=m[3];explicit=true;
+   if(u==="g"||u==="gramm"){amount/=1000;unit="kg"} else if(u==="ml"){amount/=1000;unit="l"} else if(u==="kg"){unit="kg"} else if(u==="l"||u==="liter"){unit="l"} else unit="piece";t=rest;
+ }
+ t=t.replace(/^(frische|frischer|frisches)\s+/,"").trim();
+ let key=Object.keys(catalog).find(k=>t===k||t.includes(k)||k.includes(t));
+ let c=key?catalog[key]:null;
+ let calcAmount=amount, note="";
+ if(c&&unit==="piece"&&c.unit==="kg"&&c.unitWeight){calcAmount=amount*c.unitWeight;note="≈ "+calcAmount.toFixed(2).replace(".",",")+" kg für Preisvergleich";}
+ else if(c&&unit!==c.unit&&c.unit==="piece"){note="Mengenangabe wird als Stück interpretiert";}
+ return {raw,label:c?c.label:t.replace(/\b\w/g,x=>x.toUpperCase()),amount,unit,calcAmount,key,matched:!!c,note,explicit};
 }
-$("barcodeBtn").onclick=lookupBarcode;$("barcodeInput").onkeydown=e=>{if(e.key==="Enter")lookupBarcode()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=compare;
+function wishText(w){const u=w.unit==="piece"?"×":w.unit;return (w.unit==="piece"?w.amount+"×":String(w.amount).replace(".",",")+" "+u)+" "+w.label}
+function drawSuggestions(){let a=["5 Bananen","3 rote Paprika","500 g Rinderhack","10 Eier","2 Liter Milch"];$("suggestions").innerHTML=a.map(x=>'<span class="chip" data-add="'+x+'">+ '+x+'</span>').join("");document.querySelectorAll("[data-add]").forEach(e=>e.onclick=()=>add(e.dataset.add));}
+function drawStores(){ $("stores").innerHTML=storeNames.map(st=>'<span class="chip '+(selected.has(st)?"on":"")+'" data-store="'+st+'">'+st+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores()});}
+function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;basket.push(parseWish(raw));$("productInput").value="";drawList();}
+function drawList(){ $("list").innerHTML=basket.length?basket.map((w,i)=>'<div class="item"><div class="itemname">'+escHtml(wishText(w))+'<div class="qty">'+(w.matched?'✓ Produkt verstanden'+(w.note?" · "+escHtml(w.note):""):'⚠ Noch kein sicherer Produkt-Match')+'</div></div><button class="x" data-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
+function compare(){
+ if(!basket.length){$("liveStatus")?.remove();return alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.")}
+ if(!selected.size)return alert("Bitte mindestens einen Markt auswählen.");
+ let rows=[...selected].map(store=>{let total=0,known=0;basket.forEach(w=>{let c=w.key?catalog[w.key]:null;if(c&&c.prices[store]!=null){total+=c.prices[store]*w.calcAmount;known++}});return{store,total,known,coverage:known/basket.length}});
+ let complete=rows.filter(r=>r.coverage===1).sort((a,b)=>a.total-b.total), eligible=complete.length?complete:[...rows].sort((a,b)=>b.coverage-a.coverage||a.total-b.total),win=eligible[0];
+ $("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);$("winnerCoverage").textContent=win.known+" von "+basket.length+" Positionen berechenbar · DEMO-PREISBASIS";
+ $("merchantResults").innerHTML=[...rows].sort((a,b)=>b.coverage-a.coverage||a.total-b.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+'/'+basket.length+' Positionen · '+Math.round(r.coverage*100)+'% Abdeckung · DEMO</div></div><div class="price">'+eur(r.total)+'</div></div>').join("");
+ let split=0,alloc={};basket.forEach(w=>{let c=w.key?catalog[w.key]:null;if(!c)return;let opts=[...selected].filter(st=>c.prices[st]!=null).map(st=>[st,c.prices[st]]).sort((a,b)=>a[1]-b[1]);if(opts.length){split+=opts[0][1]*w.calcAmount;(alloc[opts[0][0]]??=[]).push(w.label)}});
+ let saving=Math.max(0,win.total-split);$("splitTitle").textContent=eur(split)+" bei günstigster Produkt-Aufteilung";$("splitDetail").textContent=Object.entries(alloc).map(([st,a])=>st+": "+a.join(", ")).join(" · ");$("splitSave").textContent=saving>0?"Demo-Ersparnis ggü. "+win.store+": "+eur(saving):"Kein zusätzlicher Demo-Vorteil";$("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});
+}
+$("demoListBtn").onclick=()=>{basket=["5 Bananen","3 rote Paprika","500 g Rinderhack","10 Eier","2 Liter Milch"].map(parseWish);drawList()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=compare;
 $("planTab").onclick=()=>{$("planner").style.display="block";$("receipt").style.display="none";$("planTab").classList.add("active");$("receiptTab").classList.remove("active")};
 $("receiptTab").onclick=()=>{$("planner").style.display="none";$("receipt").style.display="block";$("receiptTab").classList.add("active");$("planTab").classList.remove("active")};
 $("receiptFile").onchange=e=>{$("receiptMsg").textContent=e.target.files[0]?"Ausgewählt: "+e.target.files[0].name+" · OCR-Verknüpfung folgt in v2.1.":""};
