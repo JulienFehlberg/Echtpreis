@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.34.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.35.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -60,7 +60,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
 <div class="card"><h2>1 Laden</h2><div class="muted">Nur ein Markt mit 100 % Datenabdeckung kann als vollständiger Warenkorb angezeigt werden. Teilbeträge sind ausdrücklich nur Zwischensummen.</div><div id="merchantResults"></div></div>
 <div class="card"><h2>Maximal sparen</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
-<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.8 · Data Engine v1 · Quelle + Trust + Proof</span></div>
+<div class="card"><h2>So wird gerechnet</h2><div class="muted">🟢 Aktuell belegt = aktuelle Quelle/Bon. 🟡 Referenzwert = letzter bekannter Preis oder vorsichtige Markt-Orientierung. Referenzwerte machen den Einkauf testbar, sind aber kein garantierter Bestpreis. Mit neuen Bons werden sie automatisch durch bessere Daten ersetzt.</div><span class="source">v2.8 · Data Engine v1 · Quelle + Trust + Proof</span></div>
 <div class="card" id="finishCard"><h2>Nach dem Einkauf geht’s mit dem Bon weiter</h2><div class="muted">Dein Einkauf bleibt offen, bis du den Kassenbon hochlädst. So kann ECHTPREIS geplante und tatsächlich bezahlte Preise verbinden und – nur mit deiner Zustimmung – anonymisierte Preisbeobachtungen zur Datenbasis beitragen lassen.</div><div class="notice" style="margin-top:14px"><b>🧾 Bon nicht vergessen!</b><br>Ein Foto nach dem Einkauf hilft, echte Preise aktuell zu halten.</div><button class="green" id="toReceiptBtn">Ich war einkaufen → Bon hochladen</button></div>
 </section>
 </section>
@@ -426,7 +426,7 @@ const catalog={
 "orangensaft":{label:"Orangensaft",unit:"l"},"kaffee":{label:"Kaffee",unit:"kg",openPricesCategory:"en:coffees"},
 "toilettenpapier":{label:"Toilettenpapier",unit:"piece"},"kuechenrolle":{label:"Küchenrolle",unit:"piece"},"waschmittel":{label:"Waschmittel",unit:"piece"},
 "spuelmittel":{label:"Spülmittel",unit:"piece"},"zahnpasta":{label:"Zahnpasta",unit:"piece"},"shampoo":{label:"Shampoo",unit:"piece"},
-"katzenfutter":{label:"Katzenfutter",unit:"kg"},"hundefutter":{label:"Hundefutter",unit:"kg"}
+"katzenfutter":{label:"Katzenfutter",unit:"kg"},"hundefutter":{label:"Hundefutter",unit:"kg"},"nutella":{label:"Nutella",unit:"piece"}
 };
 // ECHTPREIS Data Engine v2
 // Ein Preis ist immer eine Beobachtung: Produkt + Händler + Betrag + Einheit + Datum + Quelle + Trust.
@@ -456,6 +456,25 @@ function dataEngine(){
  const all=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation).filter(usableObservation);
  const seen=new Set();return all.filter(x=>{let sig=[x.key,x.store,x.price,x.per,x.date,x.proof||x.source,x.locationId||""].join("|");if(seen.has(sig))return false;seen.add(sig);return true});
 }
+const referenceBase={
+ bananen:1.79,"rote paprika":3.49,tomaten:3.29,gurken:.89,aepfel:2.49,kartoffeln:1.29,zwiebeln:1.69,
+ rinderhack:13.98,hackfleisch:10.98,haehnchenbrust:12.99,energydrink:5.96,tiefkuehlpizza:3.49,croissants:2.49,
+ eier:.32,milch:1.09,haferdrink:1.79,butter:7.16,kaese:8.98,joghurt:2.38,skyr:3.98,quark:2.78,
+ nudeln:1.98,reis:2.79,mehl:.89,zucker:1.29,brot:2.49,toast:1.79,wasser:.59,cola:1.79,orangensaft:1.99,
+ kaffee:15.98,toilettenpapier:3.99,kuechenrolle:3.49,waschmittel:5.99,spuelmittel:1.49,zahnpasta:1.99,
+ shampoo:2.49,katzenfutter:4.49,hundefutter:3.99,nutella:5.49
+};
+const referenceStoreFactor={"Lidl":.94,"Kaufland":.96,"REWE":1.06,"EDEKA":1.08,"PENNY":.95,"ALDI Nord":.93,"Netto":.94,"NORMA":.93,"dm":1.02,"Rossmann":1.03};
+function referencePrice(key,store,wish=null){
+ const today=new Date().toISOString().slice(0,10);
+ let history=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation)
+  .filter(x=>x.key===key&&x.store===store&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0);
+ if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);history=history.filter(x=>normalizeProduct(x.product||"").includes(brand));}
+ history.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ if(history.length){const x=history[0];return {...x,reference:true,referenceType:"historical",confidence:"niedrig",source:"Letzter bekannter Preis · "+(x.source||"ECHTPREIS"),status:"reference"};}
+ const base=referenceBase[key],factor=referenceStoreFactor[store];if(!Number.isFinite(base)||!Number.isFinite(factor))return null;
+ return {key,store,price:Number((base*factor).toFixed(2)),per:catalog[key]?.unit||"piece",date:"",validTo:null,region:"Deutschland",kind:"reference",source:"Markt-Referenz",product:catalog[key]?.label||key,trust:25,status:"reference",reference:true,referenceType:"estimate",confidence:"niedrig"};
+}
 function trustedPrice(key,store,wish=null){
  let rows=dataEngine().filter(x=>x.key===key&&x.store===store);
  if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);rows=rows.filter(x=>normalizeProduct(x.product||"").includes(brand));}
@@ -467,7 +486,7 @@ function trustedPrice(key,store,wish=null){
  if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:85,status:"confirmed",confidence:"mittel"}}
  return null;
 }
-function activePrice(key,store,wish=null){return trustedPrice(key,store,wish)}
+function activePrice(key,store,wish=null){return trustedPrice(key,store,wish)||referencePrice(key,store,wish)}
 function addCommunityObservation(obs){
  const x=normalizeObservation({...obs,kind:"community",trust:60});if(!x.proof||!x.key||!x.store||!Number.isFinite(x.price)||!x.date)return false;
  const rows=loadJson(communityKey);rows.push(x);saveJson(communityKey,rows);drawDataMachine();return true;
@@ -531,9 +550,9 @@ const productAliases={
  brot:["brot","vollkornbrot","mischbrot"],toast:["toast","toastbrot"],wasser:["wasser","mineralwasser"],cola:["cola","coca cola","coca-cola","cola zero","coca cola zero"],
  orangensaft:["orangensaft","orange saft","o-saft"],kaffee:["kaffee","kaffeebohnen","filterkaffee"],toilettenpapier:["toilettenpapier","klopapier"],
  kuechenrolle:["küchenrolle","kuchenrolle","kuechenrolle","küchenpapier"],waschmittel:["waschmittel"],spuelmittel:["spülmittel","spulmittel","spuelmittel"],
- zahnpasta:["zahnpasta","zahncreme"],shampoo:["shampoo"],katzenfutter:["katzenfutter"],hundefutter:["hundefutter"]
+ zahnpasta:["zahnpasta","zahncreme"],shampoo:["shampoo"],katzenfutter:["katzenfutter"],hundefutter:["hundefutter"],nutella:["nutella","grosses glas nutella","großes glas nutella","nutella 750g","nutella 750 g"]
 };
-const exactBrandNames=["coca cola","coca-cola","red bull","dr oetker","dr. oetker","alpro","milka","ehrmann","nissin"];
+const exactBrandNames=["coca cola","coca-cola","red bull","dr oetker","dr. oetker","alpro","milka","ehrmann","nissin","nutella"];
 const receiptNoise=["bio","bioland","okt","xxl","vegan","vegane","veganer","natur","classic","original","frisch","regional"];
 function receiptTokens(t){return normalizeProduct(t).replace(/\b\d+(?:\s?g|\s?kg|\s?ml|\s?l|er)?\b/g," ").split(" ").filter(x=>x&&!receiptNoise.includes(x))}
 function tokenScore(a,b){const A=new Set(receiptTokens(a)),B=new Set(receiptTokens(b));if(!A.size||!B.size)return 0;let hit=[...A].filter(x=>B.has(x)).length;return hit/Math.max(A.size,B.size)}
@@ -611,14 +630,14 @@ function drawList(){ $("list").innerHTML=basket.length?basket.map((w,i)=>'<div c
 window.compare=function compare(){
  if(!basket.length){alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");return false;}
  if(!selected.size){alert("Bitte mindestens einen Markt auswählen.");return false;}
- let rows=[...selected].map(store=>{let total=0,known=0,missing=[],sources=[];basket.forEach(w=>{let p=w.key?activePrice(w.key,store,w):null;if(p){total+=p.price*w.calcAmount;known++;sources.push(p)}else missing.push(w.label)});return{store,total,known,missing,sources,coverage:known/basket.length}});
+ let rows=[...selected].map(store=>{let total=0,known=0,missing=[],sources=[],referenceCount=0,confirmedCount=0;basket.forEach(w=>{let p=w.key?activePrice(w.key,store,w):null;if(p){total+=p.price*w.calcAmount;known++;sources.push(p);if(p.reference)referenceCount++;else confirmedCount++;}else missing.push(w.label)});return{store,total,known,missing,sources,referenceCount,confirmedCount,coverage:known/basket.length}});
  let complete=rows.filter(r=>r.known===basket.length).sort((a,b)=>a.total-b.total);
- if(complete.length){let win=complete[0];$("winnerLabel").textContent="Günstigster vollständig belegter Warenkorb";$("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);$("winnerCoverage").textContent="100 % Abdeckung · Preise mit Quelle und Gültigkeit";}
- else{$("winnerLabel").textContent="Noch nicht genug Preisdaten";$("winnerName").textContent="Wir kennen noch nicht alle Preise für deinen Einkauf";$("winnerPrice").textContent="—";let best=[...rows].sort((a,b)=>b.coverage-a.coverage)[0];$("winnerCoverage").textContent="Von "+basket.length+" Produkten kennen wir bei "+best.store+" aktuell "+best.known+". Fehlende Preise erfinden wir nicht."}
- $("merchantResults").innerHTML=[...rows].sort((a,b)=>b.coverage-a.coverage||a.total-b.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+' von '+basket.length+' Preisen vorhanden'+(r.missing.length?'<br>Noch ohne Preis: '+r.missing.map(escHtml).join(", "):'<br>Vollständig belegt')+(r.sources.length?'<br>Quelle: '+[...new Set(r.sources.map(x=>x.source+" · "+x.product+" · gültig "+x.date+(x.validTo?"–"+x.validTo:"")))].join("; "):"")+'</div></div><div class="price">'+(r.known?eur(r.total)+'<div class="coverage" style="text-align:right">'+(r.coverage===1?"Gesamt":"belegte Zwischensumme")+'</div>':"—")+'</div></div>').join("");
+ if(complete.length){let win=complete[0],approx=win.referenceCount>0;$("winnerLabel").textContent=approx?"Voraussichtlich günstigster Warenkorb":"Günstigster vollständig belegter Warenkorb";$("winnerName").textContent=win.store;$("winnerPrice").textContent=(approx?"ca. ":"")+eur(win.total);$("winnerCoverage").textContent=approx?(win.confirmedCount+" von "+basket.length+" Preisen aktuell belegt · "+win.referenceCount+" Referenzwert"+(win.referenceCount===1?"":"e")+" · tatsächliche Preise können abweichen"):"100 % Abdeckung · Preise mit Quelle und Gültigkeit";}
+ else{$("winnerLabel").textContent="Noch nicht genug Preisdaten";$("winnerName").textContent="Noch kein vollständiger Warenkorb";$("winnerPrice").textContent="—";let best=[...rows].sort((a,b)=>b.coverage-a.coverage)[0];$("winnerCoverage").textContent="Von "+basket.length+" Produkten können wir bei "+best.store+" "+best.known+" einordnen. Unbekannte Produkte bleiben offen."}
+ $("merchantResults").innerHTML=[...rows].sort((a,b)=>b.coverage-a.coverage||a.total-b.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+' von '+basket.length+' Preisen einordenbar'+(r.referenceCount?'<br>🟡 '+r.referenceCount+' Referenzwert'+(r.referenceCount===1?'':'e')+' · nur Orientierung':'')+(r.missing.length?'<br>Noch ohne Preis: '+r.missing.map(escHtml).join(", "):'<br>'+(!r.referenceCount?'Vollständig aktuell belegt':'Vollständig inkl. Referenzwerten'))+(r.sources.length?'<br>'+[...new Set(r.sources.map(x=>x.reference?(x.referenceType==="historical"?'Letzter bekannter Preis':'Markt-Referenz'):(x.source+" · "+x.product+" · "+x.date+(x.validTo?"–"+x.validTo:""))))].join("; "):"")+'</div></div><div class="price">'+(r.known?(r.referenceCount?'ca. ':'')+eur(r.total)+'<div class="coverage" style="text-align:right">'+(r.coverage===1?"Warenkorb":"Zwischensumme")+'</div>':"—")+'</div></div>').join("");
  let allSplitKnown=basket.every(w=>w.key&&[...selected].some(st=>activePrice(w.key,st,w)));
- if(!allSplitKnown){$("splitTitle").textContent="Noch nicht vollständig berechenbar";$("splitDetail").textContent="Für mindestens eine Position gibt es bei keinem ausgewählten Markt einen aktuell gültigen, belegten Preis.";$("splitSave").textContent="Keine Ersparnis berechnet."}
- else{let split=0,alloc={};basket.forEach(w=>{let opts=[...selected].map(st=>[st,activePrice(w.key,st,w)]).filter(x=>x[1]).sort((a,b)=>a[1].price-b[1].price);split+=opts[0][1].price*w.calcAmount;(alloc[opts[0][0]]??=[]).push(w.label)});let shops=Object.keys(alloc).length;$("splitTitle").textContent=eur(split)+" · "+shops+" "+(shops===1?"Laden":"Läden");$("splitDetail").textContent=Object.entries(alloc).map(([st,n])=>st+": "+n.join(", ")).join(" · ");let saving=complete.length?Math.max(0,complete[0].total-split):null;$("splitSave").textContent=saving===null?"Kein vollständiger 1-Laden-Vergleich als Referenz.":saving<0.5?"Aufteilen spart nur "+eur(saving)+" – ein Laden ist wahrscheinlich sinnvoller.":"Maximal belegte Ersparnis ggü. "+complete[0].store+": "+eur(saving);}
+ if(!allSplitKnown){$("splitTitle").textContent="Noch nicht vollständig berechenbar";$("splitDetail").textContent="Für mindestens eine Position gibt es noch weder einen belegten Preis noch einen Referenzwert.";$("splitSave").textContent="Keine Ersparnis berechnet."}
+ else{let split=0,alloc={},refUsed=0;basket.forEach(w=>{let opts=[...selected].map(st=>[st,activePrice(w.key,st,w)]).filter(x=>x[1]).sort((a,b)=>a[1].price-b[1].price);split+=opts[0][1].price*w.calcAmount;if(opts[0][1].reference)refUsed++;(alloc[opts[0][0]]??=[]).push(w.label)});let shops=Object.keys(alloc).length;$("splitTitle").textContent=(refUsed?"ca. ":"")+eur(split)+" · "+shops+" "+(shops===1?"Laden":"Läden");$("splitDetail").textContent=Object.entries(alloc).map(([st,n])=>st+": "+n.join(", ")).join(" · ")+(refUsed?" · "+refUsed+" Position"+(refUsed===1?"":"en")+" mit Referenzwert":"");let saving=complete.length?Math.max(0,complete[0].total-split):null;$("splitSave").textContent=saving===null?"Kein vollständiger 1-Laden-Vergleich als Referenz.":refUsed?"Orientierung: mögliche Ersparnis ca. "+eur(saving)+" · nicht als garantierter Bestpreis verstehen.":saving<0.5?"Aufteilen spart nur "+eur(saving)+" – ein Laden ist wahrscheinlich sinnvoller.":"Maximal belegte Ersparnis ggü. "+complete[0].store+": "+eur(saving);}
  $("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});return true;
 }
 $("demoListBtn").onclick=()=>{basket=["500 g Rinderhack","1 kg Bananen"].map(parseWish);drawList()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=()=>{if(compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};
