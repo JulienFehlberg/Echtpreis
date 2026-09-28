@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.5.2</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.5.3</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -171,11 +171,13 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
   const st=document.getElementById("barcodeStatus"),box=document.getElementById("barcodeLive"),video=document.getElementById("barcodeVideo");
   try{
    await ensureZXing(); box.style.display="block"; liveStopped=false;
+   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error("getUserMedia unavailable");
+   liveStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}},audio:false});
+   video.srcObject=liveStream;
+   await video.play();
    const hints=new Map();hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E]);hints.set(ZXing.DecodeHintType.TRY_HARDER,true);liveReader=new ZXing.BrowserMultiFormatReader(hints);
-   const devices=await ZXing.BrowserCodeReader.listVideoInputDevices();
-   const rear=devices.find(d=>/back|rear|environment|rück/i.test(d.label))||devices[devices.length-1];
    if(st)st.textContent="Scanner aktiv – EAN-Barcode ruhig in den Rahmen halten.";
-   liveReader.decodeFromVideoDevice(rear&&rear.deviceId?rear.deviceId:undefined,video,async(result,err)=>{
+   liveReader.decodeFromVideoElement(video,async(result,err)=>{
     if(liveStopped||!result)return;
     const code=String(result.getText?result.getText():result.text||"").trim();
     if(st)st.innerHTML="Scanner liest: <strong>"+code+"</strong>";
