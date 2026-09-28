@@ -32,6 +32,8 @@ assert(html.includes("echtpreis_insight_history_v1"),"personal insight history m
 assert(html.includes("function renderStatsMarketProfile"),"personal market profile missing");
 assert(html.includes("function renderStatsPriceMemory"),"personal product price memory missing");
 assert(html.includes("function renderStatsRhythm"),"personal shopping rhythm analysis missing");
+assert(html.includes("function searchPersonalPurchases"),"personal purchase search missing");
+assert(html.includes("function renderPurchaseSearch"),"personal purchase search renderer missing");
 assert(html.includes("purchase-rhythm"),"post-scan rhythm insight missing");
 assert(html.includes("gleiche")||html.includes("identisch"),"market profile must explain direct-product comparison");
 assert(html.includes("function renderStatsTrend"),"month-over-month shopping trend missing");
