@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.1</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Liste erstellen, Märkte vergleichen und sehen, ob sich ein zweiter Stopp wirklich lohnt.</p></section>
 <div class="tabs"><button class="tab active" id="planTab">Einkauf planen</button><button class="tab" id="receiptTab">Bon prüfen</button></div>
 
@@ -36,14 +36,18 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <div class="inputrow"><input id="productInput" placeholder="z. B. Eier, Bananen, Haferdrink"><select id="qty"><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select><button class="primary" id="addBtn">+</button></div>
 <div class="chips" id="suggestions"></div><div id="list"></div></div>
 
+<div class="card"><h2>🔎 Echtes Produkt prüfen</h2><div class="muted">EAN/Barcode eingeben. ECHTPREIS lädt die Produktidentität aus Open Food Facts und sucht anschließend echte beobachtete Preise in Open Prices.</div>
+<div class="inputrow"><input id="barcodeInput" inputmode="numeric" placeholder="EAN / Barcode, z. B. 13 Ziffern"><button class="primary" id="barcodeBtn">Prüfen</button></div>
+<div id="liveStatus" class="detail"></div><div id="liveProduct"></div></div>
+
 <div class="card"><h2>Welche Märkte?</h2><div class="muted">Später: automatisch nach Standort und Entfernung. Heute kannst du auswählen.</div><div class="chips" id="stores"></div>
-<div class="notice"><b>Wichtig:</b> v2.0 nutzt für diesen UX-Test klar gekennzeichnete DEMO-PREISE. Es werden keine Händlerpreise als aktuell ausgegeben. Live-Preisdaten kommen als eigener Daten-Layer.</div>
+<div class="notice"><b>Wichtig:</b> Der Warenkorbvergleich nutzt für diesen UX-Test klar gekennzeichnete DEMO-PREISE. Es werden keine Händlerpreise als aktuell ausgegeben. Live-Preisdaten kommen als eigener Daten-Layer.</div>
 <button class="green" id="compareBtn">Einkauf vergleichen</button></div>
 
 <section class="results" id="results"><div class="winner"><div class="smallcap">Günstigster Demo-Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
 <div class="card"><h2>Alle Märkte</h2><div class="muted">Nur bekannte Positionen werden summiert. Fehlende Preise werden nicht erfunden.</div><div id="merchantResults"></div></div>
 <div class="card"><h2>Lohnt sich Aufteilen?</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
-<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.0 · Demo-Datensatz</span></div></section>
+<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.1 · Demo-Warenkorb + echte Barcode-Abfrage</span></div></section>
 </section>
 
 <section class="receipt" id="receipt"><div class="card"><h2>Nach dem Einkauf: Bon prüfen</h2><div class="muted">Damit schließt sich der Kreis: geplant → gekauft → tatsächlich bezahlt. Die bestehende OCR bleibt erhalten und wird als nächstes mit deiner Einkaufsliste verbunden.</div><label class="upload" for="receiptFile">📷 Bon auswählen</label><input id="receiptFile" type="file" accept="image/*" capture="environment" style="display:none"><div id="receiptMsg" class="detail"></div></div></section>
@@ -60,7 +64,44 @@ const catalog={
 "Coca-Cola Zero 1,5 l":{Lidl:1.49,Kaufland:1.39,REWE:1.59,EDEKA:1.59},
 "Milch 1 l":{Lidl:1.09,Kaufland:1.05,REWE:1.15,EDEKA:1.19}
 };
-const storeNames=["Lidl","Kaufland","REWE","EDEKA"];let basket=[];let selected=new Set(storeNames);
+const storeNames=["Lidl","Kaufland","REWE","EDEKA"];async function lookupBarcode(){
+ const code=$("barcodeInput").value.replace(/\D/g,"");
+ if(code.length<8){$("liveStatus").textContent="Bitte einen gültigen Barcode mit mindestens 8 Ziffern eingeben.";return}
+ $("liveStatus").textContent="Produkt wird gesucht …";$("liveProduct").innerHTML="";
+ try{
+  const pr=await fetch("https://world.openfoodfacts.org/api/v2/product/"+encodeURIComponent(code)+".json?fields=code,product_name,brands,quantity,image_front_small_url");
+  if(!pr.ok) throw new Error("Produktdienst nicht erreichbar");
+  const pd=await pr.json();
+  if(pd.status!==1||!pd.product){$("liveStatus").textContent="Kein Produkt zu diesem Barcode gefunden.";return}
+  const p=pd.product,name=p.product_name||"Produkt ohne Namen",brand=p.brands||"",qty=p.quantity||"";
+  $("liveStatus").textContent="Produkt gefunden. Suche beobachtete Preise …";
+  let priceData=null, priceError=false;
+  try{
+   const rr=await fetch("https://prices.openfoodfacts.org/api/v1/prices?product_code="+encodeURIComponent(code)+"&size=20&order_by=-date");
+   if(rr.ok) priceData=await rr.json(); else priceError=true;
+  }catch(e){priceError=true}
+  const items=priceData?.items||priceData?.results||[];
+  const valid=items.filter(x=>Number.isFinite(Number(x.price))&&x.currency==="EUR");
+  valid.sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+  let priceHtml="";
+  if(valid.length){
+    const latest=valid.slice(0,8), vals=latest.map(x=>Number(x.price)), lo=Math.min(...vals),hi=Math.max(...vals);
+    priceHtml='<div class="split"><strong>'+escHtml(name)+'</strong><div class="detail">'+escHtml([brand,qty].filter(Boolean).join(" · "))+' · EAN '+code+'</div><div class="big" style="font-size:25px">'+eur(lo)+(hi!==lo?" – "+eur(hi):"")+'</div><div class="coverage">'+latest.length+' echte Preisbeobachtung'+(latest.length===1?"":"en")+' ausgewertet · neueste: '+escHtml(latest[0].date||"Datum unbekannt")+'</div><span class="source">Quelle: Open Prices / Open Food Facts · ODbL</span></div>';
+    priceHtml+='<div style="margin-top:10px">'+latest.slice(0,5).map(x=>'<div class="merchant"><div><b>'+escHtml(locationLabel(x))+'</b><div class="coverage">'+escHtml(x.date||"ohne Datum")+(x.price_is_discounted?" · Angebot":"")+'</div></div><div class="price">'+eur(Number(x.price))+'</div></div>').join("")+'</div>';
+    $("liveStatus").textContent="Echte Daten gefunden – keine Demo-Preise.";
+  }else{
+    priceHtml='<div class="split"><strong>'+escHtml(name)+'</strong><div class="detail">'+escHtml([brand,qty].filter(Boolean).join(" · "))+' · EAN '+code+'</div><div class="notice">Produkt sicher erkannt, aber in Open Prices wurden dafür aktuell keine EUR-Preisbeobachtungen gefunden. ECHTPREIS schätzt hier bewusst keinen Preis.</div><span class="source">Produkt: Open Food Facts</span></div>';
+    $("liveStatus").textContent=priceError?"Produkt erkannt; Preisquelle war nicht erreichbar.":"Produkt erkannt; noch keine passenden Preisdaten.";
+  }
+  $("liveProduct").innerHTML=priceHtml;
+ }catch(e){$("liveStatus").textContent="Live-Abfrage fehlgeschlagen. Demo-Vergleich bleibt davon getrennt."}
+}
+function escHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function locationLabel(x){
+ const l=x.location||{};
+ return l.name||l.osm_name||l.display_name||x.location_name||("Beobachteter Händler / Ort"+(x.location_id?" #"+x.location_id:""));
+}
+let basket=[];let selected=new Set(storeNames);
 const $=id=>document.getElementById(id), eur=n=>n.toLocaleString("de-DE",{style:"currency",currency:"EUR"});
 function drawSuggestions(){ $("suggestions").innerHTML=Object.keys(catalog).slice(0,6).map(x=>'<span class="chip" data-add="'+x+'">+ '+x+'</span>').join("");document.querySelectorAll("[data-add]").forEach(e=>e.onclick=()=>add(e.dataset.add));}
 function drawStores(){ $("stores").innerHTML=storeNames.map(s=>'<span class="chip '+(selected.has(s)?"on":"")+'" data-store="'+s+'">'+s+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores()});}
@@ -74,7 +115,7 @@ $("merchantResults").innerHTML=rows.sort((a,b)=>a.total-b.total).map(r=>'<div cl
 let split=0,alloc={};basket.forEach(i=>{let opts=[...selected].filter(s=>catalog[i.name]?.[s]!=null).map(s=>[s,catalog[i.name][s]]).sort((a,b)=>a[1]-b[1]);if(opts.length){split+=opts[0][1]*i.qty;(alloc[opts[0][0]]??=[]).push(i.name)}});let saving=Math.max(0,win.total-split);
 $("splitTitle").textContent=eur(split)+" bei günstigster Produkt-Aufteilung";$("splitDetail").textContent=Object.entries(alloc).map(([s,a])=>s+": "+a.length+" Position"+(a.length===1?"":"en")).join(" · ");$("splitSave").textContent=saving>0?"Demo-Ersparnis ggü. "+win.store+": "+eur(saving):"Kein zusätzlicher Demo-Vorteil";$("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});
 }
-$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=compare;
+$("barcodeBtn").onclick=lookupBarcode;$("barcodeInput").onkeydown=e=>{if(e.key==="Enter")lookupBarcode()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=compare;
 $("planTab").onclick=()=>{$("planner").style.display="block";$("receipt").style.display="none";$("planTab").classList.add("active");$("receiptTab").classList.remove("active")};
 $("receiptTab").onclick=()=>{$("planner").style.display="none";$("receipt").style.display="block";$("receiptTab").classList.add("active");$("planTab").classList.remove("active")};
 $("receiptFile").onchange=e=>{$("receiptMsg").textContent=e.target.files[0]?"Ausgewählt: "+e.target.files[0].name+" · OCR-Verknüpfung folgt in v2.1.":""};
