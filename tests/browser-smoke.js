@@ -75,6 +75,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert(!d.getElementById("receiptTotalCheck").textContent.startsWith("✓"),"VAT arithmetic must not falsely verify a receipt");
  assert.strictEqual(d.getElementById("analysisSaving").textContent,"–","VAT summary must not trigger a market comparison");
  assert(d.getElementById("analysisBestStore").textContent.includes("wartet"),"unverified receipt should explicitly wait for a safe scan");
+ assert.strictEqual(w.detectReceiptStore("GLOBUS Markthalle\n28.09.26\nMilch 1,09\nSUMME 1,09"),"Globus","additional German retailers should be recognized for receipt history");
+ d.getElementById("receiptStore").value="";d.getElementById("receiptDate").value="";w.applyReceiptText("KLEINER LADEN\n28.09.26\nMilch 1,09\nBrot 1,99\nSUMME 3,08","Foto");assert.strictEqual(d.getElementById("receiptStore").value,"Unbekannter Händler","strong unknown-retailer receipts should remain saveable");assert(d.getElementById("receiptTotalCheck").textContent.startsWith("✓"),"unknown retailer must not invalidate otherwise reconciled receipt content");assert(d.getElementById("analysisNote").textContent.includes("persönliche Statistik"),"unknown retailer should disable comparison but keep personal analytics");
  const realPhotoOcr="EDEKA Fil. 5491\n28.09.26\nG&G Mini-Hdrnchen 1,49 A\nOetker Ristorante 3,49 A\nRed Bull 0,25 1,49 € x 2 2,98 B\nPfand 0,25 € xX 2 9 ,50*B\nSUMME ® 8 ,46\nBar € 20,00\nMwSt NETTO MwSt UMSATZ\nA 7% 4,65 0,33 4,98";
  w.applyReceiptText(realPhotoOcr,"Bonausschnitt");
  assert.strictEqual(d.getElementById("receiptTotalInput").value,"8,46","real receipt photo should yield its printed total");
