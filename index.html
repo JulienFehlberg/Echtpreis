@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v4.4</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v4.5</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="homeactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkauf planen<small>Preise vergleichen</small></button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen<small>Preise bestätigen</small></button><button class="homeaction" id="homePoints"><span>🎁</span>Beiträge & Punkte<small id="pointsMini">0 XP</small></button></div><div class="tabs"><button class="tab active" id="planTab">Planen</button><button class="tab" id="receiptTab">Bon scannen</button></div>
 
@@ -235,7 +235,7 @@ function refreshPoints(){let xp=Number(localStorage.getItem("echtpreis_xp")||0),
 $("homePlan").onclick=showPlan;$("homeReceipt").onclick=showReceipt;$("homePoints").onclick=showPoints;$("pointsBack").onclick=showPlan;
 $("toReceiptBtn").onclick=showReceipt;$("backPlanBtn").onclick=showPlan;
 $("planTab").onclick=showPlan;$("receiptTab").onclick=showReceipt;
-let receiptDraft=[];
+let receiptDraft=[];let detectedReceiptBarcode="";
 function guessKey(name){return identifyReceiptProduct(name).key||""}
 function drawReviewRows(){
  $("reviewRows").innerHTML=receiptDraft.map((r,i)=>(()=>{let m=identifyReceiptProduct(r.name||"");return '<div class="reviewrow"><div><input data-rname="'+i+'" value="'+escHtml(r.name||"")+'" placeholder="Artikel"><div class="detail">'+(m.key?'✓ '+escHtml(m.label)+' · '+confidenceLabel(m):'⚠ '+escHtml(m.label))+'</div></div><input data-rprice="'+i+'" inputmode="decimal" value="'+(r.price||"")+'" placeholder="bezahlt €"><input data-ramount="'+i+'" inputmode="decimal" value="'+(r.packAmount||"")+'" placeholder="Menge"><select data-runit="'+i+'"><option value="">Einheit</option><option value="kg" '+(r.packUnit==='kg'?'selected':'')+'>kg</option><option value="g" '+(r.packUnit==='g'?'selected':'')+'>g</option><option value="l" '+(r.packUnit==='l'?'selected':'')+'>l</option><option value="ml" '+(r.packUnit==='ml'?'selected':'')+'>ml</option><option value="piece" '+(r.packUnit==='piece'?'selected':'')+'>Stück</option></select><button class="x" data-rdel="'+i+'">✕</button></div>'})()).join("");
@@ -283,8 +283,23 @@ function applyReceiptText(text,label){
  let dm=text.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2})\b/);$("receiptDate").value=dm?dm[3]+"-"+dm[2]+"-"+dm[1]:new Date().toISOString().slice(0,10);
  $("ocrStatus").textContent=receiptDraft.length?receiptDraft.length+" mögliche Preiszeilen aus "+label+" erkannt. Bitte kontrollieren.":"Keine sicheren Preiszeilen erkannt. Du kannst Artikel manuell ergänzen.";drawReviewRows();
 }
+async function detectReceiptBarcode(file){
+ detectedReceiptBarcode="";
+ if(!("BarcodeDetector" in window)||file.type==="application/pdf")return null;
+ try{
+  const supported=await BarcodeDetector.getSupportedFormats();
+  const wanted=["code_128","code_39","code_93","ean_13","ean_8","itf","codabar"].filter(x=>supported.includes(x));
+  if(!wanted.length)return null;
+  const detector=new BarcodeDetector({formats:wanted}),bitmap=await createImageBitmap(file),codes=await detector.detect(bitmap);bitmap.close();
+  const hit=codes.find(x=>String(x.rawValue||"").trim().length>=4);
+  if(hit){detectedReceiptBarcode=String(hit.rawValue).trim();return {value:detectedReceiptBarcode,format:hit.format||"barcode"}}
+ }catch(e){}
+ return null;
+}
 async function processReceiptFile(file){
  $("ocrBox").style.display="block";
+ const barcode=await detectReceiptBarcode(file);
+ if(barcode)$("receiptMsg").textContent="✓ Bon ausgewählt: "+file.name+" · Barcode erkannt";
  if(file.type==="application/pdf"||/\.pdf$/i.test(file.name)){
   $("ocrStatus").textContent="Digitalen PDF-Bon lesen …";
   try{let text=await extractPdfText(file);if(text.replace(/\s/g,"").length>40){applyReceiptText(text,"PDF");return}
@@ -308,7 +323,7 @@ function closePurchase(){try{localStorage.removeItem("echtpreis_open_purchase")}
 async function submitReceiptReward(store,date,valid){
  const contributorId=localStorage.getItem("echtpreis_contributor_id")||"";
  const total=valid.reduce((n,x)=>n+(Number(x.price)||0),0);
- const payload={store,purchasedAt:date+"T12:00:00",date,total:total.toFixed(2),contributorId,items:valid.map(x=>({rawName:x.name,lineTotal:x.price,price:x.price}))};
+ const payload={store,purchasedAt:date+"T12:00:00",date,total:total.toFixed(2),contributorId,receiptBarcode:detectedReceiptBarcode||undefined,items:valid.map(x=>({rawName:x.name,lineTotal:x.price,price:x.price}))};
  try{
   const r=await fetch(API_BASE+"/v1/receipt-submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
   const d=await r.json();if(!r.ok)throw new Error(d.error||"HTTP "+r.status);
