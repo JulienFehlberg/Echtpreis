@@ -579,7 +579,9 @@ function retailerFromLocation(x){
  for(const [name,needle] of chains)if(t.includes(needle))return name;return null;
 }
 function normalizePer(p){p=String(p||"").toUpperCase();if(["KG","KILOGRAM"].includes(p))return"kg";if(["L","LITER"].includes(p))return"l";if(["UNIT","PIECE"].includes(p))return"piece";return null}
-async function ingestOpenPrices(){
+async function ingestOpenPrices(force=false){
+ const syncKey="echtpreis_openprices_last_sync_v1",last=Number(localStorage.getItem(syncKey)||0),age=Date.now()-last;
+ if(!force&&last&&age<6*60*60*1000){dataMachineState.openPrices="Cache aktuell";dataMachineState.lastSync=new Date(last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();return}
  const previous=loadJson(openPricesCacheKey),fresh=[],successfulKeys=new Set();dataMachineState.loaded=0;dataMachineState.rejected=0;
  const jobs=Object.entries(catalog).filter(([,c])=>c.openPricesCategory).map(async([key,c])=>{
   const url="https://prices.openfoodfacts.org/api/v1/prices?category_tag="+encodeURIComponent(c.openPricesCategory)+"&currency=EUR&size=50&order_by=-date";
@@ -593,7 +595,7 @@ async function ingestOpenPrices(){
  const results=await Promise.allSettled(jobs),ok=results.filter(x=>x.status==="fulfilled").length;
  if(ok){const kept=previous.filter(x=>!successfulKeys.has(x.key));saveJson(openPricesCacheKey,[...kept,...fresh].slice(-10000));dataMachineState.openPrices="verbunden · "+ok+"/"+jobs.length+" Kategorien geprüft";}
  else dataMachineState.openPrices="nicht erreichbar · Cache bleibt aktiv";
- dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();
+ if(ok)localStorage.setItem(syncKey,String(Date.now()));dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();
 }
 async function ingestOpenPriceForBarcode(code,key,label){
  try{
