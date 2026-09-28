@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.41.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.42.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -416,16 +416,16 @@ const catalog={
 "skyr":{label:"Skyr",unit:"kg"},"quark":{label:"Quark",unit:"kg"},
 "nudeln":{label:"Nudeln",unit:"kg",openPricesCategory:"en:pastas"},"reis":{label:"Reis",unit:"kg",openPricesCategory:"en:rices"},
 "mehl":{label:"Mehl",unit:"kg"},"zucker":{label:"Zucker",unit:"kg"},"brot":{label:"Brot",unit:"piece"},"toast":{label:"Toast",unit:"piece"},
-"wasser":{label:"Mineralwasser",unit:"l",openPricesCategory:"en:waters"},"cola":{label:"Cola",unit:"l",openPricesCategory:"en:colas"},
+"wasser":{label:"Mineralwasser",unit:"l",openPricesCategory:"en:waters",clarify:"wasser"},"cola":{label:"Cola",unit:"l",openPricesCategory:"en:colas"},
 "orangensaft":{label:"Orangensaft",unit:"l"},"kaffee":{label:"Kaffee",unit:"kg",openPricesCategory:"en:coffees"},
 "toilettenpapier":{label:"Toilettenpapier",unit:"piece"},"kuechenrolle":{label:"Küchenrolle",unit:"piece"},"waschmittel":{label:"Waschmittel",unit:"piece"},
 "spuelmittel":{label:"Spülmittel",unit:"piece"},"zahnpasta":{label:"Zahnpasta",unit:"piece"},"shampoo":{label:"Shampoo",unit:"piece"},
-"katzenfutter":{label:"Katzenfutter",unit:"kg"},"hundefutter":{label:"Hundefutter",unit:"kg"},"nutella":{label:"Nutella",unit:"piece"},"wodka":{label:"Wodka",unit:"l"},"bier":{label:"Bier",unit:"l"}
+"katzenfutter":{label:"Katzenfutter",unit:"kg"},"hundefutter":{label:"Hundefutter",unit:"kg"},"nutella":{label:"Nutella",unit:"piece",clarify:"nutella"},"wodka":{label:"Wodka",unit:"l"},"bier":{label:"Bier",unit:"l"}
 };
 const catalogExpansion={
  erdbeeren:{label:"Erdbeeren",unit:"kg",openPricesCategory:"en:strawberries"},blaubeeren:{label:"Blaubeeren",unit:"kg",openPricesCategory:"en:blueberries"},himbeeren:{label:"Himbeeren",unit:"kg",openPricesCategory:"en:raspberries"},weintrauben:{label:"Weintrauben",unit:"kg",openPricesCategory:"en:grapes"},orangen:{label:"Orangen",unit:"kg",openPricesCategory:"en:oranges"},zitronen:{label:"Zitronen",unit:"kg",openPricesCategory:"en:lemons"},birnen:{label:"Birnen",unit:"kg",openPricesCategory:"en:pears"},kiwi:{label:"Kiwi",unit:"piece"},avocado:{label:"Avocado",unit:"piece"},mango:{label:"Mango",unit:"piece"},ananas:{label:"Ananas",unit:"piece"},wassermelone:{label:"Wassermelone",unit:"kg"},
  brokkoli:{label:"Brokkoli",unit:"kg"},karotten:{label:"Karotten",unit:"kg"},zucchini:{label:"Zucchini",unit:"kg"},champignons:{label:"Champignons",unit:"kg"},salat:{label:"Salat",unit:"piece"},knoblauch:{label:"Knoblauch",unit:"kg"},suesskartoffeln:{label:"Süßkartoffeln",unit:"kg"},paprika:{label:"Paprika",unit:"kg"},
- schweinehack:{label:"Schweinehack",unit:"kg"},haehnchen:{label:"Hähnchen",unit:"kg"},putenbrust:{label:"Putenbrust",unit:"kg"},schweinefleisch:{label:"Schweinefleisch",unit:"kg"},rindfleisch:{label:"Rindfleisch",unit:"kg"},lachs:{label:"Lachs",unit:"kg"},fischstaebchen:{label:"Fischstäbchen",unit:"kg"},wurst:{label:"Wurst / Aufschnitt",unit:"kg"},salami:{label:"Salami",unit:"kg"},schinken:{label:"Schinken",unit:"kg"},
+ schweinehack:{label:"Schweinehack",unit:"kg"},haehnchen:{label:"Hähnchen",unit:"kg"},putenbrust:{label:"Putenbrust",unit:"kg"},schweinefleisch:{label:"Schweinefleisch",unit:"kg"},rindfleisch:{label:"Rindfleisch",unit:"kg"},lachs:{label:"Lachs",unit:"kg",clarify:"lachs"},fischstaebchen:{label:"Fischstäbchen",unit:"kg"},wurst:{label:"Wurst / Aufschnitt",unit:"kg"},salami:{label:"Salami",unit:"kg"},schinken:{label:"Schinken",unit:"kg"},
  frischkaese:{label:"Frischkäse",unit:"kg"},huettenkaese:{label:"Hüttenkäse",unit:"kg"},feta:{label:"Feta / Hirtenkäse",unit:"kg"},sahne:{label:"Sahne",unit:"l"},schmand:{label:"Schmand",unit:"kg"},kefir:{label:"Kefir",unit:"l"},pudding:{label:"Pudding",unit:"kg"},
  haferflocken:{label:"Haferflocken",unit:"kg"},muesli:{label:"Müsli",unit:"kg"},cornflakes:{label:"Cornflakes",unit:"kg"},linsen:{label:"Linsen",unit:"kg"},bohnen:{label:"Bohnen",unit:"kg"},kichererbsen:{label:"Kichererbsen",unit:"kg"},couscous:{label:"Couscous",unit:"kg"},passierte_tomaten:{label:"Passierte Tomaten",unit:"kg"},tomatenmark:{label:"Tomatenmark",unit:"kg"},oel:{label:"Speiseöl",unit:"l"},olivenoel:{label:"Olivenöl",unit:"l"},essig:{label:"Essig",unit:"l"},salz:{label:"Salz",unit:"kg"},pfeffer:{label:"Pfeffer",unit:"kg"},
  honig:{label:"Honig",unit:"kg"},marmelade:{label:"Marmelade",unit:"kg"},erdnussbutter:{label:"Erdnussbutter",unit:"kg"},schokolade:{label:"Schokolade",unit:"kg"},chips:{label:"Chips",unit:"kg"},kekse:{label:"Kekse",unit:"kg"},gummibaerchen:{label:"Gummibärchen",unit:"kg"},eis:{label:"Eis",unit:"l"},
@@ -569,7 +569,7 @@ function locationLabel(x){
 }
 const basketStateKey="echtpreis_basket_state_v1";
 function loadBasketState(){try{return JSON.parse(localStorage.getItem(basketStateKey)||"[]")}catch(e){return[]}}
-function saveBasketState(){try{localStorage.setItem(basketStateKey,JSON.stringify(basket.map(w=>({raw:w.raw,checked:!!w.checked,ean:w.ean||null,label:w.label||null}))))}catch(e){}}
+function saveBasketState(){try{localStorage.setItem(basketStateKey,JSON.stringify(basket.map(w=>({raw:w.raw,checked:!!w.checked,ean:w.ean||null,label:w.label||null,choice:w.choice||{}}))))}catch(e){}}
 let basket=[];let selected=new Set(storeNames);
 const $=id=>document.getElementById(id), eur=n=>n.toLocaleString("de-DE",{style:"currency",currency:"EUR"});
 function normalizeProduct(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9%]+/g," ").replace(/\s+/g," ").trim()}
@@ -657,8 +657,23 @@ function parseWish(raw){
  if(c&&unit==="piece"&&c.unit==="kg"&&c.unitWeight){calcAmount=amount*c.unitWeight;note="≈ "+calcAmount.toFixed(2).replace(".",",")+" kg für Preisvergleich";}
  else if(c&&unit!==c.unit&&c.unit==="piece"){note="Mengenangabe wird als Stück interpretiert";}
  const exactBrand=exactBrandNames.find(b=>normalized.includes(normalizeProduct(b)))||"";
- return {raw:original,label:c?c.label:(t.replace(/\b\w/g,x=>x.toUpperCase())||original),amount,unit,calcAmount,key,matched:!!c,note,explicit,matchMode:exactBrand?"exact":"comparable",exactBrand};
+ return hydrateChoice({raw:original,label:c?c.label:(t.replace(/\b\w/g,x=>x.toUpperCase())||original),amount,unit,calcAmount,key,matched:!!c,note,explicit,matchMode:exactBrand?"exact":"comparable",exactBrand});
 }
+const productChoices={
+ wasser:{title:"Welches Mineralwasser?",groups:[{name:"Sorte",options:[["Still","still"],["Medium","medium"],["Classic","classic"]]},{name:"Größe",options:[["0,5 l","0.5l"],["1,0 l","1l"],["1,5 l","1.5l"],["6 × 1,5 l","6x1.5l"]}]},
+ lachs:{title:"Welchen Lachs meinst du?",groups:[{name:"Art",options:[["Frisches Lachsfilet","fresh"],["Räucherlachs","smoked"],["TK-Lachs","frozen"],["Frischetheke","counter"]]},{name:"Menge",options:[["200 g","200g"],["250 g","250g"],["500 g","500g"],["1 kg","1kg"]}]},
+ nutella:{title:"Welche Glasgröße?",groups:[{name:"Größe",options:[["450 g","450g"],["750 g","750g"],["1 kg","1kg"]]}]}
+};
+function inferChoice(w){
+ let n=normalizeProduct(w.raw),v={};
+ if(w.key==="wasser"){if(/\bstill/.test(n))v.Sorte="still";else if(/medium/.test(n))v.Sorte="medium";else if(/classic|sprudel/.test(n))v.Sorte="classic";if(/6\s*x\s*1[,.]?5/.test(w.raw.toLowerCase()))v["Größe"]="6x1.5l";else if(/1[,.]?5\s*l/.test(w.raw.toLowerCase()))v["Größe"]="1.5l";else if(/0[,.]?5\s*l/.test(w.raw.toLowerCase()))v["Größe"]="0.5l";else if(/1(?:[,.]0)?\s*l/.test(w.raw.toLowerCase()))v["Größe"]="1l";}
+ if(w.key==="lachs"){if(/rauch|geraucher/.test(n))v.Art="smoked";else if(/tiefkuhl|\btk\b/.test(n))v.Art="frozen";else if(/frischetheke|theke/.test(n))v.Art="counter";else if(/frisch|filet/.test(n))v.Art="fresh";let g=w.raw.toLowerCase().match(/(200|250|500)\s*g/);if(g)v.Menge=g[1]+"g";else if(/1\s*kg/.test(w.raw.toLowerCase()))v.Menge="1kg";}
+ if(w.key==="nutella"){let g=w.raw.toLowerCase().match(/(450|750)\s*g/);if(g)v["Größe"]=g[1]+"g";else if(/1\s*kg/.test(w.raw.toLowerCase()))v["Größe"]="1kg";}
+ return v;
+}
+function hydrateChoice(w){w.choice={...inferChoice(w),...(w.choice||{})};let spec=productChoices[w.key];w.needsClarification=!!spec&&spec.groups.some(g=>!w.choice[g.name]);return w}
+function choiceLabel(w){let spec=productChoices[w.key];if(!spec)return"";return spec.groups.map(g=>{let v=w.choice&&w.choice[g.name],o=g.options.find(x=>x[1]===v);return o?o[0]:""}).filter(Boolean).join(" · ")}
+function choiceEditor(w,i){let spec=productChoices[w.key];if(!spec||!w.needsClarification)return"";return '<div style="margin-top:8px;padding:10px;border:1px solid #705d27;border-radius:12px;background:#211d12"><b style="color:#ffd86b">'+escHtml(spec.title)+'</b>'+spec.groups.map(g=>'<div class="qty" style="margin-top:7px">'+escHtml(g.name)+'</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">'+g.options.map(o=>'<button type="button" class="chip '+(w.choice&&w.choice[g.name]===o[1]?"on":"")+'" data-choice="'+i+'" data-group="'+escHtml(g.name)+'" data-value="'+escHtml(o[1])+'">'+escHtml(o[0])+'</button>').join("")+'</div>').join("")+'<div class="qty" style="margin-top:8px">Oder Produkt oben genauer eingeben, z. B. Marke, Größe oder Variante.</div></div>'}
 function wishText(w){const u=w.unit==="piece"?"×":w.unit;return (w.unit==="piece"?w.amount+"×":String(w.amount).replace(".",",")+" "+u)+" "+w.label}
 function drawSuggestions(){let a=["500 g Rinderhack","1 kg Bananen","10 Eier","2 Liter Milch"];$("suggestions").innerHTML=a.map(x=>'<span class="chip" data-add="'+x+'">+ '+x+'</span>').join("");document.querySelectorAll("[data-add]").forEach(e=>e.onclick=()=>add(e.dataset.add));}
 function drawStores(){ $("stores").innerHTML=storeNames.map(st=>'<span class="chip '+(selected.has(st)?"on":"")+'" data-store="'+st+'">'+st+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores()});}
@@ -671,20 +686,21 @@ window.addEchtpreisBarcode=async(name,qty,code)=>{
  try{learnFrequent(raw)}catch(e){}drawList();await ingestOpenPriceForBarcode(ean,key,name);return true;
 };
 window.getEchtpreisRawList=()=>basket.map(x=>x.raw);
-window.replaceEchtpreisList=rows=>{basket=(rows||[]).map(x=>{let w=parseWish(typeof x==="string"?x:x.raw);w.checked=!!(x&&x.checked);return w}).filter(x=>x.raw);saveBasketState();drawList();};
+window.replaceEchtpreisList=rows=>{basket=(rows||[]).map(x=>{let w=parseWish(typeof x==="string"?x:x.raw);w.checked=!!(x&&x.checked);w.choice={...w.choice,...(x&&x.choice||{})};hydrateChoice(w);return w}).filter(x=>x.raw);saveBasketState();drawList();};
 function drawList(){
  const ordered=basket.map((w,i)=>({w,i})).sort((a,b)=>Number(a.w.checked)-Number(b.w.checked));
- const row=({w,i})=>'<div class="item" style="'+(w.checked?'opacity:.55;':'')+'"><button type="button" data-check="'+i+'" aria-label="'+(w.checked?'Wieder auf die Liste':'Im Einkaufswagen')+'" style="width:32px;height:32px;border-radius:9px;border:2px solid '+(w.checked?'#35d07f':'#718079')+';background:'+(w.checked?'#35d07f':'transparent')+';color:#07150d;font-weight:900;font-size:18px;flex:0 0 32px">'+(w.checked?'✓':'')+'</button><div class="itemname" style="'+(w.checked?'text-decoration:line-through;':'')+'">'+escHtml(wishText(w))+'<div class="qty">'+(w.checked?'Im Einkaufswagen':(w.matched?'✓ erkannt':'⚠ Produkt prüfen')+(w.note?' · '+escHtml(w.note):''))+'</div></div><button class="x" data-del="'+i+'" aria-label="Produkt entfernen">✕</button></div>';
+ const row=({w,i})=>'<div class="item" style="'+(w.checked?'opacity:.55;':'')+'"><button type="button" data-check="'+i+'" aria-label="'+(w.checked?'Wieder auf die Liste':'Im Einkaufswagen')+'" style="width:32px;height:32px;border-radius:9px;border:2px solid '+(w.checked?'#35d07f':'#718079')+';background:'+(w.checked?'#35d07f':'transparent')+';color:#07150d;font-weight:900;font-size:18px;flex:0 0 32px">'+(w.checked?'✓':'')+'</button><div class="itemname" style="'+(w.checked?'text-decoration:line-through;':'')+'">'+escHtml(wishText(w))+'<div class="qty">'+(w.checked?'Im Einkaufswagen':(w.matched?'✓ erkannt':'⚠ Produkt prüfen')+(w.note?' · '+escHtml(w.note):'')+(choiceLabel(w)?' · '+escHtml(choiceLabel(w)):'')+(w.needsClarification?' · ⚠ genauer auswählen':'')+'</div>'+choiceEditor(w,i)+'</div><button class="x" data-del="'+i+'" aria-label="Produkt entfernen">✕</button></div>';
  let rows=ordered.map(row).join(""),done=basket.filter(w=>w.checked).length;
  $("list").innerHTML=basket.length?rows+'<div class="muted" style="padding-top:10px;text-align:center">'+done+' von '+basket.length+' im Einkaufswagen'+(done===basket.length&&basket.length?' · ✓ Einkauf komplett':'')+'</div>':'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';
  let preview=$("basketPreview"),previewItems=$("basketPreviewItems");if(preview&&previewItems){preview.style.display=basket.length?"block":"none";previewItems.innerHTML=rows+(basket.length?'<div class="muted" style="padding-top:8px">'+done+' von '+basket.length+' im Einkaufswagen</div>':'');}
  document.querySelectorAll("[data-check]").forEach(e=>e.onclick=()=>{let w=basket[+e.dataset.check];if(w){w.checked=!w.checked;saveBasketState();drawList()}});
+ document.querySelectorAll("[data-choice]").forEach(e=>e.onclick=()=>{let w=basket[+e.dataset.choice];if(w){w.choice=w.choice||{};w.choice[e.dataset.group]=e.dataset.value;hydrateChoice(w);saveBasketState();drawList()}});
  document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);saveBasketState();drawList()});
 }
 window.compare=async function compare(){
  await loadNearbyStores();
  if(!basket.length){alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");return false;}
- if(!selected.size){alert("Bitte mindestens einen Markt auswählen.");return false;}
+ if(!selected.size){alert("Bitte mindestens einen Markt auswählen.");return false;}let unclear=basket.filter(w=>w.needsClarification);if(unclear.length){alert("Bitte wähle bei "+unclear.map(w=>w.label).join(", ")+" noch die passende Variante aus.");return false;}
  let rows=[...selected].map(store=>{let total=0,known=0,missing=[],sources=[],referenceCount=0,confirmedCount=0;basket.forEach(w=>{let p=w.key?activePrice(w.key,store,w):null;if(p){total+=p.price*w.calcAmount;known++;sources.push(p);if(p.reference)referenceCount++;else confirmedCount++;}else missing.push(w.label)});return{store,total,known,missing,sources,referenceCount,confirmedCount,coverage:known/basket.length}});
  let complete=rows.filter(r=>r.known===basket.length).map(r=>({...r,branch:nearestStore(r.store)})).filter(r=>!nearbyStores.length||r.branch).sort((a,b)=>a.total-b.total);
  if(complete.length){let win=complete[0],approx=win.referenceCount>0;$("winnerLabel").textContent="Voraussichtlich am günstigsten";$("winnerName").textContent=win.store;$("winnerPrice").textContent=(approx?"ca. ":"")+eur(win.total);$("winnerCoverage").textContent=approx?"Geschätzter Gesamtpreis":"Aktuell belegter Gesamtpreis";}
