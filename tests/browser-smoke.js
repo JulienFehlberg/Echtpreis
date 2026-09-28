@@ -10,6 +10,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  await new Promise(r=>setTimeout(r,120));
  const w=dom.window,d=w.document;
  assert.strictEqual(errors.length,0,"browser startup errors: "+errors.join(" | "));
+ assert(![...d.body.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()),"stray CSS or text appears before the app");
  assert.strictEqual(typeof w.parseWish,"function");
  let p=w.parseWish("0,5 kg Tomaten");assert.strictEqual(p.key,"tomaten");assert.strictEqual(p.amount,0.5);assert.strictEqual(p.unit,"kg");
  p=w.parseWish("2 l Coca Cola");assert.strictEqual(p.key,"cola");assert.strictEqual(p.matchMode,"exact");
