@@ -115,7 +115,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(w.receiptObservationUnitPrice({price:2.98,packAmount:.25,packUnit:"l",count:2},{unit:"kg"}),null,"incompatible receipt units must never be shared as market prices");
 
  const receipt=w.parseReceiptText("G&G Mini-Hörnchen 1,49\nOetker Ristorante 3,49\nRed Bull 0,25 1,49 x 2 2,98\nPfand 0,25 x 2 0,50\nSUMME 8,46");
- const barcodePromise=w.addEchtpreisBarcode("Testprodukt","250 g","12345678");assert.strictEqual(w.getEchtpreisRawList().length,1,"barcode product should enter the primary basket immediately");w.replaceEchtpreisList([]);void barcodePromise;
+ const barcodePromise=w.addEchtpreisBarcode("Testprodukt","250 g","12345678");assert.strictEqual(w.getEchtpreisRawList().length,1,"barcode product should enter the primary basket immediately");w.replaceEchtpreisList([]);await barcodePromise;
  assert(receipt.length>=4,"receipt parser lost rows");
  const longReceipt=Array.from({length:55},(_,i)=>"Milch "+String(i+1)+" 1,00").join("\n")+"\nSUMME 55,00";assert.strictEqual(w.parseReceiptText(longReceipt).length,55,"normal large grocery receipts must not be truncated at 40 lines");
 
@@ -136,6 +136,14 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(w.detectReceiptDate("Datum 2026-09-28"),"2026-09-28","ISO receipt date should be supported");
  assert.strictEqual(w.detectReceiptDate("Datum 31.02.2026"),"","impossible receipt dates must be rejected");
  w.localStorage.removeItem("echtpreis_open_purchase");assert.strictEqual(w.localStorage.getItem("echtpreis_open_purchase"),null,"test environment should start without an open purchase");
+ w.replaceEchtpreisList(["1 kg Kartoffeln"]);await w.compare({skipLocation:true,scroll:false});
+ assert(d.getElementById("winnerPrice").textContent.startsWith("ca. "),"unverified basket totals must be visibly approximate");
+ assert.strictEqual(d.getElementById("winnerCoverage").textContent,"","source coverage must not clutter the main price card");
+ assert.strictEqual(d.getElementById("verifiedSavings").style.display,"none","model-only market differences must not be sold as savings");
+ const visibleMarkets=d.getElementById("merchantResults").cloneNode(true);visibleMarkets.querySelectorAll("details").forEach(x=>x.remove());
+ assert(!visibleMarkets.textContent.includes("0 von 1 Preisen"),"market rows should not repeat technical coverage counts outside details");
+ assert(d.getElementById("merchantResults").textContent.includes("Preisdetails"),"price provenance must remain available on demand");
+ w.replaceEchtpreisList([]);
  console.log("browser smoke OK · single basket · quantity parser · receipt parser");
  dom.window.close();
 })().catch(e=>{console.error(e);process.exit(1)});
