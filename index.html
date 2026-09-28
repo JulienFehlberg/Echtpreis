@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.12.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.13.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -36,7 +36,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <section id="planner">
 <div class="card"><h2>Deine Einkaufsliste</h2><div class="muted">Menge, Einheit und Produkt dürfen zusammen in ein Feld. Beispiele: „5 Bananen“, „3 rote Paprika“, „500 g Rinderhack“, „2 Liter Milch“.</div>
 <div class="inputrow"><input id="productInput" placeholder="z. B. 5 Bananen oder 500 g Rinderhack"><button class="primary" id="addBtn">Hinzufügen</button><button class="ghost" id="barcodeBtn" type="button" aria-label="Barcode scannen">📷</button></div>
-<div id="frequentProducts" style="display:none;margin-top:12px"></div><input id="barcodeFile" type="file" accept="image/*" capture="environment" style="display:none">
+<div id="frequentProducts" style="display:none;margin-top:12px"></div><div id="savedLists" style="margin-top:12px"></div><input id="barcodeFile" type="file" accept="image/*" capture="environment" style="display:none">
 <div id="barcodeLive" style="display:none;position:fixed;inset:0;background:#000;z-index:9999">
  <video id="barcodeVideo" playsinline muted style="width:100%;height:100%;object-fit:cover"></video>
  <div style="position:absolute;left:10%;right:10%;top:38%;height:24%;border:3px solid #fff;border-radius:18px;box-shadow:0 0 0 9999px rgba(0,0,0,.35)"></div>
@@ -225,6 +225,20 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
    localStorage.setItem("echtpreis_product_learning",JSON.stringify(learned));
   }catch(e){}
  }
+ function getSavedLists(){try{return JSON.parse(localStorage.getItem("echtpreis_saved_lists")||"{}")}catch(e){return {}}}
+ function saveCurrentList(){
+  if(!stableBasket.length){alert("Deine Einkaufsliste ist noch leer.");return;}
+  const name=prompt("Wie soll die Liste heißen?","Wocheneinkauf");if(!name||!name.trim())return;
+  const all=getSavedLists();all[name.trim()]=stableBasket.map(x=>x.raw);
+  localStorage.setItem("echtpreis_saved_lists",JSON.stringify(all));renderSavedLists();
+ }
+ function renderSavedLists(){
+  const box=document.getElementById("savedLists");if(!box)return;const all=getSavedLists(),names=Object.keys(all);
+  box.innerHTML='<button type="button" class="ghost" id="saveCurrentListBtn" style="padding:9px 12px">＋ Liste speichern</button>'+(names.length?'<div class="muted" style="margin:12px 0 7px">Gespeicherte Listen</div><div style="display:flex;gap:7px;flex-wrap:wrap">'+names.map(n=>'<span style="display:inline-flex;gap:4px"><button type="button" class="ghost" data-load-list="'+esc(n)+'" style="padding:9px 12px">'+esc(n)+'</button><button type="button" class="ghost" data-delete-list="'+esc(n)+'" aria-label="'+esc(n)+' löschen" style="padding:9px">✕</button></span>').join("")+'</div>':'');
+  const save=document.getElementById("saveCurrentListBtn");if(save)save.onclick=saveCurrentList;
+  box.querySelectorAll("[data-load-list]").forEach(b=>b.onclick=()=>{stableBasket=(all[b.dataset.loadList]||[]).map(parseLine);renderStable();});
+  box.querySelectorAll("[data-delete-list]").forEach(b=>b.onclick=()=>{const x=getSavedLists();delete x[b.dataset.deleteList];localStorage.setItem("echtpreis_saved_lists",JSON.stringify(x));renderSavedLists();});
+ }
  function getFrequent(){try{return JSON.parse(localStorage.getItem("echtpreis_frequent_products")||"{}")}catch(e){return {}}}
  function renderFrequent(){
   const box=document.getElementById("frequentProducts");if(!box)return;
@@ -348,6 +362,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
  if(bf)bf.addEventListener("change",function(){const file=bf.files&&bf.files[0];if(file)scanBarcodeFile(file);bf.value="";});
   loadCommunityPrices();
   renderFrequent();
+  renderSavedLists();
   renderStable();
  });
  window.compareStable=compareStable;
