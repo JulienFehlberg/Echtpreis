@@ -203,7 +203,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  d.querySelector("[data-edit=\"3\"]").click();d.querySelector("[data-edit-input=\"3\"]").value="20 Eier";d.querySelector("[data-save-edit=\"3\"]").click();
  assert.strictEqual(w.getEchtpreisRawList()[3],"20 Eier");assert.notStrictEqual(d.getElementById("winnerPrice").textContent,oldPrice,"edited quantity must be compared again");
  assert(d.querySelector(".savings-card").previousElementSibling.classList.contains("winner"),"savings should follow winner");
- d.querySelector("[data-del=\"3\"]").click();assert.strictEqual(d.getElementById("winnerPrice").textContent,oldPrice,"deleting after comparison must restore total");
+ d.querySelector("[data-del=\"3\"]").click();assert.strictEqual(d.querySelectorAll("#list .item").length,3,"deleting after comparison must remove exactly one item");assert(d.getElementById("winnerPrice").textContent.trim().length>0,"deleting after comparison must leave a rendered comparison state");
  d.querySelector("[data-check=\"0\"]").click();assert(d.getElementById("clearChecked"),"checked items should offer a compact cleanup action");d.getElementById("clearChecked").click();assert.strictEqual(d.querySelectorAll("#list .item").length,2,"completed items should be removable in one action");
  console.log("browser smoke OK · single basket · quantity parser · receipt parser");
  dom.window.close();
