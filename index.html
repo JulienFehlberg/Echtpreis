@@ -833,5 +833,5 @@ $("finishPurchaseBtn").onclick=async()=>{
  $("receiptMsg").textContent=(($("contribute").checked&&receiptTotalVerified)?(saved+" erkannte Produktpreise beigetragen."):$("contribute").checked?"Bon gespeichert · Community-Preise wegen ungeprüfter Summe nicht übernommen.":"Bon geprüft · keine Community-Freigabe.")+rewardText;drawDataMachine();refreshPoints();
 };
 $("noReceiptBtn").onclick=()=>{if(!confirm("Bon verloren oder nicht mehr vorhanden? Du kannst den Einkauf trotzdem abschließen. Diesmal können daraus nur keine Preise zur ECHTPREIS-Datenbasis beitragen."))return;closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Diesmal ohne Bon – kein Problem.";$("receiptMsg").textContent="Keine Preisdaten beigetragen.";$("noReceiptBtn").style.display="none";$("finishPurchaseBtn").style.display="none";};
-refreshPoints();drawSuggestions();drawStores();drawList();drawDataMachine();syncSharedData();ingestOpenPrices();
+refreshPoints();drawSuggestions();drawStores();let savedBasket=loadBasketState();if(savedBasket.length)basket=savedBasket.map(x=>{let w=parseWish(x.raw);w.checked=!!x.checked;return w});drawList();drawDataMachine();syncSharedData();ingestOpenPrices();
 </script></body></html>
