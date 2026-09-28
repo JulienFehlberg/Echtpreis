@@ -15,10 +15,10 @@ assert(!html.includes('label for="receiptTotalInput"'),"manual receipt-total edi
 assert.strictEqual((html.match(/function importRecipeIngredients\s*\(/g)||[]).length,1,"recipe import must have one implementation");
 assert(html.includes("plausibleReceiptItemName"),"receipt item plausibility guard missing");
 assert(html.includes("comparisonQuality"),"comparison confidence labelling missing");
-assert(html.includes('String(b.validFrom||"").localeCompare(String(a.validFrom||""))||(Number(b.trust)||0)-(Number(a.trust)||0)||a.price-b.price'),"legacy price chooser must prioritize freshness and trust before cheapness");
+assert(!html.includes("compareStable"),"obsolete duplicate comparison engine must stay removed");
 assert(html.includes('history.sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0)||a.price-b.price)'),"historical fallback must prioritize freshness and trust");
 assert(html.includes("echtpreis_openprices_sync_by_key_v1"),"Open Prices should be cached per product key");
-assert(html.includes("ingestOpenPrices(false,basket.map(w=>w.key).filter(Boolean))"),"manual compare should load only basket price categories");
+assert(html.includes("const keys=basket.map(w=>w.key).filter(Boolean)"),"manual compare should derive only basket price categories");
 assert(!html.includes("syncSharedData();ingestOpenPrices();"),"startup must not fetch the full Open Prices catalog");
 assert(html.includes('<script src="app/config.js"></script>'),"store-ready config layer missing");
 assert(html.includes('<script src="app/runtime.js"></script>'),"platform runtime layer missing");
@@ -54,7 +54,7 @@ assert(html.includes("echtpreis_feedback_queue_v1"),"offline feedback queue miss
 assert(html.includes("flushFeedbackQueue"),"queued feedback retry missing");
 assert(html.includes("items:valid.map"),"local receipt history must retain line items for future insights");
 assert(html.includes("typicalQty=medianNumber(priorQty)"),"household forecast must normalize latest quantity against typical purchase quantity");
-assert(html.includes("storeCanCarry(store,i,i.key)"),"stable price comparison must enforce retailer assortment");
+assert(html.includes("if(!storeCanCarry(store,wish,key))return null"),"primary price comparison must enforce retailer assortment");
 assert(html.includes("reward.ok&&!reward.duplicate&&receiptTotalVerified"),"duplicate or server-unverified receipts must never contribute market prices");
 assert(html.includes("Number(r.packAmount||0)*(Number(r.count)||1)"),"multipack receipt observations must normalize by total purchased quantity");
 assert(html.includes("lineTotal:Number(x.price)||0,price:Number(x.price)||0,count:Number(x.count)||1"),"receipt sync must preserve line total so multipacks are not divided twice after reload");
@@ -74,4 +74,4 @@ assert(html.includes("echtpreis_nearby_store_cache_v1"),"nearby stores should pe
 
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
 const products=(html.match(/label:"/g)||[]).length;assert(products>=30,"primary product catalog unexpectedly small: "+products);
-console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
+assert(!html.includes("stableBasket"),"obsolete duplicate basket state must stay removed");\nassert(html.includes("if(dataEngineCache)return dataEngineCache"),"normalized observation engine should be cached");\nassert(html.includes("priceLookupMemo"),"basket price lookups should be memoized within a comparison");\nconsole.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
