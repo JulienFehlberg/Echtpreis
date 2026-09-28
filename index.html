@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.7</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.8</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="tabs"><button class="tab active" id="planTab">1 · Planen</button><button class="tab" id="receiptTab">2 · Bon abschließen</button></div>
 
@@ -43,7 +43,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
 <div class="card"><h2>Alle Märkte</h2><div class="muted">Nur bekannte Positionen werden summiert. Fehlende Preise werden nicht erfunden.</div><div id="merchantResults"></div></div>
 <div class="card"><h2>Lohnt sich Aufteilen?</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
-<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.7 · echte Händlerbeobachtungen · keine Schätzpreise</span></div>
+<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.8 · Data Engine v1 · Quelle + Trust + Proof</span></div>
 <div class="card" id="finishCard"><h2>Nach dem Einkauf geht’s mit dem Bon weiter</h2><div class="muted">Dein Einkauf bleibt offen, bis du den Kassenbon hochlädst. So kann ECHTPREIS geplante und tatsächlich bezahlte Preise verbinden und – nur mit deiner Zustimmung – anonymisierte Preisbeobachtungen zur Datenbasis beitragen lassen.</div><div class="notice" style="margin-top:14px"><b>🧾 Bon nicht vergessen!</b><br>Ein Foto nach dem Einkauf hilft, echte Preise aktuell zu halten.</div><button class="green" id="toReceiptBtn">Ich war einkaufen → Bon hochladen</button></div>
 </section>
 </section>
@@ -64,49 +64,39 @@ const catalog={
 "kartoffeln":{label:"Kartoffeln",unit:"kg"},
 "skyr":{label:"Skyr",unit:"kg"}
 };
-// Verifizierte Preisbeobachtungen. Kein Eintrag = kein Preis.
-// Gültigkeit/Region sind Teil des Datensatzes; historische Werte werden NICHT als "heute" verkauft.
-const verifiedPrices=[
- {key:"bananen",store:"Kaufland",price:1.99,per:"kg",date:"2026-09-24",validTo:"2026-09-30",region:"Berlin",kind:"Angebot",source:"Kaufland offiziell",sourceUrl:"https://filiale.kaufland.de/?FilialID=8830",product:"Chiquita Bananen"},
- {key:"rinderhack",store:"REWE",price:13.96,per:"kg",date:"2026-09-28",validTo:"2026-10-04",region:"Berlin",kind:"Angebot",source:"REWE offiziell",sourceUrl:"https://www.rewe.de/marktseite/berlin-prenzlauer-berg/1931149/rewe-markt-john-schehr-str-20-24/",product:"Rinder-Hackfleisch 250 g"}
+// ECHTPREIS Data Engine v1
+// Einheitliches Schema: jede Zahl braucht Quelle, Datum, Ort/Region und Vertrauensstatus.
+const seedPrices=[
+ {key:"bananen",store:"Kaufland",price:1.99,per:"kg",date:"2026-09-24",validTo:"2026-09-30",region:"Berlin",kind:"official",source:"Kaufland offiziell",product:"Chiquita Bananen",trust:100},
+ {key:"rinderhack",store:"REWE",price:13.96,per:"kg",date:"2026-09-28",validTo:"2026-10-04",region:"Berlin",kind:"official",source:"REWE offiziell",product:"Rinder-Hackfleisch 250 g",trust:100}
 ];
-function activePrice(key,store){
+const communityKey="echtpreis_community_observations_v1";
+function loadCommunity(){try{return JSON.parse(localStorage.getItem(communityKey)||"[]")}catch(e){return[]}}
+function saveCommunity(rows){try{localStorage.setItem(communityKey,JSON.stringify(rows))}catch(e){}}
+function normalizeObservation(x){
+ return {id:x.id||("ep_"+Date.now()+"_"+Math.random().toString(36).slice(2)),key:x.key||null,store:x.store||null,price:Number(x.price),per:x.per||"piece",date:x.date||null,validTo:x.validTo||null,region:x.region||null,kind:x.kind||"community",source:x.source||"ECHTPREIS Bon",product:x.product||x.key||"Unbekannt",proof:x.proof||null,trust:Number(x.trust||0),status:x.status||"observed"};
+}
+function dataEngine(){
+ const all=[...seedPrices,...loadCommunity()].map(normalizeObservation).filter(x=>x.key&&x.store&&Number.isFinite(x.price)&&x.price>=0&&x.date);
+ const seen=new Set(); return all.filter(x=>{let sig=[x.key,x.store,x.price,x.per,x.date,x.proof||x.source].join("|");if(seen.has(sig))return false;seen.add(sig);return true});
+}
+function trustedPrice(key,store){
  const today=new Date().toISOString().slice(0,10);
- const p=verifiedPrices.filter(x=>x.key===key&&x.store===store&&x.date<=today&&(!x.validTo||x.validTo>=today)).sort((a,b)=>b.date.localeCompare(a.date))[0];
- return p||null;
+ const rows=dataEngine().filter(x=>x.key===key&&x.store===store&&x.date<=today&&(!x.validTo||x.validTo>=today));
+ // Offizielle Quellen dürfen allein referenzfähig sein. Community braucht mehrere unabhängige Nachweise.
+ const official=rows.filter(x=>x.kind==="official"&&x.trust>=90).sort((a,b)=>b.date.localeCompare(a.date));
+ if(official.length)return {...official[0],confidence:"hoch"};
+ const groups={};rows.filter(x=>x.kind==="community"&&x.proof).forEach(x=>{let k=[x.price,x.per,x.date].join("|");(groups[k]??=[]).push(x)});
+ const confirmed=Object.values(groups).filter(g=>new Set(g.map(x=>x.proof)).size>=2).sort((a,b)=>b.length-a.length);
+ if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:80,status:"confirmed",confidence:"mittel"}}
+ return null;
 }
-const storeNames=["Lidl","Kaufland","REWE","EDEKA"];async function lookupBarcode(){
- const code=$("barcodeInput").value.replace(/\D/g,"");
- if(code.length<8){$("liveStatus").textContent="Bitte einen gültigen Barcode mit mindestens 8 Ziffern eingeben.";return}
- $("liveStatus").textContent="Produkt wird gesucht …";$("liveProduct").innerHTML="";
- try{
-  const pr=await fetch("https://world.openfoodfacts.org/api/v2/product/"+encodeURIComponent(code)+".json?fields=code,product_name,brands,quantity,image_front_small_url");
-  if(!pr.ok) throw new Error("Produktdienst nicht erreichbar");
-  const pd=await pr.json();
-  if(pd.status!==1||!pd.product){$("liveStatus").textContent="Kein Produkt zu diesem Barcode gefunden.";return}
-  const p=pd.product,name=p.product_name||"Produkt ohne Namen",brand=p.brands||"",qty=p.quantity||"";
-  $("liveStatus").textContent="Produkt gefunden. Suche beobachtete Preise …";
-  let priceData=null, priceError=false;
-  try{
-   const rr=await fetch("https://prices.openfoodfacts.org/api/v1/prices?product_code="+encodeURIComponent(code)+"&size=20&order_by=-date");
-   if(rr.ok) priceData=await rr.json(); else priceError=true;
-  }catch(e){priceError=true}
-  const items=priceData?.items||priceData?.results||[];
-  const valid=items.filter(x=>Number.isFinite(Number(x.price))&&x.currency==="EUR");
-  valid.sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
-  let priceHtml="";
-  if(valid.length){
-    const latest=valid.slice(0,8), vals=latest.map(x=>Number(x.price)), lo=Math.min(...vals),hi=Math.max(...vals);
-    priceHtml='<div class="split"><strong>'+escHtml(name)+'</strong><div class="detail">'+escHtml([brand,qty].filter(Boolean).join(" · "))+' · EAN '+code+'</div><div class="big" style="font-size:25px">'+eur(lo)+(hi!==lo?" – "+eur(hi):"")+'</div><div class="coverage">'+latest.length+' echte Preisbeobachtung'+(latest.length===1?"":"en")+' ausgewertet · neueste: '+escHtml(latest[0].date||"Datum unbekannt")+'</div><span class="source">Quelle: Open Prices / Open Food Facts · ODbL</span></div>';
-    priceHtml+='<div style="margin-top:10px">'+latest.slice(0,5).map(x=>'<div class="merchant"><div><b>'+escHtml(locationLabel(x))+'</b><div class="coverage">'+escHtml(x.date||"ohne Datum")+(x.price_is_discounted?" · Angebot":"")+'</div></div><div class="price">'+eur(Number(x.price))+'</div></div>').join("")+'</div>';
-    $("liveStatus").textContent="Echte Daten gefunden – keine Demo-Preise.";
-  }else{
-    priceHtml='<div class="split"><strong>'+escHtml(name)+'</strong><div class="detail">'+escHtml([brand,qty].filter(Boolean).join(" · "))+' · EAN '+code+'</div><div class="notice">Produkt sicher erkannt, aber in Open Prices wurden dafür aktuell keine EUR-Preisbeobachtungen gefunden. ECHTPREIS schätzt hier bewusst keinen Preis.</div><span class="source">Produkt: Open Food Facts</span></div>';
-    $("liveStatus").textContent=priceError?"Produkt erkannt; Preisquelle war nicht erreichbar.":"Produkt erkannt; noch keine passenden Preisdaten.";
-  }
-  $("liveProduct").innerHTML=priceHtml;
- }catch(e){$("liveStatus").textContent="Live-Abfrage fehlgeschlagen. Demo-Vergleich bleibt davon getrennt."}
+function activePrice(key,store){return trustedPrice(key,store)}
+function addCommunityObservation(obs){
+ const x=normalizeObservation(obs); if(!x.proof||!x.key||!x.store||!Number.isFinite(x.price)||!x.date)return false;
+ let rows=loadCommunity();rows.push(x);saveCommunity(rows);return true;
 }
+const storeNames=["Lidl","Kaufland","REWE","EDEKA"];
 function escHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function locationLabel(x){
  const l=x.location||{};
@@ -152,9 +142,9 @@ function showPlan(){$("planner").style.display="block";$("receipt").style.displa
 function showReceipt(){$("planner").style.display="none";$("receipt").style.display="block";$("receiptTab").classList.add("active");$("planTab").classList.remove("active");try{if(localStorage.getItem("echtpreis_open_purchase")==="1")$("openPurchaseNotice").innerHTML="<b>Offener Einkauf:</b> Warte auf deinen Bon."}catch(e){}}
 $("toReceiptBtn").onclick=showReceipt;$("backPlanBtn").onclick=showPlan;
 $("planTab").onclick=showPlan;$("receiptTab").onclick=showReceipt;
-$("receiptFile").onchange=e=>{let file=e.target.files[0];$("receiptMsg").textContent=file?"✓ Bon ausgewählt: "+file.name+" · Als Nächstes wird daraus die automatische Belegerkennung.":"";$("finishPurchaseBtn").disabled=!file};
+$("receiptFile").onchange=e=>{let file=e.target.files[0];$("receiptMsg").textContent=file?"✓ Bon ausgewählt: "+file.name+" · Der Bon ist der Nachweis. Preise werden erst nach Extraktion als einzelne Beobachtungen gespeichert.":"";$("finishPurchaseBtn").disabled=!file};
 function closePurchase(){try{localStorage.removeItem("echtpreis_open_purchase")}catch(e){}}
-$("finishPurchaseBtn").onclick=()=>{if(!$("receiptFile").files[0])return;closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Danke für deinen Bon.";$("finishPurchaseBtn").textContent="✓ Einkauf abgeschlossen";$("finishPurchaseBtn").disabled=true;$("noReceiptBtn").style.display="none";$("receiptMsg").textContent+=$("contribute").checked?" · Danke! Anonymisierte Preisdaten dürfen ECHTPREIS verbessern.":" · Bon nur für deinen Einkauf – keine Community-Freigabe.";};
+$("finishPurchaseBtn").onclick=()=>{if(!$("receiptFile").files[0])return;let proofId="receipt_"+Date.now();try{localStorage.setItem("echtpreis_last_proof",JSON.stringify({id:proofId,type:"RECEIPT",file:$("receiptFile").files[0].name,created:new Date().toISOString(),consent:$("contribute").checked}))}catch(e){};closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Danke für deinen Bon.";$("finishPurchaseBtn").textContent="✓ Einkauf abgeschlossen";$("finishPurchaseBtn").disabled=true;$("noReceiptBtn").style.display="none";$("receiptMsg").textContent+=$("contribute").checked?" · Danke! Anonymisierte Preisdaten dürfen ECHTPREIS verbessern.":" · Bon nur für deinen Einkauf – keine Community-Freigabe.";};
 $("noReceiptBtn").onclick=()=>{if(!confirm("Bon verloren oder nicht mehr vorhanden? Du kannst den Einkauf trotzdem abschließen. Diesmal können daraus nur keine Preise zur ECHTPREIS-Datenbasis beitragen."))return;closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Diesmal ohne Bon – kein Problem.";$("receiptMsg").textContent="Keine Preisdaten beigetragen.";$("noReceiptBtn").style.display="none";$("finishPurchaseBtn").style.display="none";};
 drawSuggestions();drawStores();drawList();
 </script></body></html>
