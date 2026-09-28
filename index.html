@@ -614,18 +614,20 @@ function drawDataMachine(){
  el.innerHTML="<b>Datenmaschine aktiv:</b> "+rows.length+" aktuell nutzbare Beobachtungen<br><span class='detail'>ECHTPREIS API: "+escHtml(apiState)+"<br>Open Prices: "+escHtml(dataMachineState.openPrices)+(dataMachineState.lastSync?" · Sync "+dataMachineState.lastSync:"")+"<br>"+(Object.entries(by).map(([k,v])=>escHtml(k)+": "+v).join(" · ")||"Noch keine nutzbaren Quellen")+"</span>";
 }
 const storeNames=["Lidl","Kaufland","REWE","EDEKA","PENNY","ALDI Nord","Netto","NORMA","dm","Rossmann"];
-let nearbyStores=[];
+let nearbyStores=[],nearbyStoresFetchedAt=0,nearbyStoresLocation=null;
 function storeBrand(tags){let n=normalizeProduct([tags.brand,tags.name,tags.operator].filter(Boolean).join(" "));if(n.includes("aldi nord")||n==="aldi")return"ALDI Nord";if(n.includes("kaufland"))return"Kaufland";if(n.includes("rewe"))return"REWE";if(n.includes("edeka"))return"EDEKA";if(n.includes("penny"))return"PENNY";if(n.includes("netto"))return"Netto";if(n.includes("norma"))return"NORMA";if(n.includes("rossmann"))return"Rossmann";if(n.includes("dm"))return"dm";if(n.includes("lidl"))return"Lidl";return""}
 function distanceKm(a,b,c,d){const R=6371,p=Math.PI/180,x=(c-a)*p,y=(d-b)*p,z=Math.sin(x/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(z))}
 async function loadNearbyStores(){
- nearbyStores=[];const status=$("locationStatusText");if(status)status.textContent="Aktueller Standort wird ermittelt …";
+ const status=$("locationStatusText");if(status)status.textContent="Aktueller Standort wird ermittelt …";
  if(!navigator.geolocation){if(status)status.textContent="Standort ist in diesem Browser nicht verfügbar.";return[]}
  return new Promise(resolve=>navigator.geolocation.getCurrentPosition(async pos=>{try{
-  const {latitude:lat,longitude:lon}=pos.coords;if(status)status.textContent="Suche passende Filialen in deiner Nähe …";
+  const {latitude:lat,longitude:lon}=pos.coords;
+  if(nearbyStores.length&&nearbyStoresLocation&&Date.now()-nearbyStoresFetchedAt<5*60*1000&&distanceKm(lat,lon,nearbyStoresLocation.lat,nearbyStoresLocation.lon)<.3){if(status)status.textContent=nearbyStores.length+" passende Filialen aus aktuellem Standort-Cache.";return resolve(nearbyStores)}
+  if(status)status.textContent="Suche passende Filialen in deiner Nähe …";
   const q='[out:json][timeout:15];(nwr["shop"="supermarket"](around:12000,'+lat+','+lon+');nwr["shop"="discount"](around:12000,'+lat+','+lon+');nwr["shop"="chemist"](around:12000,'+lat+','+lon+'););out center tags;';
   const r=await fetch("https://overpass-api.de/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(q)});if(!r.ok)throw 0;const d=await r.json();
   nearbyStores=(d.elements||[]).map(e=>{let t=e.tags||{},slat=e.lat||(e.center&&e.center.lat),slon=e.lon||(e.center&&e.center.lon),brand=storeBrand(t);if(!brand||!slat||!slon)return null;let address=[t["addr:street"],t["addr:housenumber"]].filter(Boolean).join(" ");return{brand,lat:slat,lon:slon,distance:distanceKm(lat,lon,slat,slon),address,name:t.name||brand}}).filter(Boolean).sort((x,y)=>x.distance-y.distance);
-  if(status)status.textContent=nearbyStores.length?nearbyStores.length+" passende Filialen gefunden.":"Keine passenden Filialen in der Nähe gefunden.";resolve(nearbyStores);
+  nearbyStoresFetchedAt=Date.now();nearbyStoresLocation={lat,lon};if(status)status.textContent=nearbyStores.length?nearbyStores.length+" passende Filialen gefunden.":"Keine passenden Filialen in der Nähe gefunden.";resolve(nearbyStores);
  }catch(e){nearbyStores=[];if(status)status.textContent="Filialsuche gerade nicht erreichbar.";resolve([])}},()=>{nearbyStores=[];if(status)status.textContent="Standort nicht freigegeben – Vergleich ohne Entfernung.";resolve([])},{enableHighAccuracy:true,timeout:10000,maximumAge:60000}));
 }
 function nearestStore(brand){return nearbyStores.find(x=>x.brand===brand)||null}
@@ -878,7 +880,8 @@ function refreshStats(){
  $("statsPotential").textContent=known.length?"ca. "+eur(known.reduce((n,r)=>n+Number(r.potentialSaving),0)):"–";
  $("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderStatsReceipts();
 }
-window.refreshEchtpreisStats=refreshStats;
+async function refreshStatsFromServer(){const merged=await loadServerReceipts();if(Array.isArray(merged)){savePersonalReceipts(merged.slice(0,250));refreshStats()}}
+window.refreshEchtpreisStats=()=>{refreshStats();void refreshStatsFromServer()};
 async function loadServerReceipts(){
  const local=getPersonalReceipts(),cid=localStorage.getItem("echtpreis_contributor_id")||"";if(!cid)return local;
  try{
