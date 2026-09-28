@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.31.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.32.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -633,10 +633,10 @@ function drawReviewRows(){
 function parseReceiptNumber(v){return Number(String(v||"").replace(/\./g,"").replace(",","."))}
 function inferPackFromName(name){
  let s=String(name||"").toLowerCase().replace(",",".");
- let m=s.match(/(\d+(?:\.\d+)?)\s*(kg|g|ml|l)\b/);
- if(m)return {packAmount:Number(m[1]),packUnit:m[2]};
- let p=s.match(/\b(\d{1,3})\s*(?:er|stk|stück)\b/);
- return p?{packAmount:Number(p[1]),packUnit:"piece"}:{packAmount:"",packUnit:""};
+ let m=s.match(/(\d+(?:\.\d+)?)\s*(kg|g|ml|l)\b/);if(m)return {packAmount:Number(m[1]),packUnit:m[2]};
+ let p=s.match(/\b(\d{1,3})\s*(?:er|stk|stück)\b/);if(p)return {packAmount:Number(p[1]),packUnit:"piece"};
+ let bev=s.match(/(?:red\s*bull|monster(?:\s*energy)?|coca[ -]?cola|pepsi|fanta|sprite|mineralwasser|orangensaft).*?\b(0\.\d{2,3}|1\.\d|2\.0)\b/i);
+ return bev?{packAmount:Number(bev[1]),packUnit:"l"}:{packAmount:"",packUnit:""};
 }
 function parseReceiptText(text){
  const lines=text.split(/\n+/).map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean),rows=[];let last=null;
@@ -672,7 +672,7 @@ async function renderPdfFirstPage(file){
  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,page=await pdf.getPage(1),vp=page.getViewport({scale:2}),canvas=document.createElement("canvas");canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:canvas.getContext("2d"),viewport:vp}).promise;return new Promise(r=>canvas.toBlob(r,"image/jpeg",.92));
 }
 function applyReceiptText(text,label){
- receiptDraft=parseReceiptText(text);let low=text.toLowerCase();if(low.includes("lidl"))$("receiptStore").value="Lidl";else if(low.includes("kaufland"))$("receiptStore").value="Kaufland";else if(low.includes("rewe"))$("receiptStore").value="REWE";else if(low.includes("edeka"))$("receiptStore").value="EDEKA";
+ receiptDraft=parseReceiptText(text);let low=text.toLowerCase();if(low.includes("lidl"))$("receiptStore").value="Lidl";else if(low.includes("kaufland"))$("receiptStore").value="Kaufland";else if(low.includes("rewe"))$("receiptStore").value="REWE";else if(low.includes("edeka"))$("receiptStore").value="EDEKA";else if(low.includes("penny"))$("receiptStore").value="PENNY";else if(low.includes("aldi"))$("receiptStore").value="ALDI Nord";else if(low.includes("netto"))$("receiptStore").value="Netto";else if(low.includes("norma"))$("receiptStore").value="NORMA";else if(low.includes("rossmann"))$("receiptStore").value="Rossmann";else if(/\bdm\b/.test(low))$("receiptStore").value="dm";
  let dm=text.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2})\b/);$("receiptDate").value=dm?dm[3]+"-"+dm[2]+"-"+dm[1]:new Date().toISOString().slice(0,10);
  let ed=text.match(/EDEKA\s+Fil\.?\s*(\d+)/i),addr=text.match(/(?:^|\n)\s*([^\n]{3,45}(?:str\.|straße|strasse)[^\n]*)/i),detail=$("receiptStoreDetail");
  if(detail)detail.textContent=ed?("✓ EDEKA Filiale "+ed[1]+(addr?" · "+addr[1].trim():"")):"";
