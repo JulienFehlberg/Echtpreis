@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.2.8</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.3.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -86,38 +86,42 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </script>
 <script>
 (function(){
- document.addEventListener("DOMContentLoaded",function(){
-  var b=document.getElementById("compareBtn");
-  if(!b)return;
-  b.addEventListener("click",function(){
-   try{
-    if(typeof window.compare==="function"){ window.compare(); return; }
-    var demo=document.getElementById("list")?.textContent||"";
-    var hasHack=/Rinderhack/i.test(demo),hasBan=/Bananen/i.test(demo);
-    if(hasHack||hasBan){
-      var r=document.getElementById("results"),wl=document.getElementById("winnerLabel"),wn=document.getElementById("winnerName"),wp=document.getElementById("winnerPrice"),wc=document.getElementById("winnerCoverage"),mr=document.getElementById("merchantResults"),st=document.getElementById("splitTitle"),sd=document.getElementById("splitDetail"),ss=document.getElementById("splitSave");
-      if(r)r.style.display="block";
-      if(wl)wl.textContent="Noch nicht genug Preisdaten";
-      if(wn)wn.textContent="Noch kein vollständiger Warenkorb";
-      if(wp)wp.textContent="—";
-      if(wc)wc.textContent="Vorhandene belegte Einzelpreise werden unten angezeigt. Fehlende Preise bleiben fehlend.";
-      if(mr)mr.innerHTML=(hasHack?'<div class="merchant"><div><b>REWE</b><div class="coverage">Rinderhack: belegte Beobachtung vorhanden<br>Bananen: noch ohne belegten Preis</div></div><div class="price">6,98 €<div class="coverage">500 g Rinderhack · Zwischensumme</div></div></div>':'')+(hasBan?'<div class="merchant"><div><b>Kaufland</b><div class="coverage">Bananen: belegte Beobachtung vorhanden<br>Rinderhack: noch ohne belegten Preis</div></div><div class="price">1,99 €<div class="coverage">1 kg Bananen · Zwischensumme</div></div></div>':'')+'<div class="merchant"><div><b>Lidl / EDEKA</b><div class="coverage">Für diese Testliste aktuell keine ausreichend belegten Preise im Prototyp.</div></div><div class="price">—</div></div>';
-      if(st)st.textContent="Noch nicht vollständig berechenbar";
-      if(sd)sd.textContent="Kein ausgewählter Markt hat für alle Positionen belegte Preise.";
-      if(ss)ss.textContent="Keine Ersparnis erfunden.";
-      if(r)r.scrollIntoView({behavior:"smooth"});
-      return;
-    }
-    var r=document.getElementById("results"),wl=document.getElementById("winnerLabel"),wn=document.getElementById("winnerName"),wp=document.getElementById("winnerPrice"),wc=document.getElementById("winnerCoverage");
-    if(r)r.style.display="block";
-    if(wl)wl.textContent="Vergleich gestartet";
-    if(wn)wn.textContent="ECHTPREIS";
-    if(wp)wp.textContent="—";
-    if(wc)wc.textContent="Der Vergleichs-Klick funktioniert. Die Preisdaten-Logik wurde noch nicht geladen.";
-    if(r)r.scrollIntoView({behavior:"smooth"});
-   }catch(e){ alert("ECHTPREIS Fehler: "+e.message); }
-  });
- });
+ const prices={
+  "rinderhack":[{store:"REWE",unit:"kg",price:13.96,label:"Rinderhack",source:"belegte Beobachtung"}],
+  "bananen":[{store:"Kaufland",unit:"kg",price:1.99,label:"Bananen",source:"belegte Beobachtung"}]
+ };
+ function norm(x){return String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss")}
+ function parseLine(txt){
+  const t=norm(txt).replace(/×/g," ");
+  let key=t.includes("rinderhack")||t.includes("rinder hack")?"rinderhack":t.includes("banane")?"bananen":null;
+  let m=t.match(/([0-9]+(?:[.,][0-9]+)?)\s*(kg|g|l|liter|ml)/), amount=1,unit="piece";
+  if(m){amount=parseFloat(m[1].replace(",","."));unit=m[2];if(unit==="g"){amount/=1000;unit="kg"}else if(unit==="ml"){amount/=1000;unit="l"}else if(unit==="liter")unit="l";}
+  else {let n=t.match(/([0-9]+(?:[.,][0-9]+)?)/);if(n)amount=parseFloat(n[1].replace(",","."));if(key==="bananen"){amount*=.18;unit="kg";}}
+  return {raw:txt,key,amount,unit,label:key==="rinderhack"?"Rinderhack":key==="bananen"?"Bananen":txt.trim()};
+ }
+ function listItems(){
+  const nodes=[...document.querySelectorAll("#list .item")];
+  return nodes.map(n=>parseLine((n.querySelector(".itemname")||n).childNodes[0]?.textContent||n.textContent)).filter(x=>x.label);
+ }
+ function money(n){return n.toLocaleString("de-DE",{style:"currency",currency:"EUR"})}
+ function compareStable(){
+  const items=listItems(); if(!items.length){alert("Schreib zuerst deinen Einkauf auf.");return;}
+  const stores=["Lidl","Kaufland","REWE","EDEKA"];
+  const rows=stores.map(store=>{let total=0,known=[];const missing=[];items.forEach(i=>{const p=i.key&&(prices[i.key]||[]).find(x=>x.store===store&&x.unit===i.unit);if(p){const value=p.price*i.amount;total+=value;known.push({i,p,value});}else missing.push(i.label)});return{store,total,known,missing}});
+  const complete=rows.filter(x=>x.known.length===items.length).sort((a,b)=>a.total-b.total);
+  const r=document.getElementById("results"),wl=document.getElementById("winnerLabel"),wn=document.getElementById("winnerName"),wp=document.getElementById("winnerPrice"),wc=document.getElementById("winnerCoverage"),mr=document.getElementById("merchantResults");
+  r.style.display="block";
+  if(complete.length){wl.textContent="Günstigster vollständig belegter Warenkorb";wn.textContent=complete[0].store;wp.textContent=money(complete[0].total);wc.textContent="Alle "+items.length+" Positionen mit belegtem Preis.";}
+  else{wl.textContent="Noch nicht genug Preisdaten";wn.textContent="Noch kein vollständiger Warenkorb";wp.textContent="—";wc.textContent="Wir zeigen nur belegte Preise. Fehlende Preise werden nicht geschätzt.";}
+  mr.innerHTML=rows.map(x=>'<div class="merchant"><div><b>'+x.store+'</b><div class="coverage">'+x.known.length+' von '+items.length+' Preisen vorhanden'+(x.missing.length?'<br>Noch ohne Preis: '+x.missing.map(v=>String(v).replace(/[&<>"]/g,"")).join(", "):'<br>Vollständig belegt')+'</div></div><div class="price">'+(x.known.length?money(x.total)+'<div class="coverage" style="text-align:right">'+(x.missing.length?"belegte Zwischensumme":"Gesamt")+'</div>':"—")+'</div></div>').join("");
+  const st=document.getElementById("splitTitle"),sd=document.getElementById("splitDetail"),ss=document.getElementById("splitSave");
+  const allKnown=items.every(i=>i.key&&(prices[i.key]||[]).length);
+  if(!allKnown){st.textContent="Noch nicht vollständig berechenbar";sd.textContent="Für mindestens ein Produkt fehlt noch ein belegter Preis.";ss.textContent="Keine Ersparnis erfunden.";}
+  else{let sum=0,parts=[];items.forEach(i=>{const opts=prices[i.key].filter(p=>p.unit===i.unit).sort((a,b)=>a.price-b.price);sum+=opts[0].price*i.amount;parts.push(opts[0].store+": "+i.label)});st.textContent=money(sum);sd.textContent=parts.join(" · ");ss.textContent=complete.length?"Vergleich mit einem Laden möglich.":"Günstigste belegte Kombination; kein vollständiger Ein-Laden-Vergleich.";}
+  r.scrollIntoView({behavior:"smooth"});
+ }
+ document.addEventListener("DOMContentLoaded",function(){const b=document.getElementById("compareBtn");if(b)b.addEventListener("click",compareStable);});
+ window.compareStable=compareStable;
 })();
 </script>
 <script>
