@@ -165,14 +165,6 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(w.personalComparablePrice({price:2.98,count:2}),1.49,"multipack personal comparison must normalize line total by count");
  assert.strictEqual(w.personalComparablePrice({price:1.49,count:1}),1.49,"single-item personal comparison must preserve price");
  const marketReceipts=[{store:"EDEKA",date:"2026-09-10",total:"5.00",items:[{name:"Milch 1 l",price:1.49},{name:"Butter 250 g",price:2.49}]},{store:"Kaufland",date:"2026-09-11",total:"4.00",items:[{name:"Milch 1 l",price:1.19},{name:"Butter 250 g",price:1.99}]}];w.renderStatsMarketProfile(marketReceipts);const marketText=d.getElementById("statsMarketProfile").textContent;assert(marketText.includes("EDEKA")&&marketText.includes("Kaufland"),"market profile should compare overlapping products across stores");assert(marketText.includes("direkt vergleichbare Produkte"),"market profile must disclose its comparison basis");
- const householdQtyReceipts=[
- {date:"2026-09-01",items:[{name:"Milch 1 l",price:2.18,count:2}]},
- {date:"2026-09-06",items:[{name:"Milch 1 l",price:2.18,count:2}]},
- {date:"2026-09-11",items:[{name:"Milch 1 l",price:2.18,count:2}]},
- {date:"2026-09-16",items:[{name:"Milch 1 l",price:2.18,count:2}]},
- {date:"2026-09-21",items:[{name:"Milch 1 l",price:2.18,count:2}]},
- {date:"2026-09-26",items:[{name:"Milch 1 l",price:4.36,count:4}]}
- ];const qtyNeed=w.buildHouseholdNeeds(householdQtyReceipts).find(x=>x.key==="milch");assert(qtyNeed&&qtyNeed.typicalQty===2&&qtyNeed.lastQty===4,"household forecast should compare latest quantity with the user's typical quantity");assert(qtyNeed.quantityFactor>1,"larger-than-usual purchase should extend expected household coverage");
  const insight=w.buildReceiptInsight([{id:"1",store:"EDEKA",date:"2026-09-01",total:"20.00",items:[{name:"Milch",price:1.09}]},{id:"2",store:"EDEKA",date:"2026-09-08",total:"22.00",items:[{name:"Milch",price:1.09}]},{id:"3",store:"EDEKA",date:"2026-09-15",total:"21.00",items:[{name:"Milch",price:1.09}]},{id:"4",store:"EDEKA",date:"2026-09-28",total:"35.00",items:[{name:"Milch",price:1.39},{name:"Red Bull",price:5.96}]}],{id:"4",store:"EDEKA",date:"2026-09-28",total:"35.00",items:[{name:"Milch",price:1.39},{name:"Red Bull",price:5.96}]});assert(insight&&insight.title,"receipt insight should produce a personal fact");assert(/teurer|Einkauf|Milch|Bon/i.test(insight.title),"receipt insight should be meaningful");
  const splitQty=w.parseReceiptText("Red Bull 1,49\n1,49 x 2\nPfand 0,25 x 2\nSUMME 3,48");assert.strictEqual(Number(splitQty[0].price),2.98,"separate quantity line must update article total");
  const discounted=w.parseReceiptText("Pizza 3,99\nAktionsrabatt -0,50\nSUMME 3,49");assert.strictEqual(Number(discounted[0].price),3.49,"separate discount must reduce recognized paid total");assert.strictEqual(discounted[0].regularTotal,3.99,"regular pre-discount price should remain available");
