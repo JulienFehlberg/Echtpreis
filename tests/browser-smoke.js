@@ -17,7 +17,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  const receipt=w.parseReceiptText("G&G Mini-Hörnchen 1,49\nOetker Ristorante 3,49\nRed Bull 0,25 1,49 x 2 2,98\nPfand 0,25 x 2 0,50\nSUMME 8,46");
  assert(receipt.length>=4,"receipt parser lost rows");
  assert(receipt.some(x=>x.isDeposit),"deposit line not recognized");
- d.getElementById("demoListBtn").click();assert.strictEqual(d.querySelectorAll("#list .item").length,2,"demo list must use primary basket only");
+ w.localStorage.removeItem("echtpreis_open_purchase");d.getElementById("compareBtn").click();assert.strictEqual(w.localStorage.getItem("echtpreis_open_purchase"),null,"failed comparison must not open a purchase");\n d.getElementById("demoListBtn").click();assert.strictEqual(d.querySelectorAll("#list .item").length,2,"demo list must use primary basket only");
  d.getElementById("productInput").value="0,5 kg Tomaten";d.getElementById("addBtn").click();assert.strictEqual(d.querySelectorAll("#list .item").length,3,"add button should add exactly one item");
  d.getElementById("compareBtn").click();assert.notStrictEqual(d.getElementById("results").style.display,"none","compare should render results");
  console.log("browser smoke OK · single basket · quantity parser · receipt parser");
