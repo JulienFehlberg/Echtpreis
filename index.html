@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.1.1</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.1.2</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="homeactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkauf planen<small>Preise vergleichen</small></button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen<small>Preise bestätigen</small></button><button class="homeaction" id="homePoints"><span>🎁</span>Beiträge & Punkte<small id="pointsMini">0 XP</small></button></div><div class="tabs"><button class="tab active" id="planTab">Planen</button><button class="tab" id="receiptTab">Bon scannen</button></div>
 
@@ -171,7 +171,6 @@ async function syncSharedData(){
 }
 async function pushSharedReceipt(proof,items){
  try{let r=await fetch(API_BASE+"/v1/receipt-observations",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({proof,items})});if(!r.ok)throw 0;let d=await r.json();apiState="verbunden · "+d.accepted+" neue Beobachtungen übertragen";await syncSharedData();return d}catch(e){apiState="Upload später erneut nötig · lokal gespeichert";drawDataMachine();return null}
-}
 const productIndexKey="echtpreis_product_index_v1";
 function loadProductIndex(){return loadJson(productIndexKey,[])}
 function saveProductIndex(rows){saveJson(productIndexKey,rows.slice(-2500))}
@@ -190,7 +189,6 @@ identifyReceiptProduct=function(name){const learned=learnedMatch(name),base=base
 function extractEAN(text){let m=String(text||"").match(/\b(\d{8}|\d{12,14})\b/);return m?m[1]:null}
 async function enrichByEAN(ean){
  if(!ean)return null;try{let r=await fetch("https://world.openfoodfacts.org/api/v3/product/"+encodeURIComponent(ean)+"?fields=code,product_name,brands,quantity,categories_tags,countries_tags");if(!r.ok)return null;let d=await r.json(),p=d.product||d;if(!p)return null;return{ean:p.code||ean,name:p.product_name||"",brand:p.brands||"",quantity:p.quantity||"",categories:p.categories_tags||[],source:"Open Food Facts"}}catch(e){return null}
-}
 async function attachEANToDraft(rawText){
  const ean=extractEAN(rawText);if(!ean)return null;return await enrichByEAN(ean);
 }
