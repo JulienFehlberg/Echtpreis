@@ -147,6 +147,10 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(w.receiptArithmeticMatches(8.46,8.36),false,"material receipt arithmetic differences must still fail");
 
  const rb=w.inferPackFromName("Red Bull 0,25");assert.strictEqual(rb.packAmount,0.25);assert.strictEqual(rb.packUnit,"l");
+ assert.strictEqual(w.receiptObservationUnitPrice({price:2.98,packAmount:.25,packUnit:"l",count:2},{unit:"l"}),5.96,"two 250 ml cans for 2.98 must normalize to 5.96 EUR/l, not 11.92");
+ assert.strictEqual(w.receiptObservationUnitPrice({price:1.49,packAmount:.25,packUnit:"l",count:1},{unit:"l"}),5.96,"single 250 ml can normalization regressed");
+ assert.strictEqual(w.receiptObservationUnitPrice({price:2.98,packAmount:.25,packUnit:"l",count:2},{unit:"kg"}),null,"incompatible receipt units must never be shared as market prices");
+
  const receipt=w.parseReceiptText("G&G Mini-Hörnchen 1,49\nOetker Ristorante 3,49\nRed Bull 0,25 1,49 x 2 2,98\nPfand 0,25 x 2 0,50\nSUMME 8,46");
  await w.addEchtpreisBarcode("Testprodukt","250 g","12345678");assert.strictEqual(d.querySelectorAll("#list .item").length,1,"barcode product should enter the primary basket");w.replaceEchtpreisList([]);
  for(let i=0;i<24;i++){
