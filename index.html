@@ -76,7 +76,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste<small>Vorher Preise vergleichen</small></button>
 <button class="homeaction" id="homeStats" type="button"><span>📊</span>Meine Statistik<small>Dein Einkaufsprofil</small></button>
 </div><div id="homePulse" style="display:none;margin:0 0 14px;padding:12px 14px;border:1px solid rgba(16,32,25,.08);border-radius:16px;background:rgba(255,255,255,.78)"><b id="homePulseTitle"></b><div id="homePulseDetail" class="detail"></div></div>
-<div class="tabs" style="display:none"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
+<div id="householdNeeds" class="card" style="display:none;margin-top:0"></div><div class="tabs" style="display:none"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
 
 <section id="planner" style="display:none">
 <div class="card"><h2>Deine Einkaufsliste</h2><div class="muted">Menge, Einheit und Produkt dürfen zusammen in ein Feld. Beispiele: „5 Bananen“, „3 rote Paprika“, „500 g Rinderhack“, „2 Liter Milch“.</div>
@@ -882,6 +882,55 @@ function showReceipt(){hidePoints();$("planner").style.display="none";$("receipt
 function showPoints(){$("planner").style.display="none";$("receipt").style.display="none";$("pointsCard").style.display="block";window.scrollTo({top:0,behavior:"smooth"});refreshPoints()}
 function getPersonalReceipts(){try{let value=JSON.parse(localStorage.getItem("echtpreis_personal_receipts")||"[]");return Array.isArray(value)?value:[]}catch(e){return[]}}
 function savePersonalReceipts(v){localStorage.setItem("echtpreis_personal_receipts",JSON.stringify(v))}
+function householdNeedKey(item){
+ const raw=String(item&&item.name||"").trim();if(!raw)return null;
+ try{const hit=identifyReceiptProduct(raw);if(hit&&hit.key)return {key:hit.key,label:(catalog[hit.key]&&catalog[hit.key].label)||raw}}catch(e){}
+ let key=normalizeProduct(raw).replace(/\b\d+(?:[.,]\d+)?\s*(?:g|kg|ml|l|stk|stueck)\b/g,"").trim();
+ return key.length>=3?{key:"raw:"+key,label:raw}:null;
+}
+function medianNumber(values){const a=(values||[]).filter(Number.isFinite).sort((x,y)=>x-y);if(!a.length)return null;const m=Math.floor(a.length/2);return a.length%2?a[m]:(a[m-1]+a[m])/2}
+function buildHouseholdNeeds(receipts=getPersonalReceipts()){
+ const today=new Date(localDateKey()+"T12:00:00"),groups=new Map();
+ (receipts||[]).filter(r=>r&&r.date&&Array.isArray(r.items)).forEach(r=>{
+  const day=new Date(String(r.date).slice(0,10)+"T12:00:00");if(!Number.isFinite(day.getTime())||day>today)return;
+  const seen=new Set();
+  r.items.forEach(item=>{if(item.isAdjustment||item.isDeposit||Number(item.price)<=0)return;const p=householdNeedKey(item);if(!p||seen.has(p.key))return;seen.add(p.key);if(!groups.has(p.key))groups.set(p.key,{...p,dates:[],samples:[]});let g=groups.get(p.key);g.dates.push(day);g.samples.push(String(item.name||p.label))})
+ });
+ const out=[];
+ groups.forEach(g=>{
+  const dates=[...new Map(g.dates.sort((a,b)=>a-b).map(d=>[localDateKey(d),d])).values()];if(dates.length<2)return;
+  const intervals=[];for(let i=1;i<dates.length;i++){const d=Math.round((dates[i]-dates[i-1])/86400000);if(d>=1&&d<=180)intervals.push(d)}
+  const rhythm=medianNumber(intervals);if(!rhythm||rhythm<2)return;
+  const last=dates[dates.length-1],daysSince=Math.max(0,Math.floor((today-last)/86400000)),daysLeft=Math.round(rhythm-daysSince);
+  const confidence=dates.length>=4?"hoch":dates.length>=3?"mittel":"lernend";
+  // Surface only when the expected next purchase is close; this keeps the card useful instead of noisy.
+  const lead=Math.max(3,Math.min(7,Math.round(rhythm*.22)));if(daysLeft>lead)return;
+  const urgency=daysLeft<=0?0:daysLeft<=2?1:2;
+  out.push({...g,rhythm:Math.round(rhythm),daysSince,daysLeft,confidence,urgency,purchases:dates.length});
+ });
+ return out.sort((a,b)=>a.urgency-b.urgency||a.daysLeft-b.daysLeft||b.purchases-a.purchases).slice(0,6);
+}
+function householdNeedText(n){
+ if(n.daysLeft<=-2)return "könnte bereits leer sein";
+ if(n.daysLeft<=0)return "wahrscheinlich jetzt wieder fällig";
+ if(n.daysLeft===1)return "wahrscheinlich morgen wieder fällig";
+ return "wahrscheinlich in "+n.daysLeft+" Tagen wieder fällig";
+}
+function addHouseholdNeedToList(key){
+ const need=buildHouseholdNeeds().find(x=>x.key===key);if(!need)return;
+ if(!basket.some(w=>normalizeProduct(w.raw)===normalizeProduct(need.label))){basket.push(parseWish(need.label));saveBasketState();learnFrequentProduct(need.label);drawList();basketChanged()}
+ const btn=document.querySelector('[data-household-add="'+CSS.escape(key)+'"]');if(btn){btn.textContent="✓ Auf der Liste";btn.disabled=true}
+}
+function renderHouseholdNeeds(receipts=getPersonalReceipts()){
+ const box=$("householdNeeds");if(!box)return;const needs=buildHouseholdNeeds(receipts);
+ if(!needs.length){box.style.display="none";return}
+ const rows=needs.map(n=>'<div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #edf0ee"><div style="flex:1;min-width:0"><b style="display:block;overflow-wrap:anywhere">'+escHtml(n.label)+'</b><div class="detail">'+escHtml(householdNeedText(n))+' · Rhythmus ca. '+n.rhythm+' Tage · '+n.purchases+' Käufe gelernt</div></div><button type="button" class="ghost" data-household-add="'+escHtml(n.key)+'" style="padding:9px 11px;white-space:nowrap">+ Liste</button></div>').join("");
+ box.innerHTML='<div class="smallcap" style="color:#087443">🏠 Dein Haushalt</div><h2 style="margin-top:5px">Könnte bei dir bald leer sein</h2><div class="muted">Aus deinen echten Einkäufen gelernt – keine Inventur nötig.</div><div style="margin-top:8px">'+rows+'</div>';
+ box.style.display="block";
+ box.querySelectorAll("[data-household-add]").forEach(b=>b.onclick=()=>addHouseholdNeedToList(b.dataset.householdAdd));
+}
+window.renderEchtpreisHouseholdNeeds=renderHouseholdNeeds;
+
 function receiptLocalFingerprint(store,date,total,items){
  const raw=[normalizeProduct(store),date,Number(total).toFixed(2),...(items||[]).map(x=>normalizeProduct(x.name)+":"+Number(x.price).toFixed(2)).sort()].join("|");let h=2166136261;for(let i=0;i<raw.length;i++){h^=raw.charCodeAt(i);h=Math.imul(h,16777619)}return "r"+(h>>>0).toString(16);
 }
@@ -1049,7 +1098,7 @@ function refreshStats(){
  $("statsWeekly").textContent=eur(sum(receipts.filter(r=>String(r.date||"")>=weekKey&&String(r.date||"")<=todayKey)));
  $("statsMonthly").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(month)&&String(r.date||"")<=todayKey)));
  $("statsPotential").textContent=known.length?"ca. "+eur(known.reduce((n,r)=>n+Number(r.potentialSaving),0)):"–";
- $("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderHomePulse(receipts);renderStatsInsight(receipts);renderStatsBreakdown(receipts);renderStatsTrend(receipts);renderStatsCategoryChanges(receipts);renderStatsYearTrend(receipts);renderStatsMarketProfile(receipts);renderStatsPriceMemory(receipts);renderStatsRhythm(receipts);renderStatsDiscoveries();renderStatsReceipts();
+ $("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderHomePulse(receipts);renderHouseholdNeeds(receipts);renderStatsInsight(receipts);renderStatsBreakdown(receipts);renderStatsTrend(receipts);renderStatsCategoryChanges(receipts);renderStatsYearTrend(receipts);renderStatsMarketProfile(receipts);renderStatsPriceMemory(receipts);renderStatsRhythm(receipts);renderStatsDiscoveries();renderStatsReceipts();
 }
 async function refreshStatsFromServer(){const merged=await loadServerReceipts();if(Array.isArray(merged)){savePersonalReceipts(merged.slice(0,250));refreshStats()}}
 window.refreshEchtpreisStats=()=>{refreshStats();void refreshStatsFromServer()};
@@ -1342,5 +1391,5 @@ async function sendFeedbackPayload(payload){const r=await fetch(API_BASE+"/v1/fe
 async function flushFeedbackQueue(){let q=loadFeedbackQueue();if(!q.length)return 0, sent=0;const keep=[];for(const item of q){try{await sendFeedbackPayload(item);sent++}catch(e){keep.push(item)}}saveFeedbackQueue(keep);return sent}
 const feedbackSend=$("feedbackSend");if(feedbackSend)feedbackSend.onclick=async()=>{const message=$("feedbackText").value.trim(),status=$("feedbackStatus");if(message.length<3){status.textContent="Schreib bitte kurz dazu, was dir aufgefallen ist.";return}feedbackSend.disabled=true;status.textContent="Wird gesendet …";const version=document.querySelector(".version")?.textContent||"",payload={message,appVersion:version,platform:window.EchtpreisRuntime?.platform||"web",page:location.pathname+location.search,userAgent:navigator.userAgent,createdAt:new Date().toISOString()};try{await sendFeedbackPayload(payload);$("feedbackText").value="";status.textContent="✓ Danke – Feedback ist angekommen."}catch(e){let q=loadFeedbackQueue();q.push(payload);saveFeedbackQueue(q);$("feedbackText").value="";status.textContent="✓ Gespeichert – wird automatisch gesendet, sobald der Server erreichbar ist."}finally{feedbackSend.disabled=false}};
 void flushFeedbackQueue();
-refreshPoints();drawSuggestions();drawStores();let savedBasket=loadBasketState();if(savedBasket.length)basket=savedBasket.filter(x=>x&&x.raw).map(restoreBasketItem);drawList();drawDataMachine();syncSharedData();
+refreshPoints();drawSuggestions();drawStores();let savedBasket=loadBasketState();if(savedBasket.length)basket=savedBasket.filter(x=>x&&x.raw).map(restoreBasketItem);drawList();drawDataMachine();renderHouseholdNeeds();syncSharedData();
 </script></body></html>
