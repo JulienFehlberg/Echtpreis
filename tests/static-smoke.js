@@ -4,7 +4,7 @@ const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].m
 assert(scripts.length>=3,"inline scripts missing");
 scripts.forEach((code,i)=>{const file=path.join(os.tmpdir(),"echtpreis-inline-"+(i+1)+".js");fs.writeFileSync(file,code);const r=cp.spawnSync(process.execPath,["--check",file],{encoding:"utf8"});assert.strictEqual(r.status,0,"inline script "+(i+1)+" syntax: "+(r.stderr||r.stdout));});
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.strictEqual(new Set(ids).size,ids.length,"duplicate HTML ids");
-["productInput","addBtn","compareBtn","demoListBtn","list","stores","results","receiptFile","receiptStore","receiptDate","finishPurchaseBtn","reviewRows","ocrStatus","receiptTotalCheck","receiptStoreDetail","receiptPaymentDetail","receiptInsight","receiptInsightTitle","statsAverage","statsRecent","statsInsight","feedbackText","feedbackSend","feedbackStatus"].forEach(id=>assert(ids.includes(id),"missing required element #"+id));
+["productInput","addBtn","compareBtn","demoListBtn","list","stores","results","receiptFile","receiptStore","receiptDate","finishPurchaseBtn","reviewRows","ocrStatus","receiptTotalCheck","receiptStoreDetail","receiptPaymentDetail","receiptInsight","receiptInsightTitle","statsAverage","statsBreakdown","statsRecent","statsInsight","feedbackText","feedbackSend","feedbackStatus"].forEach(id=>assert(ids.includes(id),"missing required element #"+id));
 assert(!html.includes('addEventListener("click",compareStable)'),"legacy compare engine is still bound");
 assert(!html.includes('var demo=byId("demoListBtn")'),"obsolete demo handler is still bound");
 assert(html.includes("window.addEchtpreisItem"),"single-basket bridge missing");
@@ -25,6 +25,7 @@ assert(html.includes('<script src="app/runtime.js"></script>'),"platform runtime
 assert(html.includes("window.EchtpreisRuntime"),"location flow must use the platform runtime");
 assert(html.includes('href="privacy.html"'),"privacy entry point missing");
 assert(html.includes("function buildReceiptInsight"),"personal receipt insight engine missing");
+assert(html.includes("function renderStatsBreakdown"),"monthly spending breakdown missing");
 assert(html.includes('API_BASE+"/v1/feedback"'),"tester feedback endpoint is not wired into the UI");
 assert(html.includes("items:valid.map"),"local receipt history must retain line items for future insights");
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
