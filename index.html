@@ -814,8 +814,7 @@ function comparisonQuality(row,totalItems){
 }
 window.compare=async function compare({skipLocation=false,scroll=true}={}){
  hasCompared=true;const revision=comparisonRevision;$("compareStatus").textContent=skipLocation?"Vergleich wird aktualisiert …":"Vergleich wird berechnet …";
- if(!skipLocation)await loadNearbyStores();
- await ingestOpenPrices(false,basket.map(w=>w.key).filter(Boolean));
+ if(!skipLocation){await loadNearbyStores();await ingestOpenPrices(false,basket.map(w=>w.key).filter(Boolean));}
  if(revision!==comparisonRevision)return false;
  if(!basket.length){$("results").style.display="none";$("compareStatus").textContent="Schreib zuerst deinen Einkauf auf.";if(!skipLocation)alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");return false}
  if(!selected.size){$("results").style.display="none";$("compareStatus").textContent="Bitte mindestens einen Markt auswählen.";if(!skipLocation)alert("Bitte mindestens einen Markt auswählen.");return false}
