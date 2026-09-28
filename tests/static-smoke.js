@@ -20,6 +20,10 @@ assert(html.includes('history.sort((a,b)=>String(b.date).localeCompare(String(a.
 assert(html.includes("echtpreis_openprices_sync_by_key_v1"),"Open Prices should be cached per product key");
 assert(html.includes("ingestOpenPrices(false,basket.map(w=>w.key).filter(Boolean))"),"manual compare should load only basket price categories");
 assert(!html.includes("syncSharedData();ingestOpenPrices();"),"startup must not fetch the full Open Prices catalog");
+assert(html.includes('<script src="app/config.js"></script>'),"store-ready config layer missing");
+assert(html.includes('<script src="app/runtime.js"></script>'),"platform runtime layer missing");
+assert(html.includes("window.EchtpreisRuntime"),"location flow must use the platform runtime");
+assert(html.includes('href="privacy.html"'),"privacy entry point missing");
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
 const products=(html.match(/label:"/g)||[]).length;assert(products>=30,"primary product catalog unexpectedly small: "+products);
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
