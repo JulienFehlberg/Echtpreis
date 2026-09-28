@@ -28,6 +28,8 @@ assert(html.includes('rel="manifest"'),"installable web-app manifest missing");
 assert(html.includes('apple-mobile-web-app-capable'),"iOS home-screen metadata missing");
 assert(html.includes("function buildReceiptInsight"),"personal receipt insight engine missing");
 assert(html.includes("function renderStatsBreakdown"),"monthly spending breakdown missing");
+assert(html.includes("sicher kategorisiert"),"spending breakdown confidence coverage missing");
+assert(html.includes('x.category!=="Sonstiges"'),"uncertain categories must not drive post-scan category facts");
 assert(html.includes("echtpreis_insight_history_v1"),"personal insight history missing");
 assert(html.includes("function renderStatsMarketProfile"),"personal market profile missing");
 assert(html.includes("function renderStatsPriceMemory"),"personal product price memory missing");
