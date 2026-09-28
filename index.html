@@ -62,7 +62,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.58.1</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.58.2</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
@@ -755,7 +755,8 @@ window.addEchtpreisBarcode=async(name,qty,code)=>{
  try{learnFrequent(raw)}catch(e){}drawList();basketChanged();await ingestOpenPriceForBarcode(ean,key,name);if(hasCompared)basketChanged();return true;
 };
 window.getEchtpreisRawList=()=>basket.map(x=>x.raw);
-window.replaceEchtpreisList=rows=>{basket=(rows||[]).map(x=>{let w=parseWish(typeof x==="string"?x:x.raw);w.checked=!!(x&&x.checked);w.choice={...w.choice,...(x&&x.choice||{})};hydrateChoice(w);return w}).filter(x=>x.raw);saveBasketState();drawList();basketChanged();};
+function restoreBasketItem(x){let saved=typeof x==="string"?{raw:x}:x,w=parseWish(saved.raw);w.checked=!!saved.checked;if(saved.ean){Object.assign(w,{ean:saved.ean,key:"ean:"+saved.ean,label:saved.label||w.label,amount:1,unit:"piece",calcAmount:1,matched:true,matchMode:"exact"})}else{w.choice={...w.choice,...(saved.choice||{})};hydrateChoice(w)}return w}
+window.replaceEchtpreisList=rows=>{basket=(rows||[]).filter(x=>typeof x==="string"?x:x&&x.raw).map(restoreBasketItem);saveBasketState();drawList();basketChanged();};
 function drawList(){
  const ordered=basket.map((w,i)=>({w,i})).sort((a,b)=>Number(a.w.checked)-Number(b.w.checked));
  const row=({w,i})=>'<div class="item" style="'+(w.checked?'opacity:.55;':'')+'"><button type="button" data-check="'+i+'" aria-label="'+(w.checked?'Wieder auf die Liste':'Im Einkaufswagen')+'" style="width:32px;height:32px;border-radius:9px;border:2px solid '+(w.checked?'#35d07f':'#718079')+';background:'+(w.checked?'#35d07f':'transparent')+';color:#07150d;font-weight:900;font-size:18px;flex:0 0 32px">'+(w.checked?'✓':'')+'</button><div class="itemname" style="'+(w.checked?'text-decoration:line-through;':'')+'">'+escHtml(wishText(w))+'<div class="qty">'+(w.checked?'Im Einkaufswagen':(w.matched?'✓ erkannt':'⚠ Produkt prüfen')+(w.note?' · '+escHtml(w.note):'')+(choiceLabel(w)?' · '+escHtml(choiceLabel(w)):'')+(w.needsClarification?' · ⚠ genauer auswählen':''))+'</div>'+choiceEditor(w,i)+(editingItem===i?'<div class="list-edit"><input data-edit-input="'+i+'" aria-label="Produkt und Menge bearbeiten" value="'+escHtml(w.raw)+'"><button type="button" class="primary" data-save-edit="'+i+'">Speichern</button></div>':'<button type="button" class="edit-trigger" data-edit="'+i+'">Bearbeiten</button>')+'</div><button class="x" data-del="'+i+'" aria-label="Produkt entfernen">✕</button></div>';
@@ -963,5 +964,5 @@ $("finishPurchaseBtn").onclick=async()=>{
  $("receiptMsg").textContent=(($("contribute").checked&&receiptTotalVerified)?(saved+" erkannte Produktpreise beigetragen."):$("contribute").checked?"Bon gespeichert · Community-Preise wegen ungeprüfter Summe nicht übernommen.":"Bon geprüft · keine Community-Freigabe.")+rewardText;drawDataMachine();refreshPoints();
 };
 $("noReceiptBtn").onclick=()=>{if(!confirm("Bon verloren oder nicht mehr vorhanden? Du kannst den Einkauf trotzdem abschließen. Diesmal können daraus nur keine Preise zur ECHTPREIS-Datenbasis beitragen."))return;closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Diesmal ohne Bon – kein Problem.";$("receiptMsg").textContent="Keine Preisdaten beigetragen.";$("noReceiptBtn").style.display="none";$("finishPurchaseBtn").style.display="none";};
-refreshPoints();drawSuggestions();drawStores();let savedBasket=loadBasketState();if(savedBasket.length)basket=savedBasket.map(x=>{let w=parseWish(x.raw);w.checked=!!x.checked;return w});drawList();drawDataMachine();syncSharedData();ingestOpenPrices();
+refreshPoints();drawSuggestions();drawStores();let savedBasket=loadBasketState();if(savedBasket.length)basket=savedBasket.filter(x=>x&&x.raw).map(restoreBasketItem);drawList();drawDataMachine();syncSharedData();ingestOpenPrices();
 </script></body></html>

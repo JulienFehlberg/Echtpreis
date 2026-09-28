@@ -41,6 +41,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  p=w.parseWish("500 g Erdbeeren");assert.strictEqual(p.key,"erdbeeren");assert.strictEqual(p.unit,"kg");assert.strictEqual(p.amount,0.5);assert(w.referencePrice("erdbeeren","Lidl",p)?.reference,"strawberry reference fallback missing");
  p=w.parseWish("250 g Blaubeeren");assert.strictEqual(p.key,"blaubeeren");assert(w.referencePrice("blaubeeren","REWE",p)?.price>0,"blueberry reference fallback missing");
  p=w.parseWish("1 kg Süßkartoffeln");assert.strictEqual(p.key,"suesskartoffeln");
+ let restored=w.restoreBasketItem({raw:"Lachs",choice:{Art:"frozen",Menge:"500g"},checked:true});assert.strictEqual(restored.needsClarification,false,"saved product choice must survive reload");assert.strictEqual(restored.checked,true);
+ restored=w.restoreBasketItem({raw:"250 g Testprodukt",ean:"12345678",label:"Testprodukt · 250 g"});assert.strictEqual(restored.key,"ean:12345678","barcode identity must survive reload");
  assert.strictEqual(w.identifyReceiptProduct("Red Bull 0,25").key,"energydrink");
  const rb=w.inferPackFromName("Red Bull 0,25");assert.strictEqual(rb.packAmount,0.25);assert.strictEqual(rb.packUnit,"l");
  const receipt=w.parseReceiptText("G&G Mini-Hörnchen 1,49\nOetker Ristorante 3,49\nRed Bull 0,25 1,49 x 2 2,98\nPfand 0,25 x 2 0,50\nSUMME 8,46");
