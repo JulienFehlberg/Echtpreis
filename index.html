@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.1</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.1.1</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="homeactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkauf planen<small>Preise vergleichen</small></button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen<small>Preise bestätigen</small></button><button class="homeaction" id="homePoints"><span>🎁</span>Beiträge & Punkte<small id="pointsMini">0 XP</small></button></div><div class="tabs"><button class="tab active" id="planTab">Planen</button><button class="tab" id="receiptTab">Bon scannen</button></div>
 
@@ -333,7 +333,8 @@ const runDupeTestBtn=$("runDupeTest");if(runDupeTestBtn)runDupeTestBtn.onclick=a
 };
 $("addReviewRow").onclick=()=>{receiptDraft.push({name:"",price:"",packAmount:"",packUnit:""});drawReviewRows()};
 $("receiptFile").onchange=e=>{let file=e.target.files[0];$("receiptMsg").textContent=file?"✓ Bon ausgewählt: "+file.name:"";$("finishPurchaseBtn").disabled=!file;if(file)processReceiptFile(file)};
-function closePurchase(){try{localStorage.removeItem("echtpreis_open_purchase")}catch(e){}}\nconst autoImports=$("autoReceiptImports");if(autoImports)autoImports.onchange=()=>localStorage.setItem("echtpreis_auto_imports",autoImports.checked?"1":"0");
+function closePurchase(){try{localStorage.removeItem("echtpreis_open_purchase")}catch(e){}}
+const autoImports=$("autoReceiptImports");if(autoImports)autoImports.onchange=()=>localStorage.setItem("echtpreis_auto_imports",autoImports.checked?"1":"0");
 async function submitReceiptReward(store,date,valid){
  const contributorId=localStorage.getItem("echtpreis_contributor_id")||"";
  const total=valid.reduce((n,x)=>n+(Number(x.price)||0),0);
