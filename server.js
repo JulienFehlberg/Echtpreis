@@ -51,4 +51,4 @@ async function handle(req,res){
 const server=http.createServer((req,res)=>{Promise.resolve(handle(req,res)).catch(e=>{console.error("Request failed",e);if(!res.headersSent)send(res,500,{error:"Interner Serverfehler"});else if(!res.writableEnded)res.end()})});
 async function start(){try{await initDb();await seedMerchants();server.listen(PORT,()=>console.log("ECHTPREIS Data API 5.0 on "+PORT))}catch(e){console.error("DB init failed",e);server.listen(PORT,()=>console.log("ECHTPREIS Data API 5.0 fallback on "+PORT))}}
 if(require.main===module)start();
-module.exports={server,start,handle,receiptHash,receiptCodeHash,rewardScore,validObs,clean,normalizeMerchant};
+module.exports={server,start,handle,receiptHash,receiptCodeHash,rewardScore,validObs,clean};
