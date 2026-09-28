@@ -1066,15 +1066,16 @@ async function runImageReceiptOCR(file){
  $("ocrBox").style.display="block";$("ocrStatus").textContent="Bon wird lokal gelesen …";receiptCash=null;
  try{
   if(!window.Tesseract){$("ocrStatus").textContent="Lokale Texterkennung wird geladen …";await new Promise((resolve,reject)=>{let sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc)})}
-  const first=await Tesseract.recognize(file,"deu",{logger:m=>{if(m.status==="recognizing text")$("ocrStatus").textContent="Bon lesen: "+Math.round((m.progress||0)*100)+" %"}}),texts=[first.data.text||""],baseTotal=extractReceiptTotal(first.data.text||"");
-  const withBaseTotal=t=>baseTotal&&!extractReceiptTotal(t)?t+"\nSUMME "+baseTotal.toFixed(2).replace(".",","):t;
-  let best=receiptCandidateScore(withBaseTotal(texts[0]));applyReceiptText(best.text,"Foto");
+  const first=await Tesseract.recognize(file,"deu",{logger:m=>{if(m.status==="recognizing text")$("ocrStatus").textContent="Bon lesen: "+Math.round((m.progress||0)*100)+" %"}}),texts=[first.data.text||""],
+   baseText=first.data.text||"",baseTotal=extractReceiptTotal(baseText),baseStore=detectReceiptStore(baseText),baseDate=detectReceiptDate(baseText),baseCash=extractReceiptCash(baseText);
+  const withBaseMetadata=t=>{let out=String(t||"");if(baseStore&&!detectReceiptStore(out))out=baseStore+"\n"+out;if(baseDate&&!detectReceiptDate(out)){let p=baseDate.split("-");out=p[2]+"."+p[1]+"."+p[0]+"\n"+out}if(baseTotal&&!extractReceiptTotal(out))out+="\nSUMME "+baseTotal.toFixed(2).replace(".",",");if(baseCash.paid&&!extractReceiptCash(out).paid)out+="\nBar "+baseCash.paid.toFixed(2).replace(".",",");if(baseCash.change!=null&&!extractReceiptCash(out).change)out+="\nRückgeld "+baseCash.change.toFixed(2).replace(".",",");return out};
+  let best=receiptCandidateScore(withBaseMetadata(texts[0]));applyReceiptText(best.text,"Foto");
   if(!receiptCandidateVerified(best)){
    $("ocrStatus").textContent="Artikelbereich wird genauer gelesen …";
    try{const image=await createImageBitmap(file),w=image.width,h=image.height;image.close();texts.push(await receiptCrop(file,[w*.16,h*.12,w*.70,h*.27],"eng",6))}catch(e){}
    // Convert fractional crop values to the actual image size on the next pass.
    if(texts.length>1){
-    let candidate=receiptCandidateScore(withBaseTotal(texts[1]));if(candidate.score>best.score)best=candidate;
+    let candidate=receiptCandidateScore(withBaseMetadata(texts[1]));if(candidate.score>best.score)best=candidate;
     applyReceiptText(best.text,"Bonausschnitt");
    }
   }
@@ -1083,7 +1084,7 @@ async function runImageReceiptOCR(file){
    try{
     const image=await createImageBitmap(file),w=image.width,h=image.height;image.close();
     texts.push(await receiptCrop(file,[w*.10,h*.07,w*.80,h*.40],"deu",4));
-    let candidate=receiptCandidateScore(withBaseTotal(texts[texts.length-1]));if(candidate.score>best.score)best=candidate;
+    let candidate=receiptCandidateScore(withBaseMetadata(texts[texts.length-1]));if(candidate.score>best.score)best=candidate;
     applyReceiptText(best.text,"Detailprüfung");
    }catch(e){}
   }
