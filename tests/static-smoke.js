@@ -55,6 +55,10 @@ assert(html.includes("flushFeedbackQueue"),"queued feedback retry missing");
 assert(html.includes("items:valid.map"),"local receipt history must retain line items for future insights");
 assert(html.includes("typicalQty=medianNumber(priorQty)"),"household forecast must normalize latest quantity against typical purchase quantity");
 assert(html.includes("storeCanCarry(store,i,i.key)"),"stable price comparison must enforce retailer assortment");
+assert(html.includes("reward.ok&&!reward.duplicate&&receiptTotalVerified"),"duplicate or server-unverified receipts must never contribute market prices");
+assert(html.includes("Number(r.packAmount||0)*(Number(r.count)||1)"),"multipack receipt observations must normalize by total purchased quantity");
+assert(html.includes("globalAdjustments=receiptDraft.filter"),"coupon receipts must not produce misleading cross-store savings");
+
 
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
 const products=(html.match(/label:"/g)||[]).length;assert(products>=30,"primary product catalog unexpectedly small: "+products);
