@@ -62,7 +62,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}.receipt-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #e5eae7;text-align:left}.receipt-item strong{white-space:nowrap}.receipt-item-name{min-width:0;overflow-wrap:anywhere}.receipt-item small{display:block;color:#68736d;margin-top:3px}.ocrbox #receiptTotalCheck,.ocrbox #receiptPaymentDetail{font-size:14px;margin:10px 0;text-align:left}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.60.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.61.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
@@ -745,14 +745,22 @@ function drawSuggestions(){let a=["500 g Rinderhack","1 kg Bananen","10 Eier","2
 function drawStores(){ $("stores").innerHTML=storeNames.map(st=>'<span class="chip '+(selected.has(st)?"on":"")+'" data-store="'+st+'">'+st+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores();basketChanged()});}
 function renderQuickSuggestions(){
  const box=$("quickSuggestions");if(!box)return;
- const identity=w=>w.key||normalizeProduct(w.raw);
- const inBasket=new Set(basket.map(identity));
+ const identity=w=>w.key||normalizeProduct(w.raw),inBasket=new Set(basket.map(identity)),keys=new Set(basket.map(w=>w.key).filter(Boolean));
  const ranked=Object.entries((typeof getFrequent==="function"?getFrequent():{})).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+ const complements={
+  rinderhack:["1 kg Zwiebeln","500 g Tomaten","500 g Nudeln"],hackfleisch:["1 kg Zwiebeln","500 g Tomaten","500 g Nudeln"],
+  nudeln:["500 g Tomaten","500 g Käse","1 Zwiebel"],reis:["500 g Hähnchenbrust","500 g Paprika","1 Zwiebel"],
+  milch:["10 Eier","500 g Haferflocken","1 kg Bananen"],eier:["1 Brot","250 g Butter","1 l Milch"],
+  brot:["250 g Butter","500 g Käse","10 Eier"],toast:["250 g Butter","500 g Käse","10 Eier"],
+  kartoffeln:["500 g Rinderhack","1 Zwiebel","500 g Paprika"],suesskartoffeln:["500 g Rinderhack","10 Eier","1 Zwiebel"],
+  haferflocken:["1 l Milch","1 kg Bananen","500 g Joghurt"],joghurt:["1 kg Bananen","500 g Haferflocken","250 g Blaubeeren"]
+ };
+ const contextual=[];keys.forEach(k=>(complements[k]||[]).forEach(x=>contextual.push(x)));
  const popular=["10 Eier","1 l Milch","1 kg Bananen","500 g Rinderhack","1 kg Kartoffeln","500 g Tomaten","1 Brot","1 Toast","500 g Joghurt","250 g Butter","1 kg Äpfel","1 Gurke","500 g Karotten","500 g Käse","500 g Nudeln","1 kg Reis","1 l Haferdrink","500 g Haferflocken","1 l Orangensaft","1 kg Zwiebeln"];
- const more=Object.entries(catalog).filter(([key,c])=>!c.clarify).map(([key,c])=>(c.unit==="piece"?"1 ":c.unit==="l"?"1 l ":"500 g ")+c.label);
+ const more=Object.entries(catalog).filter(([,x])=>!x.clarify).map(([,x])=>(x.unit==="piece"?"1 ":x.unit==="l"?"1 l ":"500 g ")+x.label);
  const seen=new Set(),picks=[];
- for(const raw of [...ranked,...popular,...more]){const w=parseWish(raw),id=identity(w);if(!w.key||w.needsClarification||inBasket.has(id)||seen.has(id))continue;seen.add(id);picks.push(raw);if(picks.length===3)break}
- box.innerHTML=picks.length?'<div class="quick-label">Schnell hinzufügen</div><div class="quick-row">'+picks.map(x=>'<button type="button" class="quick-chip" data-quick="'+escHtml(x)+'">+ '+escHtml(x)+'</button>').join("")+'</div>':"";
+ for(const raw of [...contextual,...ranked,...popular,...more]){const w=parseWish(raw),id=identity(w);if(!w.key||w.needsClarification||inBasket.has(id)||seen.has(id))continue;seen.add(id);picks.push(raw);if(picks.length===3)break}
+ box.innerHTML=picks.length?'<div class="quick-label">'+(contextual.length?"Passt zu deiner Liste":"Schnell hinzufügen")+'</div><div class="quick-row">'+picks.map(x=>'<button type="button" class="quick-chip" data-quick="'+escHtml(x)+'">+ '+escHtml(x)+'</button>').join("")+'</div>':"";
  box.querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>add(b.dataset.quick));
 }
 function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;let w=parseWish(raw);let duplicate=basket.find(x=>x.raw.toLowerCase()===w.raw.toLowerCase()&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}w.checked=false;basket.push(w);try{learnFrequent(raw)}catch(e){}$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();}
@@ -806,7 +814,6 @@ function saveRecipe(){let name=$("recipeName").value.trim(),ingredients=recipeRo
 function drawSavedRecipes(){let a=loadRecipes(),el=$("savedRecipesList");el.innerHTML=a.length?a.map(r=>'<div style="padding:10px 0;border-bottom:1px solid #263329"><b>'+escHtml(r.name)+'</b><div class="qty">'+r.ingredients.length+' Zutaten</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px"><button class="chip" data-recipe-add="'+r.id+'">🛒 In Einkaufsliste</button><button class="chip" data-recipe-edit="'+r.id+'">Bearbeiten</button><button class="chip" data-recipe-del="'+r.id+'">Löschen</button></div></div>').join(""):'<div class="muted">Noch keine Rezepte gespeichert.</div>';document.querySelectorAll("[data-recipe-add]").forEach(e=>e.onclick=()=>{let r=loadRecipes().find(x=>x.id===e.dataset.recipeAdd);if(r){let n=addRecipeRows(r.ingredients);alert((n||0)+" Zutaten wurden in deine Einkaufsliste übernommen.")}});document.querySelectorAll("[data-recipe-edit]").forEach(e=>e.onclick=()=>{let r=loadRecipes().find(x=>x.id===e.dataset.recipeEdit);if(r)showRecipeImport(r)});document.querySelectorAll("[data-recipe-del]").forEach(e=>e.onclick=()=>{if(confirm("Rezept wirklich löschen?")){saveRecipes(loadRecipes().filter(x=>x.id!==e.dataset.recipeDel));drawSavedRecipes()}})}
 function showSavedRecipes(){showPlan();$("recipeImport").style.display="none";$("savedRecipesPanel").style.display="block";drawSavedRecipes()}
 
-function importRecipeIngredients(){let rows=$("recipeIngredients").value.split(/\n+/).map(x=>x.trim()).filter(Boolean);if(!rows.length)return alert("Füge zuerst die Zutaten des Rezepts ein.");let added=0;rows.forEach(raw=>{if(!basket.some(x=>normalizeProduct(x.raw)===normalizeProduct(raw))){let w=parseWish(raw);w.checked=false;basket.push(w);added++}});saveBasketState();drawList();if(added)basketChanged();$("recipeImport").style.display="none";$("recipeIngredients").value="";if(added)alert(added+" Zutaten wurden in deine Einkaufsliste übernommen.");}
 const homeRecipeEl=$("homeRecipe");if(homeRecipeEl)homeRecipeEl.onclick=()=>showRecipeImport();$("addRecipeBtn").onclick=()=>showRecipeImport();$("savedRecipesBtn").onclick=showSavedRecipes;$("importRecipeBtn").onclick=importRecipeIngredients;$("saveRecipeBtn").onclick=saveRecipe;$("closeRecipeBtn").onclick=()=>{$("recipeImport").style.display="none"};
 window.echtpreisAdd=()=>add();window.echtpreisCompare=async()=>{if(await compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};$("demoListBtn").onclick=()=>{basket=["500 g Rinderhack","1 kg Bananen"].map(parseWish);drawList();basketChanged()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=async()=>{if(await compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};
 function hidePoints(){$("pointsCard").style.display="none"}
@@ -825,7 +832,11 @@ function refreshStats(){
  $("statsReceipts").textContent=String(receipts.length);$("statsSpent").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(year))));$("statsWeekly").textContent=eur(sum(receipts.filter(r=>String(r.date||"")>=weekKey)));$("statsMonthly").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(month))));$("statsPotential").textContent=known.length?"ca. "+eur(known.reduce((n,r)=>n+Number(r.potentialSaving),0)):"–";$("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderStatsReceipts();
 }
 window.refreshEchtpreisStats=refreshStats;
-async function loadServerReceipts(){let cid=localStorage.getItem("echtpreis_contributor_id")||"";if(!cid)return getPersonalReceipts();try{let r=await fetch(API_BASE+"/v1/my-receipts?contributorId="+encodeURIComponent(cid)),d=await r.json();if(r.ok&&Array.isArray(d.items))return d.items.map(x=>({id:x.id,store:x.store,date:String(x.purchasedAt||"").slice(0,10),total:"",private:!!x.private,source:"server"}))}catch(e){}return getPersonalReceipts()}
+async function loadServerReceipts(){
+ const local=getPersonalReceipts(),cid=localStorage.getItem("echtpreis_contributor_id")||"";if(!cid)return local;
+ try{let r=await fetch(API_BASE+"/v1/my-receipts?contributorId="+encodeURIComponent(cid)),d=await r.json();if(r.ok&&Array.isArray(d.items)){let byId=new Map(local.map(x=>[String(x.id),x]));return d.items.map(x=>{let cached=byId.get(String(x.id))||{};return {id:x.id,store:x.store||cached.store,date:String(x.purchasedAt||cached.date||"").slice(0,10),total:Number(x.total)>0?Number(x.total).toFixed(2):(cached.total||""),potentialSaving:x.potentialSaving!=null?Number(x.potentialSaving):cached.potentialSaving,savingConfidence:x.savingConfidence||cached.savingConfidence||null,private:!!x.private,source:"server"}})}}
+ catch(e){}return local;
+}
 async function setReceiptPrivate(r,value){if(r.source==="server"){let cid=localStorage.getItem("echtpreis_contributor_id")||"";let q=await fetch(API_BASE+"/v1/receipt-privacy",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({receiptId:r.id,contributorId:cid,private:value})});if(!q.ok)throw new Error("Server konnte den Privatstatus nicht ändern")}else{let a=getPersonalReceipts(),x=a.find(v=>v.id===r.id);if(x)x.private=value;savePersonalReceipts(a)}}
 async function deletePersonalReceipt(r){if(r.source==="server"){let cid=localStorage.getItem("echtpreis_contributor_id")||"";let q=await fetch(API_BASE+"/v1/receipt-delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({receiptId:r.id,contributorId:cid})});if(!q.ok)throw new Error("Server konnte den Bon nicht löschen")}savePersonalReceipts(getPersonalReceipts().filter(v=>String(v.id)!==String(r.id)));refreshStats()}
 async function renderPersonalReceipts(){let box=$("myReceipts");if(!box)return;box.innerHTML='<div class="detail">Bons werden geladen …</div>';let rs=await loadServerReceipts();box.innerHTML=rs.length?rs.map((r,i)=>'<div style="border:1px solid #ddd;border-radius:12px;padding:10px;margin:7px 0"><b>'+escHtml(r.store||"Bon")+'</b> · '+escHtml(r.date||"")+(r.total?' · '+escHtml(r.total)+' €':'')+(r.private?' · 🔒 Privat':'')+'<div style="display:flex;gap:7px;margin-top:7px"><button class="ghost" data-private-receipt="'+i+'">'+(r.private?'Privat aus':'🔒 Privat')+'</button><button class="ghost" data-delete-receipt="'+i+'">🗑 Löschen</button></div></div>').join(""):'<div class="detail">Noch keine persönlichen Bons gespeichert.</div>';document.querySelectorAll("[data-private-receipt]").forEach(b=>b.onclick=async()=>{let r=rs[+b.dataset.privateReceipt];b.disabled=true;try{await setReceiptPrivate(r,!r.private);await renderPersonalReceipts()}catch(e){alert(e.message);b.disabled=false}});document.querySelectorAll("[data-delete-receipt]").forEach(b=>b.onclick=async()=>{let r=rs[+b.dataset.deleteReceipt];if(!confirm("Diesen Bon aus deinem persönlichen Verlauf löschen?"))return;b.disabled=true;try{await deletePersonalReceipt(r);await renderPersonalReceipts()}catch(e){alert(e.message);b.disabled=false}})}
@@ -833,7 +844,7 @@ function refreshPoints(){let xp=Number(localStorage.getItem("echtpreis_xp")||0),
 let hp=$("homePoints");if(hp)hp.onclick=showPoints;$("pointsBack").onclick=showPlan;
 $("toReceiptBtn").onclick=showReceipt;$("backPlanBtn").onclick=showPlan;
 $("planTab").onclick=showPlan;$("receiptTab").onclick=showReceipt;
-let receiptDraft=[];let detectedReceiptBarcode="";let receiptTotalVerified=false;let receiptCash=null;let currentReceiptSaving=null;let currentTestPayload=null;const devTestMode=new URLSearchParams(location.search).get("test")==="1";const testModeBox=$("testModeBox");if(devTestMode&&testModeBox)testModeBox.style.display="block";
+let receiptDraft=[];let detectedReceiptBarcode="";let receiptTotalVerified=false;let receiptCash=null;let currentReceiptSaving=null;let currentReceiptSavingConfidence=null;let currentTestPayload=null;const devTestMode=new URLSearchParams(location.search).get("test")==="1";const testModeBox=$("testModeBox");if(devTestMode&&testModeBox)testModeBox.style.display="block";
 function guessKey(name){return identifyReceiptProduct(name).key||""}
 function drawReviewRows(){
  $("reviewRows").innerHTML=receiptDraft.map(r=>{let m=identifyReceiptProduct(r.name||""),meta=r.isDeposit?"Pfand":(m.key?"erkannt":"Artikel erkannt · kein sicherer Marktpreis");return '<div class="reviewrow receipt-item"><div class="receipt-item-name"><b>'+escHtml(r.name||"Unbekannter Artikel")+'</b><small>'+escHtml(meta)+'</small></div><strong>'+eur(Number(String(r.price||0).replace(",","."))||0)+'</strong></div>'}).join("");
@@ -894,13 +905,17 @@ function extractReceiptCash(text){
  m=t.match(/(?:rückgeld|rueckgeld|wechselgeld)\s*(?:€|EUR)?\s*-?\s*(\d{1,5}[,.]\d{2})/i);if(m)out.change=parseReceiptNumber(m[1]);
  return out;
 }
+function plausibleReceiptItemName(name){
+ const n=normalizeProduct(name),letters=(n.match(/[a-z]/g)||[]).length;
+ return n.length>=4&&letters>=3&&!/^(?:bar|summe|gesamt|mwst|netto|umsatz|steuer|rueckgeld|rückgeld|eur|kasse|terminal|datum|uhrzeit)$/.test(n);
+}
 function receiptCandidateScore(text){
  const rows=parseReceiptText(text),total=extractReceiptTotal(text),recognized=Number(rows.reduce((n,r)=>n+(Number(String(r.price).replace(",","."))||0),0).toFixed(2)),cash=extractReceiptCash(text),low=String(text||"").toLowerCase();
  let score=0;if(total>0)score+=35;score+=Math.min(rows.length,5)*9;if(total>0&&rows.length&&Math.abs(total-recognized)<.011)score+=55;if(/lidl|kaufland|rewe|edeka|penny|aldi|netto|norma|rossmann|\bdm\b/.test(low))score+=8;if(/\b\d{2}[.\/-]\d{2}[.\/-](?:20)?\d{2}\b/.test(text))score+=4;if(cash.paid)score+=3;
- rows.forEach(r=>{let n=(r.name||"").trim();if(n.length<2||/^(?:bar|summe|gesamt|mwst|netto|umsatz|steuer|rückgeld|eur|€)$/i.test(n))score-=25});
+ rows.forEach(r=>{if(r.isDeposit)return;let n=(r.name||"").trim();if(!plausibleReceiptItemName(n))score-=35;else if(identifyReceiptProduct(n).key)score+=8});
  return {score,rows,total,recognized,cash,text};
 }
-function receiptCandidateVerified(candidate){return !!(candidate&&candidate.total>0&&candidate.rows.length>=2&&Math.abs(candidate.total-candidate.recognized)<.011&&candidate.score>=70)}
+function receiptCandidateVerified(candidate){const products=(candidate?.rows||[]).filter(r=>!r.isDeposit);return !!(candidate&&candidate.total>0&&products.length>=1&&products.every(r=>plausibleReceiptItemName(r.name))&&Math.abs(candidate.total-candidate.recognized)<.011&&candidate.score>=70)}
 
 function checkReceiptTotal(){
  const total=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,"")),recognized=Number(receiptDraft.reduce((n,r)=>n+(Number(String(r.price).replace(",","."))||0),0).toFixed(2));
@@ -908,7 +923,7 @@ function checkReceiptTotal(){
  const plausible=receiptDraft.every(r=>r.isDeposit||((r.name||"").trim().length>=2&&!/^(?:bar|summe|gesamt|mwst|netto|umsatz|steuer|rückgeld)$/i.test((r.name||"").trim())));
  receiptTotalVerified=arithmeticMatch&&plausible;
  $("receiptTotalCheck").textContent=total>0?(receiptTotalVerified?"✓ "+receiptDraft.length+" Positionen erkannt · Bon-Summe "+eur(total):"Bon noch nicht sicher genug erkannt. Bitte erneut fotografieren."):"Bon-Summe konnte nicht sicher erkannt werden.";
- const pay=$("receiptPaymentDetail");if(pay){let bits=[];if(receiptCash&&receiptCash.paid)bits.push("Bar gegeben: "+eur(receiptCash.paid));if(receiptCash&&receiptCash.change)bits.push("Rückgeld: "+eur(receiptCash.change));pay.textContent=bits.join(" · ")}
+ const pay=$("receiptPaymentDetail");if(pay){let bits=[];if(receiptCash&&receiptCash.paid){bits.push("Bar gegeben: "+eur(receiptCash.paid));if(!receiptCash.change&&total>0&&receiptCash.paid>=total)receiptCash.change=Number((receiptCash.paid-total).toFixed(2))}if(receiptCash&&receiptCash.change!=null)bits.push("Rückgeld: "+eur(receiptCash.change));pay.textContent=bits.join(" · ")}
  const btn=$("finishPurchaseBtn");if(btn)btn.disabled=!(receiptTotalVerified&&$("receiptStore").value&&$("receiptDate").value);
  updateReceiptAnalysis();
 }
@@ -923,15 +938,15 @@ async function renderPdfFirstPage(file){
  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,page=await pdf.getPage(1),vp=page.getViewport({scale:2}),canvas=document.createElement("canvas");canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:canvas.getContext("2d"),viewport:vp}).promise;return new Promise(r=>canvas.toBlob(r,"image/jpeg",.92));
 }
 function updateReceiptAnalysis(){
- const box=$("receiptAnalysis");if(!box)return;
- currentReceiptSaving=null;
+ const box=$("receiptAnalysis");if(!box)return;currentReceiptSaving=null;currentReceiptSavingConfidence=null;
  const valid=receiptDraft.filter(r=>!r.isDeposit&&r.name&&Number(r.price)>0),paid=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,""));
- if(!paid){box.style.display="none";return;}
- const store=$("receiptStore").value||"Dein Markt",wishes=valid.map(r=>{let w=parseWish(r.name);w.matchMode="comparable";if(r.packAmount&&r.packUnit){w.calcAmount=Number(r.packAmount)*(Number(r.count)||1)*(r.packUnit==="g"||r.packUnit==="ml"?.001:1)}return w});
- let rows=valid.length&&receiptTotalVerified?[...selected].filter(st=>st!==store).map(st=>{let total=receiptDraft.filter(r=>r.isDeposit).reduce((n,r)=>n+Number(r.price||0),0),known=0;wishes.forEach(w=>{let p=w.key?activePrice(w.key,st,w):null;if(p){total+=p.price*w.calcAmount;known++}});return {store:st,total,known}}).filter(x=>x.known===wishes.length&&x.total>0).sort((a,b)=>a.total-b.total):[];
+ if(!paid){box.style.display="none";return}
  $("analysisPaid").textContent=eur(paid);box.style.display="block";
- if(rows.length&&rows[0].total<paid){let best=rows[0],saving=paid-best.total;currentReceiptSaving=saving;$("analysisBestStore").textContent=best.store+" · geschätzt";$("analysisBestPrice").textContent="ca. "+eur(best.total);$("analysisSaving").textContent="ca. "+eur(saving);$("analysisNote").textContent="Vergleich auf Basis der aktuell verfügbaren ECHTPREIS- und Referenzpreise. Filialpreise können abweichen.";}
- else{$("analysisBestStore").textContent=rows.length?rows[0].store+" · geschätzt":valid.length?"Kein vollständiger Marktvergleich möglich":"Artikel für Marktvergleich fehlen";$("analysisBestPrice").textContent=rows.length?"ca. "+eur(rows[0].total):"–";$("analysisSaving").textContent=rows.length?"0,00 €":"noch keinen Betrag";if(rows.length)currentReceiptSaving=0;$("analysisNote").textContent=rows.length?"Der günstigste bekannte Vergleich liegt nicht unter deiner Bon-Summe. Filialpreise können abweichen.":valid.length?"Für einen belastbaren Vergleich müssen die Bon-Summe und alle erkannten Positionen übereinstimmen und alle Produkte bepreist werden können.":"Die Bon-Summe wird gespeichert. Ergänze die Artikel mit ihren Preisen oder fotografiere den Bon erneut, um eine mögliche Ersparnis zu berechnen.";}
+ if(!receiptTotalVerified){$("analysisBestStore").textContent="Vergleich wartet auf sicheren Scan";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="–";$("analysisNote").textContent="Erst wenn Artikel und Bon-Summe zusammenpassen, wird ein Preisvergleich berechnet.";return}
+ const store=$("receiptStore").value||"Dein Markt",wishes=valid.map(r=>{let w=parseWish(r.name);w.matchMode="comparable";if(r.packAmount&&r.packUnit)w.calcAmount=Number(r.packAmount)*(Number(r.count)||1)*(r.packUnit==="g"||r.packUnit==="ml"?.001:1);return w});
+ let rows=[...selected].filter(st=>st!==store).map(st=>{let total=receiptDraft.filter(r=>r.isDeposit).reduce((n,r)=>n+Number(r.price||0),0),known=0,referenceCount=0,confirmedCount=0;wishes.forEach(w=>{let p=w.key?activePrice(w.key,st,w):null;if(p){total+=p.price*w.calcAmount;known++;p.reference?referenceCount++:confirmedCount++}});return {store:st,total,known,referenceCount,confirmedCount}}).filter(x=>x.known===wishes.length&&x.total>0).sort((a,b)=>a.total-b.total);
+ if(rows.length&&rows[0].total<paid){let best=rows[0],saving=paid-best.total,confidence=best.referenceCount===0?"hoch":best.confirmedCount>0?"mittel":"niedrig";currentReceiptSaving=Number(saving.toFixed(2));currentReceiptSavingConfidence=confidence;$("analysisBestStore").textContent=best.store+(confidence==="hoch"?" · belegt":" · Schätzung");$("analysisBestPrice").textContent=(confidence==="hoch"?"":"ca. ")+eur(best.total);$("analysisSaving").textContent=(confidence==="hoch"?"":"ca. ")+eur(saving);$("analysisNote").textContent=confidence==="hoch"?"Alle Vergleichspositionen beruhen auf aktuell belegten Preisen.":"Mindestens ein Vergleichspreis ist geschätzt. Die Ersparnis ist deshalb nur eine Orientierung und keine Filialgarantie."}
+ else{$("analysisBestStore").textContent=rows.length?rows[0].store:"Kein vollständiger Marktvergleich möglich";$("analysisBestPrice").textContent=rows.length?(rows[0].referenceCount?"ca. ":"")+eur(rows[0].total):"–";$("analysisSaving").textContent=rows.length?"0,00 €":"–";if(rows.length){currentReceiptSaving=0;currentReceiptSavingConfidence=rows[0].referenceCount?"niedrig":"hoch"}$("analysisNote").textContent=rows.length?"Der günstigste bekannte Vergleich liegt nicht unter deiner Bon-Summe.":"Für alle erkannten Produkte werden erst noch belastbare Vergleichspreise benötigt."}
 }
 function applyReceiptText(text,label){
  receiptDraft=parseReceiptText(text);let cash=extractReceiptCash(text);if(cash.paid||cash.change)receiptCash=cash;let low=text.toLowerCase();if(low.includes("lidl"))$("receiptStore").value="Lidl";else if(low.includes("kaufland"))$("receiptStore").value="Kaufland";else if(low.includes("rewe"))$("receiptStore").value="REWE";else if(low.includes("edeka"))$("receiptStore").value="EDEKA";else if(low.includes("penny"))$("receiptStore").value="PENNY";else if(low.includes("aldi"))$("receiptStore").value="ALDI Nord";else if(low.includes("netto"))$("receiptStore").value="Netto";else if(low.includes("norma"))$("receiptStore").value="NORMA";else if(low.includes("rossmann"))$("receiptStore").value="Rossmann";else if(/\bdm\b/.test(low))$("receiptStore").value="dm";
@@ -1010,12 +1025,12 @@ const runDupeTestBtn=$("runDupeTest");if(runDupeTestBtn)runDupeTestBtn.onclick=a
 $("addReviewRow").onclick=()=>{receiptDraft.push({name:"",price:"",packAmount:"",packUnit:""});drawReviewRows()};
 $("receiptTotalInput").oninput=checkReceiptTotal;
 $("receiptStore").onchange=updateReceiptAnalysis;
-$("receiptFile").onchange=async e=>{let file=e.target.files[0],button=$("finishPurchaseBtn");$("receiptMsg").textContent=file?"✓ Bon ausgewählt: "+file.name:"";button.disabled=true;$("receiptTotalInput").value="";receiptDraft=[];receiptCash=null;if(!file)return;try{await processReceiptFile(file)}catch(err){$("ocrBox").style.display="block";$("ocrStatus").textContent="Bon konnte nicht sicher gelesen werden. Bitte erneut fotografieren.";receiptDraft=[];receiptCash=null;drawReviewRows();checkReceiptTotal()}checkReceiptTotal()};
+$("receiptFile").onchange=async e=>{let file=e.target.files[0],button=$("finishPurchaseBtn");$("receiptMsg").textContent=file?"✓ Bon ausgewählt: "+file.name:"";button.style.display="block";button.textContent="Bon speichern";button.disabled=true;$("noReceiptBtn").style.display="block";$("receiptAnalysis").style.display="none";$("receiptTotalInput").value="";receiptDraft=[];receiptCash=null;currentReceiptSaving=null;currentReceiptSavingConfidence=null;if(!file)return;try{await processReceiptFile(file)}catch(err){$("ocrBox").style.display="block";$("ocrStatus").textContent="Bon konnte nicht sicher gelesen werden. Bitte erneut fotografieren.";receiptDraft=[];receiptCash=null;drawReviewRows();checkReceiptTotal()}checkReceiptTotal()};
 function closePurchase(){try{localStorage.removeItem("echtpreis_open_purchase")}catch(e){}}
 const autoImports=$("autoReceiptImports");if(autoImports)autoImports.onchange=()=>localStorage.setItem("echtpreis_auto_imports",autoImports.checked?"1":"0");
 async function submitReceiptReward(store,date,valid,total){
  const contributorId=localStorage.getItem("echtpreis_contributor_id")||"";
- const payload={store,purchasedAt:date+"T12:00:00",date,total:total.toFixed(2),contributorId,receiptBarcode:detectedReceiptBarcode||undefined,items:valid.map(x=>({rawName:x.name,lineTotal:x.price,price:x.price}))};
+ const payload={store,purchasedAt:date+"T12:00:00",date,total:total.toFixed(2),potentialSaving:currentReceiptSaving,savingConfidence:currentReceiptSavingConfidence,contributorId,receiptBarcode:detectedReceiptBarcode||undefined,items:valid.map(x=>({rawName:x.name,lineTotal:x.price,price:x.price}))};
  try{
   const r=await fetch(API_BASE+"/v1/receipt-submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
   const d=await r.json();if(!r.ok)throw new Error(d.error||"HTTP "+r.status);
@@ -1033,8 +1048,8 @@ $("finishPurchaseBtn").onclick=async()=>{
  $("finishPurchaseBtn").disabled=true;$("finishPurchaseBtn").textContent="Bon wird geprüft …";
  let reward=await submitReceiptReward(store,date,valid,total);
  let receipts=getPersonalReceipts(),existing=receipts.find(r=>r.id===reward.receiptId)||receipts.find(r=>r.store===store&&r.date===date&&Number(r.total)===0);
- if(existing){existing.total=total.toFixed(2);existing.potentialSaving=currentReceiptSaving;}
- else receipts.unshift({id:reward.receiptId||"local_"+Date.now(),store,date,total:total.toFixed(2),potentialSaving:currentReceiptSaving,private:false,source:reward.receiptId?"server":"local"});
+ if(existing){existing.total=total.toFixed(2);existing.potentialSaving=currentReceiptSaving;existing.savingConfidence=currentReceiptSavingConfidence;}
+ else receipts.unshift({id:reward.receiptId||"local_"+Date.now(),store,date,total:total.toFixed(2),potentialSaving:currentReceiptSaving,savingConfidence:currentReceiptSavingConfidence,private:false,source:reward.receiptId?"server":"local"});
  savePersonalReceipts(receipts.slice(0,250));refreshStats();
  if(reward.ok&&reward.duplicate){$("receiptMsg").textContent="Bon bereits erfasst · Summe "+eur(total)+" in der Statistik aktualisiert. Keine erneuten XP.";$("finishPurchaseBtn").textContent="Bereits erfasst";return}
  let proofId="receipt_"+Date.now(),saved=0,sharedItems=[];
@@ -1045,6 +1060,6 @@ $("finishPurchaseBtn").onclick=async()=>{
  let rewardText=reward.ok?(" · +"+reward.xp+" XP"+(reward.status?" · "+reward.status:"")):" · XP-Server momentan nicht erreichbar";
  $("receiptMsg").textContent=(($("contribute").checked&&receiptTotalVerified)?(saved+" erkannte Produktpreise beigetragen."):$("contribute").checked?"Bon gespeichert · Community-Preise wegen ungeprüfter Summe nicht übernommen.":"Bon geprüft · keine Community-Freigabe.")+rewardText;drawDataMachine();refreshPoints();
 };
-$("noReceiptBtn").onclick=()=>{if(!confirm("Bon verloren oder nicht mehr vorhanden? Du kannst den Einkauf trotzdem abschließen. Diesmal können daraus nur keine Preise zur ECHTPREIS-Datenbasis beitragen."))return;closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Diesmal ohne Bon – kein Problem.";$("receiptMsg").textContent="Keine Preisdaten beigetragen.";$("noReceiptBtn").style.display="none";$("finishPurchaseBtn").style.display="none";};
+$("noReceiptBtn").onclick=()=>{$("receiptFile").value="";$("ocrStatus").textContent="";$("receiptMsg").textContent="";$("reviewRows").innerHTML="";$("receiptTotalCheck").textContent="";$("receiptPaymentDetail").textContent="";$("receiptAnalysis").style.display="none";$("finishPurchaseBtn").disabled=true;$("finishPurchaseBtn").textContent="Bon speichern";receiptDraft=[];receiptCash=null;receiptTotalVerified=false;currentReceiptSaving=null;currentReceiptSavingConfidence=null;$("receiptFile").click()};
 refreshPoints();drawSuggestions();drawStores();let savedBasket=loadBasketState();if(savedBasket.length)basket=savedBasket.filter(x=>x&&x.raw).map(restoreBasketItem);drawList();drawDataMachine();syncSharedData();ingestOpenPrices();
 </script></body></html>
