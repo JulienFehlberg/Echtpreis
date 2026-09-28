@@ -183,18 +183,25 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
   }
   const cleanLabel=raw.replace(/^\s*[0-9]+(?:[.,][0-9]+)?\s*(?:kg|g|l|liter|ml|x|×|stuck|stueck|stk|packung(?:en)?|flasche(?:n)?|dose(?:n)?|rolle(?:n)?)?\s*/i,"").trim()||raw;
   const brandWords=["coca cola","coca-cola","red bull","dr oetker","dr. oetker","alpro","milka","ehrmann","nissin"];
-  const exact=brandWords.some(b=>t.includes(b));
-  return {raw,key,amount,unit,label:cleanLabel,matchMode:exact?"exact":"comparable"};
+  const exactBrand=brandWords.find(b=>t.includes(b))||"";
+  return {raw,key,amount,unit,label:cleanLabel,matchMode:exactBrand?"exact":"comparable",exactBrand};
  }
  function listItems(){
   const nodes=[...document.querySelectorAll("#list .item")];
   return nodes.map(n=>parseLine((n.querySelector(".itemname")||n).childNodes[0]?.textContent||n.textContent)).filter(x=>x.label);
  }
  function money(n){return n.toLocaleString("de-DE",{style:"currency",currency:"EUR"})}
+ function priceMatchesItem(p,i){
+  if(!p||!i||p.unit!==i.unit||!activePrice(p))return false;
+  if(i.matchMode!=="exact")return true;
+  if(!i.exactBrand)return false;
+  return norm(p.label||p.product||"").includes(norm(i.exactBrand));
+ }
  function compareStable(){
   const items=listItems(); if(!items.length){alert("Schreib zuerst deinen Einkauf auf.");return;}
-  const stores=["Lidl","Kaufland","REWE","EDEKA","PENNY"];
-  const rows=stores.map(store=>{let total=0,known=[];const missing=[];items.forEach(i=>{const p=i.key&&(prices[i.key]||[]).find(x=>x.store===store&&x.unit===i.unit&&activePrice(x));if(p){const value=p.price*i.amount;total+=value;known.push({i,p,value});}else missing.push(i.label)});return{store,total,known,missing}});
+  const discovered=[...new Set(Object.values(prices).flat().map(p=>p.store).filter(Boolean))];
+  const stores=[...new Set(["Lidl","Kaufland","REWE","EDEKA","PENNY",...discovered])];
+  const rows=stores.map(store=>{let total=0,known=[];const missing=[];items.forEach(i=>{const p=i.key&&(prices[i.key]||[]).find(x=>x.store===store&&priceMatchesItem(x,i));if(p){const value=p.price*i.amount;total+=value;known.push({i,p,value});}else missing.push(i.label+(i.matchMode==="exact"?" (exakt)":""))});return{store,total,known,missing}});
   const complete=rows.filter(x=>x.known.length===items.length).sort((a,b)=>a.total-b.total);
   const r=document.getElementById("results"),wl=document.getElementById("winnerLabel"),wn=document.getElementById("winnerName"),wp=document.getElementById("winnerPrice"),wc=document.getElementById("winnerCoverage"),mr=document.getElementById("merchantResults");
   r.style.display="block";
@@ -202,9 +209,9 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
   else{wl.textContent="Noch nicht genug Preisdaten";wn.textContent="Noch kein vollständiger Warenkorb";wp.textContent="—";wc.textContent="Wir zeigen nur belegte Preise. Fehlende Preise werden nicht geschätzt.";}
   mr.innerHTML=rows.map(x=>'<div class="merchant"><div><b>'+x.store+'</b><div class="coverage">'+x.known.length+' von '+items.length+' Preisen vorhanden'+(x.missing.length?'<br>Noch ohne Preis: '+x.missing.map(v=>String(v).replace(/[&<>"]/g,"")).join(", "):'<br>Vollständig belegt')+'</div></div><div class="price">'+(x.known.length?money(x.total)+'<div class="coverage" style="text-align:right">'+(x.missing.length?"belegte Zwischensumme":"Gesamt")+'</div>':"—")+'</div></div>').join("");
   const st=document.getElementById("splitTitle"),sd=document.getElementById("splitDetail"),ss=document.getElementById("splitSave");
-  const allKnown=items.every(i=>i.key&&(prices[i.key]||[]).some(activePrice));
+  const allKnown=items.every(i=>i.key&&(prices[i.key]||[]).some(p=>priceMatchesItem(p,i)));
   if(!allKnown){st.textContent="Noch nicht vollständig berechenbar";sd.textContent="Für mindestens ein Produkt fehlt noch ein belegter Preis.";ss.textContent="Keine Ersparnis erfunden.";}
-  else{let sum=0,parts=[];items.forEach(i=>{const opts=prices[i.key].filter(p=>p.unit===i.unit&&activePrice(p)).sort((a,b)=>a.price-b.price);sum+=opts[0].price*i.amount;parts.push(opts[0].store+": "+i.label)});st.textContent=money(sum);sd.textContent=parts.join(" · ");ss.textContent=complete.length?"Vergleich mit einem Laden möglich.":"Günstigste belegte Kombination; kein vollständiger Ein-Laden-Vergleich.";}
+  else{let sum=0,parts=[];items.forEach(i=>{const opts=prices[i.key].filter(p=>priceMatchesItem(p,i)).sort((a,b)=>a.price-b.price);sum+=opts[0].price*i.amount;parts.push(opts[0].store+": "+i.label)});st.textContent=money(sum);sd.textContent=parts.join(" · ");ss.textContent=complete.length?"Vergleich mit einem Laden möglich.":"Günstigste belegte Kombination; kein vollständiger Ein-Laden-Vergleich.";}
   r.scrollIntoView({behavior:"smooth"});
  }
  let stableBasket=[];
