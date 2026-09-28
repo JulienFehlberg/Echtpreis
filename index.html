@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.8.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.9.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -113,7 +113,15 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
    const data=await res.json(),rows=Array.isArray(data)?data:(data.observations||data.items||[]);
    rows.forEach(o=>{
     const raw=String(o.product_name||o.product||o.raw_name||o.name||"");
-    const n=norm(raw),key=n.includes("rinderhack")||n.includes("rinder hack")?"rinderhack":n.includes("banane")?"bananen":null;
+    const n=norm(raw);
+    const matchMap={
+     rinderhack:["rinderhack","rinder hack"],bananen:["banane"],milch:["milch"],eier:["eier","ei "],paprika:["paprika"],
+     tomaten:["tomate"],kartoffeln:["kartoffel"],nudeln:["nudel","pasta","spaghetti","penne"],reis:["reis"],butter:["butter"],
+     kaese:["kase","gouda","emmentaler"],joghurt:["joghurt","yoghurt"],wasser:["mineralwasser"],cola:["coca cola","coca-cola","cola zero"],
+     toilettenpapier:["toilettenpapier","klopapier"],kuechenrolle:["kuchenrolle","kuchenpapier"],waschmittel:["waschmittel"],
+     zahnpasta:["zahnpasta","zahncreme"],katzenfutter:["katzenfutter"],hundefutter:["hundefutter"]
+    };
+    const key=Object.keys(matchMap).find(k=>matchMap[k].some(v=>n.includes(v)))||null;
     const store=String(o.store||o.merchant||o.merchant_name||"").trim();
     const price=Number(o.unit_price||o.price_per_unit||o.price);
     const unit=String(o.pack_unit||o.unit||"").toLowerCase();
@@ -131,7 +139,25 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
   const raw=String(txt||"").trim(),t=norm(raw).replace(/×/g," ");
   const aliases=[
    ["rinderhack",["rinderhack","rinder hack","rinderhackfleisch"]],
-   ["bananen",["banane","bananen"]]
+   ["bananen",["banane","bananen"]],
+   ["milch",["milch","vollmilch","fettarme milch","frischmilch","haltbare milch"]],
+   ["eier",["eier","ei ","bio eier","freilandeier","bodenhaltung"]],
+   ["paprika",["paprika","rote paprika","spitzpaprika"]],
+   ["tomaten",["tomate","tomaten","cherrytomaten","strauchtomaten"]],
+   ["kartoffeln",["kartoffel","kartoffeln"]],
+   ["nudeln",["nudel","nudeln","pasta","spaghetti","penne"]],
+   ["reis",["reis","basmatireis","jasminreis"]],
+   ["butter",["butter"]],
+   ["kaese",["käse","kaese","gouda","emmentaler"]],
+   ["joghurt",["joghurt","yoghurt"]],
+   ["wasser",["mineralwasser","wasser"]],
+   ["cola",["coca cola","coca-cola","cola zero","cola"]],
+   ["toilettenpapier",["toilettenpapier","klopapier"]],
+   ["kuechenrolle",["küchenrolle","kuechenrolle","küchenpapier","kuechenpapier"]],
+   ["waschmittel",["waschmittel"]],
+   ["zahnpasta",["zahnpasta","zahncreme"]],
+   ["katzenfutter",["katzenfutter"]],
+   ["hundefutter",["hundefutter"]]
   ];
   let key=null;
   for(const a of aliases){if(a[1].some(v=>t.includes(v))){key=a[0];break;}}
@@ -149,7 +175,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
    if(key==="bananen"){amount*=.18;unit="kg";}
   }
   const cleanLabel=raw.replace(/^\s*[0-9]+(?:[.,][0-9]+)?\s*(?:kg|g|l|liter|ml|x|×|stuck|stueck|stk|packung(?:en)?|flasche(?:n)?|dose(?:n)?|rolle(?:n)?)?\s*/i,"").trim()||raw;
-  return {raw,key,amount,unit,label:key==="rinderhack"?"Rinderhack":key==="bananen"?"Bananen":cleanLabel};
+  return {raw,key,amount,unit,label:cleanLabel};
  }
  function listItems(){
   const nodes=[...document.querySelectorAll("#list .item")];
