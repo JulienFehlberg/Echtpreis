@@ -988,7 +988,7 @@ function checkReceiptTotal(){
  const plausible=receiptDraft.filter(r=>!r.isDeposit).length>0&&receiptDraft.every(r=>r.isDeposit||plausibleReceiptItemName(r.name));
  receiptTotalVerified=arithmeticMatch&&plausible&&!!$("receiptStore").value&&!!$("receiptDate").value;
  $("receiptTotalCheck").textContent=total>0?(receiptTotalVerified?"✓ "+receiptDraft.length+" Positionen erkannt · Bon-Summe "+eur(total):"Bon noch nicht sicher genug erkannt. Bitte erneut fotografieren."):"Bon-Summe konnte nicht sicher erkannt werden.";
- const pay=$("receiptPaymentDetail");if(pay){let bits=[];if(receiptCash&&receiptCash.paid){bits.push("Bar gegeben: "+eur(receiptCash.paid));if(!receiptCash.change&&total>0&&receiptCash.paid>=total)receiptCash.change=Number((receiptCash.paid-total).toFixed(2))}if(receiptCash&&receiptCash.change!=null)bits.push("Rückgeld: "+eur(receiptCash.change));pay.textContent=bits.join(" · ")}
+ const pay=$("receiptPaymentDetail");if(pay){let bits=[];if(receiptCash&&receiptCash.paid){bits.push("Bar gegeben: "+eur(receiptCash.paid));if(total>0&&receiptCash.paid>=total){let expected=Number((receiptCash.paid-total).toFixed(2));if(receiptCash.change==null||Math.abs(Number(receiptCash.change)-expected)>.02){receiptCash.change=expected;receiptCash.changeCalculated=true}}}if(receiptCash&&receiptCash.change!=null)bits.push("Rückgeld: "+eur(receiptCash.change)+(receiptCash.changeCalculated?" · geprüft":""));pay.textContent=bits.join(" · ")}
  const btn=$("finishPurchaseBtn");if(btn)btn.disabled=!(receiptTotalVerified&&$("receiptStore").value&&$("receiptDate").value);
  updateReceiptAnalysis();
 }
