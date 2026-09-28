@@ -7,7 +7,10 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "node tests/static-smoke.js && node tests/server-unit.js && node tests/browser-smoke.js"
+    "test": "node tests/static-smoke.js && node tests/server-unit.js && node tests/browser-smoke.js",
+    "test:static": "node tests/static-smoke.js",
+    "test:server": "node tests/server-unit.js",
+    "test:browser": "node tests/browser-smoke.js"
   },
   "dependencies": {
     "pg": "^8.13.1"
