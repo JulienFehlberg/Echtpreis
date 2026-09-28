@@ -68,6 +68,7 @@ assert(html.includes('type:"first-receipt-fact"'),"first receipt should produce 
 assert(html.includes("currentReceiptSaving=Number(saving.toFixed(2))"),"estimated receipt savings should remain available with confidence labeling");
 assert(html.includes("void refresh()"),"shopping comparison should render cache-first instead of blocking on network refresh");
 assert(html.includes("Promise.allSettled([loadNearbyStores(),ingestOpenPrices(false,keys)])"),"location and live price refresh should run in parallel");
+assert(html.includes("comparisonRefreshPromise"),"concurrent background comparison refreshes should be deduplicated");
 assert(html.includes("echtpreis_nearby_store_cache_v1"),"nearby stores should persist across sessions for fast repeat comparisons");
 
 
