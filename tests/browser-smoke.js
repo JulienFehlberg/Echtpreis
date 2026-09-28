@@ -22,7 +22,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  w.localStorage.removeItem("echtpreis_open_purchase");d.getElementById("compareBtn").click();assert.strictEqual(w.localStorage.getItem("echtpreis_open_purchase"),null,"failed comparison must not open a purchase");
  d.getElementById("demoListBtn").click();assert.strictEqual(d.querySelectorAll("#list .item").length,2,"demo list must use primary basket only");
  d.getElementById("productInput").value="0,5 kg Tomaten";d.getElementById("addBtn").click();assert.strictEqual(d.querySelectorAll("#list .item").length,3,"add button should add exactly one item");
- d.getElementById("compareBtn").click();assert.notStrictEqual(d.getElementById("results").style.display,"none","compare should render results");
+ d.getElementById("compareBtn").click();assert.notStrictEqual(d.getElementById("results").style.display,"none","compare should render results");assert(/ca\.|Referenz/i.test(d.getElementById("winnerPrice").textContent+" "+d.getElementById("winnerCoverage").textContent),"reference fallback should be visibly marked");
  console.log("browser smoke OK · single basket · quantity parser · receipt parser");
  dom.window.close();
 })().catch(e=>{console.error(e);process.exit(1)});
