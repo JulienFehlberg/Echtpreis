@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.30.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.31.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -308,8 +308,8 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
  async function lookupBarcode(code){
   const st=document.getElementById("barcodeStatus");if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>Produkt wird gesucht …";
   try{
-   const r=await fetch("https://world.openfoodfacts.org/api/v2/product/"+encodeURIComponent(code)+".json");
-   const d=await r.json(),p=d.product;
+   const r=await fetch("https://world.openfoodfacts.org/api/v3/product/"+encodeURIComponent(code)+"?fields=code,product_name_de,product_name,generic_name_de,generic_name,quantity,brands");
+   const d=await r.json(),p=d.product||d;
    if(!r.ok||!p){if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>⚠️ Produkt noch nicht in der Produktdatenbank gefunden.";return;}
    const name=(p.product_name_de||p.product_name||p.generic_name_de||p.generic_name||"").trim();
    const qty=(p.quantity||"").trim();
@@ -352,7 +352,8 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
    });
   }catch(e){
    await stopLiveBarcode();
-   if(st)st.textContent="Live-Scanner konnte nicht gestartet werden. Bitte Kamera-Berechtigung prüfen und erneut versuchen.";
+   if(st)st.textContent="Live-Scanner nicht verfügbar – öffne stattdessen ein Foto des Barcodes.";
+   const fallback=document.getElementById("barcodeFile");if(fallback)fallback.click();
   }
  }
  async function scanBarcodeFile(file){
@@ -411,6 +412,9 @@ const catalog={
 "rinderhack":{label:"Rinderhack",unit:"kg",openPricesCategory:"en:ground-beef"},
 "hackfleisch":{label:"Hackfleisch",unit:"kg",openPricesCategory:"en:ground-meat"},
 "haehnchenbrust":{label:"Hähnchenbrust",unit:"kg"},
+"energydrink":{label:"Energy-Drink",unit:"l",openPricesCategory:"en:energy-drinks"},
+"tiefkuehlpizza":{label:"Tiefkühlpizza",unit:"piece",openPricesCategory:"en:frozen-pizzas"},
+"croissants":{label:"Croissants / Hörnchen",unit:"piece",openPricesCategory:"en:croissants"},
 "eier":{label:"Eier",unit:"piece",openPricesCategory:"en:eggs"},
 "milch":{label:"Milch",unit:"l",openPricesCategory:"en:milks"},
 "haferdrink":{label:"Haferdrink",unit:"l"},
@@ -510,7 +514,7 @@ const productAliases={
  tomaten:["tomate","tomaten","cherrytomaten","cocktailtomaten","strauchtomaten"],gurken:["gurke","gurken","salatgurke"],
  aepfel:["apfel","aepfel","äpfel"],kartoffeln:["kartoffel","kartoffeln","speisekartoffeln"],zwiebeln:["zwiebel","zwiebeln"],
  rinderhack:["rinderhack","rinder hack","rinderhackfleisch","rind hack","hackfleisch rind"],hackfleisch:["hackfleisch","gemischtes hack","hack gemischt"],
- haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
+ haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],energydrink:["energy drink","energydrink","red bull","monster energy"],tiefkuehlpizza:["tiefkühlpizza","tiefkuhlpizza","tk pizza","pizza ristorante","ristorante pizza","dr oetker ristorante"],croissants:["croissant","croissants","hörnchen","hornchen","mini hörnchen","mini hornchen"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
  milch:["milch","vollmilch","frischmilch","haltbare milch","h milch"],haferdrink:["haferdrink","hafer drink","hafermilch","oat drink","alpro hafer"],
  butter:["butter"],kaese:["käse","kase","kaese","gouda","emmentaler","mozzarella"],joghurt:["joghurt","yoghurt"],skyr:["skyr"],quark:["quark","magerquark"],
  nudeln:["nudeln","nudel","pasta","spaghetti","penne","fusilli"],reis:["reis","basmatireis","jasminreis"],mehl:["mehl","weizenmehl"],zucker:["zucker"],
