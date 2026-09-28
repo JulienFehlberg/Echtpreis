@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.2</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.3</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="tabs"><button class="tab active" id="planTab">Einkauf planen</button><button class="tab" id="receiptTab">Bon prüfen</button></div>
 
@@ -40,10 +40,10 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <div class="notice"><b>Wichtig:</b> Die freie Liste wird bereits strukturiert. Der Händlervergleich nutzt dort, wo noch keine belastbaren Live-Daten vorhanden sind, klar gekennzeichnete DEMO-PREISE. Es werden keine Händlerpreise als aktuell ausgegeben. Live-Preisdaten kommen als eigener Daten-Layer.</div>
 <button class="green" id="compareBtn">Einkauf vergleichen</button></div>
 
-<section class="results" id="results"><div class="winner"><div class="smallcap">Günstigster Demo-Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
+<section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
 <div class="card"><h2>Alle Märkte</h2><div class="muted">Nur bekannte Positionen werden summiert. Fehlende Preise werden nicht erfunden.</div><div id="merchantResults"></div></div>
 <div class="card"><h2>Lohnt sich Aufteilen?</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
-<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.2 · freie Einkaufsliste · Demo-Preisbasis</span></div></section>
+<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.3 · vollständige Abdeckung vor Preisurteil</span></div></section>
 </section>
 
 <section class="receipt" id="receipt"><div class="card"><h2>Nach dem Einkauf: Bon prüfen</h2><div class="muted">Damit schließt sich der Kreis: geplant → gekauft → tatsächlich bezahlt. Die bestehende OCR bleibt erhalten und wird als nächstes mit deiner Einkaufsliste verbunden.</div><label class="upload" for="receiptFile">📷 Bon auswählen</label><input id="receiptFile" type="file" accept="image/*" capture="environment" style="display:none"><div id="receiptMsg" class="detail"></div></div></section>
@@ -121,18 +121,40 @@ function drawStores(){ $("stores").innerHTML=storeNames.map(st=>'<span class="ch
 function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;basket.push(parseWish(raw));$("productInput").value="";drawList();}
 function drawList(){ $("list").innerHTML=basket.length?basket.map((w,i)=>'<div class="item"><div class="itemname">'+escHtml(wishText(w))+'<div class="qty">'+(w.matched?'✓ Produkt verstanden'+(w.note?" · "+escHtml(w.note):""):'⚠ Noch kein sicherer Produkt-Match')+'</div></div><button class="x" data-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
 function compare(){
- if(!basket.length){$("liveStatus")?.remove();return alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.")}
+ if(!basket.length)return alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");
  if(!selected.size)return alert("Bitte mindestens einen Markt auswählen.");
- let rows=[...selected].map(store=>{let total=0,known=0;basket.forEach(w=>{let c=w.key?catalog[w.key]:null;if(c&&c.prices[store]!=null){total+=c.prices[store]*w.calcAmount;known++}});return{store,total,known,coverage:known/basket.length}});
- let complete=rows.filter(r=>r.coverage===1).sort((a,b)=>a.total-b.total), eligible=complete.length?complete:[...rows].sort((a,b)=>b.coverage-a.coverage||a.total-b.total),win=eligible[0];
- $("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);$("winnerCoverage").textContent=win.known+" von "+basket.length+" Positionen berechenbar · DEMO-PREISBASIS";
- $("merchantResults").innerHTML=[...rows].sort((a,b)=>b.coverage-a.coverage||a.total-b.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+'/'+basket.length+' Positionen · '+Math.round(r.coverage*100)+'% Abdeckung · DEMO</div></div><div class="price">'+eur(r.total)+'</div></div>').join("");
- let split=0,alloc={};basket.forEach(w=>{let c=w.key?catalog[w.key]:null;if(!c)return;let opts=[...selected].filter(st=>c.prices[st]!=null).map(st=>[st,c.prices[st]]).sort((a,b)=>a[1]-b[1]);if(opts.length){split+=opts[0][1]*w.calcAmount;(alloc[opts[0][0]]??=[]).push(w.label)}});
- let saving=Math.max(0,win.total-split);$("splitTitle").textContent=eur(split)+" bei günstigster Produkt-Aufteilung";$("splitDetail").textContent=Object.entries(alloc).map(([st,a])=>st+": "+a.join(", ")).join(" · ");$("splitSave").textContent=saving>0?"Demo-Ersparnis ggü. "+win.store+": "+eur(saving):"Kein zusätzlicher Demo-Vorteil";$("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});
+ let rows=[...selected].map(store=>{let total=0,known=0,missing=[];basket.forEach(w=>{let c=w.key?catalog[w.key]:null;if(c&&c.prices[store]!=null){total+=c.prices[store]*w.calcAmount;known++}else missing.push(w.label)});return{store,total,known,missing,coverage:known/basket.length}});
+ let complete=[...rows].filter(r=>r.known===basket.length).sort((x,y)=>x.total-y.total);
+ if(complete.length){
+   let win=complete[0];
+   $("winnerLabel").textContent="Günstigster vollständiger Demo-Warenkorb · 1 Markt";
+   $("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);
+   $("winnerCoverage").textContent="100 % Abdeckung · "+basket.length+" von "+basket.length+" Positionen · DEMO-PREISBASIS";
+ }else{
+   let best=[...rows].sort((x,y)=>y.coverage-x.coverage||x.total-y.total)[0];
+   $("winnerLabel").textContent="Noch kein vollständiger Preisvergleich möglich";
+   $("winnerName").textContent="Bei allen ausgewählten Märkten fehlen Preise";
+   $("winnerPrice").textContent="—";
+   $("winnerCoverage").textContent="Beste Datenabdeckung: "+Math.round(best.coverage*100)+" % bei "+best.store+". Zwischensummen werden nicht als Warenkorbpreis gewertet.";
+ }
+ $("merchantResults").innerHTML=[...rows].sort((x,y)=>y.coverage-x.coverage||x.total-y.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+'/'+basket.length+' Positionen · '+Math.round(r.coverage*100)+'% Abdeckung · DEMO'+(r.missing.length?'<br>Fehlt: '+r.missing.map(escHtml).join(", "):'<br>Vollständig vergleichbar')+'</div></div><div class="price">'+(r.coverage===1?eur(r.total):eur(r.total)+'<div class="coverage" style="text-align:right">Zwischensumme</div>')+'</div></div>').join("");
+ let allSplitKnown=basket.every(w=>{let c=w.key?catalog[w.key]:null;return c&&[...selected].some(st=>c.prices[st]!=null)});
+ if(!allSplitKnown){
+   $("splitTitle").textContent="Noch nicht vollständig berechenbar";
+   $("splitDetail").textContent="Mindestens eine Position hat bei keinem ausgewählten Markt einen bekannten Preis.";
+   $("splitSave").textContent="Keine Ersparnis berechnet.";
+ }else{
+   let split=0,alloc={};basket.forEach(w=>{let c=catalog[w.key],opts=[...selected].filter(st=>c.prices[st]!=null).map(st=>[st,c.prices[st]]).sort((x,y)=>x[1]-y[1]);split+=opts[0][1]*w.calcAmount;(alloc[opts[0][0]]??=[]).push(w.label)});
+   $("splitTitle").textContent=eur(split)+" bei günstigster Produkt-Aufteilung";
+   $("splitDetail").textContent=Object.entries(alloc).map(([st,names])=>st+": "+names.join(", ")).join(" · ");
+   if(complete.length){let saving=Math.max(0,complete[0].total-split);$("splitSave").textContent=saving>0?"Demo-Ersparnis ggü. "+complete[0].store+": "+eur(saving):"Kein zusätzlicher Demo-Vorteil";}
+   else $("splitSave").textContent="Aufteilung vollständig berechenbar, aber kein vollständiger Ein-Markt-Vergleich als Referenz.";
+ }
+ $("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});
 }
 $("demoListBtn").onclick=()=>{basket=["5 Bananen","3 rote Paprika","500 g Rinderhack","10 Eier","2 Liter Milch"].map(parseWish);drawList()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=compare;
 $("planTab").onclick=()=>{$("planner").style.display="block";$("receipt").style.display="none";$("planTab").classList.add("active");$("receiptTab").classList.remove("active")};
 $("receiptTab").onclick=()=>{$("planner").style.display="none";$("receipt").style.display="block";$("receiptTab").classList.add("active");$("planTab").classList.remove("active")};
-$("receiptFile").onchange=e=>{$("receiptMsg").textContent=e.target.files[0]?"Ausgewählt: "+e.target.files[0].name+" · OCR-Verknüpfung folgt in v2.1.":""};
+$("receiptFile").onchange=e=>{$("receiptMsg").textContent=e.target.files[0]?"Ausgewählt: "+e.target.files[0].name+" · OCR-Verknüpfung folgt in einer nächsten Version.":""};
 drawSuggestions();drawStores();drawList();
 </script></body></html>
