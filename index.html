@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.10.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.11.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -202,8 +202,9 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
  let stableBasket=[];
  function renderStable(){
   const box=document.getElementById("list"); if(!box)return;
-  box.innerHTML=stableBasket.length?stableBasket.map((x,i)=>'<div class="item"><div class="itemname">'+x.raw.replace(/[&<>"]/g,"")+'<div class="qty">'+(x.key?"✓ Preis-Match vorhanden":"✓ Auf der Liste · Preis wird gesucht")+'</div></div><button class="x" data-stable-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';
+  box.innerHTML=stableBasket.length?stableBasket.map((x,i)=>'<div class="item" data-stable-edit="'+i+'" style="cursor:pointer"><div class="itemname">'+x.raw.replace(/[&<>"]/g,"")+'<div class="qty">'+(x.key?"✓ Preis-Match vorhanden":"✓ Auf der Liste · Preis wird gesucht")+' · Antippen zum Bearbeiten</div></div><button class="x" data-stable-del="'+i+'" aria-label="Löschen">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';
   box.querySelectorAll("[data-stable-del]").forEach(b=>{b.style.display="inline-flex";b.style.alignItems="center";b.style.justifyContent="center";b.style.minWidth="44px";b.style.minHeight="44px";b.style.cursor="pointer";b.onclick=function(e){e.preventDefault();e.stopPropagation();stableBasket.splice(Number(b.dataset.stableDel),1);renderStable();};});
+  box.querySelectorAll("[data-stable-edit]").forEach(row=>{row.onclick=function(e){if(e.target.closest("[data-stable-del]"))return;const i=Number(row.dataset.stableEdit),old=stableBasket[i];const value=prompt("Eintrag bearbeiten",old.raw);if(value===null)return;const v=value.trim();if(!v)return;const item=parseLine(v),learned=learnedKey(item.label);if(!item.key&&learned)item.key=learned;if(item.key)rememberProduct(item.label,item.key);stableBasket[i]=item;renderStable();};});
  }
  function learnedKey(raw){
   try{
