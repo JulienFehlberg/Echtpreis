@@ -146,7 +146,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
   }catch(e){}
  }
  async function loadOpenPricesForItems(items){
-  const categories={bananen:["en:bananas","kg"],rinderhack:["en:ground-beef","kg"],milch:["en:milks","l"],eier:["en:eggs","piece"],paprika:["en:red-bell-peppers","kg"]};
+  const categories={bananen:["en:bananas","kg"],rinderhack:["en:ground-beef","kg"],milch:["en:milks","l"],eier:["en:eggs","piece"],paprika:["en:red-bell-peppers","kg"],tomaten:["en:tomatoes","kg"],kartoffeln:["en:potatoes","kg"],nudeln:["en:pastas","kg"],reis:["en:rices","kg"],butter:["en:butters","kg"],kaese:["en:cheeses","kg"],joghurt:["en:yogurts","kg"],wasser:["en:waters","l"],cola:["en:colas","l"]};
   const wanted=[...new Set(items.filter(i=>i.key&&categories[i.key]).map(i=>i.key))];
   const chainName=x=>{const t=norm([x?.location?.osm_brand,x?.location?.osm_name,x?.location?.osm_display_name].filter(Boolean).join(" "));for(const [n,a] of [["Kaufland","kaufland"],["Lidl","lidl"],["REWE","rewe"],["EDEKA","edeka"],["PENNY","penny"],["ALDI","aldi"],["Netto","netto"],["NORMA","norma"],["dm","dm drogerie"],["Rossmann","rossmann"]])if(t.includes(a))return n;return""};
   const per=p=>{p=String(p||"").toUpperCase();if(["KG","KILOGRAM"].includes(p))return"kg";if(["L","LITER"].includes(p))return"l";if(["UNIT","PIECE"].includes(p))return"piece";return""};
@@ -158,7 +158,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
     const age=(Date.now()-new Date(date+"T12:00:00").getTime())/86400000;if(age<0||age>30)return;
     prices[key]=prices[key]||[];const sig=store+"|"+u+"|"+price+"|"+date+"|"+x.proof_id;
     if(prices[key].some(p=>p._sig===sig))return;
-    prices[key].push({store,unit:u,price,label:x.product_name||key,source:"Open Prices",validFrom:date,validTo:new Date(new Date(date+"T12:00:00").getTime()+30*86400000).toISOString().slice(0,10),trust:75,_sig:sig});
+    prices[key].push({store,unit:u,price,label:x.product?.product_name||x.product_name||key,source:"Open Prices",validFrom:date,validTo:new Date(new Date(date+"T12:00:00").getTime()+30*86400000).toISOString().slice(0,10),trust:75,_sig:sig});
    });
   }));
  } 
@@ -218,13 +218,13 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
   if(!i.exactBrand)return false;
   return norm(p.label||p.product||"").includes(norm(i.exactBrand));
  }
- async function compareStable(){
+ function bestPriceForItem(store,i){\n  const opts=i.key?(prices[i.key]||[]).filter(x=>x.store===store&&priceMatchesItem(x,i)):[];\n  opts.sort((a,b)=>a.price-b.price||String(b.validFrom||"").localeCompare(String(a.validFrom||""))||(Number(b.trust)||0)-(Number(a.trust)||0));\n  return opts[0]||null;\n }\n async function compareStable(){
   const items=listItems(); if(!items.length){alert("Schreib zuerst deinen Einkauf auf.");return;}
   const wl0=document.getElementById("winnerLabel");if(wl0)wl0.textContent="Aktuelle Preise werden gesucht …";
   await loadOpenPricesForItems(items);
   const discovered=[...new Set(Object.values(prices).flat().map(p=>p.store).filter(Boolean))];
   const stores=[...new Set(["Lidl","Kaufland","REWE","EDEKA","PENNY",...discovered])];
-  const rows=stores.map(store=>{let total=0,known=[];const missing=[];items.forEach(i=>{const p=i.key&&(prices[i.key]||[]).find(x=>x.store===store&&priceMatchesItem(x,i));if(p){const value=p.price*i.amount;total+=value;known.push({i,p,value});}else missing.push(i.label+(i.matchMode==="exact"?" (exakt)":""))});return{store,total,known,missing}});
+  const rows=stores.map(store=>{let total=0,known=[];const missing=[];items.forEach(i=>{const p=bestPriceForItem(store,i);if(p){const value=p.price*i.amount;total+=value;known.push({i,p,value});}else missing.push(i.label+(i.matchMode==="exact"?" (exakt)":""))});return{store,total,known,missing}});
   const complete=rows.filter(x=>x.known.length===items.length).sort((a,b)=>a.total-b.total);
   const r=document.getElementById("results"),wl=document.getElementById("winnerLabel"),wn=document.getElementById("winnerName"),wp=document.getElementById("winnerPrice"),wc=document.getElementById("winnerCoverage"),mr=document.getElementById("merchantResults");
   r.style.display="block";
@@ -234,7 +234,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
   const st=document.getElementById("splitTitle"),sd=document.getElementById("splitDetail"),ss=document.getElementById("splitSave");
   const allKnown=items.every(i=>i.key&&(prices[i.key]||[]).some(p=>priceMatchesItem(p,i)));
   if(!allKnown){st.textContent="Noch nicht vollständig berechenbar";sd.textContent="Für mindestens ein Produkt fehlt noch ein belegter Preis.";ss.textContent="Keine Ersparnis erfunden.";}
-  else{let sum=0,parts=[];items.forEach(i=>{const opts=prices[i.key].filter(p=>priceMatchesItem(p,i)).sort((a,b)=>a.price-b.price);sum+=opts[0].price*i.amount;parts.push(opts[0].store+": "+i.label)});st.textContent=money(sum);sd.textContent=parts.join(" · ");ss.textContent=complete.length?"Vergleich mit einem Laden möglich.":"Günstigste belegte Kombination; kein vollständiger Ein-Laden-Vergleich.";}
+  else{let sum=0,parts=[];items.forEach(i=>{const opts=prices[i.key].filter(p=>priceMatchesItem(p,i)).sort((a,b)=>a.price-b.price||String(b.validFrom||"").localeCompare(String(a.validFrom||""))||(Number(b.trust)||0)-(Number(a.trust)||0));sum+=opts[0].price*i.amount;parts.push(opts[0].store+": "+i.label)});st.textContent=money(sum);sd.textContent=parts.join(" · ");ss.textContent=complete.length?"Vergleich mit einem Laden möglich.":"Günstigste belegte Kombination; kein vollständiger Ein-Laden-Vergleich.";}
   r.scrollIntoView({behavior:"smooth"});
  }
  let stableBasket=[];
