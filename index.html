@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.4.2</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.5.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -37,6 +37,13 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <div class="card"><h2>Deine Einkaufsliste</h2><div class="muted">Menge, Einheit und Produkt dürfen zusammen in ein Feld. Beispiele: „5 Bananen“, „3 rote Paprika“, „500 g Rinderhack“, „2 Liter Milch“.</div>
 <div class="inputrow"><input id="productInput" placeholder="z. B. 5 Bananen oder 500 g Rinderhack"><button class="primary" id="addBtn">Hinzufügen</button><button class="ghost" id="barcodeBtn" type="button" aria-label="Barcode scannen">📷</button></div>
 <input id="barcodeFile" type="file" accept="image/*" capture="environment" style="display:none">
+<div id="barcodeLive" style="display:none;position:fixed;inset:0;background:#000;z-index:9999">
+ <video id="barcodeVideo" playsinline muted style="width:100%;height:100%;object-fit:cover"></video>
+ <div style="position:absolute;left:10%;right:10%;top:38%;height:24%;border:3px solid #fff;border-radius:18px;box-shadow:0 0 0 9999px rgba(0,0,0,.35)"></div>
+ <div style="position:absolute;top:20px;left:0;right:0;text-align:center;color:white;font-weight:800;font-size:18px">Barcode in den Rahmen halten</div>
+ <button id="closeBarcodeLive" type="button" style="position:absolute;top:18px;right:18px;width:48px;height:48px;border:0;border-radius:24px;font-size:24px">✕</button>
+ <button id="photoBarcodeFallback" type="button" style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);padding:14px 20px;border:0;border-radius:14px;font-weight:800">Foto verwenden</button>
+</div>
 <div id="barcodeStatus" class="detail"></div><div class="detail">Du musst keine Packungsgröße oder Marke kennen.</div>
 <div class="chips" id="suggestions"></div><div id="list"></div><button class="ghost" id="demoListBtn" style="width:100%;margin-top:12px">Testliste einsetzen</button></div>
 
@@ -147,6 +154,40 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
    if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>✓ "+name+(qty?" · "+qty:"")+" zur Liste hinzugefügt";
   }catch(e){if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>⚠️ Produktdaten konnten gerade nicht geladen werden.";}
  }
+ let liveStream=null,liveReader=null,liveStopped=true;
+ async function stopLiveBarcode(){
+  liveStopped=true;
+  if(liveReader&&liveReader.reset)try{liveReader.reset()}catch(e){}
+  liveReader=null;
+  if(liveStream)liveStream.getTracks().forEach(t=>t.stop());
+  liveStream=null;
+  const box=document.getElementById("barcodeLive");if(box)box.style.display="none";
+ }
+ async function ensureZXing(){
+  if(window.ZXing)return;
+  await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc)});
+ }
+ async function startLiveBarcode(){
+  const st=document.getElementById("barcodeStatus"),box=document.getElementById("barcodeLive"),video=document.getElementById("barcodeVideo");
+  try{
+   await ensureZXing(); box.style.display="block"; liveStopped=false;
+   liveReader=new ZXing.BrowserMultiFormatReader();
+   const devices=await ZXing.BrowserCodeReader.listVideoInputDevices();
+   const rear=devices.find(d=>/back|rear|environment/i.test(d.label))||devices[devices.length-1];
+   liveReader.decodeFromVideoDevice(rear&&rear.deviceId?rear.deviceId:undefined,video,async(result,err)=>{
+    if(liveStopped||!result)return;
+    const code=String(result.getText?result.getText():result.text||"").trim();
+    if(!/^\\d{8,14}$/.test(code))return;
+    await stopLiveBarcode();
+    if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>Produkt wird gesucht …";
+    await lookupBarcode(code);
+   });
+  }catch(e){
+   await stopLiveBarcode();
+   if(st)st.textContent="Live-Scanner konnte nicht gestartet werden. Du kannst stattdessen ein Foto verwenden.";
+   const bf=document.getElementById("barcodeFile");if(bf)bf.click();
+  }
+ }
  async function scanBarcodeFile(file){
   const st=document.getElementById("barcodeStatus");if(st)st.textContent="Barcode wird gelesen …";
   if(!("BarcodeDetector" in window)){
@@ -174,7 +215,11 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
   if(b)b.addEventListener("click",compareStable);
   if(add)add.addEventListener("click",function(){addStable(inp&&inp.value);});
   if(inp)inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();addStable(inp.value);}});
-  if(demo)demo.addEventListener("click",function(){stableBasket=[parseLine("500 g Rinderhack"),parseLine("1 kg Bananen")];renderStable();});if(bar&&bf)bar.addEventListener("click",function(){bf.click();});if(bf)bf.addEventListener("change",function(){const file=bf.files&&bf.files[0];if(file)scanBarcodeFile(file);bf.value="";});
+  if(demo)demo.addEventListener("click",function(){stableBasket=[parseLine("500 g Rinderhack"),parseLine("1 kg Bananen")];renderStable();});if(bar)bar.addEventListener("click",function(){startLiveBarcode();});
+ const closeLive=document.getElementById("closeBarcodeLive"),photoFallback=document.getElementById("photoBarcodeFallback");
+ if(closeLive)closeLive.addEventListener("click",function(){stopLiveBarcode();});
+ if(photoFallback&&bf)photoFallback.addEventListener("click",function(){stopLiveBarcode();bf.click();});
+ if(bf)bf.addEventListener("change",function(){const file=bf.files&&bf.files[0];if(file)scanBarcodeFile(file);bf.value="";});
   renderStable();
  });
  window.compareStable=compareStable;
