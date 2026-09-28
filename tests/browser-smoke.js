@@ -100,6 +100,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert(w.storeCanCarry("dm",w.parseWish("1 Zahnpasta")),"drugstore categories should remain eligible when verified observations become available");
  assert.strictEqual(w.activePrice("zahnpasta","dm",w.parseWish("1 Zahnpasta")),null,"a category guess must not invent a drugstore price or availability");
  const exactEnergy=w.parseWish("2 Red Bull");assert.strictEqual(w.referencePrice(exactEnergy.key,"Lidl",exactEnergy),null,"exact brands must not fall back to generic model prices");
+ const exactPizza=w.parseWish("1 Oetker Ristorante");assert.strictEqual(exactPizza.matchMode,"exact","Oetker receipt/list items must remain exact-brand products");assert.strictEqual(w.referencePrice(exactPizza.key,"Lidl",exactPizza),null,"Oetker must not fall back to generic pizza pricing");
+ const exactOwnBrand=w.parseWish("1 G&G Mini-Hörnchen");assert.strictEqual(exactOwnBrand.matchMode,"exact","retailer own-brand receipt items must remain exact");
  const observationDate=new Date().toISOString().slice(0,10);
  w.localStorage.setItem("echtpreis_community_observations_v2",JSON.stringify([1,2].map(n=>({key:"zahnpasta",store:"dm",price:1.99,per:"piece",date:observationDate,kind:"community",proof:"independent_"+n,trust:60}))));
  assert(w.activePrice("zahnpasta","dm",w.parseWish("1 Zahnpasta")),"two current independent observations should enable a drugstore comparison");
