@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.14.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.15.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -38,10 +38,10 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <div class="inputrow"><input id="productInput" placeholder="z. B. 5 Bananen oder 500 g Rinderhack"><button class="primary" id="addBtn">Hinzufügen</button><button class="ghost" id="barcodeBtn" type="button" aria-label="Barcode scannen">📷</button></div>
 <div id="frequentProducts" style="display:none;margin-top:12px"></div><div id="savedLists" style="margin-top:12px"></div><div id="localStores" class="muted" style="margin-top:14px;padding:12px;border:1px solid #263329;border-radius:14px">
 <b style="color:#fff">Filialen · Berlin-Spandau</b><br>
-Kaufland · Grünhofer Weg 9 · Mo–Sa 07:00–22:00<br>
-Lidl · Seegefelder Weg 391 · Mo–Sa 07:00–21:00<br>
-EDEKA Center · Spandau Arcaden, Klosterstraße 3 · Mo–Sa 07:00–22:00
-<div style="margin-top:6px;font-size:12px">Filialdaten werden getrennt von Preisen geführt. Ein Preis gilt nur dort, wo die Quelle die Filiale/Region belegt.</div>
+<div style="margin-top:8px">Kaufland · Grünhofer Weg 9 · Mo–Sa 07:00–22:00 · <a href="https://www.google.com/maps/dir/?api=1&destination=Gr%C3%BCnhofer+Weg+9%2C+13581+Berlin" target="_blank" rel="noopener">Route</a></div>
+<div style="margin-top:6px">Lidl · Seegefelder Weg 391 · Mo–Sa 07:00–21:00 · <a href="https://www.google.com/maps/dir/?api=1&destination=Seegefelder+Weg+391%2C+13591+Berlin" target="_blank" rel="noopener">Route</a></div>
+<div style="margin-top:6px">EDEKA Center · Klosterstraße 3 · Mo–Sa 07:00–22:00 · <a href="https://www.google.com/maps/dir/?api=1&destination=Klosterstra%C3%9Fe+3%2C+13581+Berlin" target="_blank" rel="noopener">Route</a></div>
+<div style="margin-top:8px;font-size:12px">Filialdaten werden getrennt von Preisen geführt. Ein Preis gilt nur dort, wo die Quelle die Filiale/Region belegt.</div>
 </div><input id="barcodeFile" type="file" accept="image/*" capture="environment" style="display:none">
 <div id="barcodeLive" style="display:none;position:fixed;inset:0;background:#000;z-index:9999">
  <video id="barcodeVideo" playsinline muted style="width:100%;height:100%;object-fit:cover"></video>
