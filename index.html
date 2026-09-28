@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.33.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.34.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -306,13 +306,13 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
  async function lookupBarcode(code){
   const st=document.getElementById("barcodeStatus");if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>Produkt wird gesucht …";
   try{
-   const r=await fetch("https://world.openfoodfacts.org/api/v3/product/"+encodeURIComponent(code)+"?fields=code,product_name_de,product_name,generic_name_de,generic_name,quantity,brands");
+   const r=await fetch("https://world.openfoodfacts.org/api/v3/product/"+encodeURIComponent(code)+"?product_type=all&fields=code,product_name_de,product_name,generic_name_de,generic_name,quantity,brands");
    const d=await r.json(),p=d.product||d;
    if(!r.ok||!p){if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>⚠️ Produkt noch nicht in der Produktdatenbank gefunden.";return;}
    const name=(p.product_name_de||p.product_name||p.generic_name_de||p.generic_name||"").trim();
    const qty=(p.quantity||"").trim();
    if(!name){if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>⚠️ Produkt vorhanden, aber noch ohne brauchbaren Namen.";return;}
-   addStable((qty?qty+" ":"")+name);
+   if(window.addEchtpreisBarcode)await window.addEchtpreisBarcode(name,qty,code);else addStable((qty?qty+" ":"")+name);
    if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>✓ "+name+(qty?" · "+qty:"")+" zur Liste hinzugefügt";
   }catch(e){if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>⚠️ Produktdaten konnten gerade nicht geladen werden.";}
  }
@@ -494,6 +494,18 @@ async function ingestOpenPrices(){
  else dataMachineState.openPrices="nicht erreichbar · Cache bleibt aktiv";
  dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();
 }
+async function ingestOpenPriceForBarcode(code,key,label){
+ try{
+  const url="https://prices.openfoodfacts.org/api/v1/prices?product_code="+encodeURIComponent(code)+"&currency=EUR&size=50&order_by=-date";
+  const r=await fetch(url);if(!r.ok)return 0;const d=await r.json(),items=d.items||d.results||[],fresh=[];
+  items.forEach(x=>{const store=retailerFromLocation(x),per=normalizePer(x.price_per),country=(x.location?.osm_address_country_code||"").toLowerCase();
+   if(!store||per!=="piece"||(country&&country!=="de")||!x.proof_id)return;
+   const o=normalizeObservation({key,store,price:+x.price,per:"piece",date:String(x.date||"").slice(0,10),region:x.location?.osm_address_city||"Deutschland",kind:"openprices",source:"Open Prices",product:x.product?.product_name||x.product_name||label,proof:"op:"+x.proof_id,locationId:x.location_id,trust:80});
+   if(usableObservation(o))fresh.push(o);
+  });
+  const previous=loadJson(openPricesCacheKey).filter(x=>x.key!==key);saveJson(openPricesCacheKey,[...previous,...fresh].slice(-10000));drawDataMachine();return fresh.length;
+ }catch(e){return 0}
+}
 function drawDataMachine(){
  const el=$("dataMachineStatus");if(!el)return;const rows=dataEngine(),by={};rows.forEach(x=>by[x.source]=(by[x.source]||0)+1);
  el.innerHTML="<b>Datenmaschine aktiv:</b> "+rows.length+" aktuell nutzbare Beobachtungen<br><span class='detail'>ECHTPREIS API: "+escHtml(apiState)+"<br>Open Prices: "+escHtml(dataMachineState.openPrices)+(dataMachineState.lastSync?" · Sync "+dataMachineState.lastSync:"")+"<br>"+(Object.entries(by).map(([k,v])=>escHtml(k)+": "+v).join(" · ")||"Noch keine nutzbaren Quellen")+"</span>";
@@ -587,6 +599,12 @@ function drawSuggestions(){let a=["500 g Rinderhack","1 kg Bananen","10 Eier","2
 function drawStores(){ $("stores").innerHTML=storeNames.map(st=>'<span class="chip '+(selected.has(st)?"on":"")+'" data-store="'+st+'">'+st+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores()});}
 function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;let w=parseWish(raw);let duplicate=basket.find(x=>x.raw.toLowerCase()===w.raw.toLowerCase()&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}basket.push(w);try{learnFrequent(raw)}catch(e){}$("productInput").value="";drawList();}
 window.addEchtpreisItem=raw=>add(raw);
+window.addEchtpreisBarcode=async(name,qty,code)=>{
+ const ean=String(code||"").trim(),raw=(qty?qty+" ":"")+name,key="ean:"+ean;
+ if(basket.some(x=>x.ean===ean)){alert(name+" steht bereits auf deiner Liste.");return false;}
+ basket.push({raw,label:name+(qty?" · "+qty:""),amount:1,unit:"piece",calcAmount:1,key,matched:true,note:"Exaktes Barcode-Produkt",explicit:true,matchMode:"exact",exactBrand:"",ean});
+ try{learnFrequent(raw)}catch(e){}drawList();await ingestOpenPriceForBarcode(ean,key,name);return true;
+};
 window.getEchtpreisRawList=()=>basket.map(x=>x.raw);
 window.replaceEchtpreisList=rows=>{basket=(rows||[]).map(parseWish).filter(x=>x.raw);drawList();};
 function drawList(){ $("list").innerHTML=basket.length?basket.map((w,i)=>'<div class="item"><div class="itemname">'+escHtml(wishText(w))+'<div class="qty">'+(w.matched?'✓ erkannt':'⚠ Noch kein sicherer Produkt-Match')+'</div></div><button class="x" data-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
