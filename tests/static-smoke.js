@@ -24,6 +24,8 @@ assert(html.includes('<script src="app/config.js"></script>'),"store-ready confi
 assert(html.includes('<script src="app/runtime.js"></script>'),"platform runtime layer missing");
 assert(html.includes("window.EchtpreisRuntime"),"location flow must use the platform runtime");
 assert(html.includes('href="privacy.html"'),"privacy entry point missing");
+assert(html.includes('rel="manifest"'),"installable web-app manifest missing");
+assert(html.includes('apple-mobile-web-app-capable'),"iOS home-screen metadata missing");
 assert(html.includes("function buildReceiptInsight"),"personal receipt insight engine missing");
 assert(html.includes("function renderStatsBreakdown"),"monthly spending breakdown missing");
 assert(html.includes("echtpreis_insight_history_v1"),"personal insight history missing");
