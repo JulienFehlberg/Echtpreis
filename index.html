@@ -32,15 +32,22 @@ h2{font-size:29px;letter-spacing:-.035em;margin:12px 0}.row{display:flex;justify
 <p class="tiny">Texterkennung im Browser. Das Foto wird von dieser Testversion nicht an ECHTPREIS hochgeladen oder gespeichert.</p>
 </section>
 <section id="result" class="result">
-<span class="badge">ECHTPREIS 0.7</span><h2 id="resultTitle">Dokument erkannt</h2><div class="row"><span class="label">Dokumenttyp</span><span class="value" id="docType">–</span></div>
+<span class="badge">ECHTPREIS 0.8</span><h2 id="resultTitle">Dokument erkannt</h2><div class="row"><span class="label">Dokumenttyp</span><span class="value" id="docType">–</span></div>
 <div class="row"><span class="label">Händler</span><span class="value" id="merchant">–</span></div>
 <div class="row"><span class="label">Datum</span><span class="value" id="date">–</span></div>
 <div class="row"><span class="label">Gesamtbetrag</span><span class="value total" id="total">–</span></div><div class="row"><span class="label">Aus Artikeln berechnet</span><span class="value" id="calcTotal">–</span></div><div class="row"><span class="label">Rechencheck</span><span class="value" id="check">–</span></div>
+<div id="serviceBox" style="display:none;margin-top:18px">
+<b>Kostenaufteilung</b>
+<div class="row"><span class="label">Anfahrt</span><span class="value" id="anfahrt">–</span></div>
+<div class="row"><span class="label">Arbeitszeit / Lohn</span><span class="value" id="arbeit">–</span></div>
+<div class="row"><span class="label">Material / Ersatzteile</span><span class="value" id="material">–</span></div>
+<div class="row"><span class="label">MwSt.</span><span class="value" id="mwst">–</span></div>
+</div>
 <div class="items"><b id="positionsTitle">Erkannte Positionen</b><div id="items"></div></div>
 <div class="warn good"><b>Erkennung abgeschlossen.</b><br>ECHTPREIS strukturiert erkannte Positionen und Preise. Eine Fairness-Bewertung erscheint erst, wenn dafür belastbare Vergleichsdaten vorhanden sind – ohne erfundene Preise.</div>
 <details style="margin-top:17px"><summary><b>Erkannten Text anzeigen</b></summary><div id="raw" class="raw"></div></details>
 </section>
-<section id="error" class="result error"></section><div class="foot">ECHTPREIS · v0.7 · Testversion</div>
+<section id="error" class="result error"></section><div class="foot">ECHTPREIS · v0.8 · Testversion</div>
 </main>
 <script>
 const $=s=>document.querySelector(s);
@@ -48,9 +55,19 @@ $("#cam").onclick=()=>$("#cameraInput").click();$("#lib").onclick=()=>$("#librar
 $("#cameraInput").onchange=read;$("#libraryInput").onchange=read;
 const euro=/(\d{1,4}[.,]\d{2})\s*(?:€|EUR)?\s*$/i;
 function norm(s){return s.replace(".",",")}
-function merchant(text){const t=text.toLowerCase();for(const [k,v] of [["new yorker","NEW YORKER"],["lidl","Lidl"],["aldi","ALDI"],["rewe","REWE"],["edeka","EDEKA"],["kaufland","Kaufland"],["media markt","MediaMarkt"],["mediamarkt","MediaMarkt"],["saturn","Saturn"]])if(t.includes(k))return v;return "Nicht sicher erkannt"}
+function merchant(text){
+ const t=text.toLowerCase();
+ for(const [k,v] of [["new yorker","NEW YORKER"],["klarcheck 24","Klarcheck 24"],["reparaturdienst berlin","Reparaturdienst Berlin & Umland"],["lidl","Lidl"],["aldi","ALDI"],["rewe","REWE"],["edeka","EDEKA"],["kaufland","Kaufland"],["media markt","MediaMarkt"],["mediamarkt","MediaMarkt"],["saturn","Saturn"]]) if(t.includes(k)) return v;
+ const candidates=text.split("\n").map(x=>x.trim()).filter(x=>/gmbh|ug\b|reparatur|service|dienst/i.test(x));
+ return candidates[0]?.slice(0,55)||"Nicht sicher erkannt"
+}
 function dateOf(text){const m=text.match(/\b([0-3]?\d[.\/-][01]?\d[.\/-](?:20)?\d{2})\b/);return m?m[1]:"Nicht sicher erkannt"}
-function totalOf(text){for(const line of text.split("\n"))if(/gesamt|summe|zu zahlen|total/i.test(line)){const m=line.match(euro);if(m)return norm(m[1])+" €"}return "Nicht sicher erkannt"}
+function totalOf(text){
+ const lines=text.split("\n");
+ const keys=[/zu zahlender?\s*betrag/i,/endbetrag/i,/gesamtbetrag/i,/gesamtsumme/i,/zwischensumme/i,/gesamt/i,/summe/i,/total/i];
+ for(const key of keys) for(const line of lines) if(key.test(line)){const m=line.match(/(\d{1,5}[.,]\d{1,2})\s*(?:€|EUR)?/i);if(m)return norm(m[1])+" €"}
+ return "Nicht sicher erkannt"
+}
 function articleId(line){
  let m=line.match(/\b\d{2}[.]\d{2}[.]\d{3}[.]\d{4}\b/);
  if(m)return m[0];
@@ -67,6 +84,26 @@ function documentType(text){
  return "Preis-Dokument";
 }
 
+function amountNear(text,labels){
+ const lines=text.split("\n").map(x=>x.replace(/\s+/g," ").trim());
+ for(const label of labels){
+  for(let i=0;i<lines.length;i++) if(label.test(lines[i])){
+   const window=[lines[i],lines[i+1]||""].join(" ");
+   const ms=[...window.matchAll(/(\d{1,5}[.,]\d{1,2})\s*(?:€|EUR)?/gi)];
+   if(ms.length) return norm(ms[ms.length-1][1])+" €";
+  }
+ }
+ return "Nicht sicher erkannt"
+}
+function serviceFields(text){
+ return {
+  anfahrt:amountNear(text,[/anfahrt/i,/fahrtkosten/i]),
+  arbeit:amountNear(text,[/arbeitszeit/i,/arbeitslohn/i,/lohn/i]),
+  material:amountNear(text,[/material/i,/ersatzteil/i]),
+  mwst:amountNear(text,[/mwst/i,/umsatzsteuer/i]),
+  total:amountNear(text,[/zu zahlender? betrag/i,/endbetrag/i,/gesamtbetrag/i,/gesamtsumme/i])
+ }
+}
 function cleanProductName(line){
  return line
   .replace(/\b\d{2}[.]\d{2}[.]\d{3}[.]\d{4}\b/g,"")
@@ -121,21 +158,30 @@ async function read(e){
  const file=e.target.files&&e.target.files[0];if(!file)return;
  $("#preview").src=URL.createObjectURL(file);$("#preview").style.display="block";$("#result").style.display="none";$("#error").style.display="none";$("#progress").style.display="block";$("#bar").style.width="5%";
  try{
-  const out=await Tesseract.recognize(file,"deu+eng",{logger:m=>{if(m.status==="recognizing text"){const p=Math.round((m.progress||0)*100);$("#status").textContent="Bon wird gelesen … "+p+" %";$("#bar").style.width=Math.max(8,p)+"%"}else $("#status").textContent="Texterkennung wird vorbereitet …"}});
+  const out=await Tesseract.recognize(file,"deu+eng",{logger:m=>{if(m.status==="recognizing text"){const p=Math.round((m.progress||0)*100);$("#status").textContent="Dokument wird gelesen … "+p+" %";$("#bar").style.width=Math.max(8,p)+"%"}else $("#status").textContent="Texterkennung wird vorbereitet …"}});
   const text=out.data.text||"", items=parseItems(text);
   const detectedTotal=totalOf(text), calc=items.reduce((n,x)=>n+cents(x.price),0), detectedCents=totalNumber(detectedTotal);
   const dtype=documentType(text);
   $("#docType").textContent=dtype;
   $("#resultTitle").textContent=dtype==="Kassenbon"?"Kassenbon erkannt":dtype+" erkannt";
-  $("#positionsTitle").textContent=dtype==="Kassenbon"?"Erkannte Kaufpositionen":"Erkannte Positionen";
+  $("#positionsTitle").textContent=dtype==="Kassenbon"?"Erkannte Kaufpositionen":"Erkannte Positionen / Leistungen";
+  const isService=["Rechnung","Kostenvoranschlag","Angebot"].includes(dtype);
+  document.querySelector("#merchant").previousElementSibling.textContent=isService?"Anbieter":"Händler";
   $("#merchant").textContent=merchant(text);$("#date").textContent=dateOf(text);$("#total").textContent=detectedTotal;
-  $("#calcTotal").textContent=items.length?formatCents(calc):"–";
-  $("#check").textContent=!items.length?"–":(detectedCents===null?"✓ "+formatCents(calc)+" aus Positionen":(Math.abs(detectedCents-calc)<=1?"✓ "+formatCents(calc)+" bestätigt":"⚠ Abweichung"));
-  if(detectedCents===null && items.length) $("#total").textContent=formatCents(calc)+"*";
+  $("#serviceBox").style.display=isService?"block":"none";
+  if(isService){
+    const sf=serviceFields(text);
+    $("#anfahrt").textContent=sf.anfahrt;$("#arbeit").textContent=sf.arbeit;$("#material").textContent=sf.material;$("#mwst").textContent=sf.mwst;
+    if(detectedTotal==="Nicht sicher erkannt" && sf.total!=="Nicht sicher erkannt") $("#total").textContent=sf.total;
+  }
+  $("#calcTotal").textContent=(dtype==="Kassenbon"&&items.length)?formatCents(calc):"–";
+  document.querySelector("#calcTotal").previousElementSibling.textContent=dtype==="Kassenbon"?"Aus Artikeln berechnet":"Positionssumme";
+  $("#check").textContent=dtype!=="Kassenbon"?"Noch nicht möglich":(!items.length?"–":(detectedCents===null?"✓ "+formatCents(calc)+" aus Positionen":(Math.abs(detectedCents-calc)<=1?"✓ "+formatCents(calc)+" bestätigt":"⚠ Abweichung")));
+  if(dtype==="Kassenbon" && detectedCents===null && items.length) $("#total").textContent=formatCents(calc)+"*";
   $("#raw").textContent=text||"Kein Text erkannt.";
-  $("#items").innerHTML=items.length?items.map(x=>`<div class="item"><div class="itemtop"><span class="itemname">${esc(x.name)}</span><span class="itemprice">${x.price}</span></div>${x.id?`<div class="meta">Erkannter Artikelcode: ${x.id}</div>`:""}</div>`).join(""):`<div class="warn">Noch keine Kaufposition sicher erkannt. Öffne unten den Bon-Text – damit können wir den Parser gezielt verbessern.</div>`;
+  $("#items").innerHTML=items.length?items.map(x=>`<div class="item"><div class="itemtop"><span class="itemname">${esc(x.name)}</span><span class="itemprice">${x.price}</span></div>${x.id?`<div class="meta">Erkannter Artikelcode: ${x.id}</div>`:""}</div>`).join(""):`<div class="warn">Noch keine Position sicher erkannt. Bei handschriftlichen Dokumenten kann die aktuelle Texterkennung an ihre Grenzen kommen. Öffne unten den erkannten Text, um das Ergebnis zu prüfen.</div>`;
   $("#progress").style.display="none";$("#result").style.display="block";$("#result").scrollIntoView({behavior:"smooth",block:"start"});
- }catch(err){$("#progress").style.display="none";$("#error").style.display="block";$("#error").innerHTML="<b>Texterkennung fehlgeschlagen.</b><br>Bitte Bon gerade, nah und bei gutem Licht fotografieren."}
+ }catch(err){$("#progress").style.display="none";$("#error").style.display="block";$("#error").innerHTML="<b>Texterkennung fehlgeschlagen.</b><br>Bitte das Dokument gerade, nah und bei gutem Licht fotografieren."}
  e.target.value="";
 }
 function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
