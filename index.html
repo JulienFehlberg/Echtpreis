@@ -64,7 +64,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}.receipt-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #e5eae7;text-align:left}.receipt-item strong{white-space:nowrap}.receipt-item-name{min-width:0;overflow-wrap:anywhere}.receipt-item small{display:block;color:#68736d;margin-top:3px}.ocrbox #receiptTotalCheck,.ocrbox #receiptPaymentDetail{font-size:14px;margin:10px 0;text-align:left}.insight-card{margin:16px 0;padding:18px;border-radius:20px;background:#fff8e8;border:1px solid #f0dfb7;text-align:left}.insight-card .insight-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:900;color:#8a6a18}.insight-card strong{display:block;font-size:20px;line-height:1.25;margin:5px 0}.insight-card .detail{font-size:13px}.feedback-box{max-width:560px;margin:22px auto 6px;text-align:left;color:#66736c;font-size:12px}.feedback-box summary{cursor:pointer;text-align:center;font-weight:800}.feedback-box textarea{width:100%;box-sizing:border-box;margin-top:10px;min-height:82px;resize:vertical}.feedback-box button{width:100%;margin-top:8px;padding:10px}.feedback-status{text-align:center;margin-top:7px;font-size:12px}@media(max-width:430px){.insight-card{padding:15px}.insight-card strong{font-size:18px}}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.64.1</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.64.2</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
@@ -117,7 +117,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <div class="homeaction"><span>📅</span><b id="statsMonthly">0,00 €</b><small>in diesem Monat</small></div>
 <div class="homeaction"><span>💡</span><b id="statsPotential">–</b><small>geschätztes Sparpotenzial</small></div>
 <div class="homeaction"><span>🛒</span><b id="statsAverage">0,00 €</b><small>Ø pro Einkauf</small></div>
-</div><div id="statsInsight" class="insight-card" style="display:none"><div class="insight-kicker">✨ Dein Einkaufsprofil</div><strong id="statsInsightTitle"></strong><div id="statsInsightDetail" class="detail"></div></div><div class="muted" style="margin-top:14px">Basiert auf deinen gespeicherten Bons. Je mehr Bons du scannst, desto persönlicher werden die Auswertungen.</div><div id="statsBreakdown" style="margin-top:16px"></div><div id="statsRecent" style="margin-top:14px"></div>
+</div><div id="statsInsight" class="insight-card" style="display:none"><div class="insight-kicker">✨ Dein Einkaufsprofil</div><strong id="statsInsightTitle"></strong><div id="statsInsightDetail" class="detail"></div></div><div class="muted" style="margin-top:14px">Basiert auf deinen gespeicherten Bons. Je mehr Bons du scannst, desto persönlicher werden die Auswertungen.</div><div id="statsBreakdown" style="margin-top:16px"></div><div id="statsDiscoveries" style="margin-top:16px"></div><div id="statsRecent" style="margin-top:14px"></div>
 <button class="ghost" id="statsBack" style="width:100%;margin-top:14px">Zurück</button></section>
 <section class="card" id="profileCard" style="display:none">
 <h2>Mein Profil</h2><div class="muted">Dein ECHTPREIS-Konto.</div>
@@ -910,7 +910,11 @@ function buildReceiptInsight(receipts,current){
  const sorted=candidates.sort((a,b)=>b.score-a.score),recent=(()=>{try{return JSON.parse(localStorage.getItem("echtpreis_recent_insight_types")||"[]")}catch(e){return[]}})();return sorted.find(x=>!recent.slice(-2).includes(x.type))||sorted[0];
 }
 function renderReceiptInsight(receipts,current){
- const card=$("receiptInsight");if(!card)return;const insight=buildReceiptInsight(receipts,current);card.style.display="block";$("receiptInsightTitle").textContent=insight.title;$("receiptInsightDetail").textContent=insight.detail;try{let h=JSON.parse(localStorage.getItem("echtpreis_recent_insight_types")||"[]");h.push(insight.type);localStorage.setItem("echtpreis_recent_insight_types",JSON.stringify(h.slice(-6)))}catch(e){}
+ const card=$("receiptInsight");if(!card)return;const insight=buildReceiptInsight(receipts,current);card.style.display="block";$("receiptInsightTitle").textContent=insight.title;$("receiptInsightDetail").textContent=insight.detail;try{let h=JSON.parse(localStorage.getItem("echtpreis_recent_insight_types")||"[]");h.push(insight.type);localStorage.setItem("echtpreis_recent_insight_types",JSON.stringify(h.slice(-6)));let history=JSON.parse(localStorage.getItem("echtpreis_insight_history_v1")||"[]"),entry={receiptId:String(current?.id||""),date:current?.date||"",store:current?.store||"",type:insight.type,title:insight.title,detail:insight.detail};history=history.filter(x=>x.receiptId!==entry.receiptId);history.unshift(entry);localStorage.setItem("echtpreis_insight_history_v1",JSON.stringify(history.slice(0,20)))}catch(e){}
+}
+function renderStatsDiscoveries(){
+ const box=$("statsDiscoveries");if(!box)return;let rows=[];try{rows=JSON.parse(localStorage.getItem("echtpreis_insight_history_v1")||"[]")}catch(e){}
+ rows=Array.isArray(rows)?rows.slice(0,4):[];box.innerHTML=rows.length?'<div style="font-weight:900;margin-bottom:7px">Letzte Entdeckungen</div>'+rows.map(x=>'<div style="padding:9px 0;border-bottom:1px solid #edf0ee"><b>'+escHtml(x.title)+'</b><div class="detail">'+escHtml([formatReceiptDate(x.date),x.store].filter(Boolean).join(" · "))+(x.detail?' · '+escHtml(x.detail):'')+'</div></div>').join(""):"";
 }
 function renderStatsBreakdown(receipts){
  const box=$("statsBreakdown");if(!box)return;const month=new Date().toISOString().slice(0,7),rows=(receipts||[]).filter(r=>String(r.date||"").startsWith(month)),cats={},products={};let recognized=0;
@@ -938,7 +942,7 @@ function refreshStats(){
  $("statsWeekly").textContent=eur(sum(receipts.filter(r=>String(r.date||"")>=weekKey&&String(r.date||"")<=todayKey)));
  $("statsMonthly").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(month)&&String(r.date||"")<=todayKey)));
  $("statsPotential").textContent=known.length?"ca. "+eur(known.reduce((n,r)=>n+Number(r.potentialSaving),0)):"–";
- $("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderStatsInsight(receipts);renderStatsBreakdown(receipts);renderStatsReceipts();
+ $("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderStatsInsight(receipts);renderStatsBreakdown(receipts);renderStatsDiscoveries();renderStatsReceipts();
 }
 async function refreshStatsFromServer(){const merged=await loadServerReceipts();if(Array.isArray(merged)){savePersonalReceipts(merged.slice(0,250));refreshStats()}}
 window.refreshEchtpreisStats=()=>{refreshStats();void refreshStatsFromServer()};
