@@ -579,23 +579,26 @@ function retailerFromLocation(x){
  for(const [name,needle] of chains)if(t.includes(needle))return name;return null;
 }
 function normalizePer(p){p=String(p||"").toUpperCase();if(["KG","KILOGRAM"].includes(p))return"kg";if(["L","LITER"].includes(p))return"l";if(["UNIT","PIECE"].includes(p))return"piece";return null}
-async function ingestOpenPrices(force=false){
- const syncKey="echtpreis_openprices_last_sync_v1",last=Number(localStorage.getItem(syncKey)||0),age=Date.now()-last;
- if(!force&&last&&age<6*60*60*1000){dataMachineState.openPrices="Cache aktuell";dataMachineState.lastSync=new Date(last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();return}
+async function ingestOpenPrices(force=false,keys=null){
+ const syncKey="echtpreis_openprices_sync_by_key_v1",sync=loadJson(syncKey,{}),now=Date.now(),wanted=keys?new Set(keys.filter(Boolean)):null;
+ const entries=Object.entries(catalog).filter(([key,item])=>item.openPricesCategory&&(!wanted||wanted.has(key))).filter(([key])=>force||!sync[key]||now-Number(sync[key])>=6*60*60*1000);
+ if(!entries.length){dataMachineState.openPrices="Cache aktuell";dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();return}
  const previous=loadJson(openPricesCacheKey),fresh=[],successfulKeys=new Set();dataMachineState.loaded=0;dataMachineState.rejected=0;
- const jobs=Object.entries(catalog).filter(([,c])=>c.openPricesCategory).map(async([key,c])=>{
-  const url="https://prices.openfoodfacts.org/api/v1/prices?category_tag="+encodeURIComponent(c.openPricesCategory)+"&currency=EUR&size=50&order_by=-date";
+ const jobs=entries.map(async([key,item])=>{
+  const url="https://prices.openfoodfacts.org/api/v1/prices?category_tag="+encodeURIComponent(item.openPricesCategory)+"&currency=EUR&size=50&order_by=-date";
   const r=await fetch(url);if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json(),items=d.items||d.results||[];successfulKeys.add(key);
   items.forEach(x=>{const store=retailerFromLocation(x),per=normalizePer(x.price_per),country=(x.location?.osm_address_country_code||"").toLowerCase();
-   if(!store||per!==c.unit||(country&&country!=="de")||!x.proof_id){dataMachineState.rejected++;return}
-   const o=normalizeObservation({key,store,price:+x.price,per,date:String(x.date||"").slice(0,10),region:x.location?.osm_address_city||"Deutschland",kind:"openprices",source:"Open Prices",product:x.product?.product_name||x.product_name||c.label,proof:"op:"+x.proof_id,locationId:x.location_id,trust:75});
+   if(!store||per!==item.unit||(country&&country!=="de")||!x.proof_id){dataMachineState.rejected++;return}
+   const o=normalizeObservation({key,store,price:+x.price,per,date:String(x.date||"").slice(0,10),region:x.location?.osm_address_city||"Deutschland",kind:"openprices",source:"Open Prices",product:x.product?.product_name||x.product_name||item.label,proof:"op:"+x.proof_id,locationId:x.location_id,trust:75});
    if(usableObservation(o)){fresh.push(o);dataMachineState.loaded++}else dataMachineState.rejected++;
   });
  });
  const results=await Promise.allSettled(jobs),ok=results.filter(x=>x.status==="fulfilled").length;
- if(ok){const kept=previous.filter(x=>!successfulKeys.has(x.key));saveJson(openPricesCacheKey,[...kept,...fresh].slice(-10000));dataMachineState.openPrices="verbunden · "+ok+"/"+jobs.length+" Kategorien geprüft";}
- else dataMachineState.openPrices="nicht erreichbar · Cache bleibt aktiv";
- if(ok)localStorage.setItem(syncKey,String(Date.now()));dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();
+ if(ok){
+  const kept=previous.filter(x=>!successfulKeys.has(x.key));saveJson(openPricesCacheKey,[...kept,...fresh].slice(-10000));
+  successfulKeys.forEach(key=>sync[key]=now);saveJson(syncKey,sync);dataMachineState.openPrices="verbunden · "+ok+"/"+entries.length+" benötigte Kategorien geprüft";
+ }else dataMachineState.openPrices="nicht erreichbar · Cache bleibt aktiv";
+ dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();
 }
 async function ingestOpenPriceForBarcode(code,key,label){
  try{
@@ -812,6 +815,7 @@ function comparisonQuality(row,totalItems){
 window.compare=async function compare({skipLocation=false,scroll=true}={}){
  hasCompared=true;const revision=comparisonRevision;$("compareStatus").textContent=skipLocation?"Vergleich wird aktualisiert …":"Vergleich wird berechnet …";
  if(!skipLocation)await loadNearbyStores();
+ await ingestOpenPrices(false,basket.map(w=>w.key).filter(Boolean));
  if(revision!==comparisonRevision)return false;
  if(!basket.length){$("results").style.display="none";$("compareStatus").textContent="Schreib zuerst deinen Einkauf auf.";if(!skipLocation)alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");return false}
  if(!selected.size){$("results").style.display="none";$("compareStatus").textContent="Bitte mindestens einen Markt auswählen.";if(!skipLocation)alert("Bitte mindestens einen Markt auswählen.");return false}
@@ -1141,5 +1145,5 @@ $("finishPurchaseBtn").onclick=async()=>{
  $("receiptMsg").textContent=($("contribute").checked?(saved+" erkannte Produktpreise beigetragen."):"Bon gespeichert.")+rewardText;drawDataMachine();refreshPoints();
 };
 $("noReceiptBtn").onclick=()=>{$("receiptFile").value="";$("ocrStatus").textContent="";$("receiptMsg").textContent="";$("reviewRows").innerHTML="";$("receiptTotalCheck").textContent="";$("receiptPaymentDetail").textContent="";$("receiptStoreDetail").textContent="";$("receiptStore").value="";$("receiptDate").value="";$("receiptAnalysis").style.display="none";$("finishPurchaseBtn").disabled=true;$("finishPurchaseBtn").textContent="Bon speichern";receiptDraft=[];receiptCash=null;receiptTotalVerified=false;currentReceiptSaving=null;currentReceiptSavingConfidence=null;$("receiptFile").click()};
-refreshPoints();drawSuggestions();drawStores();let savedBasket=loadBasketState();if(savedBasket.length)basket=savedBasket.filter(x=>x&&x.raw).map(restoreBasketItem);drawList();drawDataMachine();syncSharedData();ingestOpenPrices();
+refreshPoints();drawSuggestions();drawStores();let savedBasket=loadBasketState();if(savedBasket.length)basket=savedBasket.filter(x=>x&&x.raw).map(restoreBasketItem);drawList();drawDataMachine();syncSharedData();
 </script></body></html>
