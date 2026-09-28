@@ -138,6 +138,12 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  let restored=w.restoreBasketItem({raw:"Lachs",choice:{Art:"frozen",Menge:"500g"},checked:true});assert.strictEqual(restored.needsClarification,false,"saved product choice must survive reload");assert.strictEqual(restored.checked,true);
  restored=w.restoreBasketItem({raw:"250 g Testprodukt",ean:"12345678",label:"Testprodukt · 250 g"});assert.strictEqual(restored.key,"ean:12345678","barcode identity must survive reload");
  assert.strictEqual(w.identifyReceiptProduct("Red Bull 0,25").key,"energydrink");
+ assert.strictEqual(w.plausibleReceiptItemName("Terminal"),false,"terminal metadata must never verify as a product");
+ assert.strictEqual(w.plausibleReceiptItemName("Kartenzahlung"),false,"payment metadata must never verify as a product");
+ assert.strictEqual(w.plausibleReceiptItemName("Milch"),true,"normal short product names must remain valid");
+ assert.strictEqual(w.receiptArithmeticMatches(8.46,8.45),true,"one-cent OCR rounding differences should be tolerated");
+ assert.strictEqual(w.receiptArithmeticMatches(8.46,8.36),false,"material receipt arithmetic differences must still fail");
+
  const rb=w.inferPackFromName("Red Bull 0,25");assert.strictEqual(rb.packAmount,0.25);assert.strictEqual(rb.packUnit,"l");
  const receipt=w.parseReceiptText("G&G Mini-Hörnchen 1,49\nOetker Ristorante 3,49\nRed Bull 0,25 1,49 x 2 2,98\nPfand 0,25 x 2 0,50\nSUMME 8,46");
  await w.addEchtpreisBarcode("Testprodukt","250 g","12345678");assert.strictEqual(d.querySelectorAll("#list .item").length,1,"barcode product should enter the primary basket");w.replaceEchtpreisList([]);
