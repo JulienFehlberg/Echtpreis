@@ -26,6 +26,8 @@ assert(html.includes("window.EchtpreisRuntime"),"location flow must use the plat
 assert(html.includes('href="privacy.html"'),"privacy entry point missing");
 assert(html.includes('rel="manifest"'),"installable web-app manifest missing");
 assert(html.includes('apple-mobile-web-app-capable'),"iOS home-screen metadata missing");
+assert(html.indexOf('id="homeReceipt"')<html.indexOf('id="homePlan"'),"receipt scan should be the primary home action");
+assert(html.includes("Bon scannen"),"primary receipt action copy missing");
 assert(html.includes("function buildReceiptInsight"),"personal receipt insight engine missing");
 assert(html.includes("function renderStatsBreakdown"),"monthly spending breakdown missing");
 assert(html.includes("sicher kategorisiert"),"spending breakdown confidence coverage missing");
