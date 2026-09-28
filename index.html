@@ -920,7 +920,7 @@ function previewReceiptInsight(){
  const card=$("receiptInsight");if(!card||!receiptTotalVerified)return;
  const total=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,"")),store=$("receiptStore").value,date=$("receiptDate").value;
  if(!total||!store||!date)return;
- const current={id:"preview",store,date,total:total.toFixed(2),items:receiptDraft.filter(r=>r.name&&Number(r.price)>0).map(r=>({name:r.name,price:Number(r.price),isDeposit:!!r.isDeposit}))},receipts=[...getPersonalReceipts(),current],insight=buildReceiptInsight(receipts,current);
+ const current={id:"preview",store,date,total:total.toFixed(2),items:receiptDraft.filter(r=>r.name&&Number(r.price)>0).map(r=>({name:r.name,price:Number(r.price),isDeposit:!!r.isDeposit,count:Number(r.count||1),unitLinePrice:Number(r.unitLinePrice||0),packAmount:Number(r.packAmount||0),packUnit:r.packUnit||""}))},receipts=[...getPersonalReceipts(),current],insight=buildReceiptInsight(receipts,current);
  card.style.display="block";$("receiptInsightTitle").textContent=insight.title;$("receiptInsightDetail").textContent=insight.detail;
 }
 function renderReceiptInsight(receipts,current){
@@ -944,7 +944,11 @@ function personalComparablePrice(item){
  const total=Number(item&&item.price)||0,count=Math.max(1,Number(item&&item.count)||1);return total>0?total/count:0;
 }
 function comparableProductSignature(item){
- if(!item||item.isDeposit)return "";const name=normalizeProduct(item.name||"");if(!name)return "";const pack=inferPackFromName(item.name||"");return name+(pack&&pack.packAmount&&pack.packUnit?"|"+pack.packAmount+"|"+pack.packUnit:"");
+ if(!item||item.isDeposit)return "";const name=normalizeProduct(item.name||"");if(!name)return "";const inferred=inferPackFromName(item.name||""),amount=Number(item.packAmount||inferred?.packAmount||0),unit=item.packUnit||inferred?.packUnit||"";return name+(amount&&unit?"|"+amount+"|"+unit:"");
+}
+function comparableItemPrice(item){
+ const count=Math.max(1,Number(item?.count)||1),unitLine=Number(item?.unitLinePrice)||0,total=Number(item?.price)||0;
+ return unitLine>0?unitLine:(total>0?total/count:0);
 }
 function renderStatsMarketProfile(receipts){
  const box=$("statsMarketProfile");if(!box)return;const byProduct={};
@@ -1255,7 +1259,7 @@ async function submitReceiptReward(store,date,valid,total){
 $("finishPurchaseBtn").onclick=async()=>{
  if(!$("receiptFile").files[0])return;let store=$("receiptStore").value,date=$("receiptDate").value;if(!store||!date)return alert("Händler oder Bon-Datum wurden nicht sicher erkannt. Bitte den Bon erneut fotografieren.");
  const total=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,""));if(!Number.isFinite(total)||total<=0)return alert("Die Bon-Summe wurde nicht sicher erkannt. Bitte den Bon erneut fotografieren.");
- let valid=receiptDraft.map(r=>({name:(r.name||"").trim(),price:Number(String(r.price).replace(",",".")),packAmount:Number(String(r.packAmount||"").replace(",",".")),packUnit:r.packUnit||"",discount:Number(r.discount||0),regularTotal:Number(r.regularTotal||r.price||0),count:Number(r.count||1),quantitySource:r.quantitySource||"",isDeposit:!!r.isDeposit})).filter(r=>r.name&&Number.isFinite(r.price)&&r.price>0);
+ let valid=receiptDraft.map(r=>({name:(r.name||"").trim(),price:Number(String(r.price).replace(",",".")),packAmount:Number(String(r.packAmount||"").replace(",",".")),packUnit:r.packUnit||"",discount:Number(r.discount||0),regularTotal:Number(r.regularTotal||r.price||0),count:Number(r.count||1),quantitySource:r.quantitySource||"",unitLinePrice:Number(r.unitLinePrice||0),isDeposit:!!r.isDeposit})).filter(r=>r.name&&Number.isFinite(r.price)&&r.price>0);
  $("finishPurchaseBtn").disabled=true;$("finishPurchaseBtn").textContent="Bon wird geprüft …";
  const consent=$("contribute").checked,fingerprint=receiptLocalFingerprint(store,date,total,valid);
  let reward=consent?await submitReceiptReward(store,date,valid,total):{ok:false,localOnly:true};
