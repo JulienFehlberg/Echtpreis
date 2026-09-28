@@ -509,7 +509,7 @@ const communityKey="echtpreis_community_observations_v2";
 const sharedCacheKey="echtpreis_shared_observations_v1";
 const openPricesCacheKey="echtpreis_openprices_cache_v1";
 const dataMachineState={openPrices:"noch nicht synchronisiert",loaded:0,rejected:0,lastSync:null};
-function loadJson(key,fallback=[]){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback))}catch(e){return fallback}}
+function loadJson(key,fallback=[]){try{let value=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));return Array.isArray(fallback)&&!Array.isArray(value)?fallback:value}catch(e){return fallback}}
 function saveJson(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch(e){}}
 function normalizeObservation(x){
  return {id:x.id||("ep_"+Date.now()+"_"+Math.random().toString(36).slice(2)),key:x.key||null,store:x.store||null,price:Number(x.price),per:x.per||"piece",date:x.date||null,validTo:x.validTo||null,region:x.region||null,kind:x.kind||"community",source:x.source||"ECHTPREIS Bon",product:x.product||x.key||"Unbekannt",proof:x.proof||null,locationId:x.locationId||null,trust:Number(x.trust||0),status:x.status||"observed"};
@@ -641,7 +641,7 @@ function locationLabel(x){
  return l.name||l.osm_name||l.display_name||x.location_name||("Beobachteter Händler / Ort"+(x.location_id?" #"+x.location_id:""));
 }
 const basketStateKey="echtpreis_basket_state_v1";
-function loadBasketState(){try{return JSON.parse(localStorage.getItem(basketStateKey)||"[]")}catch(e){return[]}}
+function loadBasketState(){try{let value=JSON.parse(localStorage.getItem(basketStateKey)||"[]");return Array.isArray(value)?value:[]}catch(e){return[]}}
 function saveBasketState(){try{localStorage.setItem(basketStateKey,JSON.stringify(basket.map(w=>({raw:w.raw,checked:!!w.checked,ean:w.ean||null,label:w.label||null,choice:w.choice||{}}))))}catch(e){}}
 let basket=[];let selected=new Set(storeNames);let hasCompared=false,comparisonRevision=0,editingItem=null;
 function basketChanged(){comparisonRevision++;if(hasCompared){if(!basket.length){$("results").style.display="none";$("compareStatus").textContent="Liste leer – füge ein Produkt hinzu.";return}void compare({skipLocation:true,scroll:false});}}
@@ -858,12 +858,12 @@ function drawSavedRecipes(){let a=loadRecipes(),el=$("savedRecipesList");el.inne
 function showSavedRecipes(){showPlan();$("recipeImport").style.display="none";$("savedRecipesPanel").style.display="block";drawSavedRecipes()}
 
 const homeRecipeEl=$("homeRecipe");if(homeRecipeEl)homeRecipeEl.onclick=()=>showRecipeImport();$("addRecipeBtn").onclick=()=>showRecipeImport();$("savedRecipesBtn").onclick=showSavedRecipes;$("importRecipeBtn").onclick=importRecipeIngredients;$("saveRecipeBtn").onclick=saveRecipe;$("closeRecipeBtn").onclick=()=>{$("recipeImport").style.display="none"};
-window.echtpreisAdd=()=>add();window.echtpreisCompare=async()=>{if(await compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};$("demoListBtn").onclick=()=>{basket=["500 g Rinderhack","1 kg Bananen"].map(parseWish);drawList();basketChanged()};$("addBtn").onclick=()=>add();$("productInput").oninput=e=>renderInputSuggestions(e.target.value);$("productInput").onkeydown=e=>{if(e.key==="Enter")add();if(e.key==="Escape"){$("suggestions").style.display="none"}};$("compareBtn").onclick=async()=>{if(await compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};
+window.echtpreisAdd=()=>add();window.echtpreisCompare=async()=>{if(await compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};$("demoListBtn").onclick=()=>{basket=["500 g Rinderhack","1 kg Bananen"].map(parseWish);drawList();basketChanged()};$("addBtn").onclick=()=>add();$("productInput").oninput=e=>renderInputSuggestions(e.target.value);$("productInput").onkeydown=e=>{if(e.key==="Enter")add();if(e.key==="Escape"){$("suggestions").style.display="none"}};$("compareBtn").onclick=async()=>{let b=$("compareBtn");if(b.disabled)return;b.disabled=true;let label=b.textContent;b.textContent="Vergleich läuft …";try{if(await compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}}finally{b.disabled=false;b.textContent=label}};
 function hidePoints(){$("pointsCard").style.display="none"}
 function showPlan(){hidePoints();$("planner").style.display="block";$("receipt").style.display="none";let st=$("statsCard");if(st)st.style.display="none";document.body.classList.add("subview");$("planTab").classList.add("active");$("receiptTab").classList.remove("active");renderQuickSuggestions();window.scrollTo({top:0,behavior:"instant"})}
 function showReceipt(){hidePoints();$("planner").style.display="none";$("receipt").style.display="block";let st=$("statsCard");if(st)st.style.display="none";document.body.classList.add("subview");$("receiptTab").classList.add("active");$("planTab").classList.remove("active");window.scrollTo({top:0,behavior:"instant"});try{if(localStorage.getItem("echtpreis_open_purchase")==="1")$("openPurchaseNotice").innerHTML="<b>Offener Einkauf:</b> Warte auf deinen Bon."}catch(e){}}
 function showPoints(){$("planner").style.display="none";$("receipt").style.display="none";$("pointsCard").style.display="block";window.scrollTo({top:0,behavior:"smooth"});refreshPoints()}
-function getPersonalReceipts(){try{return JSON.parse(localStorage.getItem("echtpreis_personal_receipts")||"[]")}catch(e){return[]}}
+function getPersonalReceipts(){try{let value=JSON.parse(localStorage.getItem("echtpreis_personal_receipts")||"[]");return Array.isArray(value)?value:[]}catch(e){return[]}}
 function savePersonalReceipts(v){localStorage.setItem("echtpreis_personal_receipts",JSON.stringify(v))}
 function receiptLocalFingerprint(store,date,total,items){
  const raw=[normalizeProduct(store),date,Number(total).toFixed(2),...(items||[]).map(x=>normalizeProduct(x.name)+":"+Number(x.price).toFixed(2)).sort()].join("|");let h=2166136261;for(let i=0;i<raw.length;i++){h^=raw.charCodeAt(i);h=Math.imul(h,16777619)}return "r"+(h>>>0).toString(16);
@@ -1131,7 +1131,7 @@ $("finishPurchaseBtn").onclick=async()=>{
  $("finishPurchaseBtn").disabled=true;$("finishPurchaseBtn").textContent="Bon wird geprüft …";
  const consent=$("contribute").checked,fingerprint=receiptLocalFingerprint(store,date,total,valid);
  let reward=consent?await submitReceiptReward(store,date,valid,total):{ok:false,localOnly:true};
- let receipts=getPersonalReceipts(),existing=receipts.find(r=>r.id===reward.receiptId)||receipts.find(r=>r.fingerprint===fingerprint)||receipts.find(r=>r.store===store&&r.date===date&&Number(r.total)===0);
+ let receipts=getPersonalReceipts(),existing=receipts.find(r=>r.id===reward.receiptId)||receipts.find(r=>r.fingerprint===fingerprint)||(reward.duplicate?receipts.find(r=>r.store===store&&r.date===date&&Math.abs(Number(r.total)-total)<.011):null)||receipts.find(r=>r.store===store&&r.date===date&&Number(r.total)===0);
  if(existing){existing.total=total.toFixed(2);existing.potentialSaving=currentReceiptSaving;existing.savingConfidence=currentReceiptSavingConfidence;existing.fingerprint=fingerprint;if(reward.receiptId){existing.id=reward.receiptId;existing.source="server"}}
  else receipts.unshift({id:reward.receiptId||"local_"+Date.now(),fingerprint,store,date,total:total.toFixed(2),potentialSaving:currentReceiptSaving,savingConfidence:currentReceiptSavingConfidence,private:false,source:reward.receiptId?"server":"local"});
  savePersonalReceipts(receipts.slice(0,250));refreshStats();
