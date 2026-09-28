@@ -62,7 +62,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.58.6</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.58.7</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
@@ -103,7 +103,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <label class="ghost receipt-file-action" for="receiptFile">Foto oder Dokument auswählen</label>
 <div id="receiptMsg" class="detail"></div>
 <div id="ocrBox" class="ocrbox"><h2>Bon kontrollieren</h2><div id="ocrStatus" class="detail" role="status"></div><div id="receiptStoreDetail" class="detail"></div><label for="receiptTotalInput" style="display:block;margin-top:12px;text-align:left;font-weight:800">Bon-Summe in €</label><input id="receiptTotalInput" type="text" inputmode="decimal" placeholder="z. B. 8,46" style="width:100%;box-sizing:border-box;margin:6px 0"><div id="receiptTotalCheck" class="detail"></div><div id="reviewRows"></div><button id="addReviewRow" class="ghost" type="button">Artikel hinzufügen</button><select id="receiptStore"><option value="">Händler wählen</option><option>Lidl</option><option>Kaufland</option><option>REWE</option><option>EDEKA</option><option>PENNY</option><option>ALDI Nord</option><option>Netto</option><option>NORMA</option><option>dm</option><option>Rossmann</option></select><input id="receiptDate" type="date"><label><input type="checkbox" id="contribute" checked> Anonymisierte Preisdaten beitragen</label><button class="green" id="finishPurchaseBtn" disabled>Bon speichern</button><button class="ghost" id="noReceiptBtn">Abbrechen</button></div>
-<div id="receiptAnalysis" class="receipt-analysis" style="display:none"><div class="smallcap">Deine Bon-Analyse</div><div class="analysis-paid"><span>Bezahlt</span><strong id="analysisPaid">–</strong></div><div class="analysis-best"><span id="analysisBestStore">Günstigere Alternative</span><strong id="analysisBestPrice">–</strong></div><div class="analysis-save">Du hättest <strong id="analysisSaving">–</strong> sparen können.</div><div id="analysisNote" class="detail"></div></div><div class="receipt-why"><b>Warum Bons?</b><div class="muted">Mit echten Kassenbons baut ECHTPREIS eine eigene Preisdatenbank auf. Je mehr bestätigte Preise wir haben, desto genauer werden deine Vergleiche.</div></div>
+<div id="receiptAnalysis" class="receipt-analysis" style="display:none"><div class="smallcap">Deine Bon-Analyse</div><div class="analysis-paid"><span>Bezahlt</span><strong id="analysisPaid">–</strong></div><div class="analysis-best"><span id="analysisBestStore">Günstigere Alternative</span><strong id="analysisBestPrice">–</strong></div><div class="analysis-save">Geschätzte Ersparnis: <strong id="analysisSaving">–</strong></div><div id="analysisNote" class="detail"></div></div><div class="receipt-why"><b>Warum Bons?</b><div class="muted">Mit echten Kassenbons baut ECHTPREIS eine eigene Preisdatenbank auf. Je mehr bestätigte Preise wir haben, desto genauer werden deine Vergleiche.</div></div>
 <button class="ghost" id="backPlanBtn" style="width:100%;margin-top:14px">Zurück</button>
 <div id="openPurchaseNotice" style="display:none"></div><div id="testModeBox" style="display:none"><button id="runDupeTest" disabled></button><div id="dupeTestResult"></div></div>
 </div></section>
@@ -643,7 +643,7 @@ const productAliases={
  tomaten:["tomate","tomaten","cherrytomaten","cocktailtomaten","strauchtomaten"],gurken:["gurke","gurken","salatgurke"],
  aepfel:["apfel","aepfel","äpfel"],kartoffeln:["kartoffel","kartoffeln","speisekartoffeln"],zwiebeln:["zwiebel","zwiebeln"],
  rinderhack:["rinderhack","rinder hack","rinderhackfleisch","rind hack","hackfleisch rind"],hackfleisch:["hackfleisch","gemischtes hack","hack gemischt"],
- haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],energydrink:["energy drink","energydrink","red bull","monster energy"],tiefkuehlpizza:["tiefkühlpizza","tiefkuhlpizza","tk pizza","pizza ristorante","ristorante pizza","dr oetker ristorante"],croissants:["croissant","croissants","hörnchen","hornchen","mini hörnchen","mini hornchen","mini hdrncher"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
+ haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],energydrink:["energy drink","energydrink","red bull","monster energy"],tiefkuehlpizza:["tiefkühlpizza","tiefkuhlpizza","tk pizza","pizza ristorante","ristorante pizza","dr oetker ristorante"],croissants:["croissant","croissants","hörnchen","hornchen","mini hörnchen","mini hornchen","mini hdrncher","mini hdrnchen"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
  milch:["milch","vollmilch","frischmilch","haltbare milch","h milch"],haferdrink:["haferdrink","hafer drink","hafermilch","oat drink","alpro hafer"],
  butter:["butter"],kaese:["käse","kase","kaese","gouda","emmentaler","mozzarella"],joghurt:["joghurt","yoghurt"],skyr:["skyr"],quark:["quark","magerquark"],
  nudeln:["nudeln","nudel","pasta","spaghetti","penne","fusilli"],reis:["reis","basmatireis","jasminreis"],mehl:["mehl","weizenmehl"],zucker:["zucker"],
@@ -846,7 +846,9 @@ function inferPackFromName(name){
 function parseReceiptText(text){
  const lines=text.split(/\n+/).map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean),rows=[];let last=null;
  for(let i=0;i<lines.length;i++){
-  const line=lines[i].replace(/(\d)\s*([,.])\s*(\d{2})/g,"$1$2$3");
+  const line=lines[i].replace(/(\d)\s*([,.])\s*(\d{2})/g,"$1$2$3").replace(/\bxX\b/g,"x");
+  if(/^\s*(?:summe|gesamt(?:betrag)?|zu zahlen)\b/i.test(line))break;
+  if(/\b(?:mwst|netto|umsatz|steuer)\b/i.test(line)||/^\s*[AB]\s*(?:7|19)\s*%/i.test(line))continue;
   let discount=line.match(/(?:aktionsrabatt|preisvorteil|rabatt)\s*-?\s*(\d+[,.]\d{2})\s*(?:€|EUR)?/i);
   if(discount&&last){let d=parseReceiptNumber(discount[1]);last.discount=Number(((last.discount||0)+d).toFixed(2));last.regularTotal=Number((Number(last.price)+last.discount).toFixed(2));continue}
   let pf=line.match(/^pfand(?:\s+\d+[,.]\d{2})?\s+(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)\s+(\d+[,.]\d{2})/i)||line.match(/^pfand\s+(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)\s+(\d+[,.]\d{2})/i);
@@ -879,8 +881,9 @@ function extractReceiptTotal(text){
 }
 function checkReceiptTotal(){
  const total=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,"")),recognized=Number(receiptDraft.reduce((n,r)=>n+(Number(String(r.price).replace(",","."))||0),0).toFixed(2));
- receiptTotalVerified=total>0&&receiptDraft.length>0&&Math.abs(total-recognized)<.011;
- $("receiptTotalCheck").textContent=total>0?(receiptTotalVerified?"✓ Bon-Summe stimmt mit den erkannten Positionen überein.":receiptDraft.length?"Bon-Summe "+eur(total)+" · erkannte Positionen "+eur(recognized)+". Bitte Artikel kontrollieren.":"Bon-Summe erkannt. Für einen Marktvergleich bitte Artikel ergänzen oder erneut fotografieren."):"Bitte die Bon-Summe vom Beleg eintragen.";
+ const arithmeticMatch=total>0&&receiptDraft.length>0&&Math.abs(total-recognized)<.011,identified=receiptDraft.every(r=>r.isDeposit||!!parseWish(r.name).key);
+ receiptTotalVerified=arithmeticMatch&&identified;
+ $("receiptTotalCheck").textContent=total>0?(receiptTotalVerified?"✓ Bon-Summe stimmt mit den erkannten Artikeln überein.":arithmeticMatch?"Bon-Summe rechnerisch passend, aber mindestens ein Artikel ist nicht sicher erkannt. Bitte kontrollieren.":receiptDraft.length?"Bon-Summe "+eur(total)+" · erkannte Positionen "+eur(recognized)+". Bitte Artikel kontrollieren.":"Bon-Summe erkannt. Für einen Marktvergleich bitte Artikel ergänzen oder erneut fotografieren."):"Bitte die Bon-Summe vom Beleg eintragen.";
  updateReceiptAnalysis();
 }
 async function extractPdfText(file){
@@ -946,7 +949,12 @@ async function runImageReceiptOCR(file){
   applyReceiptText(text,"Foto");
   if(!receiptDraft.length||!extractReceiptTotal(text)){
    $("ocrStatus").textContent="Bon-Ausschnitt wird erneut gelesen …";
-   try{const image=await createImageBitmap(file),canvas=document.createElement("canvas"),crop=[image.width*.16,image.height*.12,image.width*.70,image.height*.36];canvas.width=1800;canvas.height=Math.round(1800*crop[3]/crop[2]);let ctx=canvas.getContext("2d");ctx.filter="grayscale(1) contrast(1.7)";ctx.drawImage(image,...crop,0,0,canvas.width,canvas.height);image.close();const retry=await Tesseract.recognize(canvas,"deu",{config:{tessedit_pageseg_mode:6}}),retryText=retry.data.text||"";if(parseReceiptText(retryText).length>receiptDraft.length||(!extractReceiptTotal(text)&&extractReceiptTotal(retryText)))applyReceiptText(retryText,"Bonausschnitt");}catch(err){}
+   try{
+    const image=await createImageBitmap(file),canvas=document.createElement("canvas"),crop=[image.width*.16,image.height*.12,image.width*.70,image.height*.27];
+    canvas.width=1800;canvas.height=Math.round(1800*crop[3]/crop[2]);let ctx=canvas.getContext("2d");ctx.filter="grayscale(1) contrast(1.7)";ctx.drawImage(image,...crop,0,0,canvas.width,canvas.height);image.close();
+    const retry=await Tesseract.recognize(canvas,"eng",{config:{tessedit_pageseg_mode:6}}),retryText=retry.data.text||"",newRows=parseReceiptText(retryText),printed=extractReceiptTotal(text);
+    if(newRows.length>receiptDraft.length||(!printed&&extractReceiptTotal(retryText)))applyReceiptText(retryText+(printed&&!extractReceiptTotal(retryText)?"\nSUMME "+printed.toFixed(2).replace(".",","):""),"Bonausschnitt");
+   }catch(err){}
   }
  }catch(err){$("ocrStatus").textContent="Automatische Erkennung fehlgeschlagen. Bitte Artikel manuell ergänzen.";receiptDraft=[];drawReviewRows()}
 }
