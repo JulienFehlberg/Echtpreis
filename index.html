@@ -3,660 +3,80 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#090b10">
-
-<title>ECHTPREIS</title>
-
+<meta name="theme-color" content="#07120d">
+<title>ECHTPREIS – Einkaufsplaner</title>
 <style>
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  background:#f4f6f8;
-  color:#0b0d11;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
-}
-
-.app{
-  max-width:600px;
-  margin:auto;
-  min-height:100vh;
-  padding:32px 18px 60px
-}
-
-.brand{
-  font-size:14px;
-  font-weight:950;
-  letter-spacing:.24em
-}
-
-.version{
-  float:right;
-  font-size:12px;
-  color:#9096a0;
-  letter-spacing:0
-}
-
-.hero{
-  font-size:46px;
-  line-height:.98;
-  letter-spacing:-.055em;
-  margin:24px 0 13px
-}
-
-.sub{
-  color:#68707c;
-  font-size:18px;
-  line-height:1.45;
-  margin-bottom:28px
-}
-
-.card{
-  background:white;
-  border:1px solid #e4e7ec;
-  border-radius:27px;
-  padding:20px;
-  box-shadow:0 12px 40px rgba(0,0,0,.05);
-  margin-bottom:16px
-}
-
-.primary,
-.secondary{
-  width:100%;
-  padding:18px;
-  border-radius:19px;
-  font-size:17px;
-  font-weight:850;
-  cursor:pointer
-}
-
-.primary{
-  background:#090b10;
-  color:white;
-  border:0
-}
-
-.secondary{
-  margin-top:10px;
-  background:white;
-  border:1px solid #dfe3e8;
-  color:#111
-}
-
-input{display:none}
-
-.preview{
-  width:100%;
-  max-height:400px;
-  object-fit:contain;
-  background:#f5f5f5;
-  border-radius:18px;
-  margin-top:16px;
-  display:none
-}
-
-.status{
-  display:none;
-  margin-top:16px;
-  padding:15px;
-  background:#f3f5f8;
-  border-radius:16px;
-  font-weight:750
-}
-
-.tiny{
-  color:#9298a1;
-  font-size:12px;
-  text-align:center;
-  line-height:1.4;
-  margin:14px 4px 0
-}
-
-.demo{
-  margin-top:12px;
-  text-align:center;
-  font-size:13px;
-  color:#6f7782;
-  text-decoration:underline;
-  cursor:pointer
-}
-
-.result{
-  display:none
-}
-
-.shopline{
-  color:#727985;
-  font-weight:700;
-  margin-bottom:4px
-}
-
-.total{
-  font-size:42px;
-  font-weight:950;
-  letter-spacing:-.05em;
-  margin:3px 0 18px
-}
-
-.stats{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-bottom:12px
-}
-
-.stat{
-  background:#f5f7f9;
-  border-radius:17px;
-  padding:14px
-}
-
-.statnum{
-  font-size:24px;
-  font-weight:950
-}
-
-.statlabel{
-  font-size:12px;
-  color:#777f8b;
-  margin-top:2px
-}
-
-.saving{
-  background:#ecf8ef;
-  color:#225d34;
-  border-radius:18px;
-  padding:16px;
-  margin-top:10px
-}
-
-.saving b{
-  font-size:20px
-}
-
-.sectiontitle{
-  margin:27px 0 9px;
-  font-size:18px;
-  font-weight:900
-}
-
-.item{
-  background:white;
-  border:1px solid #e4e7ec;
-  border-radius:20px;
-  padding:16px;
-  margin-bottom:10px
-}
-
-.itemtop{
-  display:flex;
-  justify-content:space-between;
-  gap:14px
-}
-
-.itemname{
-  font-weight:900
-}
-
-.itemprice{
-  font-weight:950;
-  white-space:nowrap
-}
-
-.meta{
-  color:#7c838e;
-  font-size:12px;
-  margin-top:6px;
-  line-height:1.45
-}
-
-.tag{
-  display:inline-block;
-  margin-top:9px;
-  padding:6px 9px;
-  border-radius:100px;
-  font-size:11px;
-  font-weight:850
-}
-
-.exact{
-  background:#eaf7ee;
-  color:#23633a
-}
-
-.category{
-  background:#eef3ff;
-  color:#315a9b
-}
-
-.uncertain{
-  background:#fff4dc;
-  color:#7b5918
-}
-
-.info{
-  background:white;
-  border:1px solid #e4e7ec;
-  border-radius:20px;
-  padding:17px;
-  color:#5f6670;
-  line-height:1.45;
-  font-size:14px
-}
-
-.footer{
-  text-align:center;
-  color:#9ba0a9;
-  font-size:12px;
-  margin-top:30px
-}
-
-.hidden{
-  display:none
-}
-
-@media(max-width:400px){
-  .hero{font-size:39px}
-}
-
-.ocrbox{display:none;margin-top:16px;background:#0b0d11;color:#e9edf2;border-radius:18px;padding:15px;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;max-height:280px;overflow:auto}
-.progress{height:7px;background:#e6e9ed;border-radius:99px;overflow:hidden;margin-top:12px;display:none}
-.progressbar{height:100%;width:0;background:#111;transition:width .2s}
-.realbadge{display:inline-block;background:#eaf7ee;color:#23633a;padding:5px 8px;border-radius:99px;font-size:11px;font-weight:850;margin-bottom:8px}
+*{box-sizing:border-box} body{margin:0;background:#f3f5f4;color:#101513;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:680px;margin:auto;min-height:100vh;padding:26px 16px 70px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
+.brand{font-weight:900;letter-spacing:2px;font-size:16px}.version{font-size:12px;background:#e4e9e6;padding:6px 10px;border-radius:99px;color:#52605a}
+.hero{background:#07120d;color:white;border-radius:28px;padding:28px 22px;margin-bottom:18px}.eyebrow{color:#9ed6b9;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+h1{font-size:34px;line-height:1.03;margin:10px 0 12px;letter-spacing:-1.3px}.sub{color:#c6d0cb;line-height:1.5;margin:0;font-size:15px}
+.card{background:#fff;border:1px solid #e1e6e3;border-radius:22px;padding:18px;margin:14px 0;box-shadow:0 8px 30px rgba(15,30,20,.04)}
+h2{font-size:19px;margin:0 0 5px}.muted{color:#6d7772;font-size:13px;line-height:1.45}.inputrow{display:flex;gap:8px;margin-top:15px}
+input,select{border:1px solid #d7ddd9;background:#fff;border-radius:13px;padding:13px;font-size:16px;min-width:0}input{flex:1}
+button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:800;cursor:pointer}.primary{background:#101513;color:white}.green{background:#0b6b3a;color:white;width:100%;margin-top:12px;padding:15px}.ghost{background:#edf1ef;color:#26312b}
+.item{display:flex;align-items:center;gap:9px;padding:11px 0;border-bottom:1px solid #edf0ee}.item:last-child{border:0}.itemname{flex:1;font-weight:700}.qty{color:#65716b;font-size:13px}.x{background:none;color:#8c9691;padding:6px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.chip{border:1px solid #dce2de;border-radius:99px;padding:8px 11px;font-size:13px;background:#fafbfa;cursor:pointer}.chip.on{background:#dff3e8;border-color:#a6d5bb;color:#075a30;font-weight:800}
+.notice{background:#fff7db;border:1px solid #f0dfa3;border-radius:15px;padding:12px 14px;font-size:12px;line-height:1.45;color:#66551c;margin-top:12px}
+.results{display:none}.winner{background:#0b6b3a;color:#fff;border-radius:22px;padding:20px;margin:14px 0}.smallcap{font-size:11px;text-transform:uppercase;letter-spacing:.8px;opacity:.75;font-weight:800}.big{font-size:31px;font-weight:900;margin:4px 0}.merchant{display:grid;grid-template-columns:1fr auto;gap:5px;padding:14px 0;border-bottom:1px solid #e9eeeb}.merchant:last-child{border:0}.price{font-size:20px;font-weight:900}.coverage{font-size:12px;color:#77817c}
+.split{background:#eef8f2;border:1px solid #c9e6d5;border-radius:17px;padding:15px;margin-top:14px}.split strong{font-size:17px}.save{color:#08723e;font-weight:900}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.tab{background:#e9eeeb}.tab.active{background:#101513;color:#fff}
+.receipt{display:none}.upload{display:block;text-align:center;border:1.5px dashed #b8c2bd;border-radius:16px;padding:20px;margin-top:12px;font-weight:800;cursor:pointer}
+.footer{text-align:center;color:#8a938f;font-size:11px;margin-top:28px}.detail{font-size:12px;color:#68736d;margin-top:7px}.source{font-size:11px;background:#eef1ef;border-radius:8px;padding:4px 7px;display:inline-block;margin-top:6px}
+@media(max-width:430px){h1{font-size:31px}.inputrow{flex-wrap:wrap}.inputrow input{flex-basis:100%}.inputrow select{flex:1}}
 </style>
 </head>
+<body><main class="app">
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.0</span></div>
+<section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Liste erstellen, Märkte vergleichen und sehen, ob sich ein zweiter Stopp wirklich lohnt.</p></section>
+<div class="tabs"><button class="tab active" id="planTab">Einkauf planen</button><button class="tab" id="receiptTab">Bon prüfen</button></div>
 
-<body>
+<section id="planner">
+<div class="card"><h2>Deine Einkaufsliste</h2><div class="muted">Schreib einfach, was du brauchst. Für den Prototyp funktionieren die Demo-Produkte unten bereits.</div>
+<div class="inputrow"><input id="productInput" placeholder="z. B. Eier, Bananen, Haferdrink"><select id="qty"><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select><button class="primary" id="addBtn">+</button></div>
+<div class="chips" id="suggestions"></div><div id="list"></div></div>
 
-<main class="app">
+<div class="card"><h2>Welche Märkte?</h2><div class="muted">Später: automatisch nach Standort und Entfernung. Heute kannst du auswählen.</div><div class="chips" id="stores"></div>
+<div class="notice"><b>Wichtig:</b> v2.0 nutzt für diesen UX-Test klar gekennzeichnete DEMO-PREISE. Es werden keine Händlerpreise als aktuell ausgegeben. Live-Preisdaten kommen als eigener Daten-Layer.</div>
+<button class="green" id="compareBtn">Einkauf vergleichen</button></div>
 
-<div class="brand">
-ECHTPREIS
-<span class="version">v1.2.2</span>
-</div>
-
-<h1 class="hero">Versteh, was du bezahlst.</h1>
-
-<div class="sub">
-Lade deinen Kassenbon hoch. ECHTPREIS macht deinen Einkauf verständlich
-und zeigt dir, welche Preise sich zuverlässig vergleichen lassen.
-</div>
-
-<section class="card">
-
-<button class="primary" id="cameraButton">
-📷 Kassenbon fotografieren
-</button>
-
-<button class="secondary" id="uploadButton">
-📁 Beleg hochladen
-</button>
-
-<input
-  id="cameraInput"
-  type="file"
-  accept="image/*"
-  capture="environment"
->
-
-<input
-  id="fileInput"
-  type="file"
-  accept="image/*"
->
-
-<img id="preview" class="preview">
-
-<div id="status" class="status">Bon wird vorbereitet …</div>
-<div class="progress" id="progress"><div class="progressbar" id="progressbar"></div></div>
-<div id="ocrbox" class="ocrbox"></div>
-
-<div class="demo" id="demoButton">
-Testanalyse mit unserem Lidl-Bon anzeigen
-</div>
-
-<p class="tiny">
-ECHTPREIS erfindet keine Vergleichspreise.
-Wenn zuverlässige Daten fehlen, sagen wir das.
-</p>
-
+<section class="results" id="results"><div class="winner"><div class="smallcap">Günstigster Demo-Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
+<div class="card"><h2>Alle Märkte</h2><div class="muted">Nur bekannte Positionen werden summiert. Fehlende Preise werden nicht erfunden.</div><div id="merchantResults"></div></div>
+<div class="card"><h2>Lohnt sich Aufteilen?</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
+<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.0 · Demo-Datensatz</span></div></section>
 </section>
 
-
-<section id="realResult" class="result"></section>
-
-<section id="result" class="result">
-
-<div class="card">
-
-<div class="shopline">LIDL · Testeinkauf</div>
-
-<div class="total">44,75 €</div>
-
-<div class="stats">
-
-<div class="stat">
-<div class="statnum">17</div>
-<div class="statlabel">Positionen erkannt</div>
-</div>
-
-<div class="stat">
-<div class="statnum">14</div>
-<div class="statlabel">potenziell vergleichbar</div>
-</div>
-
-</div>
-
-<div class="saving">
-Preisvorteile auf diesem Bon<br>
-<b>2,24 €</b>
-</div>
-
-</div>
-
-
-<div class="sectiontitle">
-Dein Einkauf
-</div>
-
-
-<div class="item">
-
-<div class="itemtop">
-<div class="itemname">
-Nuts Royal XXL · 500 g
-</div>
-
-<div class="itemprice">
-5,99 €
-</div>
-</div>
-
-<div class="meta">
-ALesto Selection · identisches Produkt wahrscheinlich erkannt
-</div>
-
-<span class="tag exact">
-✓ Produkt-Match
-</span>
-
-</div>
-
-
-<div class="item">
-
-<div class="itemtop">
-<div class="itemname">
-Paprika rot
-</div>
-
-<div class="itemprice">
-2,49 €/kg
-</div>
-</div>
-
-<div class="meta">
-Lose Ware · Vergleich erfolgt über Kategorie und Grundpreis
-</div>
-
-<span class="tag category">
-Kategorie-Vergleich
-</span>
-
-</div>
-
-
-<div class="item">
-
-<div class="itemtop">
-<div class="itemname">
-Ehrmann Grand Dessert Toffee
-</div>
-
-<div class="itemprice">
-0,49 €
-</div>
-</div>
-
-<div class="meta">
-Markenprodukt erkannt · genaue Packungsvariante wird noch geprüft
-</div>
-
-<span class="tag exact">
-Produkt erkannt
-</span>
-
-</div>
-
-
-<div class="item">
-
-<div class="itemtop">
-<div class="itemname">
-Schlagsahne 30 %
-</div>
-
-<div class="itemprice">
-0,99 €
-</div>
-</div>
-
-<div class="meta">
-Mehrere passende Produkte möglich
-</div>
-
-<span class="tag uncertain">
-⚠ Variante nicht eindeutig
-</span>
-
-</div>
-
-
-<div class="item">
-
-<div class="itemtop">
-<div class="itemname">
-Lachsfilet
-</div>
-
-<div class="itemprice">
-9,99 €
-</div>
-</div>
-
-<div class="meta">
-Noch nicht genügend Informationen für einen zuverlässigen Preisvergleich
-</div>
-
-<span class="tag uncertain">
-Noch kein Vergleich
-</span>
-
-</div>
-
-
-<div class="sectiontitle">
-So bewertet ECHTPREIS
-</div>
-
-<div class="info">
-
-<b>Identisches Produkt</b><br>
-Vergleich mit exakt derselben Produktvariante.<br><br>
-
-<b>Vergleichbares Produkt</b><br>
-Nur wenn Produktart und Menge sinnvoll vergleichbar sind.<br><br>
-
-<b>Kategorie</b><br>
-Lose Lebensmittel wie Obst und Gemüse werden über Stück- oder Grundpreise verglichen.<br><br>
-
-<b>Zu wenig Daten</b><br>
-Dann gibt ECHTPREIS keine Preisbewertung ab.
-
-</div>
-
-</section>
-
-
-<div class="footer">
-ECHTPREIS · Einkaufsanalyse · Testversion
-</div>
-
+<section class="receipt" id="receipt"><div class="card"><h2>Nach dem Einkauf: Bon prüfen</h2><div class="muted">Damit schließt sich der Kreis: geplant → gekauft → tatsächlich bezahlt. Die bestehende OCR bleibt erhalten und wird als nächstes mit deiner Einkaufsliste verbunden.</div><label class="upload" for="receiptFile">📷 Bon auswählen</label><input id="receiptFile" type="file" accept="image/*" capture="environment" style="display:none"><div id="receiptMsg" class="detail"></div></div></section>
+<div class="footer">ECHTPREIS · Versteh, was du bezahlst.</div>
 </main>
-
-
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-
-const cameraButton=document.getElementById("cameraButton");
-const uploadButton=document.getElementById("uploadButton");
-const cameraInput=document.getElementById("cameraInput");
-const fileInput=document.getElementById("fileInput");
-const preview=document.getElementById("preview");
-const status=document.getElementById("status");
-const result=document.getElementById("result");
-const realResult=document.getElementById("realResult");
-const demoButton=document.getElementById("demoButton");
-const progress=document.getElementById("progress");
-const progressbar=document.getElementById("progressbar");
-const ocrbox=document.getElementById("ocrbox");
-
-cameraButton.onclick=()=>cameraInput.click();
-uploadButton.onclick=()=>fileInput.click();
-cameraInput.onchange=handleFile;
-fileInput.onchange=handleFile;
-
-function euro(v){return Number(v).toFixed(2).replace(".",",")+" €";}
-function num(s){return Number(String(s).replace(".","").replace(",","."));}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
-
-async function prepareReceiptImage(file){
- const img=await new Promise((resolve,reject)=>{
-   const im=new Image(); im.onload=()=>resolve(im); im.onerror=reject; im.src=URL.createObjectURL(file);
- });
- const maxW=1800;
- const scale=Math.min(3,maxW/img.width);
- const w=Math.max(1,Math.round(img.width*scale)), h=Math.max(1,Math.round(img.height*scale));
- const c=document.createElement("canvas"); c.width=w; c.height=h;
- const ctx=c.getContext("2d",{willReadFrequently:true});
- ctx.drawImage(img,0,0,w,h);
- const d=ctx.getImageData(0,0,w,h), a=d.data;
- let sum=0, sum2=0, n=a.length/4;
- for(let i=0;i<a.length;i+=4){
-   const g=.299*a[i]+.587*a[i+1]+.114*a[i+2]; sum+=g; sum2+=g*g;
- }
- const mean=sum/n, variance=Math.max(0,sum2/n-mean*mean), std=Math.sqrt(variance)||1;
- for(let i=0;i<a.length;i+=4){
-   let g=.299*a[i]+.587*a[i+1]+.114*a[i+2];
-   g=(g-mean)*(72/std)+205;
-   g=Math.max(0,Math.min(255,g));
-   if(g>225) g=255; else if(g<75) g=0;
-   a[i]=a[i+1]=a[i+2]=g;
- }
- ctx.putImageData(d,0,0);
- return c;
-}
-
-function cleanOcrText(text){
- return text
-  .replace(/[|]/g,"I")
-  .replace(/(\d)[Oo](?=\d)/g,"$10")
-  .replace(/(\d)[Il](?=\d)/g,"$11")
-  .replace(/(\d)\s*[.,]\s*(\d{2})\b/g,"$1,$2");
-}
-
-function parseReceipt(text){
- text=cleanOcrText(text);
- const lines=text.split(/\r?\n/).map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean);
- let total=null,saving=null,shop=/lidl/i.test(text)?"LIDL":"Kassenbon";
- const moneyRe="(\\d{1,3}[.,]\\d{2})";
- for(let i=0;i<lines.length;i++){
-   const l=lines[i];
-   let m=l.match(new RegExp("(?:zu\\s*zahlen|zu\\s*za[hH][lI1]en|summe|gesamt(?:betrag)?|total)\\D{0,16}"+moneyRe,"i"));
-   if(m) total=num(m[1]);
-   m=l.match(new RegExp("gesamter?\\s+preisvorteil\\D{0,16}"+moneyRe,"i"));
-   if(m) saving=num(m[1]);
- }
- const ignore=/^(summe|total|zu\s*zahlen|bar|karte|ec|visa|master|mwst|ust|steuer|netto|brutto|gegeben|rückgeld|datum|uhrzeit|kasse|bon|filiale|transaktion|gesamter preisvorteil|preisvorteil|aktionsrabatt|eur\b)/i;
- const items=[];
- for(let i=0;i<lines.length;i++){
-   const l=lines[i];
-   if(ignore.test(l)||/www\.|danke|steuer-nr|ust-id/i.test(l)) continue;
-   const prices=[...l.matchAll(/(-?\\d{1,3}[.,]\\d{2})(?:\\s*€|\\s*[AB]\b|\\s*$)/gi)];
-   if(!prices.length) continue;
-   const pm=prices[prices.length-1], price=num(pm[1]);
-   if(price<=0 || price>30) continue;
-   let name=l.slice(0,pm.index).replace(/\b\d+[.,]\d+\s*(?:kg|g|x)\b.*$/i,"").replace(/[\s.:*-]+$/,"").trim();
-   if(name.length<3||/^\\d/.test(name)||!/[A-Za-zÄÖÜäöüß]{3}/.test(name)) continue;
-   if(items.some(x=>x.raw===l)) continue;
-   items.push({name,price,raw:l});
- }
- return {shop,total,saving,items,lines};
-}
-
-function renderReal(p,confidence){
- const total=p.total!==null?euro(p.total):"nicht sicher erkannt";
- const saving=p.saving!==null?euro(p.saving):"–";
- const items=p.items.slice(0,40);
- realResult.innerHTML=`
- <div class="card">
-   <span class="realbadge">✓ Echte OCR-Analyse</span>
-   <div class="shopline">${esc(p.shop)} · hochgeladener Beleg</div>
-   <div class="total">${total}</div>
-   <div class="stats">
-    <div class="stat"><div class="statnum">${items.length}</div><div class="statlabel">mögliche Positionen erkannt</div></div>
-    <div class="stat"><div class="statnum">${Math.round(confidence||0)}%</div><div class="statlabel">OCR-Lesbarkeit</div></div>
-   </div>
-   <div class="saving">Erkannte Preisvorteile<br><b>${saving}</b></div>
- </div>
- <div class="sectiontitle">Vom Bon gelesen</div>
- ${items.length?items.map(x=>`<div class="item"><div class="itemtop"><div class="itemname">${esc(x.name)}</div><div class="itemprice">${euro(x.price)}</div></div><div class="meta">OCR-Kandidat · wird erst nach Plausibilitätsprüfung für Vergleiche verwendet</div><span class="tag uncertain">Noch nicht verifiziert</span></div>`).join(""):`<div class="info">Noch keine Positionen zuverlässig erkannt. Unten kannst du den gelesenen Rohtext prüfen.</div>`}
- <div class="sectiontitle">Transparenz</div>
- <div class="info">Diese Version liest den gedruckten Bon lokal im Browser mit OCR. Sie erfindet keine Vergleichspreise. Produkt-Matching und externe Vergleichsdaten sind der nächste Schritt.</div>`;
- realResult.style.display="block";
-}
-
-async function handleFile(event){
- const file=event.target.files&&event.target.files[0]; if(!file)return;
- preview.src=URL.createObjectURL(file); preview.style.display="block";
- result.style.display="none"; realResult.style.display="none"; ocrbox.style.display="none";
- status.style.display="block"; progress.style.display="block"; progressbar.style.width="2%";
- status.textContent="OCR wird geladen …";
- try{
-   const worker=await Tesseract.createWorker("deu",1,{logger:m=>{
-     if(m.status==="recognizing text"){
-       const pct=Math.round((m.progress||0)*100);
-       progressbar.style.width=pct+"%"; status.textContent="Bon wird gelesen … "+pct+"%";
-     } else if(m.status){ status.textContent="OCR: "+m.status.replace(/_/g," ")+" …"; }
-   }});
-   const prepared=await prepareReceiptImage(file);
-   const ret=await worker.recognize(prepared,{rotateAuto:true});
-   await worker.terminate();
-   const text=cleanOcrText(ret.data.text||"");
-   const parsed=parseReceipt(text);
-   // If OCR missed the total, try the strongest receipt-total line once more.
-   if(parsed.total===null){
-     const candidates=(text.match(/\\b\\d{1,3}[.,]\\d{2}\\b/g)||[]).map(num).filter(v=>v>0&&v<500);
-     if(candidates.length) parsed.total=Math.max(...candidates);
-   }
-   renderReal(parsed,ret.data.confidence);
-   ocrbox.textContent=text||"Kein Text erkannt.";
-   ocrbox.style.display="block";
-   status.innerHTML="<b>Analyse fertig.</b> Prüfe bitte, ob Summe und Artikel stimmen.";
-   progressbar.style.width="100%";
-   realResult.scrollIntoView({behavior:"smooth",block:"start"});
- }catch(err){
-   console.error(err);
-   status.innerHTML="<b>OCR konnte nicht gestartet werden.</b><br>Bitte Seite neu laden und erneut versuchen.";
-   progress.style.display="none";
- }
-}
-
-demoButton.onclick=()=>{
- realResult.style.display="none"; result.style.display="block";
- result.scrollIntoView({behavior:"smooth",block:"start"});
+const catalog={
+"Eier 10er":{Lidl:3.39,Kaufland:3.29,REWE:3.79,EDEKA:3.89},
+"Bananen 1 kg":{Lidl:1.79,Kaufland:1.69,REWE:1.99,EDEKA:2.09},
+"Haferdrink 1 l":{Lidl:.99,Kaufland:1.09,REWE:1.19,EDEKA:1.29},
+"Hackfleisch 500 g":{Lidl:4.99,Kaufland:4.79,REWE:5.49,EDEKA:5.59},
+"Skyr 500 g":{Lidl:1.49,Kaufland:1.39,REWE:1.59,EDEKA:1.69},
+"Kartoffeln 2 kg":{Lidl:2.99,Kaufland:2.79,REWE:3.49,EDEKA:3.59},
+"Coca-Cola Zero 1,5 l":{Lidl:1.49,Kaufland:1.39,REWE:1.59,EDEKA:1.59},
+"Milch 1 l":{Lidl:1.09,Kaufland:1.05,REWE:1.15,EDEKA:1.19}
 };
-</script>
-
-</body>
-</html>
+const storeNames=["Lidl","Kaufland","REWE","EDEKA"];let basket=[];let selected=new Set(storeNames);
+const $=id=>document.getElementById(id), eur=n=>n.toLocaleString("de-DE",{style:"currency",currency:"EUR"});
+function drawSuggestions(){ $("suggestions").innerHTML=Object.keys(catalog).slice(0,6).map(x=>'<span class="chip" data-add="'+x+'">+ '+x+'</span>').join("");document.querySelectorAll("[data-add]").forEach(e=>e.onclick=()=>add(e.dataset.add));}
+function drawStores(){ $("stores").innerHTML=storeNames.map(s=>'<span class="chip '+(selected.has(s)?"on":"")+'" data-store="'+s+'">'+s+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores()});}
+function add(name){name=(name||$("productInput").value).trim();if(!name)return;let canonical=Object.keys(catalog).find(x=>x.toLowerCase()===name.toLowerCase())||name;let found=basket.find(x=>x.name===canonical);let q=+$("qty").value;if(found)found.qty+=q;else basket.push({name:canonical,qty:q});$("productInput").value="";drawList();}
+function drawList(){ $("list").innerHTML=basket.length?basket.map((x,i)=>'<div class="item"><div class="itemname">'+x.name+'<div class="qty">'+x.qty+'×</div></div><button class="x" data-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
+function compare(){if(!basket.length){basket=[{name:"Eier 10er",qty:1},{name:"Bananen 1 kg",qty:1},{name:"Haferdrink 1 l",qty:2},{name:"Hackfleisch 500 g",qty:1},{name:"Skyr 500 g",qty:2}];drawList()}if(!selected.size)return alert("Bitte mindestens einen Markt auswählen.");
+let rows=[...selected].map(store=>{let total=0,known=0;basket.forEach(i=>{if(catalog[i.name]&&catalog[i.name][store]!=null){total+=catalog[i.name][store]*i.qty;known++}});return{store,total,known,coverage:known/basket.length}});
+let complete=rows.filter(r=>r.coverage===1).sort((a,b)=>a.total-b.total);let eligible=complete.length?complete:rows.sort((a,b)=>b.coverage-a.coverage||a.total-b.total);let win=eligible[0];
+$("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);$("winnerCoverage").textContent=win.known+" von "+basket.length+" Produkten mit Preis · DEMO";
+$("merchantResults").innerHTML=rows.sort((a,b)=>a.total-b.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+'/'+basket.length+' Preise bekannt · '+Math.round(r.coverage*100)+'% Abdeckung</div></div><div class="price">'+eur(r.total)+'</div></div>').join("");
+let split=0,alloc={};basket.forEach(i=>{let opts=[...selected].filter(s=>catalog[i.name]?.[s]!=null).map(s=>[s,catalog[i.name][s]]).sort((a,b)=>a[1]-b[1]);if(opts.length){split+=opts[0][1]*i.qty;(alloc[opts[0][0]]??=[]).push(i.name)}});let saving=Math.max(0,win.total-split);
+$("splitTitle").textContent=eur(split)+" bei günstigster Produkt-Aufteilung";$("splitDetail").textContent=Object.entries(alloc).map(([s,a])=>s+": "+a.length+" Position"+(a.length===1?"":"en")).join(" · ");$("splitSave").textContent=saving>0?"Demo-Ersparnis ggü. "+win.store+": "+eur(saving):"Kein zusätzlicher Demo-Vorteil";$("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});
+}
+$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=compare;
+$("planTab").onclick=()=>{$("planner").style.display="block";$("receipt").style.display="none";$("planTab").classList.add("active");$("receiptTab").classList.remove("active")};
+$("receiptTab").onclick=()=>{$("planner").style.display="none";$("receipt").style.display="block";$("receiptTab").classList.add("active");$("planTab").classList.remove("active")};
+$("receiptFile").onchange=e=>{$("receiptMsg").textContent=e.target.files[0]?"Ausgewählt: "+e.target.files[0].name+" · OCR-Verknüpfung folgt in v2.1.":""};
+drawSuggestions();drawStores();drawList();
+</script></body></html>
