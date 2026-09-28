@@ -45,6 +45,7 @@ assert(html.includes("function renderStatsRhythm"),"personal shopping rhythm ana
 assert(html.includes("function searchPersonalPurchases"),"personal purchase search missing");
 assert(html.includes("function renderPurchaseSearch"),"personal purchase search renderer missing");
 assert(html.includes("purchase-rhythm"),"post-scan rhythm insight missing");
+assert(html.includes("top-item-share"),"dominant receipt-item insight missing");
 assert(html.includes("gleiche")||html.includes("identisch"),"market profile must explain direct-product comparison");
 assert(html.includes("function renderStatsTrend"),"month-over-month shopping trend missing");
 assert(html.includes("function renderHomePulse"),"personal home pulse missing");
