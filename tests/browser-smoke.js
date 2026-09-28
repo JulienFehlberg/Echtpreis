@@ -10,6 +10,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  await new Promise(r=>setTimeout(r,120));
  const w=dom.window,d=w.document;
  assert.strictEqual(errors.length,0,"browser startup errors: "+errors.join(" | "));
+ assert.strictEqual(d.getElementById("contribute").checked,false,"receipt price sharing must require explicit opt-in");
+ d.getElementById("productInput").value="hack";d.getElementById("productInput").dispatchEvent(new w.Event("input",{bubbles:true}));assert(d.getElementById("suggestions").textContent.toLowerCase().includes("hack"),"typing should surface matching product suggestions");d.getElementById("productInput").value="";d.getElementById("productInput").dispatchEvent(new w.Event("input",{bubbles:true}));
  assert(![...d.body.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()),"stray CSS or text appears before the app");
  d.getElementById("homePlan").click();
  assert.strictEqual(d.getElementById("planner").previousElementSibling.id,"homePlan","opened list must appear directly after its menu button");
