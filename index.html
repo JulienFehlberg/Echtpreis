@@ -46,7 +46,7 @@ button{transition:transform .12s ease,filter .12s ease}button:active{transform:s
 .home-main-actions{display:grid!important;grid-template-columns:1fr!important;gap:10px}.home-main-actions .homeaction,.home-main-actions .homeaction:first-child{grid-column:auto;min-height:82px!important;display:flex;align-items:center;gap:16px;padding:14px 16px;text-align:left;border-radius:20px;font-size:17px}
 .home-main-actions .homeaction span{flex:0 0 48px;margin:0!important}.footer{margin-top:18px}
 @media(max-width:430px){.app{padding-top:14px}.hero{padding:19px}.hero h1{font-size:27px!important}.home-main-actions .homeaction{min-height:78px!important}}
-</style>
+body.subview .hero,body.subview .home-main-actions{display:none}body.subview .top{margin-bottom:10px}body.subview .version{display:none}</style>
 </head>
 <body><main class="app">
 <div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.50.0</span></div>
@@ -113,7 +113,7 @@ button{transition:transform .12s ease,filter .12s ease}button:active{transform:s
   }
   document.addEventListener("DOMContentLoaded",function(){
     show("home");
-    var map={homePlan:"plan",planTab:"plan",backPlanBtn:"plan",pointsBack:"plan",homeReceipt:"receipt",receiptTab:"receipt",toReceiptBtn:"receipt",homePoints:"points",homeProfile:"profile",profileBack:"plan",profileReceipts:"points",homeStats:"stats",statsBack:"home"};
+    var map={homePlan:"plan",planTab:"plan",backPlanBtn:"home",pointsBack:"home",homeReceipt:"receipt",receiptTab:"receipt",toReceiptBtn:"receipt",homePoints:"points",homeProfile:"profile",profileBack:"home",profileReceipts:"points",homeStats:"stats",statsBack:"home"};
     Object.keys(map).forEach(function(id){var e=byId(id);if(e)e.addEventListener("click",function(){show(map[id])})});
     var pn=byId("profileName");if(pn)pn.value=localStorage.getItem("echtpreis_profile_name")||"";
     var px=byId("profileXp");if(px)px.textContent=(localStorage.getItem("echtpreis_xp")||"0")+" XP gesammelt";
