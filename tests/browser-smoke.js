@@ -78,6 +78,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert(d.getElementById("reviewRows").textContent.includes("2 × 1,49"),"multipack quantities should be readable in receipt summary");
  assert.strictEqual(d.querySelectorAll("#reviewRows .reviewrow").length,4,"real receipt photo OCR should retain the three products and deposit");
  assert(d.getElementById("receiptTotalCheck").textContent.startsWith("✓"),"corrected deposit OCR should reconcile the printed total");
+ assert.notStrictEqual(d.getElementById("receiptInsight").style.display,"none","verified receipt should immediately show a personal insight preview");
+ assert(d.getElementById("receiptInsightTitle").textContent.trim().length>0,"receipt insight preview should contain a fact");
  assert(!d.getElementById("analysisSaving").textContent.includes("noch"),"recognized receipt items should reach a complete market comparison");
  const productOnlyOcr="G&G Mini-Hdrnchen 1,49 A\nOetker Ristorante 3,49 A\nRed Bull 0,25 1,49 € x 2 2,98 B\nPfand 0,25 € x 2 0,50";let ocrPasses=0;w.Tesseract={recognize:async()=>({data:{text:++ocrPasses===1?taxOnlyOcr:productOnlyOcr}})};
  w.createImageBitmap=async()=>({width:1152,height:1536,close(){}});
