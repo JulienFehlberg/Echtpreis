@@ -218,7 +218,12 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
   if(!i.exactBrand)return false;
   return norm(p.label||p.product||"").includes(norm(i.exactBrand));
  }
- function bestPriceForItem(store,i){\n  const opts=i.key?(prices[i.key]||[]).filter(x=>x.store===store&&priceMatchesItem(x,i)):[];\n  opts.sort((a,b)=>a.price-b.price||String(b.validFrom||"").localeCompare(String(a.validFrom||""))||(Number(b.trust)||0)-(Number(a.trust)||0));\n  return opts[0]||null;\n }\n async function compareStable(){
+ function bestPriceForItem(store,i){
+  const opts=i.key?(prices[i.key]||[]).filter(x=>x.store===store&&priceMatchesItem(x,i)):[];
+  opts.sort((a,b)=>a.price-b.price||String(b.validFrom||"").localeCompare(String(a.validFrom||""))||(Number(b.trust)||0)-(Number(a.trust)||0));
+  return opts[0]||null;
+ }
+ async function compareStable(){
   const items=listItems(); if(!items.length){alert("Schreib zuerst deinen Einkauf auf.");return;}
   const wl0=document.getElementById("winnerLabel");if(wl0)wl0.textContent="Aktuelle Preise werden gesucht …";
   await loadOpenPricesForItems(items);
