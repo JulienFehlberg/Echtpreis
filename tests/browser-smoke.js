@@ -134,6 +134,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  w.replaceEchtpreisList([]);
  assert(receipt.length>=4,"receipt parser lost rows");
  assert(receipt.some(x=>x.isDeposit),"deposit line not recognized");
+ const insight=w.buildReceiptInsight([{id:"1",store:"EDEKA",date:"2026-09-01",total:"20.00",items:[{name:"Milch",price:1.09}]},{id:"2",store:"EDEKA",date:"2026-09-08",total:"22.00",items:[{name:"Milch",price:1.09}]},{id:"3",store:"EDEKA",date:"2026-09-15",total:"21.00",items:[{name:"Milch",price:1.09}]},{id:"4",store:"EDEKA",date:"2026-09-28",total:"35.00",items:[{name:"Milch",price:1.39},{name:"Red Bull",price:5.96}]}],{id:"4",store:"EDEKA",date:"2026-09-28",total:"35.00",items:[{name:"Milch",price:1.39},{name:"Red Bull",price:5.96}]});assert(insight&&insight.title,"receipt insight should produce a personal fact");assert(/teurer|Einkauf|Milch|Bon/i.test(insight.title),"receipt insight should be meaningful");
  const splitQty=w.parseReceiptText("Red Bull 1,49\n1,49 x 2\nPfand 0,25 x 2\nSUMME 3,48");assert.strictEqual(Number(splitQty[0].price),2.98,"separate quantity line must update article total");
  const discounted=w.parseReceiptText("Pizza 3,99\nAktionsrabatt -0,50\nSUMME 3,49");assert.strictEqual(Number(discounted[0].price),3.49,"separate discount must reduce recognized paid total");assert.strictEqual(discounted[0].regularTotal,3.99,"regular pre-discount price should remain available");
  assert.strictEqual(w.detectReceiptDate("Datum 2026-09-28"),"2026-09-28","ISO receipt date should be supported");
