@@ -13,7 +13,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(typeof w.parseWish,"function");
  let p=w.parseWish("0,5 kg Tomaten");assert.strictEqual(p.key,"tomaten");assert.strictEqual(p.amount,0.5);assert.strictEqual(p.unit,"kg");
  p=w.parseWish("2 l Coca Cola");assert.strictEqual(p.key,"cola");assert.strictEqual(p.matchMode,"exact");
- assert.strictEqual(w.identifyReceiptProduct("Red Bull 0,25").key,"energydrink");
+ assert.strictEqual(w.identifyReceiptProduct("Red Bull 0,25").key,"energydrink");\n const rb=w.inferPackFromName("Red Bull 0,25");assert.strictEqual(rb.packAmount,0.25);assert.strictEqual(rb.packUnit,"l");
  const receipt=w.parseReceiptText("G&G Mini-Hörnchen 1,49\nOetker Ristorante 3,49\nRed Bull 0,25 1,49 x 2 2,98\nPfand 0,25 x 2 0,50\nSUMME 8,46");
  assert(receipt.length>=4,"receipt parser lost rows");
  assert(receipt.some(x=>x.isDeposit),"deposit line not recognized");
