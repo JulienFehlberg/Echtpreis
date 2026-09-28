@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.15.1</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.15.2</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -566,7 +566,7 @@ $("planTab").onclick=showPlan;$("receiptTab").onclick=showReceipt;
 let receiptDraft=[];let detectedReceiptBarcode="";let currentTestPayload=null;const devTestMode=new URLSearchParams(location.search).get("test")==="1";const testModeBox=$("testModeBox");if(devTestMode&&testModeBox)testModeBox.style.display="block";
 function guessKey(name){return identifyReceiptProduct(name).key||""}
 function drawReviewRows(){
- $("reviewRows").innerHTML=receiptDraft.map((r,i)=>(()=>{let m=identifyReceiptProduct(r.name||"");return '<div class="reviewrow"><div><input data-rname="'+i+'" value="'+escHtml(r.name||"")+'" placeholder="Artikel"><div class="detail">'+(m.key?'✓ '+escHtml(m.label)+' · '+confidenceLabel(m):'⚠ '+escHtml(m.label))+'</div></div><input data-rprice="'+i+'" inputmode="decimal" value="'+(r.price||"")+'" placeholder="bezahlt €"><input data-ramount="'+i+'" inputmode="decimal" value="'+(r.packAmount||"")+'" placeholder="Menge"><select data-runit="'+i+'"><option value="">Einheit</option><option value="kg" '+(r.packUnit==='kg'?'selected':'')+'>kg</option><option value="g" '+(r.packUnit==='g'?'selected':'')+'>g</option><option value="l" '+(r.packUnit==='l'?'selected':'')+'>l</option><option value="ml" '+(r.packUnit==='ml'?'selected':'')+'>ml</option><option value="piece" '+(r.packUnit==='piece'?'selected':'')+'>Stück</option></select><button class="x" data-rdel="'+i+'">✕</button></div>'})()).join("");
+ $("reviewRows").innerHTML=receiptDraft.map((r,i)=>(()=>{let m=identifyReceiptProduct(r.name||"");return '<div class="reviewrow"><div><input data-rname="'+i+'" value="'+escHtml(r.name||"")+'" placeholder="Artikel"><div class="detail">'+(r.isDeposit?'↪ Pfand · wird nicht als Produktpreis verglichen':(m.key?'✓ '+escHtml(m.label)+' · '+confidenceLabel(m):'⚠ '+escHtml(m.label)))+'</div></div><input data-rprice="'+i+'" inputmode="decimal" value="'+(r.price||"")+'" placeholder="bezahlt €"><input data-ramount="'+i+'" inputmode="decimal" value="'+(r.packAmount||"")+'" placeholder="Menge"><select data-runit="'+i+'"><option value="">Einheit</option><option value="kg" '+(r.packUnit==='kg'?'selected':'')+'>kg</option><option value="g" '+(r.packUnit==='g'?'selected':'')+'>g</option><option value="l" '+(r.packUnit==='l'?'selected':'')+'>l</option><option value="ml" '+(r.packUnit==='ml'?'selected':'')+'>ml</option><option value="piece" '+(r.packUnit==='piece'?'selected':'')+'>Stück</option></select><button class="x" data-rdel="'+i+'">✕</button></div>'})()).join("");
  document.querySelectorAll("[data-rname]").forEach(e=>e.onchange=()=>{receiptDraft[+e.dataset.rname].name=e.value;drawReviewRows()});
  document.querySelectorAll("[data-rprice]").forEach(e=>e.oninput=()=>receiptDraft[+e.dataset.rprice].price=e.value);document.querySelectorAll("[data-ramount]").forEach(e=>e.oninput=()=>receiptDraft[+e.dataset.ramount].packAmount=e.value);document.querySelectorAll("[data-runit]").forEach(e=>e.onchange=()=>receiptDraft[+e.dataset.runit].packUnit=e.value);
  document.querySelectorAll("[data-rdel]").forEach(e=>e.onclick=()=>{receiptDraft.splice(+e.dataset.rdel,1);drawReviewRows()});
@@ -583,15 +583,21 @@ function parseReceiptText(text){
  const lines=text.split(/\n+/).map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean),rows=[];let last=null;
  for(let i=0;i<lines.length;i++){
   const line=lines[i];
-  let discount=line.match(/(?:aktionsrabatt|preisvorteil|rabatt)\s*-?\s*(\d+[,.]\d{2})\s*(?:€|EUR)?$/i);
+  let discount=line.match(/(?:aktionsrabatt|preisvorteil|rabatt)\s*-?\s*(\d+[,.]\d{2})\s*(?:€|EUR)?/i);
   if(discount&&last){let d=parseReceiptNumber(discount[1]);last.discount=Number(((last.discount||0)+d).toFixed(2));last.regularTotal=Number((Number(last.price)+last.discount).toFixed(2));continue}
+  let pf=line.match(/^pfand\s+(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)\s+(\d+[,.]\d{2})/i);
+  if(pf){last={name:"Pfand",price:String(parseReceiptNumber(pf[3])),packAmount:Number(pf[2]),packUnit:"piece",count:Number(pf[2]),unitLinePrice:parseReceiptNumber(pf[1]),isDeposit:true,pricingType:"deposit"};rows.push(last);continue}
+  let inlineMult=line.match(/^(.{2,48}?)\s+(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)\s+(\d+[,.]\d{2})(?:\s*[AB])?$/i);
+  if(inlineMult&&!/summe|gesamt|bar|karte|mwst|gegeben|rückgeld/i.test(inlineMult[1])){
+   let pack=inferPackFromName(inlineMult[1]);last={name:inlineMult[1].trim(),price:String(parseReceiptNumber(inlineMult[4])),count:Number(inlineMult[3]),unitLinePrice:parseReceiptNumber(inlineMult[2]),quantitySource:"receipt-multipack",discount:0,regularTotal:parseReceiptNumber(inlineMult[4]),...pack};rows.push(last);continue
+  }
   let weighted=line.match(/(\d+[,.]\d{2,3})\s*kg\s*[x×]?\s*(\d+[,.]\d{2})\s*€?\s*\/\s*kg/i);
   if(weighted&&last){last.packAmount=parseReceiptNumber(weighted[1]);last.packUnit="kg";last.detectedUnitPrice=parseReceiptNumber(weighted[2]);last.quantitySource="receipt-weight";continue}
-  let mult=line.match(/(\d+)\s*[x×]\s*(\d+[,.]\d{2})/i);
-  if(mult&&last){last.count=Number(mult[1]);last.unitLinePrice=parseReceiptNumber(mult[2]);last.quantitySource="receipt-multipack";continue}
-  let m=line.match(/^(.{2,48}?)\s+(\d+[,.]\d{2})\s*(?:€|EUR)?$/i);
-  if(m&&!/summe|gesamt|bar|karte|mwst|pfand(?:rückgabe)?|gegeben|rückgeld/i.test(m[1])){
-   let pack=inferPackFromName(m[1]);last={name:m[1].trim(),price:m[2].replace(",", "."),discount:0,regularTotal:parseReceiptNumber(m[2]),...pack};rows.push(last);
+  let mult=line.match(/(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)/i);
+  if(mult&&last){last.count=Number(mult[2]);last.unitLinePrice=parseReceiptNumber(mult[1]);last.quantitySource="receipt-multipack";continue}
+  let m=line.match(/^(.{2,48}?)\s+(\d+[,.]\d{2})\s*(?:€|EUR)?\s*[AB]?$/i);
+  if(m&&!/summe|gesamt|bar|karte|mwst|pfand(?:rückgabe)?|gegeben|rückgeld|payback/i.test(m[1])){
+   let pack=inferPackFromName(m[1]);last={name:m[1].trim(),price:String(parseReceiptNumber(m[2])),discount:0,regularTotal:parseReceiptNumber(m[2]),...pack};rows.push(last);
   }
  }
  return rows.slice(0,40);
@@ -673,13 +679,13 @@ async function submitReceiptReward(store,date,valid){
 }
 $("finishPurchaseBtn").onclick=async()=>{
  if(!$("receiptFile").files[0])return;let store=$("receiptStore").value,date=$("receiptDate").value;if(!store||!date)return alert("Bitte Händler und Bon-Datum kontrollieren.");
- let valid=receiptDraft.map(r=>({name:(r.name||"").trim(),price:Number(String(r.price).replace(",",".")),packAmount:Number(String(r.packAmount||"").replace(",",".")),packUnit:r.packUnit||"",discount:Number(r.discount||0),regularTotal:Number(r.regularTotal||r.price||0),count:Number(r.count||1),quantitySource:r.quantitySource||""})).filter(r=>r.name&&Number.isFinite(r.price)&&r.price>0);
+ let valid=receiptDraft.map(r=>({name:(r.name||"").trim(),price:Number(String(r.price).replace(",",".")),packAmount:Number(String(r.packAmount||"").replace(",",".")),packUnit:r.packUnit||"",discount:Number(r.discount||0),regularTotal:Number(r.regularTotal||r.price||0),count:Number(r.count||1),quantitySource:r.quantitySource||"",isDeposit:!!r.isDeposit})).filter(r=>r.name&&Number.isFinite(r.price)&&r.price>0);
  if(!valid.length&&!confirm("Es wurden keine Artikelpreise bestätigt. Einkauf trotzdem abschließen?"))return;
  $("finishPurchaseBtn").disabled=true;$("finishPurchaseBtn").textContent="Bon wird geprüft …";
  let reward=await submitReceiptReward(store,date,valid);
  if(reward.ok&&reward.duplicate){$("openPurchaseNotice").innerHTML="<b>🧾 Bon bereits erfasst.</b> Dieser Einkauf wurde schon bei ECHTPREIS eingereicht."; $("receiptMsg").textContent="Keine erneuten XP oder Punkte für denselben Bon.";$("finishPurchaseBtn").textContent="Bereits erfasst";return}
  let proofId="receipt_"+Date.now(),saved=0,sharedItems=[];
- if($("contribute").checked){valid.forEach(r=>{let match=identifyReceiptProduct(r.name),key=match.key;if(!key)return;let c=catalog[key];learnProductAlias(r.name,key,{ean:match.ean,brand:match.brand,quantity:match.quantity,source:"confirmed-receipt"});let amount=r.packAmount,unit=r.packUnit,per=c.unit,normalizedAmount=null;if(amount>0){if(unit==="g")normalizedAmount=amount/1000;else if(unit==="ml")normalizedAmount=amount/1000;else if(unit==="kg"||unit==="l"||unit==="piece")normalizedAmount=amount}let compatible=normalizedAmount>0&&((per==="kg"&&(unit==="kg"||unit==="g"))||(per==="l"&&(unit==="l"||unit==="ml"))||(per==="piece"&&unit==="piece"));if(!compatible)return;let unitPrice=r.price/normalizedAmount;if(!Number.isFinite(unitPrice)||unitPrice<=0)return;let obs={key,store,price:unitPrice,per,date,region:"",source:"ECHTPREIS Bon",product:r.name,rawName:r.name,proof:proofId,status:"observed",lineTotal:r.price,regularTotal:r.regularTotal||r.price,discount:r.discount||0,packAmount:amount,packUnit:unit,pricingConfidence:"confirmed"};if(addCommunityObservation(obs)){saved++;sharedItems.push(obs)}});if(sharedItems.length)pushSharedReceipt(proofId,sharedItems)}
+ if($("contribute").checked){valid.filter(r=>!r.isDeposit).forEach(r=>{let match=identifyReceiptProduct(r.name),key=match.key;if(!key)return;let c=catalog[key];learnProductAlias(r.name,key,{ean:match.ean,brand:match.brand,quantity:match.quantity,source:"confirmed-receipt"});let amount=r.packAmount,unit=r.packUnit,per=c.unit,normalizedAmount=null;if(amount>0){if(unit==="g")normalizedAmount=amount/1000;else if(unit==="ml")normalizedAmount=amount/1000;else if(unit==="kg"||unit==="l"||unit==="piece")normalizedAmount=amount}let compatible=normalizedAmount>0&&((per==="kg"&&(unit==="kg"||unit==="g"))||(per==="l"&&(unit==="l"||unit==="ml"))||(per==="piece"&&unit==="piece"));if(!compatible)return;let unitPrice=r.price/normalizedAmount;if(!Number.isFinite(unitPrice)||unitPrice<=0)return;let obs={key,store,price:unitPrice,per,date,region:"",source:"ECHTPREIS Bon",product:r.name,rawName:r.name,proof:proofId,status:"observed",lineTotal:r.price,regularTotal:r.regularTotal||r.price,discount:r.discount||0,packAmount:amount,packUnit:unit,pricingConfidence:"confirmed"};if(addCommunityObservation(obs)){saved++;sharedItems.push(obs)}});if(sharedItems.length)pushSharedReceipt(proofId,sharedItems)}
  try{localStorage.setItem("echtpreis_last_proof",JSON.stringify({id:proofId,type:"RECEIPT",file:$("receiptFile").files[0].name,created:new Date().toISOString(),consent:$("contribute").checked,rows:valid.length,saved}))}catch(e){}
  closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> "+valid.length+" Preiszeilen bestätigt.";$("finishPurchaseBtn").textContent="✓ Einkauf abgeschlossen";$("finishPurchaseBtn").disabled=true;$("noReceiptBtn").style.display="none";
  let rewardText=reward.ok?(" · +"+reward.xp+" XP"+(reward.status?" · "+reward.status:"")):" · XP-Server momentan nicht erreichbar";
