@@ -57,6 +57,7 @@ assert(html.includes("typicalQty=medianNumber(priorQty)"),"household forecast mu
 assert(html.includes("storeCanCarry(store,i,i.key)"),"stable price comparison must enforce retailer assortment");
 assert(html.includes("reward.ok&&!reward.duplicate&&receiptTotalVerified"),"duplicate or server-unverified receipts must never contribute market prices");
 assert(html.includes("Number(r.packAmount||0)*(Number(r.count)||1)"),"multipack receipt observations must normalize by total purchased quantity");
+assert(html.includes("lineTotal:Number(x.price)||0,price:Number(x.price)||0,count:Number(x.count)||1"),"receipt sync must preserve line total so multipacks are not divided twice after reload");
 assert(html.includes("globalAdjustments=receiptDraft.filter"),"coupon receipts must not produce misleading cross-store savings");
 
 
