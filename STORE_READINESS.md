@@ -1,0 +1,54 @@
+# ECHTPREIS – Store-Readiness
+
+ECHTPREIS wird ab jetzt so entwickelt, dass dieselbe Kernlogik auf Web, iOS und Android genutzt werden kann.
+
+## Grundprinzip
+
+Die Web-App bleibt die kostenlose Testplattform. Geräteabhängige Funktionen werden nicht direkt mit der Geschäftslogik vermischt, sondern über eine Plattform-Schicht angesprochen.
+
+```
+UI / Features
+  ↓
+ECHTPREIS Kernlogik
+  ↓
+Services (API, Preise, OCR, Speicherung)
+  ↓
+Platform Runtime
+  ├─ Web
+  ├─ iOS / Capacitor
+  └─ Android / Capacitor
+```
+
+## Regeln für neue Entwicklung
+
+1. Keine neuen Server-URLs direkt in Feature-Code schreiben. Endpunkte kommen aus `app/config.js`.
+2. Kamera, Standort, externe Links und spätere Push-Funktionen werden über `app/runtime.js` gekapselt.
+3. Preisquellen sind austauschbare Datenquellen. Die Einkaufsliste darf nicht davon abhängen, ob der Preis von ECHTPREIS, Open Prices oder später einem anderen Anbieter kommt.
+4. Bon-OCR liefert ein neutrales ECHTPREIS-Datenformat. Die Statistik kennt weder Tesseract noch einen späteren Cloud-OCR-Anbieter.
+5. Unsichere Daten werden sichtbar als unsicher behandelt und nicht als bestätigte Verfügbarkeit oder Ersparnis gespeichert.
+6. Lokale Testfunktionen müssen ohne kostenpflichtige Dienste funktionieren.
+7. Produktionsdienste dürfen später ergänzt werden, ohne die UI neu zu bauen.
+
+## Geplanter Store-Weg
+
+- Testphase: GitHub Pages + bestehende API + kostenlose/offene Datenquellen.
+- Vor Beta: Web-Code in kleinere Module aufteilen, Capacitor-Projekt hinzufügen, native Kamera/Standort-Schnittstellen anbinden.
+- iOS-Test: TestFlight.
+- Android-Test: Internal Testing im Play Store.
+- Produktion: eigene Domain, produktive Datenbank, Monitoring, Datenschutz-/Store-Metadaten und skalierbare Infrastruktur.
+
+## Kostenstrategie
+
+In der Testphase sollen keine zwingenden laufenden Kosten entstehen. Kostenpflichtige Infrastruktur wird erst eingeführt, wenn ein konkreter Nutzen besteht, z. B. bessere OCR, mehr API-Kapazität oder größere Nutzerzahlen.
+
+## Noch vor einem Store-Release zwingend
+
+- App-Icons und Splash Screens
+- native Kamera- und Standortberechtigungen
+- Datenschutzerklärung und Support-Seite
+- Löschung/Export personenbezogener Daten
+- Store-Metadaten und Screenshots
+- Fehler-/Crash-Monitoring
+- API-Rate-Limits und Produktionsdatenbank
+- echte Geräte-Tests auf iPhone und Android
+- Review der verwendeten Drittanbieter und deren Datenschutzbedingungen
