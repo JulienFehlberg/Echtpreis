@@ -58,14 +58,14 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .home-main-actions .homeaction:hover{transform:translateY(-1px);box-shadow:0 22px 60px rgba(9,39,25,.13)}
 .card{background:rgba(255,255,255,.91);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .footer{opacity:.55;letter-spacing:.3px}
-.receipt-simple{text-align:center}.receipt-simple h2{font-size:27px}.receipt-camera{width:84px;height:84px;margin:22px auto;display:grid;place-items:center;border-radius:26px;background:#e8f5ed;font-size:38px}.receipt-main-action,.receipt-file-action{display:block;width:100%;cursor:pointer}.receipt-file-action{margin-top:10px;padding:15px;border-radius:17px;font-weight:800}.receipt-why{text-align:left;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}.receipt-why b{font-size:15px}.quick-suggestions{margin:14px 0 4px}.quick-label{font-size:12px;font-weight:800;color:#77847d;margin-bottom:8px}.quick-row{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}.quick-row::-webkit-scrollbar{display:none}.quick-chip{white-space:nowrap;padding:9px 12px;border-radius:999px;background:#eef5f0;color:#174b34;font-size:13px;border:1px solid rgba(8,116,67,.08)}</style>
+.receipt-simple{text-align:center}.receipt-simple h2{font-size:27px}.receipt-camera{width:84px;height:84px;margin:22px auto;display:grid;place-items:center;border-radius:26px;background:#e8f5ed;font-size:38px}.receipt-main-action,.receipt-file-action{display:block;width:100%;cursor:pointer}.receipt-file-action{margin-top:10px;padding:15px;border-radius:17px;font-weight:800}.receipt-why{text-align:left;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}.receipt-why b{font-size:15px}.quick-suggestions{margin:14px 0 4px}.quick-label{font-size:12px;font-weight:800;color:#77847d;margin-bottom:8px}.quick-row{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}.quick-row::-webkit-scrollbar{display:none}.quick-chip{white-space:nowrap;padding:9px 12px;border-radius:999px;background:#eef5f0;color:#174b34;font-size:13px;border:1px solid rgba(8,116,67,.08)}.receipt-analysis{text-align:left;margin:20px 0;padding:18px;border-radius:20px;background:linear-gradient(145deg,#071d13,#0b7042);color:#fff}.receipt-analysis .smallcap{color:#b9dfca}.analysis-paid,.analysis-best{display:flex;align-items:end;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12)}.analysis-paid strong,.analysis-best strong{font-size:22px}.analysis-save{margin-top:14px;font-size:18px}.analysis-save strong{color:#bdf0d2}.receipt-analysis .detail{color:#c9ddd2}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.54.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.55.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
-<button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen</button>
+<button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon analysieren</button>
 <button class="homeaction" id="homeStats" type="button"><span>📊</span>Meine Statistik</button>
 </div>
 <div class="tabs" style="display:none"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -95,14 +95,14 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 
 <section class="receipt" id="receipt">
 <div class="card receipt-simple">
-<h2>Bon scannen</h2>
+<h2>Bon analysieren</h2>
 <div class="receipt-camera">📷</div>
 <label class="green receipt-main-action" for="receiptFile">Bon fotografieren</label>
 <input id="receiptFile" type="file" accept="image/*,application/pdf" capture="environment" style="display:none">
 <label class="ghost receipt-file-action" for="receiptFile">Foto oder Dokument auswählen</label>
 <div id="receiptMsg" class="detail"></div>
 <div id="ocrBox" class="ocrbox"><h2>Bon kontrollieren</h2><div id="reviewRows"></div><button id="addReviewRow" class="ghost" type="button">Artikel hinzufügen</button><select id="receiptStore"><option value="">Händler wählen</option><option>Lidl</option><option>Kaufland</option><option>REWE</option><option>EDEKA</option><option>PENNY</option><option>ALDI Nord</option><option>Netto</option><option>NORMA</option><option>dm</option><option>Rossmann</option></select><input id="receiptDate" type="date"><label><input type="checkbox" id="contribute" checked> Anonymisierte Preisdaten beitragen</label><button class="green" id="finishPurchaseBtn" disabled>Bon speichern</button><button class="ghost" id="noReceiptBtn">Abbrechen</button></div>
-<div class="receipt-why"><b>Warum Bons?</b><div class="muted">Mit echten Kassenbons baut ECHTPREIS eine eigene Preisdatenbank auf. Je mehr bestätigte Preise wir haben, desto genauer werden deine Vergleiche.</div></div>
+<div id="receiptAnalysis" class="receipt-analysis" style="display:none"><div class="smallcap">Deine Bon-Analyse</div><div class="analysis-paid"><span>Bezahlt</span><strong id="analysisPaid">–</strong></div><div class="analysis-best"><span id="analysisBestStore">Günstigere Alternative</span><strong id="analysisBestPrice">–</strong></div><div class="analysis-save">Du hättest <strong id="analysisSaving">–</strong> sparen können.</div><div id="analysisNote" class="detail"></div></div><div class="receipt-why"><b>Warum Bons?</b><div class="muted">Mit echten Kassenbons baut ECHTPREIS eine eigene Preisdatenbank auf. Je mehr bestätigte Preise wir haben, desto genauer werden deine Vergleiche.</div></div>
 <button class="ghost" id="backPlanBtn" style="width:100%;margin-top:14px">Zurück</button>
 <div id="openPurchaseNotice" style="display:none"></div><div id="testModeBox" style="display:none"><button id="runDupeTest" disabled></button><div id="dupeTestResult"></div></div>
 </div></section>
@@ -812,6 +812,7 @@ function drawReviewRows(){
  document.querySelectorAll("[data-ramount]").forEach(e=>e.oninput=()=>receiptDraft[+e.dataset.ramount].packAmount=e.value);
  document.querySelectorAll("[data-runit]").forEach(e=>e.onchange=()=>receiptDraft[+e.dataset.runit].packUnit=e.value);
  document.querySelectorAll("[data-rdel]").forEach(e=>e.onclick=()=>{receiptDraft.splice(+e.dataset.rdel,1);drawReviewRows()});
+ updateReceiptAnalysis();
 }
 function parseReceiptNumber(v){return Number(String(v||"").replace(/\./g,"").replace(",","."))}
 function inferPackFromName(name){
@@ -853,6 +854,16 @@ async function extractPdfText(file){
 async function renderPdfFirstPage(file){
  if(!window.pdfjsLib){await extractPdfText(file)}
  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,page=await pdf.getPage(1),vp=page.getViewport({scale:2}),canvas=document.createElement("canvas");canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:canvas.getContext("2d"),viewport:vp}).promise;return new Promise(r=>canvas.toBlob(r,"image/jpeg",.92));
+}
+function updateReceiptAnalysis(){
+ const box=$("receiptAnalysis");if(!box)return;
+ const valid=receiptDraft.filter(r=>!r.isDeposit&&r.name&&Number(r.price)>0),paid=valid.reduce((n,r)=>n+Number(r.price||0),0);
+ if(!valid.length||!paid){box.style.display="none";return;}
+ const store=$("receiptStore").value||"Dein Markt",wishes=valid.map(r=>{let w=parseWish(r.name);return w});
+ let rows=[...selected].filter(st=>st!==store).map(st=>{let total=0,known=0;wishes.forEach(w=>{let p=w.key?activePrice(w.key,st,w):null;if(p){total+=p.price*w.calcAmount;known++}});return {store:st,total,known}}).filter(x=>x.known===wishes.length&&x.total>0).sort((a,b)=>a.total-b.total);
+ $("analysisPaid").textContent=eur(paid);box.style.display="block";
+ if(rows.length&&rows[0].total<paid){let best=rows[0],saving=paid-best.total;$("analysisBestStore").textContent=best.store+" · geschätzt";$("analysisBestPrice").textContent="ca. "+eur(best.total);$("analysisSaving").textContent="ca. "+eur(saving);$("analysisNote").textContent="Vergleich auf Basis der aktuell verfügbaren ECHTPREIS- und Referenzpreise. Filialpreise können abweichen.";}
+ else{$("analysisBestStore").textContent="Keine günstigere vollständige Alternative gefunden";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="aktuell nichts";$("analysisNote").textContent="Wir zeigen nur Vergleiche, für die alle erkannten Produkte bepreist werden können.";}
 }
 function applyReceiptText(text,label){
  receiptDraft=parseReceiptText(text);let low=text.toLowerCase();if(low.includes("lidl"))$("receiptStore").value="Lidl";else if(low.includes("kaufland"))$("receiptStore").value="Kaufland";else if(low.includes("rewe"))$("receiptStore").value="REWE";else if(low.includes("edeka"))$("receiptStore").value="EDEKA";else if(low.includes("penny"))$("receiptStore").value="PENNY";else if(low.includes("aldi"))$("receiptStore").value="ALDI Nord";else if(low.includes("netto"))$("receiptStore").value="Netto";else if(low.includes("norma"))$("receiptStore").value="NORMA";else if(low.includes("rossmann"))$("receiptStore").value="Rossmann";else if(/\bdm\b/.test(low))$("receiptStore").value="dm";
