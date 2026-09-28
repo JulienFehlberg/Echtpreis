@@ -53,6 +53,9 @@ assert(html.includes('API_BASE+"/v1/feedback"'),"tester feedback endpoint is not
 assert(html.includes("echtpreis_feedback_queue_v1"),"offline feedback queue missing");
 assert(html.includes("flushFeedbackQueue"),"queued feedback retry missing");
 assert(html.includes("items:valid.map"),"local receipt history must retain line items for future insights");
+assert(html.includes("typicalQty=medianNumber(priorQty)"),"household forecast must normalize latest quantity against typical purchase quantity");
+assert(html.includes("storeCanCarry(store,i,i.key)"),"stable price comparison must enforce retailer assortment");
+
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
 const products=(html.match(/label:"/g)||[]).length;assert(products>=30,"primary product catalog unexpectedly small: "+products);
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
