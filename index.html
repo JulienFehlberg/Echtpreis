@@ -761,10 +761,12 @@ function renderInputSuggestions(query){
  box.querySelectorAll("[data-input-suggestion]").forEach(b=>b.onclick=()=>add(b.dataset.inputSuggestion));
 }
 function drawStores(){ $("stores").innerHTML=storeNames.map(st=>'<span class="chip '+(selected.has(st)?"on":"")+'" data-store="'+st+'">'+st+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores();basketChanged()});}
+function getFrequentProducts(){try{return JSON.parse(localStorage.getItem("echtpreis_frequent_products")||"{}")}catch(e){return {}}}
+function learnFrequentProduct(raw){try{let x=getFrequentProducts(),name=String(raw||"").trim();if(!name)return;x[name]=(x[name]||0)+1;localStorage.setItem("echtpreis_frequent_products",JSON.stringify(x))}catch(e){}}
 function renderQuickSuggestions(){
  const box=$("quickSuggestions");if(!box)return;
  const identity=w=>w.key||normalizeProduct(w.raw),inBasket=new Set(basket.map(identity)),keys=new Set(basket.map(w=>w.key).filter(Boolean));
- const ranked=Object.entries((typeof getFrequent==="function"?getFrequent():{})).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+ const ranked=Object.entries(getFrequentProducts()).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
  const complements={
   rinderhack:["1 kg Zwiebeln","500 g Tomaten","500 g Nudeln"],hackfleisch:["1 kg Zwiebeln","500 g Tomaten","500 g Nudeln"],
   nudeln:["500 g Tomaten","500 g Käse","1 Zwiebel"],reis:["500 g Hähnchenbrust","500 g Paprika","1 Zwiebel"],
@@ -781,14 +783,14 @@ function renderQuickSuggestions(){
  box.innerHTML=picks.length?'<div class="quick-label">'+(contextual.length?"Passt zu deiner Liste":"Schnell hinzufügen")+'</div><div class="quick-row">'+picks.map(x=>'<button type="button" class="quick-chip" data-quick="'+escHtml(x)+'">+ '+escHtml(x)+'</button>').join("")+'</div>':"";
  box.querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>add(b.dataset.quick));
 }
-function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;$("suggestions").style.display="none";let w=parseWish(raw);let duplicate=basket.find(x=>x.raw.toLowerCase()===w.raw.toLowerCase()&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}w.checked=false;basket.push(w);try{learnFrequent(raw)}catch(e){}$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();}
+function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;$("suggestions").style.display="none";let w=parseWish(raw);let duplicate=basket.find(x=>x.raw.toLowerCase()===w.raw.toLowerCase()&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}w.checked=false;basket.push(w);learnFrequentProduct(raw);$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();}
 renderQuickSuggestions();
 window.addEchtpreisItem=raw=>add(raw);
 window.addEchtpreisBarcode=async(name,qty,code)=>{
  const ean=String(code||"").trim(),raw=(qty?qty+" ":"")+name,key="ean:"+ean;
  if(basket.some(x=>x.ean===ean)){alert(name+" steht bereits auf deiner Liste.");return false;}
  basket.push({raw,label:name+(qty?" · "+qty:""),amount:1,unit:"piece",calcAmount:1,key,matched:true,note:"Exaktes Barcode-Produkt",explicit:true,matchMode:"exact",exactBrand:"",ean,checked:false});saveBasketState();
- try{learnFrequent(raw)}catch(e){}drawList();basketChanged();await ingestOpenPriceForBarcode(ean,key,name);if(hasCompared)basketChanged();return true;
+ learnFrequentProduct(raw);drawList();basketChanged();await ingestOpenPriceForBarcode(ean,key,name);if(hasCompared)basketChanged();return true;
 };
 window.getEchtpreisRawList=()=>basket.map(x=>x.raw);
 function restoreBasketItem(x){let saved=typeof x==="string"?{raw:x}:x,w=parseWish(saved.raw);w.checked=!!saved.checked;if(saved.ean){Object.assign(w,{ean:saved.ean,key:"ean:"+saved.ean,label:saved.label||w.label,amount:1,unit:"piece",calcAmount:1,matched:true,matchMode:"exact"})}else{w.choice={...w.choice,...(saved.choice||{})};hydrateChoice(w)}return w}
