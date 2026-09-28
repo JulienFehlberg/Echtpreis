@@ -73,6 +73,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  w.applyReceiptText(realPhotoOcr,"Bonausschnitt");
  assert.strictEqual(d.getElementById("receiptTotalInput").value,"8,46","real receipt photo should yield its printed total");
  assert(d.getElementById("receiptPaymentDetail").textContent.includes("20,00")&&d.getElementById("receiptPaymentDetail").textContent.includes("11,54"),"cash tender and calculated change should be displayed separately");
+ w.applyReceiptText(realPhotoOcr.replace("Bar € 20,00","Bar € 20,00\nRückgeld 1,54"),"Bonausschnitt");assert(d.getElementById("receiptPaymentDetail").textContent.includes("11,54")&&d.getElementById("receiptPaymentDetail").textContent.includes("geprüft"),"implausible OCR change must be corrected from cash minus total");
+ w.applyReceiptText(realPhotoOcr,"Bonausschnitt");
  assert(d.getElementById("reviewRows").textContent.includes("2 × 1,49"),"multipack quantities should be readable in receipt summary");
  assert.strictEqual(d.querySelectorAll("#reviewRows .reviewrow").length,4,"real receipt photo OCR should retain the three products and deposit");
  assert(d.getElementById("receiptTotalCheck").textContent.startsWith("✓"),"corrected deposit OCR should reconcile the printed total");
