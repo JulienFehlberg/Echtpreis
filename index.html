@@ -75,7 +75,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste<small>Vorher Preise vergleichen</small></button>
 <button class="homeaction" id="homeStats" type="button"><span>📊</span>Meine Statistik<small>Dein Einkaufsprofil</small></button>
-</div>
+</div><div id="homePulse" style="display:none;margin:0 0 14px;padding:12px 14px;border:1px solid rgba(16,32,25,.08);border-radius:16px;background:rgba(255,255,255,.78)"><b id="homePulseTitle"></b><div id="homePulseDetail" class="detail"></div></div>
 <div class="tabs" style="display:none"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
 
 <section id="planner" style="display:none">
@@ -1020,6 +1020,14 @@ function renderStatsReceipts(){
  box.innerHTML=rs.length?'<div style="font-weight:900;margin-bottom:7px">Letzte Einkäufe</div>'+rs.map(r=>'<div style="display:flex;align-items:center;gap:10px;border-top:1px solid #e6ebe8;padding:10px 0"><div style="flex:1;min-width:0"><b>'+escHtml(r.store||"Bon")+'</b><div class="detail">'+escHtml(formatReceiptDate(r.date))+(Number(r.total)>0?' · '+eur(Number(r.total)):'')+(Number.isFinite(Number(r.potentialSaving))&&r.potentialSaving!=null&&r.savingConfidence!=='niedrig'?' · ca. '+eur(Number(r.potentialSaving))+' Sparpotenzial':'')+'</div></div><button class="x" aria-label="Bon löschen" data-stat-delete="'+escHtml(String(r.id||""))+'">🗑</button></div>').join(""):'<div class="detail">Noch keine Bons gespeichert.</div>';
  box.querySelectorAll("[data-stat-delete]").forEach(b=>b.onclick=async()=>{const r=getPersonalReceipts().find(x=>String(x.id)===b.dataset.statDelete);if(!r)return;if(!confirm("Diesen Bon aus deiner Statistik löschen?"))return;b.disabled=true;try{await deletePersonalReceipt(r);refreshStats();await renderPersonalReceipts()}catch(e){alert(e.message);b.disabled=false}});
 }
+function renderHomePulse(receipts=getPersonalReceipts()){
+ const box=$("homePulse");if(!box)return;const month=window.echtpreisLocalDateKey().slice(0,7),rows=(receipts||[]).filter(r=>String(r.date||"").startsWith(month)&&Number(r.total)>0);
+ if(!rows.length){box.style.display="none";return}
+ const sum=rows.reduce((n,r)=>n+Number(r.total||0),0),monthName=new Intl.DateTimeFormat("de-DE",{month:"long"}).format(new Date(month+"-01T12:00:00")),history=(()=>{try{let h=JSON.parse(localStorage.getItem("echtpreis_insight_history_v1")||"[]");return Array.isArray(h)?h:[]}catch(e){return[]}})();
+ $("homePulseTitle").textContent=monthName+" · "+rows.length+" Bon"+(rows.length===1?"":"s")+" · "+eur(sum)+" erfasst";
+ $("homePulseDetail").textContent=history.length?"Zuletzt entdeckt: "+history[0].title:"Mit jedem Bon wird dein persönliches Einkaufsprofil genauer.";
+ box.style.display="block";
+}
 function refreshStats(){
  const receipts=getPersonalReceipts(),today=new Date(),todayKey=localDateKey(today),year=String(today.getFullYear()),month=year+"-"+String(today.getMonth()+1).padStart(2,"0"),weekStart=new Date(today.getFullYear(),today.getMonth(),today.getDate()-(today.getDay()+6)%7),weekKey=weekStart.getFullYear()+"-"+String(weekStart.getMonth()+1).padStart(2,"0")+"-"+String(weekStart.getDate()).padStart(2,"0"),sum=rows=>rows.reduce((n,r)=>n+(Number(r.total)||0),0),known=receipts.filter(r=>r.potentialSaving!=null&&Number.isFinite(Number(r.potentialSaving))&&r.savingConfidence!=="niedrig"),paid=receipts.filter(r=>Number(r.total)>0&&String(r.date||"")<=todayKey);
  $("statsReceipts").textContent=String(receipts.length);
@@ -1027,7 +1035,7 @@ function refreshStats(){
  $("statsWeekly").textContent=eur(sum(receipts.filter(r=>String(r.date||"")>=weekKey&&String(r.date||"")<=todayKey)));
  $("statsMonthly").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(month)&&String(r.date||"")<=todayKey)));
  $("statsPotential").textContent=known.length?"ca. "+eur(known.reduce((n,r)=>n+Number(r.potentialSaving),0)):"–";
- $("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderStatsInsight(receipts);renderStatsBreakdown(receipts);renderStatsTrend(receipts);renderStatsCategoryChanges(receipts);renderStatsYearTrend(receipts);renderStatsMarketProfile(receipts);renderStatsPriceMemory(receipts);renderStatsRhythm(receipts);renderStatsDiscoveries();renderStatsReceipts();
+ $("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderHomePulse(receipts);renderStatsInsight(receipts);renderStatsBreakdown(receipts);renderStatsTrend(receipts);renderStatsCategoryChanges(receipts);renderStatsYearTrend(receipts);renderStatsMarketProfile(receipts);renderStatsPriceMemory(receipts);renderStatsRhythm(receipts);renderStatsDiscoveries();renderStatsReceipts();
 }
 async function refreshStatsFromServer(){const merged=await loadServerReceipts();if(Array.isArray(merged)){savePersonalReceipts(merged.slice(0,250));refreshStats()}}
 window.refreshEchtpreisStats=()=>{refreshStats();void refreshStatsFromServer()};
