@@ -62,7 +62,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.58.5</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.58.6</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
@@ -89,7 +89,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div><div id="winnerRoute"></div></div>
 <div class="card savings-card"><h2>Deine Ersparnis</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
 <div class="card"><h2>Was kostet dein Einkauf?</h2><div id="merchantResults"></div></div>
-<details class="card"><summary style="font-weight:800;cursor:pointer">Wie genau sind die Preise?</summary><div class="muted" style="margin-top:10px">Die Beträge sind Schätzungen aus aktuellen, bekannten und Referenzpreisen. Tippe hier nur auf, wenn du mehr wissen möchtest. Tatsächliche Filialpreise können abweichen.</div></details>
+<details class="card"><summary style="font-weight:800;cursor:pointer">Wie genau sind die Preise?</summary><div class="muted" style="margin-top:10px">Die Beträge sind Schätzungen aus aktuellen, bekannten und Referenzpreisen. Ein geschätzter Preis bestätigt nicht, dass der Artikel in einer bestimmten Filiale vorrätig ist. Drogeriemärkte erscheinen nur mit belegten Produktpreisen. Tatsächliche Filialpreise und Verfügbarkeit können abweichen.</div></details>
 <div class="card" id="finishCard"><h2>Nach dem Einkauf geht’s mit dem Bon weiter</h2><div class="muted">Dein Einkauf bleibt offen, bis du den Kassenbon hochlädst. So kann ECHTPREIS geplante und tatsächlich bezahlte Preise verbinden und – nur mit deiner Zustimmung – anonymisierte Preisbeobachtungen zur Datenbasis beitragen lassen.</div><div class="notice" style="margin-top:14px"><b>🧾 Bon nicht vergessen!</b><br>Ein Foto nach dem Einkauf hilft, echte Preise aktuell zu halten.</div><button class="green" id="toReceiptBtn">Ich war einkaufen → Bon hochladen</button></div>
 </section>
 </section>
@@ -550,6 +550,7 @@ function referencePrice(key,store,wish=null){
   .filter(x=>x.key===key&&x.store===store&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0);
  if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);history=history.filter(x=>normalizeProduct(x.product||"").includes(brand));}
  history.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ if(store==="dm"||store==="Rossmann")return null;
  if(history.length){const x=history[0];return {...x,reference:true,referenceType:"historical",confidence:"niedrig",source:"Letzter bekannter Preis · "+(x.source||"ECHTPREIS"),status:"reference"};}
  const base=referenceBase[key],factor=referenceStoreFactor[store];if(!Number.isFinite(base)||!Number.isFinite(factor))return null;
  return {key,store,price:Number((base*factor).toFixed(2)),per:catalog[key]?.unit||"piece",date:"",validTo:null,region:"Deutschland",kind:"reference",source:"Markt-Referenz",product:catalog[key]?.label||key,trust:25,status:"reference",reference:true,referenceType:"estimate",confidence:"niedrig"};
@@ -565,7 +566,7 @@ function trustedPrice(key,store,wish=null){
  if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:85,status:"confirmed",confidence:"mittel"}}
  return null;
 }
-function activePrice(key,store,wish=null){if(!storeCanCarry(store,wish,key))return null;return trustedPrice(key,store,wish)||referencePrice(key,store,wish)}
+function activePrice(key,store,wish=null){if(!storeCanCarry(store,wish,key))return null;const verified=trustedPrice(key,store,wish);if(store==="dm"||store==="Rossmann")return verified;return verified||referencePrice(key,store,wish)}
 function addCommunityObservation(obs){
  const x=normalizeObservation({...obs,kind:"community",trust:60});if(!x.proof||!x.key||!x.store||!Number.isFinite(x.price)||!x.date)return false;
  const rows=loadJson(communityKey);rows.push(x);saveJson(communityKey,rows);drawDataMachine();return true;

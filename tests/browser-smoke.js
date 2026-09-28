@@ -69,7 +69,12 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  p=w.parseWish("250 g Blaubeeren");assert.strictEqual(p.key,"blaubeeren");assert(w.referencePrice("blaubeeren","REWE",p)?.price>0,"blueberry reference fallback missing");
  p=w.parseWish("1 kg Süßkartoffeln");assert.strictEqual(p.key,"suesskartoffeln");
  for(const product of ["500 g Rinderhack","500 g Hackfleisch","1 kg Hähnchenbrust"]){const wish=w.parseWish(product);assert.strictEqual(w.activePrice(wish.key,"dm",wish),null,"dm must not claim to sell "+product);assert.strictEqual(w.activePrice(wish.key,"Rossmann",wish),null,"Rossmann must not claim to sell "+product)}
- assert(w.activePrice("zahnpasta","dm",w.parseWish("1 Zahnpasta")),"drugstore items should remain eligible");
+ assert(w.storeCanCarry("dm",w.parseWish("1 Zahnpasta")),"drugstore categories should remain eligible when verified observations become available");
+ assert.strictEqual(w.activePrice("zahnpasta","dm",w.parseWish("1 Zahnpasta")),null,"a category guess must not invent a drugstore price or availability");
+ const observationDate=new Date().toISOString().slice(0,10);
+ w.localStorage.setItem("echtpreis_community_observations_v2",JSON.stringify([1,2].map(n=>({key:"zahnpasta",store:"dm",price:1.99,per:"piece",date:observationDate,kind:"community",proof:"independent_"+n,trust:60}))));
+ assert(w.activePrice("zahnpasta","dm",w.parseWish("1 Zahnpasta")),"two current independent observations should enable a drugstore comparison");
+ w.localStorage.removeItem("echtpreis_community_observations_v2");
  let restored=w.restoreBasketItem({raw:"Lachs",choice:{Art:"frozen",Menge:"500g"},checked:true});assert.strictEqual(restored.needsClarification,false,"saved product choice must survive reload");assert.strictEqual(restored.checked,true);
  restored=w.restoreBasketItem({raw:"250 g Testprodukt",ean:"12345678",label:"Testprodukt · 250 g"});assert.strictEqual(restored.key,"ean:12345678","barcode identity must survive reload");
  assert.strictEqual(w.identifyReceiptProduct("Red Bull 0,25").key,"energydrink");
