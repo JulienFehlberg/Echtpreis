@@ -17,6 +17,9 @@ assert(html.includes("plausibleReceiptItemName"),"receipt item plausibility guar
 assert(html.includes("comparisonQuality"),"comparison confidence labelling missing");
 assert(html.includes('String(b.validFrom||"").localeCompare(String(a.validFrom||""))||(Number(b.trust)||0)-(Number(a.trust)||0)||a.price-b.price'),"legacy price chooser must prioritize freshness and trust before cheapness");
 assert(html.includes('history.sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0)||a.price-b.price)'),"historical fallback must prioritize freshness and trust");
+assert(html.includes("echtpreis_openprices_sync_by_key_v1"),"Open Prices should be cached per product key");
+assert(html.includes("ingestOpenPrices(false,basket.map(w=>w.key).filter(Boolean))"),"manual compare should load only basket price categories");
+assert(!html.includes("syncSharedData();ingestOpenPrices();"),"startup must not fetch the full Open Prices catalog");
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
 const products=(html.match(/label:"/g)||[]).length;assert(products>=30,"primary product catalog unexpectedly small: "+products);
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
