@@ -916,6 +916,13 @@ function buildReceiptInsight(receipts,current){
  if(!candidates.length)candidates.push({type:"saved",score:10,title:"Einkauf gespeichert.",detail:"Mit jedem weiteren Bon wächst dein persönliches Preisgedächtnis."});
  const sorted=candidates.sort((a,b)=>b.score-a.score),recent=(()=>{try{return JSON.parse(localStorage.getItem("echtpreis_recent_insight_types")||"[]")}catch(e){return[]}})();return sorted.find(x=>!recent.slice(-2).includes(x.type))||sorted[0];
 }
+function previewReceiptInsight(){
+ const card=$("receiptInsight");if(!card||!receiptTotalVerified)return;
+ const total=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,"")),store=$("receiptStore").value,date=$("receiptDate").value;
+ if(!total||!store||!date)return;
+ const current={id:"preview",store,date,total:total.toFixed(2),items:receiptDraft.filter(r=>r.name&&Number(r.price)>0).map(r=>({name:r.name,price:Number(r.price),isDeposit:!!r.isDeposit}))},receipts=[...getPersonalReceipts(),current],insight=buildReceiptInsight(receipts,current);
+ card.style.display="block";$("receiptInsightTitle").textContent=insight.title;$("receiptInsightDetail").textContent=insight.detail;
+}
 function renderReceiptInsight(receipts,current){
  const card=$("receiptInsight");if(!card)return;const insight=buildReceiptInsight(receipts,current);card.style.display="block";$("receiptInsightTitle").textContent=insight.title;$("receiptInsightDetail").textContent=insight.detail;try{let h=JSON.parse(localStorage.getItem("echtpreis_recent_insight_types")||"[]");h.push(insight.type);localStorage.setItem("echtpreis_recent_insight_types",JSON.stringify(h.slice(-6)));let history=JSON.parse(localStorage.getItem("echtpreis_insight_history_v1")||"[]"),entry={receiptId:String(current?.id||""),date:current?.date||"",store:current?.store||"",type:insight.type,title:insight.title,detail:insight.detail};history=history.filter(x=>x.receiptId!==entry.receiptId);history.unshift(entry);localStorage.setItem("echtpreis_insight_history_v1",JSON.stringify(history.slice(0,20)))}catch(e){}
 }
@@ -1127,13 +1134,14 @@ function detectReceiptStore(text){
 function updateReceiptAnalysis(){
  const box=$("receiptAnalysis");if(!box)return;currentReceiptSaving=null;currentReceiptSavingConfidence=null;
  const valid=receiptDraft.filter(r=>!r.isDeposit&&r.name&&Number(r.price)>0),paid=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,""));
- if(!paid){box.style.display="none";return}
+ if(!paid){box.style.display="none";let ic=$("receiptInsight");if(ic)ic.style.display="none";return}
  $("analysisPaid").textContent=eur(paid);box.style.display="block";
- if(!receiptTotalVerified){$("analysisBestStore").textContent="Vergleich wartet auf sicheren Scan";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="–";$("analysisNote").textContent="Erst wenn Artikel und Bon-Summe zusammenpassen, wird ein Preisvergleich berechnet.";return}
+ if(!receiptTotalVerified){$("analysisBestStore").textContent="Vergleich wartet auf sicheren Scan";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="–";$("analysisNote").textContent="Erst wenn Artikel und Bon-Summe zusammenpassen, wird ein Preisvergleich berechnet.";let ic=$("receiptInsight");if(ic)ic.style.display="none";return}
  const store=$("receiptStore").value||"Dein Markt",wishes=valid.map(r=>{let w=parseWish(r.name);if(r.packAmount&&r.packUnit)w.calcAmount=Number(r.packAmount)*(Number(r.count)||1)*(r.packUnit==="g"||r.packUnit==="ml"?.001:1);return w});
  let rows=[...selected].filter(st=>st!==store).map(st=>{let total=receiptDraft.filter(r=>r.isDeposit).reduce((n,r)=>n+Number(r.price||0),0),known=0,referenceCount=0,confirmedCount=0;wishes.forEach(w=>{let p=w.key?activePrice(w.key,st,w):null;if(p){total+=p.price*w.calcAmount;known++;p.reference?referenceCount++:confirmedCount++}});return {store:st,total,known,referenceCount,confirmedCount}}).filter(x=>x.known===wishes.length&&x.total>0).sort((a,b)=>a.total-b.total);
  if(rows.length&&rows[0].total<paid){let best=rows[0],saving=paid-best.total,confidence=best.referenceCount===0?"hoch":best.confirmedCount>0?"mittel":"niedrig";currentReceiptSaving=confidence==="niedrig"?null:Number(saving.toFixed(2));currentReceiptSavingConfidence=confidence;$("analysisBestStore").textContent=best.store+(confidence==="hoch"?" · belegt":" · Schätzung");$("analysisBestPrice").textContent=(confidence==="hoch"?"":"ca. ")+eur(best.total);$("analysisSaving").textContent=(confidence==="hoch"?"":"ca. ")+eur(saving);$("analysisNote").textContent=confidence==="hoch"?"Alle Vergleichspositionen beruhen auf aktuell belegten Preisen.":"Mindestens ein Vergleichspreis ist geschätzt. Der Preisunterschied ist deshalb nur eine Orientierung und keine Filialgarantie."}
  else{$("analysisBestStore").textContent=rows.length?rows[0].store:"Kein vollständiger Marktvergleich möglich";$("analysisBestPrice").textContent=rows.length?(rows[0].referenceCount?"ca. ":"")+eur(rows[0].total):"–";$("analysisSaving").textContent=rows.length?"0,00 €":"–";if(rows.length){currentReceiptSaving=0;currentReceiptSavingConfidence=rows[0].referenceCount?"niedrig":"hoch"}$("analysisNote").textContent=rows.length?"Der günstigste bekannte Vergleich liegt nicht unter deiner Bon-Summe.":"Für alle erkannten Produkte werden erst noch belastbare Vergleichspreise benötigt."}
+ previewReceiptInsight();
 }
 function applyReceiptText(text,label){
  receiptDraft=parseReceiptText(text);let cash=extractReceiptCash(text);if(cash.paid||cash.change)receiptCash=cash;let detectedStore=detectReceiptStore(text);if(detectedStore)$("receiptStore").value=detectedStore;
