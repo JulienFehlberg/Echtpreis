@@ -18,6 +18,11 @@ assert(api.validReceiptPayload({store:"EDEKA",date:"2026-09-28",total:"8.46",ite
 assert(!api.validReceiptPayload({...a,total:"0"}),"zero-total receipt accepted");
 assert(!api.validReceiptPayload({...a,items:[]}),"empty receipt accepted");
 assert(!api.validReceiptPayload({...a,items:[{rawName:"Red Bull",lineTotal:0}]}),"zero-price line accepted");
+const couponReceipt={store:"EDEKA",date:"2026-09-28",total:"3.49",items:[{rawName:"Pizza",lineTotal:3.99},{rawName:"Coupon / Rabatt",lineTotal:-.50,isAdjustment:true}]};
+assert(api.validReceiptPayload(couponReceipt),"valid receipt-level coupon adjustment rejected");
+assert(!api.validReceiptPayload({...couponReceipt,items:[{rawName:"Pizza",lineTotal:3.99},{rawName:"Coupon / Rabatt",lineTotal:-.50}]}),"negative receipt line without adjustment flag accepted");
+assert(!api.validReceiptPayload({...couponReceipt,items:[{rawName:"Pizza",lineTotal:2.99},{rawName:"Coupon / Rabatt",lineTotal:.50,isAdjustment:true}]}),"positive adjustment line accepted");
+assert.notStrictEqual(api.receiptHash(couponReceipt),api.receiptHash({...couponReceipt,items:[{rawName:"Pizza",lineTotal:3.49}]}),"receipt hash must preserve adjustment structure");
 assert(api.receiptCodeHash({store:"EDEKA",receiptBarcode:"12345678"}),"barcode hash missing");
 assert.strictEqual(api.receiptCodeHash({store:"EDEKA"}),null);
 assert.strictEqual(api.rewardScore({itemCount:5,isDuplicate:true}).xp,0);
