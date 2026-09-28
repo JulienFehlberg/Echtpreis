@@ -130,6 +130,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(w.activePrice("zahnpasta","dm",w.parseWish("1 Zahnpasta")),null,"a category guess must not invent a drugstore price or availability");
  const exactEnergy=w.parseWish("2 Red Bull");assert.strictEqual(w.referencePrice(exactEnergy.key,"Lidl",exactEnergy),null,"exact brands must not fall back to generic model prices");
  const exactPizza=w.parseWish("1 Oetker Ristorante");assert.strictEqual(exactPizza.matchMode,"exact","Oetker receipt/list items must remain exact-brand products");assert.strictEqual(w.referencePrice(exactPizza.key,"Lidl",exactPizza),null,"Oetker must not fall back to generic pizza pricing");
+ const meatWish=w.parseWish("500 g Rinderhack");assert.strictEqual(w.storeCanCarry("dm",meatWish,meatWish.key),false,"dm must never be considered for fresh minced meat");assert.strictEqual(w.storeCanCarry("Rossmann",meatWish,meatWish.key),false,"Rossmann must never be considered for fresh minced meat");assert.strictEqual(w.storeCanCarry("EDEKA",meatWish,meatWish.key),true,"supermarkets must remain eligible for fresh minced meat");
+
  const exactOwnBrand=w.parseWish("1 G&G Mini-Hörnchen");assert.strictEqual(exactOwnBrand.matchMode,"exact","retailer own-brand receipt items must remain exact");
  const observationDate=new Date().toISOString().slice(0,10);
  w.localStorage.setItem("echtpreis_community_observations_v2",JSON.stringify([1,2].map(n=>({key:"zahnpasta",store:"dm",price:1.99,per:"piece",date:observationDate,kind:"community",proof:"independent_"+n,trust:60}))));
