@@ -744,7 +744,17 @@ function hydrateChoice(w){w.choice={...inferChoice(w),...(w.choice||{})};let spe
 function choiceLabel(w){let spec=productChoices[w.key];if(!spec)return"";return spec.groups.map(g=>{let v=w.choice&&w.choice[g.name],o=g.options.find(x=>x[1]===v);return o?o[0]:""}).filter(Boolean).join(" · ")}
 function choiceEditor(w,i){let spec=productChoices[w.key];if(!spec||!w.needsClarification)return"";return '<div style="margin-top:8px;padding:10px;border:1px solid #705d27;border-radius:12px;background:#211d12"><b style="color:#ffd86b">'+escHtml(spec.title)+'</b>'+spec.groups.map(g=>'<div class="qty" style="margin-top:7px">'+escHtml(g.name)+'</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">'+g.options.map(o=>'<button type="button" class="chip '+(w.choice&&w.choice[g.name]===o[1]?"on":"")+'" data-choice="'+i+'" data-group="'+escHtml(g.name)+'" data-value="'+escHtml(o[1])+'">'+escHtml(o[0])+'</button>').join("")+'</div>').join("")+'<div class="qty" style="margin-top:8px">Oder Produkt oben genauer eingeben, z. B. Marke, Größe oder Variante.</div></div>'}
 function wishText(w){const u=w.unit==="piece"?"×":w.unit;return (w.unit==="piece"?w.amount+"×":String(w.amount).replace(".",",")+" "+u)+" "+w.label}
-function drawSuggestions(){let a=["500 g Rinderhack","1 kg Bananen","10 Eier","2 Liter Milch"];$("suggestions").innerHTML=a.map(x=>'<span class="chip" data-add="'+x+'">+ '+x+'</span>').join("");document.querySelectorAll("[data-add]").forEach(e=>e.onclick=()=>add(e.dataset.add));}
+function drawSuggestions(){let box=$("suggestions");if(box){box.innerHTML="";box.style.display="none"}}
+function renderInputSuggestions(query){
+ const box=$("suggestions");if(!box)return;const q=normalizeProduct(query);
+ if(q.length<2){box.innerHTML="";box.style.display="none";return}
+ const found=[];
+ for(const [key,item] of Object.entries(catalog)){const hay=[item.label,...(productAliases[key]||[])].map(normalizeProduct),score=hay.some(x=>x.startsWith(q))?0:hay.some(x=>x.includes(q))?1:99;if(score<99)found.push({key,item,score})}
+ found.sort((a,b)=>a.score-b.score||a.item.label.localeCompare(b.item.label,"de"));
+ const rows=found.slice(0,5).map(({item})=>(item.unit==="piece"?"1 ":item.unit==="l"?"1 l ":"500 g ")+item.label);
+ box.innerHTML=rows.map(raw=>'<button type="button" class="chip" data-input-suggestion="'+escHtml(raw)+'">+ '+escHtml(raw)+'</button>').join("");box.style.display=rows.length?"flex":"none";
+ box.querySelectorAll("[data-input-suggestion]").forEach(b=>b.onclick=()=>add(b.dataset.inputSuggestion));
+}
 function drawStores(){ $("stores").innerHTML=storeNames.map(st=>'<span class="chip '+(selected.has(st)?"on":"")+'" data-store="'+st+'">'+st+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores();basketChanged()});}
 function renderQuickSuggestions(){
  const box=$("quickSuggestions");if(!box)return;
@@ -766,7 +776,7 @@ function renderQuickSuggestions(){
  box.innerHTML=picks.length?'<div class="quick-label">'+(contextual.length?"Passt zu deiner Liste":"Schnell hinzufügen")+'</div><div class="quick-row">'+picks.map(x=>'<button type="button" class="quick-chip" data-quick="'+escHtml(x)+'">+ '+escHtml(x)+'</button>').join("")+'</div>':"";
  box.querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>add(b.dataset.quick));
 }
-function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;let w=parseWish(raw);let duplicate=basket.find(x=>x.raw.toLowerCase()===w.raw.toLowerCase()&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}w.checked=false;basket.push(w);try{learnFrequent(raw)}catch(e){}$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();}
+function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;$("suggestions").style.display="none";let w=parseWish(raw);let duplicate=basket.find(x=>x.raw.toLowerCase()===w.raw.toLowerCase()&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}w.checked=false;basket.push(w);try{learnFrequent(raw)}catch(e){}$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();}
 renderQuickSuggestions();
 window.addEchtpreisItem=raw=>add(raw);
 window.addEchtpreisBarcode=async(name,qty,code)=>{
@@ -843,7 +853,7 @@ function drawSavedRecipes(){let a=loadRecipes(),el=$("savedRecipesList");el.inne
 function showSavedRecipes(){showPlan();$("recipeImport").style.display="none";$("savedRecipesPanel").style.display="block";drawSavedRecipes()}
 
 const homeRecipeEl=$("homeRecipe");if(homeRecipeEl)homeRecipeEl.onclick=()=>showRecipeImport();$("addRecipeBtn").onclick=()=>showRecipeImport();$("savedRecipesBtn").onclick=showSavedRecipes;$("importRecipeBtn").onclick=importRecipeIngredients;$("saveRecipeBtn").onclick=saveRecipe;$("closeRecipeBtn").onclick=()=>{$("recipeImport").style.display="none"};
-window.echtpreisAdd=()=>add();window.echtpreisCompare=async()=>{if(await compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};$("demoListBtn").onclick=()=>{basket=["500 g Rinderhack","1 kg Bananen"].map(parseWish);drawList();basketChanged()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=async()=>{if(await compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};
+window.echtpreisAdd=()=>add();window.echtpreisCompare=async()=>{if(await compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};$("demoListBtn").onclick=()=>{basket=["500 g Rinderhack","1 kg Bananen"].map(parseWish);drawList();basketChanged()};$("addBtn").onclick=()=>add();$("productInput").oninput=e=>renderInputSuggestions(e.target.value);$("productInput").onkeydown=e=>{if(e.key==="Enter")add();if(e.key==="Escape"){$("suggestions").style.display="none"}};$("compareBtn").onclick=async()=>{if(await compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};
 function hidePoints(){$("pointsCard").style.display="none"}
 function showPlan(){hidePoints();$("planner").style.display="block";$("receipt").style.display="none";let st=$("statsCard");if(st)st.style.display="none";document.body.classList.add("subview");$("planTab").classList.add("active");$("receiptTab").classList.remove("active");renderQuickSuggestions();window.scrollTo({top:0,behavior:"instant"})}
 function showReceipt(){hidePoints();$("planner").style.display="none";$("receipt").style.display="block";let st=$("statsCard");if(st)st.style.display="none";document.body.classList.add("subview");$("receiptTab").classList.add("active");$("planTab").classList.remove("active");window.scrollTo({top:0,behavior:"instant"});try{if(localStorage.getItem("echtpreis_open_purchase")==="1")$("openPurchaseNotice").innerHTML="<b>Offener Einkauf:</b> Warte auf deinen Bon."}catch(e){}}
