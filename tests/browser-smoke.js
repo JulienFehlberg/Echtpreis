@@ -71,6 +71,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(w.detectReceiptStore("ALDI SÜD\nMusterstraße 1\n28.09.26"),"ALDI Süd","ALDI Süd must never be classified as ALDI Nord");
  assert.strictEqual(w.detectReceiptStore("ALDI Nord\n28.09.26"),"ALDI Nord","ALDI Nord detection regressed");
  assert.strictEqual(w.detectReceiptStore("ALDI\n28.09.26"),"ALDI","ambiguous ALDI receipt should remain neutral");
+ assert.strictEqual(w.canShareReceiptPrices("Unbekannter Händler"),false,"unknown merchant prices must never enter community price data");assert.strictEqual(w.canShareReceiptPrices("ALDI"),false,"ambiguous ALDI prices must not be shared as a regional chain price");assert.strictEqual(w.canShareReceiptPrices("EDEKA"),true,"known merchant receipt prices should remain shareable with consent");
  assert.strictEqual(w.detectReceiptStore("MARKTKAUF\n28.09.26"),"Marktkauf","major German receipt chains should be recognized");
  assert.strictEqual(w.storeBrand({brand:"ALDI Süd"}),"ALDI Süd","nearby-store ALDI Süd detection regressed");
  assert.strictEqual(w.referencePrice("milch","ALDI Süd",w.parseWish("1 l Milch")),null,"ALDI Süd must not receive an invented model price without evidence");
