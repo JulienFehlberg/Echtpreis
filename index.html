@@ -62,7 +62,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.58.4</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.58.5</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
@@ -541,9 +541,10 @@ const referenceBase={
  spuelmaschinentabs:4.99,muellbeutel:2.49,alufolie:2.49,backpapier:1.99,handseife:1.49,duschgel:1.49,deo:2.49,rasierer:4.99,windeln:6.99,feuchttuecher:1.49
 };
 const referenceStoreFactor={"Lidl":.94,"Kaufland":.96,"REWE":1.06,"EDEKA":1.08,"PENNY":.95,"ALDI Nord":.93,"Netto":.94,"NORMA":.93,"dm":1.02,"Rossmann":1.03};
-const storeAssortment={alcohol:new Set(["Lidl","Kaufland","REWE","EDEKA","PENNY","ALDI Nord","Netto","NORMA"])};
-function storeCanCarry(store,wish){if(!wish)return true;if(wish.key==="wodka"||wish.key==="bier")return storeAssortment.alcohol.has(store);return true;}
+const storeAssortment={alcohol:new Set(["Lidl","Kaufland","REWE","EDEKA","PENNY","ALDI Nord","Netto","NORMA"]),drugstore:new Set(["haferdrink","nudeln","reis","mehl","zucker","haferflocken","muesli","cornflakes","linsen","bohnen","kichererbsen","couscous","passierte_tomaten","tomatenmark","oel","olivenoel","essig","salz","pfeffer","honig","marmelade","erdnussbutter","schokolade","chips","kekse","gummibaerchen","apfelsaft","multivitaminsaft","tee","kakao","kaffee","toilettenpapier","kuechenrolle","waschmittel","spuelmittel","zahnpasta","shampoo","katzenfutter","hundefutter","spuelmaschinentabs","muellbeutel","alufolie","backpapier","handseife","duschgel","deo","rasierer","windeln","feuchttuecher"])};
+function storeCanCarry(store,wish,key){const product=wish?.key||key;if(store==="dm"||store==="Rossmann")return storeAssortment.drugstore.has(product);if(product==="wodka"||product==="bier")return storeAssortment.alcohol.has(store);return true;}
 function referencePrice(key,store,wish=null){
+ if(!storeCanCarry(store,wish,key))return null;
  const today=new Date().toISOString().slice(0,10);
  let history=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation)
   .filter(x=>x.key===key&&x.store===store&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0);
@@ -564,7 +565,7 @@ function trustedPrice(key,store,wish=null){
  if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:85,status:"confirmed",confidence:"mittel"}}
  return null;
 }
-function activePrice(key,store,wish=null){if(!storeCanCarry(store,wish))return null;return trustedPrice(key,store,wish)||referencePrice(key,store,wish)}
+function activePrice(key,store,wish=null){if(!storeCanCarry(store,wish,key))return null;return trustedPrice(key,store,wish)||referencePrice(key,store,wish)}
 function addCommunityObservation(obs){
  const x=normalizeObservation({...obs,kind:"community",trust:60});if(!x.proof||!x.key||!x.store||!Number.isFinite(x.price)||!x.date)return false;
  const rows=loadJson(communityKey);rows.push(x);saveJson(communityKey,rows);drawDataMachine();return true;
