@@ -69,7 +69,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}.receipt-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #e5eae7;text-align:left}.receipt-item strong{white-space:nowrap}.receipt-item-name{min-width:0;overflow-wrap:anywhere}.receipt-item small{display:block;color:#68736d;margin-top:3px}.ocrbox #receiptTotalCheck,.ocrbox #receiptPaymentDetail{font-size:14px;margin:10px 0;text-align:left}.insight-card{margin:16px 0;padding:18px;border-radius:20px;background:#fff8e8;border:1px solid #f0dfb7;text-align:left}.insight-card .insight-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:900;color:#8a6a18}.insight-card strong{display:block;font-size:20px;line-height:1.25;margin:5px 0}.insight-card .detail{font-size:13px}.feedback-box{max-width:560px;margin:22px auto 6px;text-align:left;color:#66736c;font-size:12px}.feedback-box summary{cursor:pointer;text-align:center;font-weight:800}.feedback-box textarea{width:100%;box-sizing:border-box;margin-top:10px;min-height:82px;resize:vertical}.feedback-box button{width:100%;margin-top:8px;padding:10px}.feedback-status{text-align:center;margin-top:7px;font-size:12px}@media(max-width:430px){.insight-card{padding:15px}.insight-card strong{font-size:18px}}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.118.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.119.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -590,9 +590,9 @@ const referenceBase={
 };
 const referenceStoreFactor={"Lidl":.94,"Kaufland":.96,"REWE":1.06,"EDEKA":1.08,"PENNY":.95,"ALDI Nord":.93,"ALDI Süd":.93,"Netto":.94,"NORMA":.93,"dm":1.02,"Rossmann":1.03};
 const storeAssortment={alcohol:new Set(["Lidl","Kaufland","REWE","EDEKA","PENNY","ALDI Nord","ALDI Süd","Netto","NORMA"]),drugstore:new Set(["haferdrink","nudeln","reis","mehl","zucker","haferflocken","muesli","cornflakes","linsen","bohnen","kichererbsen","couscous","passierte_tomaten","tomatenmark","oel","olivenoel","essig","salz","pfeffer","honig","marmelade","erdnussbutter","schokolade","chips","kekse","gummibaerchen","apfelsaft","multivitaminsaft","tee","kakao","kaffee","toilettenpapier","kuechenrolle","waschmittel","spuelmittel","zahnpasta","shampoo","katzenfutter","hundefutter","spuelmaschinentabs","muellbeutel","alufolie","backpapier","handseife","duschgel","deo","rasierer","windeln","feuchttuecher"])};
-function storeCanCarry(store,wish,key){const product=wish?.key||key;if(store==="dm"||store==="Rossmann")return storeAssortment.drugstore.has(product);if(product==="wodka"||product==="bier")return storeAssortment.alcohol.has(store);return true;}
+function storeCanCarry(store,wish,key){store=canonicalStoreName(store);const product=wish?.key||key;if(store==="dm"||store==="Rossmann")return storeAssortment.drugstore.has(product);if(product==="wodka"||product==="bier")return storeAssortment.alcohol.has(store);return true;}
 function referencePrice(key,store,wish=null){
- if(!storeCanCarry(store,wish,key))return null;
+ store=canonicalStoreName(store);if(!storeCanCarry(store,wish,key))return null;
  const today=localDateKey();
  let history=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation)
   .filter(x=>x.key===key&&x.store===canonicalStoreName(store)&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0&&((new Date(today+"T12:00:00")-new Date(x.date+"T12:00:00"))/86400000)<=60);
@@ -608,7 +608,7 @@ function referencePrice(key,store,wish=null){
 function pricePlausibilityBounds(key){const base=Number(referenceBase[key]);if(!(base>0))return null;return {min:Math.max(.03,base*.28),max:base*3.5}}
 function plausibleObservationPrice(x){const b=pricePlausibilityBounds(x&&x.key);return !b||(Number(x.price)>=b.min&&Number(x.price)<=b.max)}
 function trustedPrice(key,store,wish=null){
- let rows=dataEngine().filter(x=>x.key===key&&x.store===store&&plausibleObservationPrice(x));if(wish&&wish.choice&&Object.keys(wish.choice).length)rows=rows.filter(x=>choiceMatchesProductText(wish.choice,x.product||""));
+ store=canonicalStoreName(store);let rows=dataEngine().filter(x=>x.key===key&&x.store===store&&plausibleObservationPrice(x));if(wish&&wish.choice&&Object.keys(wish.choice).length)rows=rows.filter(x=>choiceMatchesProductText(wish.choice,x.product||""));
  if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);rows=rows.filter(x=>normalizeProduct(x.product||"").includes(brand))}
  const newestFirst=a=>a.sort((x,y)=>String(y.date||"").localeCompare(String(x.date||""))||Number(y.trust||0)-Number(x.trust||0)||x.price-y.price);
  const official=newestFirst(rows.filter(x=>x.kind==="official"&&x.trust>=90));if(official.length)return {...official[0],confidence:"hoch"};
@@ -619,7 +619,7 @@ function trustedPrice(key,store,wish=null){
  return null;
 }
 function exactBrandFallbackPrice(key,store,wish){
- if(!wish||wish.matchMode!=="exact"||!wish.exactBrand||!storeCanCarry(store,wish,key))return null;
+ store=canonicalStoreName(store);if(!wish||wish.matchMode!=="exact"||!wish.exactBrand||!storeCanCarry(store,wish,key))return null;
  const today=localDateKey(),brand=normalizeProduct(wish.exactBrand),history=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation).filter(x=>x.key===key&&x.store===canonicalStoreName(store)&&x.date&&x.date<=today&&normalizeProduct(x.product||"").includes(brand)&&(!wish.choice||choiceMatchesProductText(wish.choice,x.product||""))&&Number.isFinite(x.price)&&x.price>0&&plausibleObservationPrice(x)&&((new Date(today+"T12:00:00")-new Date(x.date+"T12:00:00"))/86400000)<=120).sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0));
  if(history.length){const x=history[0];return {...x,reference:true,referenceType:"historical",confidence:"niedrig",source:"Letzter bekannter Markenpreis · "+(x.source||"ECHTPREIS"),status:"reference"}}
  const generic=referencePrice(key,store,null);if(!generic)return null;return {...generic,reference:true,referenceType:"brand-estimate",confidence:"niedrig",source:"Markenpreis-Orientierung · noch ohne aktuellen Nachweis",product:wish.exactBrand+" · "+(catalog[key]?.label||key),price:Number((generic.price*1.08).toFixed(2)),trust:15,status:"reference"};
