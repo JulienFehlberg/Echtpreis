@@ -36,6 +36,8 @@ assert(html.includes("purchase-rhythm"),"post-scan rhythm insight missing");
 assert(html.includes("gleiche")||html.includes("identisch"),"market profile must explain direct-product comparison");
 assert(html.includes("function renderStatsTrend"),"month-over-month shopping trend missing");
 assert(html.includes('API_BASE+"/v1/feedback"'),"tester feedback endpoint is not wired into the UI");
+assert(html.includes("echtpreis_feedback_queue_v1"),"offline feedback queue missing");
+assert(html.includes("flushFeedbackQueue"),"queued feedback retry missing");
 assert(html.includes("items:valid.map"),"local receipt history must retain line items for future insights");
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
 const products=(html.match(/label:"/g)||[]).length;assert(products>=30,"primary product catalog unexpectedly small: "+products);
