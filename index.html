@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.9</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v3.0</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="tabs"><button class="tab active" id="planTab">1 · Planen</button><button class="tab" id="receiptTab">2 · Bon abschließen</button></div>
 
@@ -48,7 +48,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </section>
 </section>
 
-<section class="receipt" id="receipt"><div class="card"><div class="smallcap">Schritt 2 von 2</div><h2 style="margin-top:6px">Einkauf mit Bon abschließen</h2><div class="muted">Der Bon ist fester Bestandteil des ECHTPREIS-Kreislaufs: Er bestätigt, was du wirklich gekauft und bezahlt hast. Dein aktueller Einkauf wird bis zum Abschluss lokal auf diesem Gerät als offen markiert.</div><div class="notice" id="openPurchaseNotice"><b>Offener Einkauf:</b> Noch kein Bon hinterlegt.</div><label class="upload" for="receiptFile">📷 Kassenbon fotografieren / auswählen</label><input id="receiptFile" type="file" accept="image/*" capture="environment" style="display:none"><div id="receiptMsg" class="detail"></div><div class="ocrbox" id="ocrBox"><h2>Bon kontrollieren</h2><div class="muted">ECHTPREIS liest lokal einen ersten Entwurf. Bitte korrigiere Fehler, bevor etwas als Preisbeobachtung gespeichert wird.</div><div class="inputrow"><select id="receiptStore"><option value="">Händler wählen</option><option>Lidl</option><option>Kaufland</option><option>REWE</option><option>EDEKA</option></select><input id="receiptDate" type="date"></div><div id="ocrStatus" class="detail"></div><div id="reviewRows"></div><button class="ghost" id="addReviewRow" style="width:100%;margin-top:8px">+ Artikel ergänzen</button></div><label style="display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13px;line-height:1.4"><input type="checkbox" id="contribute" style="flex:0 0 auto;margin-top:2px"> <span><b>Anonymisierte Preisdaten beitragen</b><br><span class="muted">Händler/Filiale, Datum, Produkt, Menge, Preis und Rabatt dürfen ECHTPREIS verbessern. Personen- und Zahlungsdaten gehören nicht in die Preisdatenbank.</span></span></label><button class="green" id="finishPurchaseBtn" disabled>Einkauf mit Bon abschließen</button><button class="ghost" id="noReceiptBtn" style="width:100%;margin-top:8px">Bon nicht mehr vorhanden</button><button class="ghost" id="backPlanBtn" style="width:100%;margin-top:8px">Zurück zur Liste</button></div>
+<section class="receipt" id="receipt"><div class="card"><div class="smallcap">Schritt 2 von 2</div><h2 style="margin-top:6px">Einkauf mit Bon abschließen</h2><div class="muted">Der Bon ist fester Bestandteil des ECHTPREIS-Kreislaufs: Er bestätigt, was du wirklich gekauft und bezahlt hast. Dein aktueller Einkauf wird bis zum Abschluss lokal auf diesem Gerät als offen markiert.</div><div class="notice" id="openPurchaseNotice"><b>Offener Einkauf:</b> Noch kein Bon hinterlegt.</div><label class="upload" for="receiptFile">📎 Bon hinzufügen · Foto, Screenshot oder PDF</label><input id="receiptFile" type="file" accept="image/*,application/pdf" style="display:none"><div id="receiptMsg" class="detail"></div><div class="ocrbox" id="ocrBox"><h2>Bon kontrollieren</h2><div class="muted">ECHTPREIS liest lokal einen ersten Entwurf. Bitte korrigiere Fehler, bevor etwas als Preisbeobachtung gespeichert wird.</div><div class="inputrow"><select id="receiptStore"><option value="">Händler wählen</option><option>Lidl</option><option>Kaufland</option><option>REWE</option><option>EDEKA</option></select><input id="receiptDate" type="date"></div><div id="ocrStatus" class="detail"></div><div id="reviewRows"></div><button class="ghost" id="addReviewRow" style="width:100%;margin-top:8px">+ Artikel ergänzen</button></div><label style="display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13px;line-height:1.4"><input type="checkbox" id="contribute" style="flex:0 0 auto;margin-top:2px"> <span><b>Anonymisierte Preisdaten beitragen</b><br><span class="muted">Händler/Filiale, Datum, Produkt, Menge, Preis und Rabatt dürfen ECHTPREIS verbessern. Personen- und Zahlungsdaten gehören nicht in die Preisdatenbank.</span></span></label><button class="green" id="finishPurchaseBtn" disabled>Einkauf mit Bon abschließen</button><button class="ghost" id="noReceiptBtn" style="width:100%;margin-top:8px">Bon nicht mehr vorhanden</button><button class="ghost" id="backPlanBtn" style="width:100%;margin-top:8px">Zurück zur Liste</button></div>
 <div class="card"><h2>Warum der Bon wichtig ist</h2><div class="muted">Externe Quellen sagen, was Preise sein sollen. Bons zeigen, was tatsächlich bezahlt wurde. Neue Bonpreise werden später zunächst als Beobachtung gespeichert und nicht ungeprüft zum Referenzpreis.</div></section>
 <div class="footer">ECHTPREIS · Versteh, was du bezahlst.</div>
 </main>
@@ -186,7 +186,32 @@ function parseReceiptText(text){
  for(let i=0;i<lines.length;i++){let m=lines[i].match(/^(.{2,40}?)\s+(\d+[,.]\d{2})\s*(?:€|EUR)?$/i);if(m&&!/summe|gesamt|bar|karte|mwst|pfand/i.test(m[1]))rows.push({name:m[1].trim(),price:m[2].replace(",",".")})}
  return rows.slice(0,40);
 }
-async function runLocalReceiptOCR(file){
+async function extractPdfText(file){
+ if(!window.pdfjsLib){await new Promise((resolve,reject)=>{let sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc)});pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"}
+ const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;let text="";
+ for(let p=1;p<=Math.min(pdf.numPages,8);p++){const page=await pdf.getPage(p),tc=await page.getTextContent();text+=tc.items.map(x=>x.str).join(" ")+"\n"}
+ return text;
+}
+async function renderPdfFirstPage(file){
+ if(!window.pdfjsLib){await extractPdfText(file)}
+ const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,page=await pdf.getPage(1),vp=page.getViewport({scale:2}),canvas=document.createElement("canvas");canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:canvas.getContext("2d"),viewport:vp}).promise;return new Promise(r=>canvas.toBlob(r,"image/jpeg",.92));
+}
+function applyReceiptText(text,label){
+ receiptDraft=parseReceiptText(text);let low=text.toLowerCase();if(low.includes("lidl"))$("receiptStore").value="Lidl";else if(low.includes("kaufland"))$("receiptStore").value="Kaufland";else if(low.includes("rewe"))$("receiptStore").value="REWE";else if(low.includes("edeka"))$("receiptStore").value="EDEKA";
+ let dm=text.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2})\b/);$("receiptDate").value=dm?dm[3]+"-"+dm[2]+"-"+dm[1]:new Date().toISOString().slice(0,10);
+ $("ocrStatus").textContent=receiptDraft.length?receiptDraft.length+" mögliche Preiszeilen aus "+label+" erkannt. Bitte kontrollieren.":"Keine sicheren Preiszeilen erkannt. Du kannst Artikel manuell ergänzen.";drawReviewRows();
+}
+async function processReceiptFile(file){
+ $("ocrBox").style.display="block";
+ if(file.type==="application/pdf"||/\.pdf$/i.test(file.name)){
+  $("ocrStatus").textContent="Digitalen PDF-Bon lesen …";
+  try{let text=await extractPdfText(file);if(text.replace(/\s/g,"").length>40){applyReceiptText(text,"PDF");return}
+   $("ocrStatus").textContent="PDF enthält kein nutzbares Text-Layer · erste Seite wird per OCR gelesen …";let img=await renderPdfFirstPage(file);await runImageReceiptOCR(img);return;
+  }catch(e){$("ocrStatus").textContent="PDF konnte nicht direkt gelesen werden. Bitte anderen Export oder Screenshot versuchen.";receiptDraft=[];drawReviewRows();return}
+ }
+ await runImageReceiptOCR(file);
+}
+async function runImageReceiptOCR(file){
  $("ocrBox").style.display="block";$("ocrStatus").textContent="Bon wird lokal gelesen …";
  if(!window.Tesseract){$("ocrStatus").textContent="Lokale Texterkennung wird geladen …";await new Promise((resolve,reject)=>{let sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc)})}
  try{const out=await Tesseract.recognize(file,"deu",{logger:m=>{if(m.status==="recognizing text")$("ocrStatus").textContent="Bon lesen: "+Math.round((m.progress||0)*100)+" %"}});let text=out.data.text||"";
@@ -196,7 +221,7 @@ async function runLocalReceiptOCR(file){
  }catch(err){$("ocrStatus").textContent="Automatische Erkennung fehlgeschlagen. Bitte Artikel manuell ergänzen.";receiptDraft=[];drawReviewRows()}
 }
 $("addReviewRow").onclick=()=>{receiptDraft.push({name:"",price:""});drawReviewRows()};
-$("receiptFile").onchange=e=>{let file=e.target.files[0];$("receiptMsg").textContent=file?"✓ Bon ausgewählt: "+file.name:"";$("finishPurchaseBtn").disabled=!file;if(file)runLocalReceiptOCR(file)};
+$("receiptFile").onchange=e=>{let file=e.target.files[0];$("receiptMsg").textContent=file?"✓ Bon ausgewählt: "+file.name:"";$("finishPurchaseBtn").disabled=!file;if(file)processReceiptFile(file)};
 function closePurchase(){try{localStorage.removeItem("echtpreis_open_purchase")}catch(e){}}
 $("finishPurchaseBtn").onclick=()=>{
  if(!$("receiptFile").files[0])return;let store=$("receiptStore").value,date=$("receiptDate").value;if(!store||!date)return alert("Bitte Händler und Bon-Datum kontrollieren.");
