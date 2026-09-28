@@ -62,6 +62,7 @@ assert(html.includes("globalAdjustments=receiptDraft.filter"),"coupon receipts m
 assert(html.includes("plausibleObservationPrice(x)"),"trusted prices must reject implausible price outliers");
 assert(html.includes("x.per!==catalog[x.key].unit"),"price observations with the wrong comparison unit must be rejected");
 assert(html.includes('if(wish&&wish.matchMode==="exact")return verified'),"exact-brand requests must never fall back to modeled prices");
+assert(html.includes("verifiedComplete=complete.filter(r=>r.referenceCount===0)"),"fully evidenced baskets must outrank cheaper estimated baskets");
 
 
 
