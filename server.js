@@ -17,7 +17,7 @@ const server=http.createServer(async(req,res)=>{
  if(req.method==="GET"&&req.url==="/health"){let db=load(),obs=pool?(await pool.query("SELECT count(*)::int n FROM price_observations")).rows[0].n:db.observations.length,als=pool?(await pool.query("SELECT count(*)::int n FROM product_aliases")).rows[0].n:db.aliases.length;return send(res,200,{ok:true,service:"ECHTPREIS Data API",version:"3.4",observations:obs,aliases:als,storage:pool?"postgres":"ephemeral-fallback"})}
  if(req.method==="GET"&&req.url.startsWith("/v1/observations")){let db=load(),u=new URL(req.url,"http://x"),since=u.searchParams.get("since"),rows=await dbObservations(since);if(!rows)rows=db.observations.filter(x=>!since||x.date>=since).slice(-5000);return send(res,200,{version:"3.4",items:rows})}
  if(req.method==="GET"&&req.url.startsWith("/v1/aliases")){let db=load(),rows=await dbAliases();return send(res,200,{version:"3.4",items:rows||db.aliases.slice(-5000)})}
- if(req.method==="GET"&&req.url==="/health/db-selftest"){return send(res,200,{version:"3.4",...(await dbSelfTest())})}
+ if(req.method==="GET"&&req.url.startsWith("/health/db-selftest")){return send(res,200,{version:"3.4",...(await dbSelfTest())})}
  if(req.method==="POST"&&req.url==="/v1/receipt-observations")return body(req,async(err,b)=>{
   if(err||!b||!Array.isArray(b.items)||!clean(b.proof))return send(res,400,{error:"Ungültige Anfrage"});
   let db=load(),accepted=0,rejected=0,proof=clean(b.proof);
