@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.6</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.6.1</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="tabs"><button class="tab active" id="planTab">1 · Planen</button><button class="tab" id="receiptTab">2 · Bon abschließen</button></div>
 
@@ -43,7 +43,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
 <div class="card"><h2>Alle Märkte</h2><div class="muted">Nur bekannte Positionen werden summiert. Fehlende Preise werden nicht erfunden.</div><div id="merchantResults"></div></div>
 <div class="card"><h2>Lohnt sich Aufteilen?</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
-<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.6 · Bon erwünscht, aber kein Zwang</span></div>
+<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.6.1 · Bon erwünscht · keine doppelten Listeneinträge</span></div>
 <div class="card" id="finishCard"><h2>Nach dem Einkauf geht’s mit dem Bon weiter</h2><div class="muted">Dein Einkauf bleibt offen, bis du den Kassenbon hochlädst. So kann ECHTPREIS geplante und tatsächlich bezahlte Preise verbinden und – nur mit deiner Zustimmung – anonymisierte Preisbeobachtungen zur Datenbasis beitragen lassen.</div><div class="notice" style="margin-top:14px"><b>🧾 Bon nicht vergessen!</b><br>Ein Foto nach dem Einkauf hilft, echte Preise aktuell zu halten.</div><button class="green" id="toReceiptBtn">Ich war einkaufen → Bon hochladen</button></div>
 </section>
 </section>
@@ -132,8 +132,8 @@ function parseWish(raw){
 function wishText(w){const u=w.unit==="piece"?"×":w.unit;return (w.unit==="piece"?w.amount+"×":String(w.amount).replace(".",",")+" "+u)+" "+w.label}
 function drawSuggestions(){let a=["5 Bananen","3 rote Paprika","500 g Rinderhack","10 Eier","2 Liter Milch"];$("suggestions").innerHTML=a.map(x=>'<span class="chip" data-add="'+x+'">+ '+x+'</span>').join("");document.querySelectorAll("[data-add]").forEach(e=>e.onclick=()=>add(e.dataset.add));}
 function drawStores(){ $("stores").innerHTML=storeNames.map(st=>'<span class="chip '+(selected.has(st)?"on":"")+'" data-store="'+st+'">'+st+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores()});}
-function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;basket.push(parseWish(raw));$("productInput").value="";drawList();}
-function drawList(){ $("list").innerHTML=basket.length?basket.map((w,i)=>'<div class="item"><div class="itemname">'+escHtml(wishText(w))+'<div class="qty">'+(w.matched?'✓ Produkt verstanden'+(w.note?" · "+escHtml(w.note):""):'⚠ Noch kein sicherer Produkt-Match')+'</div></div><button class="x" data-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
+function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;let w=parseWish(raw);let duplicate=basket.find(x=>x.key&&w.key&&x.key===w.key&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}basket.push(w);$("productInput").value="";drawList();}
+function drawList(){ $("list").innerHTML=basket.length?basket.map((w,i)=>'<div class="item"><div class="itemname">'+escHtml(wishText(w))+'<div class="qty">'+(w.matched?'✓ erkannt':'⚠ Noch kein sicherer Produkt-Match')+'</div></div><button class="x" data-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
 function compare(){
  if(!basket.length)return alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");
  if(!selected.size)return alert("Bitte mindestens einen Markt auswählen.");
