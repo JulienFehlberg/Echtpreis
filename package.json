@@ -1,12 +1,13 @@
 {
   "name": "echtpreis-api",
-  "version": "3.4.0",
+  "version": "5.0.0",
   "private": true,
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node tests/static-smoke.js && node tests/server-unit.js"
   },
   "dependencies": {
     "pg": "^8.13.1"
