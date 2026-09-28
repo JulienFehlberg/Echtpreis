@@ -897,7 +897,7 @@ function parseReceiptText(text){
   if(pfBasic){let unitPrice=parseReceiptNumber(pfBasic[1]),count=Number(pfBasic[2]);last={name:"Pfand",price:String(Number((unitPrice*count).toFixed(2))),packAmount:count,packUnit:"piece",count,unitLinePrice:unitPrice,isDeposit:true,pricingType:"deposit"};rows.push(last);continue}
   if(pf){last={name:"Pfand",price:String(parseReceiptNumber(pf[3])),packAmount:Number(pf[2]),packUnit:"piece",count:Number(pf[2]),unitLinePrice:parseReceiptNumber(pf[1]),isDeposit:true,pricingType:"deposit"};rows.push(last);continue}
   let inlineMult=line.match(/^(.{2,48}?)\s+(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)\s+(\d+[,.]\d{2})(?:\s*[AB])?$/i);
-  if(inlineMult&&!/summe|gesamt|bar|karte|mwst|gegeben|rückgeld/i.test(inlineMult[1])){
+  if(inlineMult&&!/summe|gesamt|bar|cash|karte|kartenzahlung|girocard|visa|mastercard|mwst|gegeben|rückgeld|payback/i.test(inlineMult[1])){
    let pack=inferPackFromName(inlineMult[1]);last={name:inlineMult[1].trim(),price:String(parseReceiptNumber(inlineMult[4])),count:Number(inlineMult[3]),unitLinePrice:parseReceiptNumber(inlineMult[2]),quantitySource:"receipt-multipack",discount:0,regularTotal:parseReceiptNumber(inlineMult[4]),...pack};rows.push(last);continue
   }
   let weighted=line.match(/(\d+[,.]\d{2,3})\s*kg\s*[x×]?\s*(\d+[,.]\d{2})\s*€?\s*\/\s*kg/i);
@@ -905,7 +905,7 @@ function parseReceiptText(text){
   let mult=line.match(/(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)/i);
   if(mult&&last){last.count=Number(mult[2]);last.unitLinePrice=parseReceiptNumber(mult[1]);last.quantitySource="receipt-multipack";continue}
   let m=line.match(/^(.{2,48}?)\s+(\d+[,.]\d{2})\s*(?:€|EUR)?\s*[AB]?$/i);
-  if(m&&!/summe|gesamt|bar|karte|mwst|pfand(?:rückgabe)?|gegeben|rückgeld|payback/i.test(m[1])){
+  if(m&&!/summe|gesamt|bar|cash|karte|kartenzahlung|girocard|visa|mastercard|mwst|pfand(?:rückgabe)?|gegeben|rückgeld|payback/i.test(m[1])){
    let pack=inferPackFromName(m[1]);last={name:m[1].trim(),price:String(parseReceiptNumber(m[2])),discount:0,regularTotal:parseReceiptNumber(m[2]),...pack};rows.push(last);
   }
  }
@@ -963,6 +963,20 @@ async function renderPdfFirstPage(file){
  if(!window.pdfjsLib){await extractPdfText(file)}
  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,page=await pdf.getPage(1),vp=page.getViewport({scale:2}),canvas=document.createElement("canvas");canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:canvas.getContext("2d"),viewport:vp}).promise;return new Promise(r=>canvas.toBlob(r,"image/jpeg",.92));
 }
+function detectReceiptStore(text){
+ const lines=String(text||"").split(/\n+/).map(x=>x.trim()).filter(Boolean),head=lines.slice(0,18).join(" ").toLowerCase();
+ if(/\blidl\b/.test(head))return "Lidl";
+ if(/\bkaufland\b/.test(head))return "Kaufland";
+ if(/\brewe\b/.test(head))return "REWE";
+ if(/\bedeka\b/.test(head))return "EDEKA";
+ if(/\bpenny\b/.test(head))return "PENNY";
+ if(/\baldi(?:\s+nord)?\b/.test(head))return "ALDI Nord";
+ if(/netto\s+(?:marken|filiale|discount)|netto-marken/i.test(head))return "Netto";
+ if(/\bnorma\b/.test(head))return "NORMA";
+ if(/\brossmann\b/.test(head))return "Rossmann";
+ if(/(?:^|\s)dm(?:\s|$)|dm-drogerie/i.test(head))return "dm";
+ return "";
+}
 function updateReceiptAnalysis(){
  const box=$("receiptAnalysis");if(!box)return;currentReceiptSaving=null;currentReceiptSavingConfidence=null;
  const valid=receiptDraft.filter(r=>!r.isDeposit&&r.name&&Number(r.price)>0),paid=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,""));
@@ -975,7 +989,7 @@ function updateReceiptAnalysis(){
  else{$("analysisBestStore").textContent=rows.length?rows[0].store:"Kein vollständiger Marktvergleich möglich";$("analysisBestPrice").textContent=rows.length?(rows[0].referenceCount?"ca. ":"")+eur(rows[0].total):"–";$("analysisSaving").textContent=rows.length?"0,00 €":"–";if(rows.length){currentReceiptSaving=0;currentReceiptSavingConfidence=rows[0].referenceCount?"niedrig":"hoch"}$("analysisNote").textContent=rows.length?"Der günstigste bekannte Vergleich liegt nicht unter deiner Bon-Summe.":"Für alle erkannten Produkte werden erst noch belastbare Vergleichspreise benötigt."}
 }
 function applyReceiptText(text,label){
- receiptDraft=parseReceiptText(text);let cash=extractReceiptCash(text);if(cash.paid||cash.change)receiptCash=cash;let low=text.toLowerCase();if(low.includes("lidl"))$("receiptStore").value="Lidl";else if(low.includes("kaufland"))$("receiptStore").value="Kaufland";else if(low.includes("rewe"))$("receiptStore").value="REWE";else if(low.includes("edeka"))$("receiptStore").value="EDEKA";else if(low.includes("penny"))$("receiptStore").value="PENNY";else if(low.includes("aldi"))$("receiptStore").value="ALDI Nord";else if(low.includes("netto"))$("receiptStore").value="Netto";else if(low.includes("norma"))$("receiptStore").value="NORMA";else if(low.includes("rossmann"))$("receiptStore").value="Rossmann";else if(/\bdm\b/.test(low))$("receiptStore").value="dm";
+ receiptDraft=parseReceiptText(text);let cash=extractReceiptCash(text);if(cash.paid||cash.change)receiptCash=cash;let detectedStore=detectReceiptStore(text);if(detectedStore)$("receiptStore").value=detectedStore;
  let dm=text.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2}|\d{2})\b/);if(dm)$("receiptDate").value=(dm[3].length===2?"20"+dm[3]:dm[3])+"-"+dm[2]+"-"+dm[1];else if(!$("receiptDate").value)$("receiptDate").value=new Date().toISOString().slice(0,10);
  let ed=text.match(/EDEKA\s+Fil\.?\s*(\d+)/i),addr=text.match(/(?:^|\n)\s*([^\n]{3,45}(?:str\.|straße|strasse)[^\n]*)/i),detail=$("receiptStoreDetail");
  if(detail)detail.textContent=ed?("✓ EDEKA Filiale "+ed[1]+(addr?" · "+addr[1].trim():"")):"";
