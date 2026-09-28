@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.32.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.33.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -54,7 +54,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <div class="chips" id="suggestions"></div><div id="list"></div><button class="ghost" id="demoListBtn" style="width:100%;margin-top:12px">Testliste einsetzen</button></div>
 
 <div class="card"><h2>Welche Märkte?</h2><div class="muted">Später: automatisch nach Standort und Entfernung. Heute kannst du auswählen.</div><div class="chips" id="stores"></div>
-<div class="notice"><b>Wichtig:</b> Die Datenmaschine kombiniert offizielle Händlerdaten, Open Prices und später Community-Bons. Jede Zahl braucht Quelle, Datum und Vertrauensstatus. Fehlende Preise bleiben fehlend.</div><div class="card" style="margin:12px 0 0;padding:12px"><div id="dataMachineStatus" class="muted"><b>Datenmaschine:</b> startet …</div></div>
+<div class="notice"><b>Wichtig:</b> Die Datenmaschine kombiniert offizielle Händlerdaten, Open Prices und bestätigte Community-Bons. Jede Zahl braucht Quelle, Datum und Vertrauensstatus. Fehlende Preise bleiben fehlend.</div><div class="card" style="margin:12px 0 0;padding:12px"><div id="dataMachineStatus" class="muted"><b>Datenmaschine:</b> startet …</div></div>
 <button class="green" id="compareBtn">Einkauf vergleichen</button></div>
 
 <section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
@@ -72,7 +72,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <div style="margin-top:16px"><b>Persönliche Daten</b><div class="inputrow"><input id="profileName" placeholder="Name"></div><button class="ghost" id="saveProfile" style="width:100%;margin-top:8px">Profil speichern</button></div>
 <div style="margin-top:18px;border-top:1px solid #e5eae7;padding-top:15px"><b>🎁 Punkte & Level</b><div class="detail" id="profileXp">0 XP gesammelt</div></div>
 <div style="margin-top:18px;border-top:1px solid #e5eae7;padding-top:15px"><b>⭐ ECHTPREIS Plus</b><div class="detail">Aktuell kein aktives Abo. Bezahlte Abos sind in dieser Testversion noch nicht aktiviert.</div><button class="ghost" style="width:100%;margin-top:8px" disabled>Abo verwalten</button></div>
-<div style="margin-top:18px;border-top:1px solid #e5eae7;padding-top:15px"><b>Datenschutz & Konto</b><button class="ghost" id="profileReceipts" style="width:100%;margin-top:8px">Meine Bons & Privatsphäre</button><button class="ghost" id="logoutBtn" style="width:100%;margin-top:8px">Abmelden</button><button class="ghost" id="deleteAccountBtn" style="width:100%;margin-top:8px;color:#a32626">Konto löschen</button><div class="detail">Konto löschen ist im Prototyp noch nicht mit einem echten Benutzerkonto verbunden.</div></div>
+<div style="margin-top:18px;border-top:1px solid #e5eae7;padding-top:15px"><b>Datenschutz & Konto</b><button class="ghost" id="profileReceipts" style="width:100%;margin-top:8px">Meine Bons & Privatsphäre</button><button class="ghost" id="logoutBtn" style="width:100%;margin-top:8px" disabled>Abmelden · noch kein Login aktiv</button><button class="ghost" id="deleteAccountBtn" style="width:100%;margin-top:8px;color:#a32626" disabled>Konto löschen · noch kein Login aktiv</button><div class="detail">In dieser Testphase wird noch kein echtes Benutzerkonto angelegt.</div></div>
 <button class="ghost" id="profileBack" style="width:100%;margin-top:14px">Zurück</button>
 </section>
 <section class="card" id="pointsCard" style="display:none"><h2>Beiträge & Punkte</h2><div class="muted">Jeder bestätigte Bon kann ECHTPREIS aktueller machen. Derselbe Bon zählt nur einmal. XP zeigen deinen Community-Beitrag; echte Prämien sind noch nicht aktiviert.</div><div class="big" id="xpTotal" style="color:#0b6b3a">0 XP</div><div class="detail" id="contributionStats">Noch keine Beiträge auf diesem Gerät.</div><div style="margin-top:16px;border-top:1px solid #ddd;padding-top:14px"><b>🧾 Meine Bons</b><div class="detail">Persönlicher Verlauf auf diesem Gerät. Jeder Bon kann privat gestellt oder gelöscht werden.</div><div id="myReceipts" style="margin-top:10px"></div></div><div style="margin-top:14px"><b>🔗 Automatische Bon-Importe</b><div class="detail">Für spätere Händler-Verknüpfungen vorbereitet. Ohne deine Zustimmung wird keine Verbindung aktiviert.</div><label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="autoReceiptImports"> Automatische Importe erlauben</label></div><button class="ghost" id="pointsBack" style="width:100%;margin-top:12px">Zurück zum Einkauf</button></section><div class="footer">ECHTPREIS · Versteh, was du bezahlst.</div>
@@ -93,8 +93,6 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
     var pn=byId("profileName");if(pn)pn.value=localStorage.getItem("echtpreis_profile_name")||"";
     var px=byId("profileXp");if(px)px.textContent=(localStorage.getItem("echtpreis_xp")||"0")+" XP gesammelt";
     var sp=byId("saveProfile");if(sp)sp.addEventListener("click",function(){localStorage.setItem("echtpreis_profile_name",(pn&&pn.value||"").trim());sp.textContent="✓ Gespeichert";setTimeout(function(){sp.textContent="Profil speichern"},1200)});
-    var lo=byId("logoutBtn");if(lo)lo.addEventListener("click",function(){alert("Echter Login folgt als nächster Schritt. Aktuell läuft ECHTPREIS noch ohne Benutzerkonto.")});
-    var da=byId("deleteAccountBtn");if(da)da.addEventListener("click",function(){alert("Kontolöschung wird aktiviert, sobald der echte Login angeschlossen ist.")});
 
   });
 })();
@@ -593,8 +591,8 @@ window.getEchtpreisRawList=()=>basket.map(x=>x.raw);
 window.replaceEchtpreisList=rows=>{basket=(rows||[]).map(parseWish).filter(x=>x.raw);drawList();};
 function drawList(){ $("list").innerHTML=basket.length?basket.map((w,i)=>'<div class="item"><div class="itemname">'+escHtml(wishText(w))+'<div class="qty">'+(w.matched?'✓ erkannt':'⚠ Noch kein sicherer Produkt-Match')+'</div></div><button class="x" data-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
 window.compare=function compare(){
- if(!basket.length)return alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");
- if(!selected.size)return alert("Bitte mindestens einen Markt auswählen.");
+ if(!basket.length){alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");return false;}
+ if(!selected.size){alert("Bitte mindestens einen Markt auswählen.");return false;}
  let rows=[...selected].map(store=>{let total=0,known=0,missing=[],sources=[];basket.forEach(w=>{let p=w.key?activePrice(w.key,store,w):null;if(p){total+=p.price*w.calcAmount;known++;sources.push(p)}else missing.push(w.label)});return{store,total,known,missing,sources,coverage:known/basket.length}});
  let complete=rows.filter(r=>r.known===basket.length).sort((a,b)=>a.total-b.total);
  if(complete.length){let win=complete[0];$("winnerLabel").textContent="Günstigster vollständig belegter Warenkorb";$("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);$("winnerCoverage").textContent="100 % Abdeckung · Preise mit Quelle und Gültigkeit";}
@@ -603,9 +601,9 @@ window.compare=function compare(){
  let allSplitKnown=basket.every(w=>w.key&&[...selected].some(st=>activePrice(w.key,st,w)));
  if(!allSplitKnown){$("splitTitle").textContent="Noch nicht vollständig berechenbar";$("splitDetail").textContent="Für mindestens eine Position gibt es bei keinem ausgewählten Markt einen aktuell gültigen, belegten Preis.";$("splitSave").textContent="Keine Ersparnis berechnet."}
  else{let split=0,alloc={};basket.forEach(w=>{let opts=[...selected].map(st=>[st,activePrice(w.key,st,w)]).filter(x=>x[1]).sort((a,b)=>a[1].price-b[1].price);split+=opts[0][1].price*w.calcAmount;(alloc[opts[0][0]]??=[]).push(w.label)});let shops=Object.keys(alloc).length;$("splitTitle").textContent=eur(split)+" · "+shops+" "+(shops===1?"Laden":"Läden");$("splitDetail").textContent=Object.entries(alloc).map(([st,n])=>st+": "+n.join(", ")).join(" · ");let saving=complete.length?Math.max(0,complete[0].total-split):null;$("splitSave").textContent=saving===null?"Kein vollständiger 1-Laden-Vergleich als Referenz.":saving<0.5?"Aufteilen spart nur "+eur(saving)+" – ein Laden ist wahrscheinlich sinnvoller.":"Maximal belegte Ersparnis ggü. "+complete[0].store+": "+eur(saving);}
- $("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});
+ $("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});return true;
 }
-$("demoListBtn").onclick=()=>{basket=["500 g Rinderhack","1 kg Bananen"].map(parseWish);drawList()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=()=>{compare();try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};
+$("demoListBtn").onclick=()=>{basket=["500 g Rinderhack","1 kg Bananen"].map(parseWish);drawList()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=()=>{if(compare())try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};
 function hidePoints(){$("pointsCard").style.display="none"}
 function showPlan(){hidePoints();$("planner").style.display="block";$("receipt").style.display="none";$("planTab").classList.add("active");$("receiptTab").classList.remove("active")}
 function showReceipt(){hidePoints();$("planner").style.display="none";$("receipt").style.display="block";$("receiptTab").classList.add("active");$("planTab").classList.remove("active");try{if(localStorage.getItem("echtpreis_open_purchase")==="1")$("openPurchaseNotice").innerHTML="<b>Offener Einkauf:</b> Warte auf deinen Bon."}catch(e){}}
