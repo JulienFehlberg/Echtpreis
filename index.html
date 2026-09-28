@@ -69,7 +69,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}.receipt-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #e5eae7;text-align:left}.receipt-item strong{white-space:nowrap}.receipt-item-name{min-width:0;overflow-wrap:anywhere}.receipt-item small{display:block;color:#68736d;margin-top:3px}.ocrbox #receiptTotalCheck,.ocrbox #receiptPaymentDetail{font-size:14px;margin:10px 0;text-align:left}.insight-card{margin:16px 0;padding:18px;border-radius:20px;background:#fff8e8;border:1px solid #f0dfb7;text-align:left}.insight-card .insight-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:900;color:#8a6a18}.insight-card strong{display:block;font-size:20px;line-height:1.25;margin:5px 0}.insight-card .detail{font-size:13px}.feedback-box{max-width:560px;margin:22px auto 6px;text-align:left;color:#66736c;font-size:12px}.feedback-box summary{cursor:pointer;text-align:center;font-weight:800}.feedback-box textarea{width:100%;box-sizing:border-box;margin-top:10px;min-height:82px;resize:vertical}.feedback-box button{width:100%;margin-top:8px;padding:10px}.feedback-status{text-align:center;margin-top:7px;font-size:12px}@media(max-width:430px){.insight-card{padding:15px}.insight-card strong{font-size:18px}}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.73.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.74.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -889,8 +889,11 @@ function householdNeedKey(item){
  return key.length>=3?{key:"raw:"+key,label:raw}:null;
 }
 function medianNumber(values){const a=(values||[]).filter(Number.isFinite).sort((x,y)=>x-y);if(!a.length)return null;const m=Math.floor(a.length/2);return a.length%2?a[m]:(a[m-1]+a[m])/2}
+const householdStateKey="echtpreis_household_state_v1";
+function getHouseholdState(){try{let v=JSON.parse(localStorage.getItem(householdStateKey)||"{}");return v&&typeof v==="object"?v:{}}catch(e){return {}}}
+function saveHouseholdState(v){try{localStorage.setItem(householdStateKey,JSON.stringify(v||{}))}catch(e){}}
 function buildHouseholdNeeds(receipts=getPersonalReceipts()){
- const today=new Date(localDateKey()+"T12:00:00"),groups=new Map();
+ const state=getHouseholdState(), today=new Date(localDateKey()+"T12:00:00"),groups=new Map();
  (receipts||[]).filter(r=>r&&r.date&&Array.isArray(r.items)).forEach(r=>{
   const day=new Date(String(r.date).slice(0,10)+"T12:00:00");if(!Number.isFinite(day.getTime())||day>today)return;
   const seen=new Set();
@@ -904,7 +907,9 @@ function buildHouseholdNeeds(receipts=getPersonalReceipts()){
   const last=dates[dates.length-1],daysSince=Math.max(0,Math.floor((today-last)/86400000)),daysLeft=Math.round(rhythm-daysSince);
   const confidence=dates.length>=4?"hoch":dates.length>=3?"mittel":"lernend";
   // Surface only when the expected next purchase is close; this keeps the card useful instead of noisy.
-  const lead=Math.max(3,Math.min(7,Math.round(rhythm*.22)));if(daysLeft>lead)return;
+  const lead=Math.max(3,Math.min(7,Math.round(rhythm*.22)));
+  const s=state[g.key]||{},snoozeUntil=s.snoozeUntil?new Date(s.snoozeUntil+"T12:00:00"):null;if(snoozeUntil&&snoozeUntil>today)return;
+  if(daysLeft>lead)return;
   const urgency=daysLeft<=0?0:daysLeft<=2?1:2;
   out.push({...g,rhythm:Math.round(rhythm),daysSince,daysLeft,confidence,urgency,purchases:dates.length});
  });
@@ -916,6 +921,12 @@ function householdNeedText(n){
  if(n.daysLeft===1)return "wahrscheinlich morgen wieder fällig";
  return "wahrscheinlich in "+n.daysLeft+" Tagen wieder fällig";
 }
+function setHouseholdNeedState(key,action){
+ const needs=buildHouseholdNeeds(),need=needs.find(x=>x.key===key);if(!need)return;const state=getHouseholdState(),now=new Date(localDateKey()+"T12:00:00");
+ if(action==="have"){const days=Math.max(3,Math.min(30,Math.round(need.rhythm*.45))),until=new Date(now.getTime()+days*86400000);state[key]={action:"have",updated:localDateKey(),snoozeUntil:localDateKey(until)}}
+ if(action==="need")state[key]={action:"need",updated:localDateKey(),snoozeUntil:null};
+ saveHouseholdState(state);if(action==="need")addHouseholdNeedToList(key);renderHouseholdNeeds();
+}
 function addHouseholdNeedToList(key){
  const need=buildHouseholdNeeds().find(x=>x.key===key);if(!need)return;
  if(!basket.some(w=>normalizeProduct(w.raw)===normalizeProduct(need.label))){basket.push(parseWish(need.label));saveBasketState();learnFrequentProduct(need.label);drawList();basketChanged()}
@@ -924,10 +935,11 @@ function addHouseholdNeedToList(key){
 function renderHouseholdNeeds(receipts=getPersonalReceipts()){
  const box=$("householdNeeds");if(!box)return;const needs=buildHouseholdNeeds(receipts);
  if(!needs.length){box.style.display="none";return}
- const rows=needs.map(n=>'<div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #edf0ee"><div style="flex:1;min-width:0"><b style="display:block;overflow-wrap:anywhere">'+escHtml(n.label)+'</b><div class="detail">'+escHtml(householdNeedText(n))+' · Rhythmus ca. '+n.rhythm+' Tage · '+n.purchases+' Käufe gelernt</div></div><button type="button" class="ghost" data-household-add="'+escHtml(n.key)+'" style="padding:9px 11px;white-space:nowrap">+ Liste</button></div>').join("");
+ const rows=needs.map(n=>'<div style="padding:12px 0;border-bottom:1px solid #edf0ee"><div><b style="display:block;overflow-wrap:anywhere">'+escHtml(n.label)+'</b><div class="detail">'+escHtml(householdNeedText(n))+' · Rhythmus ca. '+n.rhythm+' Tage · '+n.purchases+' Käufe gelernt</div></div><div style="display:flex;gap:7px;margin-top:9px"><button type="button" class="primary" data-household-add="'+escHtml(n.key)+'" style="padding:9px 11px">+ Liste</button><button type="button" class="ghost" data-household-have="'+escHtml(n.key)+'" style="padding:9px 11px">Noch vorhanden</button></div></div>').join("");
  box.innerHTML='<div class="smallcap" style="color:#087443">🏠 Dein Haushalt</div><h2 style="margin-top:5px">Könnte bei dir bald leer sein</h2><div class="muted">Aus deinen echten Einkäufen gelernt – keine Inventur nötig.</div><div style="margin-top:8px">'+rows+'</div>';
  box.style.display="block";
- box.querySelectorAll("[data-household-add]").forEach(b=>b.onclick=()=>addHouseholdNeedToList(b.dataset.householdAdd));
+ box.querySelectorAll("[data-household-add]").forEach(b=>b.onclick=()=>setHouseholdNeedState(b.dataset.householdAdd,"need"));
+ box.querySelectorAll("[data-household-have]").forEach(b=>b.onclick=()=>setHouseholdNeedState(b.dataset.householdHave,"have"));
 }
 window.renderEchtpreisHouseholdNeeds=renderHouseholdNeeds;
 
