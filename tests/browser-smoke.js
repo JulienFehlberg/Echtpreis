@@ -32,7 +32,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  Object.defineProperty(receiptInput,"files",{configurable:true,value:[new w.File(["receipt"],"bon.jpg",{type:"image/jpeg"})]});
  receiptInput.dispatchEvent(new w.Event("change"));await new Promise(r=>setTimeout(r,20));
  assert.strictEqual(d.getElementById("receiptStore").value,"EDEKA","receipt merchant should be detected");
- assert(d.getElementById("ocrStatus").textContent.includes("mögliche Preiszeilen"),"receipt OCR must complete without a missing status element");
+ assert(d.getElementById("ocrStatus").textContent.includes("Bon automatisch erkannt")||d.getElementById("ocrStatus").textContent.includes("Positionen erkannt"),"receipt OCR must complete with an automatic recognition status");
  assert.strictEqual(d.getElementById("receiptAnalysis").style.display,"block","receipt analysis should appear after OCR");
  assert.strictEqual(d.getElementById("finishPurchaseBtn").disabled,false,"receipt should be reviewable after OCR");
  const today=new Date().toISOString().slice(0,10);
