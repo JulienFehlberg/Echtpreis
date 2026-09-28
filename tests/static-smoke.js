@@ -66,7 +66,7 @@ assert(html.includes('referenceType:"brand-estimate"'),"estimated exact-brand pr
 assert(html.includes("verifiedBest.total<=win.total*1.12"),"basket ranking must balance evidence quality with useful cold-start savings");
 assert(html.includes('type:"first-receipt-fact"'),"first receipt should produce an immediate useful fact");
 assert(html.includes("currentReceiptSaving=Number(saving.toFixed(2))"),"estimated receipt savings should remain available with confidence labeling");
-assert(html.includes("comparisonRefreshPromise=Promise.allSettled"),"shopping comparison should render cache-first while refreshing asynchronously");
+assert(html.includes("const pending=Promise.allSettled")&&html.includes("comparisonRefreshPromise=pending")&&html.includes("comparisonRefreshPromise===pending"),"shopping comparison should render cache-first without an older refresh clearing a newer one");
 assert(html.includes("Promise.allSettled([loadNearbyStores(),ingestOpenPrices(false,keys)])"),"location and live price refresh should run in parallel");
 assert(html.includes("comparisonRefreshPromise"),"concurrent background comparison refreshes should be deduplicated");
 assert(html.includes("echtpreis_nearby_store_cache_v1"),"nearby stores should persist across sessions for fast repeat comparisons");
@@ -76,6 +76,6 @@ assert(html.includes("echtpreis_nearby_store_cache_v1"),"nearby stores should pe
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
 const products=(html.match(/label:"/g)||[]).length;assert(products>=30,"primary product catalog unexpectedly small: "+products);
 assert(!html.includes("stableBasket"),"obsolete duplicate basket state must stay removed");
-assert(html.includes("if(dataEngineCache)return dataEngineCache"),"normalized observation engine should be cached");
+assert(html.includes("if(dataEngineCache&&dataEngineCacheDay===today)return dataEngineCache"),"normalized observation engine should be cached only for the current day");
 assert(html.includes("priceLookupMemo"),"basket price lookups should be memoized within a comparison");
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);

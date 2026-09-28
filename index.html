@@ -69,7 +69,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}.receipt-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #e5eae7;text-align:left}.receipt-item strong{white-space:nowrap}.receipt-item-name{min-width:0;overflow-wrap:anywhere}.receipt-item small{display:block;color:#68736d;margin-top:3px}.ocrbox #receiptTotalCheck,.ocrbox #receiptPaymentDetail{font-size:14px;margin:10px 0;text-align:left}.insight-card{margin:16px 0;padding:18px;border-radius:20px;background:#fff8e8;border:1px solid #f0dfb7;text-align:left}.insight-card .insight-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:900;color:#8a6a18}.insight-card strong{display:block;font-size:20px;line-height:1.25;margin:5px 0}.insight-card .detail{font-size:13px}.feedback-box{max-width:560px;margin:22px auto 6px;text-align:left;color:#66736c;font-size:12px}.feedback-box summary{cursor:pointer;text-align:center;font-weight:800}.feedback-box textarea{width:100%;box-sizing:border-box;margin-top:10px;min-height:82px;resize:vertical}.feedback-box button{width:100%;margin-top:8px;padding:10px}.feedback-status{text-align:center;margin-top:7px;font-size:12px}@media(max-width:430px){.insight-card{padding:15px}.insight-card strong{font-size:18px}}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.127.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.128.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -258,15 +258,16 @@ function usableObservation(x){
  const max=freshnessDays(x);if(max!=null&&!x.validTo&&((new Date(today)-new Date(x.date))/86400000)>max)return false;
  return true;
 }
-let dataEngineCache=null,dataEngineCacheVersion=0;
+let dataEngineCache=null,dataEngineCacheVersion=0,dataEngineCacheDay=null;
 function invalidateDataEngine(){dataEngineCache=null;dataEngineCacheVersion++}
 function dataEngine(){
- if(dataEngineCache)return dataEngineCache;
+ const today=localDateKey();if(dataEngineCache&&dataEngineCacheDay===today)return dataEngineCache;
+ if(dataEngineCacheDay!==today){dataEngineCache=null;dataEngineCacheDay=today;dataEngineCacheVersion++}
  const all=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation).filter(usableObservation),seen=new Set();
  dataEngineCache=all.filter(x=>{let sig=[x.key,x.store,x.price,x.per,x.date,x.proof||x.source,x.locationId||""].join("|");if(seen.has(sig))return false;seen.add(sig);return true});
  return dataEngineCache;
 }
-window.addEventListener("storage",e=>{if([communityKey,sharedCacheKey,openPricesCacheKey].includes(e.key)){invalidateDataEngine();resetPriceLookupMemo()}});
+window.addEventListener("storage",e=>{if([communityKey,sharedCacheKey,openPricesCacheKey].includes(e.key)){invalidateDataEngine();resetPriceLookupMemo();drawDataMachine();if(hasCompared&&basket.length)void compare({skipLocation:true,scroll:false,backgroundRefresh:true})}});
 const referenceBase={
  bananen:1.79,"rote paprika":3.49,tomaten:3.29,gurken:.89,aepfel:2.49,kartoffeln:1.29,zwiebeln:1.69,
  rinderhack:13.98,hackfleisch:10.98,haehnchenbrust:12.99,energydrink:5.96,tiefkuehlpizza:3.49,croissants:2.49,
@@ -283,7 +284,7 @@ const referenceBase={
  apfelsaft:1.49,multivitaminsaft:1.59,limonade:1.29,eistee:1.29,tee:1.99,kakao:7.98,pommes:2.49,tk_gemuese:2.99,tk_obst:5.99,
  spuelmaschinentabs:4.99,muellbeutel:2.49,alufolie:2.49,backpapier:1.99,handseife:1.49,duschgel:1.49,deo:2.49,rasierer:4.99,windeln:6.99,feuchttuecher:1.49
 };
-const referenceStoreFactor={"Lidl":.94,"Kaufland":.96,"REWE":1.06,"EDEKA":1.08,"PENNY":.95,"ALDI Nord":.93,"ALDI Süd":.93,"Netto":.94,"NORMA":.93,"dm":1.02,"Rossmann":1.03};
+const referenceStoreFactor={"Lidl":.94,"Kaufland":.96,"REWE":1.06,"EDEKA":1.08,"PENNY":.95,"ALDI Nord":.93,"Netto":.94,"NORMA":.93,"dm":1.02,"Rossmann":1.03};
 const storeAssortment={alcohol:new Set(["Lidl","Kaufland","REWE","EDEKA","PENNY","ALDI Nord","ALDI Süd","Netto","NORMA"]),drugstore:new Set(["haferdrink","nudeln","reis","mehl","zucker","haferflocken","muesli","cornflakes","linsen","bohnen","kichererbsen","couscous","passierte_tomaten","tomatenmark","oel","olivenoel","essig","salz","pfeffer","honig","marmelade","erdnussbutter","schokolade","chips","kekse","gummibaerchen","apfelsaft","multivitaminsaft","tee","kakao","kaffee","toilettenpapier","kuechenrolle","waschmittel","spuelmittel","zahnpasta","shampoo","katzenfutter","hundefutter","spuelmaschinentabs","muellbeutel","alufolie","backpapier","handseife","duschgel","deo","rasierer","windeln","feuchttuecher"])};
 function storeCanCarry(store,wish,key){store=canonicalStoreName(store);const product=wish?.key||key;if(store==="dm"||store==="Rossmann")return storeAssortment.drugstore.has(product);if(product==="wodka"||product==="bier")return storeAssortment.alcohol.has(store);return true;}
 function referencePrice(key,store,wish=null){
@@ -334,7 +335,7 @@ let priceLookupMemo=new Map();
 function resetPriceLookupMemo(){priceLookupMemo.clear()}
 function priceWishSignature(w){return JSON.stringify([w?.key,w?.matchMode,w?.exactBrand,w?.choice||{}])}
 function activePrice(key,store,wish=null){
- store=canonicalStoreName(store);const cacheKey=[dataEngineCacheVersion,key,store,priceWishSignature(wish)].join("|");if(priceLookupMemo.has(cacheKey))return priceLookupMemo.get(cacheKey);
+ dataEngine();store=canonicalStoreName(store);const cacheKey=[dataEngineCacheVersion,key,store,priceWishSignature(wish)].join("|");if(priceLookupMemo.has(cacheKey))return priceLookupMemo.get(cacheKey);
  let result=null;if(storeCanCarry(store,wish,key)){const verified=trustedPrice(key,store,wish);result=(store==="dm"||store==="Rossmann")?verified:(wish&&wish.matchMode==="exact"?verified||exactBrandFallbackPrice(key,store,wish):verified||referencePrice(key,store,wish))}
  priceLookupMemo.set(cacheKey,result);return result;
 }
@@ -353,7 +354,7 @@ async function ingestOpenPrices(force=false,keys=null){
  const syncKey="echtpreis_openprices_sync_by_key_v1",sync=loadJson(syncKey,{}),now=Date.now(),wanted=keys?new Set(keys.filter(Boolean)):null;
  const entries=Object.entries(catalog).filter(([key,item])=>item.openPricesCategory&&(!wanted||wanted.has(key))).filter(([key])=>force||!sync[key]||now-Number(sync[key])>=6*60*60*1000);
  if(!entries.length){dataMachineState.openPrices="Cache aktuell";dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();return}
- const previous=loadJson(openPricesCacheKey),fresh=[],successfulKeys=new Set();dataMachineState.loaded=0;dataMachineState.rejected=0;
+ const fresh=[],successfulKeys=new Set();dataMachineState.loaded=0;dataMachineState.rejected=0;
  const jobs=entries.map(async([key,item])=>{
   const url="https://prices.openfoodfacts.org/api/v1/prices?category_tag="+encodeURIComponent(item.openPricesCategory)+"&currency=EUR&size=50&order_by=-date";
   const r=await fetch(url);if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json(),items=d.items||d.results||[];successfulKeys.add(key);
@@ -365,7 +366,7 @@ async function ingestOpenPrices(force=false,keys=null){
  });
  const results=await Promise.allSettled(jobs),ok=results.filter(x=>x.status==="fulfilled").length;
  if(ok){
-  const kept=previous.filter(x=>!successfulKeys.has(x.key));saveJson(openPricesCacheKey,[...kept,...fresh].slice(-10000));invalidateDataEngine();
+  const kept=loadJson(openPricesCacheKey).filter(x=>!successfulKeys.has(x.key));saveJson(openPricesCacheKey,[...kept,...fresh].slice(-10000));invalidateDataEngine();
   successfulKeys.forEach(key=>sync[key]=now);saveJson(syncKey,sync);dataMachineState.openPrices="verbunden · "+ok+"/"+entries.length+" benötigte Kategorien geprüft";
  }else dataMachineState.openPrices="nicht erreichbar · Cache bleibt aktiv";
  dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();
@@ -387,22 +388,25 @@ function drawDataMachine(){
  el.innerHTML="<b>Datenmaschine aktiv:</b> "+rows.length+" aktuell nutzbare Beobachtungen<br><span class='detail'>ECHTPREIS API: "+escHtml(apiState)+"<br>Open Prices: "+escHtml(dataMachineState.openPrices)+(dataMachineState.lastSync?" · Sync "+dataMachineState.lastSync:"")+"<br>"+(Object.entries(by).map(([k,v])=>escHtml(k)+": "+v).join(" · ")||"Noch keine nutzbaren Quellen")+"</span>";
 }
 const storeNames=["Lidl","Kaufland","REWE","EDEKA","PENNY","ALDI Nord","ALDI Süd","Netto","NORMA","dm","Rossmann"];
-let nearbyStores=loadJson("echtpreis_nearby_store_cache_v1",[]),nearbyStoresFetchedAt=Number(localStorage.getItem("echtpreis_nearby_store_cache_at")||0),nearbyStoresLocation=loadJson("echtpreis_nearby_store_location_v1",null);
+let nearbyStores=[],cachedNearbyStores=loadJson("echtpreis_nearby_store_cache_v1",[]),nearbyStoresFetchedAt=Number(localStorage.getItem("echtpreis_nearby_store_cache_at")||0),nearbyStoresLocation=loadJson("echtpreis_nearby_store_location_v1",null),nearbyStoreRequest=0;
 function storeBrand(tags){let n=normalizeProduct([tags.brand,tags.name,tags.operator].filter(Boolean).join(" "));if(n.includes("aldi sud")||n.includes("aldi sued"))return"ALDI Süd";if(n.includes("aldi nord"))return"ALDI Nord";if(n==="aldi")return"";if(n.includes("kaufland"))return"Kaufland";if(n.includes("rewe"))return"REWE";if(n.includes("edeka"))return"EDEKA";if(n.includes("penny"))return"PENNY";if(n.includes("netto"))return"Netto";if(n.includes("norma"))return"NORMA";if(n.includes("rossmann"))return"Rossmann";if(n.includes("dm"))return"dm";if(n.includes("lidl"))return"Lidl";return""}
 function distanceKm(a,b,c,d){const R=6371,p=Math.PI/180,x=(c-a)*p,y=(d-b)*p,z=Math.sin(x/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(z))}
 async function loadNearbyStores(){
+ const request=++nearbyStoreRequest;
  const status=$("locationStatusText");if(status)status.textContent="Aktueller Standort wird ermittelt …";
  try{
   const runtime=window.EchtpreisRuntime;if(!runtime||!runtime.currentPosition)throw new Error("Standort nicht verfügbar");
   const pos=await runtime.currentPosition({enableHighAccuracy:true,timeout:10000,maximumAge:60000}),{latitude:lat,longitude:lon}=pos.coords;
-  if(nearbyStores.length&&nearbyStoresLocation&&Date.now()-nearbyStoresFetchedAt<5*60*1000&&distanceKm(lat,lon,nearbyStoresLocation.lat,nearbyStoresLocation.lon)<.3){if(status)status.textContent=nearbyStores.length+" passende Filialen aus aktuellem Standort-Cache.";return nearbyStores}
+  if(request!==nearbyStoreRequest)return nearbyStores;
+  if(cachedNearbyStores.length&&nearbyStoresLocation&&Date.now()-nearbyStoresFetchedAt<5*60*1000&&distanceKm(lat,lon,nearbyStoresLocation.lat,nearbyStoresLocation.lon)<.3){nearbyStores=cachedNearbyStores;if(status)status.textContent=nearbyStores.length+" passende Filialen aus aktuellem Standort-Cache.";return nearbyStores}
   if(status)status.textContent="Suche passende Filialen in deiner Nähe …";
   const q='[out:json][timeout:15];(nwr["shop"="supermarket"](around:12000,'+lat+','+lon+');nwr["shop"="discount"](around:12000,'+lat+','+lon+');nwr["shop"="chemist"](around:12000,'+lat+','+lon+'););out center tags;';
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);let r;try{r=await fetch("https://overpass-api.de/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(q),signal:controller.signal})}finally{clearTimeout(timer)}
   if(!r.ok)throw new Error("Filialsuche fehlgeschlagen");const d=await r.json();
+  if(request!==nearbyStoreRequest)return nearbyStores;
   nearbyStores=(d.elements||[]).map(e=>{let t=e.tags||{},slat=e.lat||(e.center&&e.center.lat),slon=e.lon||(e.center&&e.center.lon),brand=storeBrand(t);if(!brand||!slat||!slon)return null;let address=[t["addr:street"],t["addr:housenumber"]].filter(Boolean).join(" ");return{brand,lat:slat,lon:slon,distance:distanceKm(lat,lon,slat,slon),address,name:t.name||brand}}).filter(Boolean).sort((x,y)=>x.distance-y.distance);
-  nearbyStoresFetchedAt=Date.now();nearbyStoresLocation={lat,lon};saveJson("echtpreis_nearby_store_cache_v1",nearbyStores.slice(0,100));saveJson("echtpreis_nearby_store_location_v1",nearbyStoresLocation);localStorage.setItem("echtpreis_nearby_store_cache_at",String(nearbyStoresFetchedAt));if(status)status.textContent=nearbyStores.length?nearbyStores.length+" passende Filialen gefunden.":"Keine passenden Filialen in der Nähe gefunden.";return nearbyStores;
- }catch(e){if(status)status.textContent=/permission|denied|freigegeben/i.test(String(e&&e.message||e))?"Standort nicht freigegeben – Vergleich ohne Entfernung.":"Standort/Filialsuche gerade nicht verfügbar – Vergleich ohne Entfernung.";return[]}
+  nearbyStoresFetchedAt=Date.now();nearbyStoresLocation={lat,lon};cachedNearbyStores=nearbyStores.slice(0,100);saveJson("echtpreis_nearby_store_cache_v1",cachedNearbyStores);saveJson("echtpreis_nearby_store_location_v1",nearbyStoresLocation);localStorage.setItem("echtpreis_nearby_store_cache_at",String(nearbyStoresFetchedAt));if(status)status.textContent=nearbyStores.length?nearbyStores.length+" passende Filialen gefunden.":"Keine passenden Filialen in der Nähe gefunden.";return nearbyStores;
+ }catch(e){if(request===nearbyStoreRequest){nearbyStores=[];if(status)status.textContent=/permission|denied|freigegeben/i.test(String(e&&e.message||e))?"Standort nicht freigegeben – Vergleich ohne Entfernung.":"Standort/Filialsuche gerade nicht verfügbar – Vergleich ohne Entfernung."}return[]}
 }
 function nearestStore(brand){return nearbyStores.find(x=>x.brand===brand)||null}
 function routeUrl(x){return x?"https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(x.lat+","+x.lon):""}
@@ -461,9 +465,11 @@ function identifyReceiptProduct(name){
 function confidenceLabel(m){return !m.key?"unsicher":m.score>=.95?"sehr sicher":m.score>=.85?"sicher":"prüfen"}
 const API_BASE=window.ECHTPREIS_CONFIG?.apiBase||"https://echtpreis-api.onrender.com";
 let apiState="wird verbunden …";
+let sharedDataRequest=0;
 async function syncSharedData(){
- try{let r=await fetch(API_BASE+"/v1/observations?since="+new Date(Date.now()-14*86400000).toISOString().slice(0,10));if(!r.ok)throw 0;let d=await r.json();saveJson(sharedCacheKey,d.items||[]);apiState="verbunden · "+(d.items||[]).length+" gemeinsame Beobachtungen";drawDataMachine()}
- catch(e){apiState="offline · lokaler Fallback";drawDataMachine()}
+ const request=++sharedDataRequest;
+ try{let r=await fetch(API_BASE+"/v1/observations?since="+new Date(Date.now()-14*86400000).toISOString().slice(0,10));if(!r.ok)throw 0;let d=await r.json();if(!Array.isArray(d.items))throw 0;if(request!==sharedDataRequest)return;saveJson(sharedCacheKey,d.items);invalidateDataEngine();apiState="verbunden · "+d.items.length+" gemeinsame Beobachtungen";drawDataMachine();if(hasCompared&&basket.length)void compare({skipLocation:true,scroll:false,backgroundRefresh:true})}
+ catch(e){if(request===sharedDataRequest){apiState="offline · lokaler Fallback";drawDataMachine()}}
 }
 async function pushSharedReceipt(proof,items){
  try{let r=await fetch(API_BASE+"/v1/receipt-observations",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({proof,items})});if(!r.ok)throw 0;let d=await r.json();apiState="verbunden · "+d.accepted+" neue Beobachtungen übertragen";await syncSharedData();return d}catch(e){apiState="Upload später erneut nötig · lokal gespeichert";drawDataMachine();return null}
@@ -638,7 +644,8 @@ window.compare=async function compare({skipLocation=false,scroll=true,background
   const keys=[...new Set(basket.map(w=>w.key).filter(Boolean))],refreshKey=keys.slice().sort().join("|");
   if(!comparisonRefreshPromise||lastRefreshKey!==refreshKey){
    lastRefreshKey=refreshKey;const before=comparisonRevision;
-   comparisonRefreshPromise=Promise.allSettled([loadNearbyStores(),ingestOpenPrices(false,keys)]).then(()=>{if(before===comparisonRevision&&basket.length)return compare({skipLocation:true,scroll:false,backgroundRefresh:true})}).finally(()=>{comparisonRefreshPromise=null});
+   const pending=Promise.allSettled([loadNearbyStores(),ingestOpenPrices(false,keys)]).then(()=>{if(before===comparisonRevision&&basket.length&&lastRefreshKey===refreshKey)return compare({skipLocation:true,scroll:false,backgroundRefresh:true})}).finally(()=>{if(comparisonRefreshPromise===pending)comparisonRefreshPromise=null});
+   comparisonRefreshPromise=pending;
   }
  }
  if(revision!==comparisonRevision)return false;
