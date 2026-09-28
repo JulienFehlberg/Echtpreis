@@ -28,14 +28,14 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.37.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.38.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
 
 <section id="planner">
 <div class="card"><h2>Deine Einkaufsliste</h2><div class="muted">Menge, Einheit und Produkt dürfen zusammen in ein Feld. Beispiele: „5 Bananen“, „3 rote Paprika“, „500 g Rinderhack“, „2 Liter Milch“.</div>
-<div class="inputrow"><input id="productInput" placeholder="z. B. 5 Bananen oder 500 g Rinderhack"><button class="primary" id="addBtn">Hinzufügen</button><button class="ghost" id="barcodeBtn" type="button" aria-label="Barcode scannen">📷</button></div>
+<div id="basketPreview" style="display:none;margin:14px 0 10px"><div style="font-weight:900;font-size:16px;margin-bottom:8px">Dein Einkauf</div><div id="basketPreviewItems"></div></div><div class="inputrow"><input id="productInput" placeholder="z. B. 5 Bananen oder 500 g Rinderhack"><button class="primary" id="addBtn">Hinzufügen</button><button class="ghost" id="barcodeBtn" type="button" aria-label="Barcode scannen">📷</button></div>
 <div id="frequentProducts" style="display:none;margin-top:12px"></div><div id="savedLists" style="margin-top:12px"></div><div class="muted" style="margin-top:12px;padding:12px;border:1px solid #263329;border-radius:14px"><b style="color:#fff">Echter Testbon #1</b><br>EDEKA · Elstaler Str. 6 · 28.09.2026 · 8,46 €<br><span style="font-size:12px">Mini-Hörnchen 1,49 € · Dr. Oetker Ristorante 3,49 € · Red Bull 0,25 l 2×1,49 € · Pfand 2×0,25 €</span></div><div id="localStores" class="muted" style="margin-top:14px;padding:12px;border:1px solid #263329;border-radius:14px">
 <b style="color:#fff">Filialen · Berlin-Spandau</b><br>
 <div style="margin-top:8px">Kaufland · Grünhofer Weg 9 · Mo–Sa 07:00–22:00 · <a href="https://www.google.com/maps/dir/?api=1&destination=Gr%C3%BCnhofer+Weg+9%2C+13581+Berlin" target="_blank" rel="noopener">Route</a></div>
@@ -657,7 +657,7 @@ window.addEchtpreisBarcode=async(name,qty,code)=>{
 };
 window.getEchtpreisRawList=()=>basket.map(x=>x.raw);
 window.replaceEchtpreisList=rows=>{basket=(rows||[]).map(parseWish).filter(x=>x.raw);drawList();};
-function drawList(){ $("list").innerHTML=basket.length?basket.map((w,i)=>'<div class="item"><div class="itemname">'+escHtml(wishText(w))+'<div class="qty">'+(w.matched?'✓ erkannt':'⚠ Noch kein sicherer Produkt-Match')+'</div></div><button class="x" data-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
+function drawList(){let rows=basket.map((w,i)=>'<div class="item"><div class="itemname">'+escHtml(wishText(w))+'<div class="qty">'+(w.matched?'✓ erkannt':'⚠ Produkt prüfen')+(w.note?' · '+escHtml(w.note):'')+'</div></div><button class="x" data-del="'+i+'" aria-label="Produkt entfernen">✕</button></div>').join("");$("list").innerHTML=basket.length?rows:'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';let preview=$("basketPreview"),previewItems=$("basketPreviewItems");if(preview&&previewItems){preview.style.display=basket.length?"block":"none";previewItems.innerHTML=rows;}document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
 window.compare=function compare(){
  if(!basket.length){alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");return false;}
  if(!selected.size){alert("Bitte mindestens einen Markt auswählen.");return false;}
