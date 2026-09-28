@@ -23,7 +23,7 @@ h2{font-size:29px;letter-spacing:-.035em;margin:12px 0}.row{display:flex;justify
 </style></head>
 <body><main class="app">
 <div class="brand">ECHTPREIS</div><h1 class="hero">Was hast du wirklich bezahlt?</h1>
-<div class="sub">Bon fotografieren. ECHTPREIS trennt jetzt Kaufpositionen von Datum, Zahlung und Wechselgeld.</div>
+<div class="sub">Bon fotografieren. ECHTPREIS erkennt Kaufpositionen, Artikelcodes und prüft die Rechnung rechnerisch.</div>
 <section class="card">
 <button class="primary" id="cam">📷 Kassenbon fotografieren</button><button class="secondary" id="lib">Foto auswählen</button>
 <input id="cameraInput" type="file" accept="image/*" capture="environment"><input id="libraryInput" type="file" accept="image/*">
@@ -31,15 +31,15 @@ h2{font-size:29px;letter-spacing:-.035em;margin:12px 0}.row{display:flex;justify
 <p class="tiny">Texterkennung im Browser. Das Bonfoto wird von dieser Testversion nicht an ECHTPREIS hochgeladen oder gespeichert.</p>
 </section>
 <section id="result" class="result">
-<span class="badge">ECHTPREIS 0.4</span><h2>Bon erkannt</h2>
+<span class="badge">ECHTPREIS 0.5</span><h2>Bon erkannt</h2>
 <div class="row"><span class="label">Händler</span><span class="value" id="merchant">–</span></div>
 <div class="row"><span class="label">Datum</span><span class="value" id="date">–</span></div>
-<div class="row"><span class="label">Gesamtbetrag</span><span class="value total" id="total">–</span></div>
+<div class="row"><span class="label">Gesamtbetrag</span><span class="value total" id="total">–</span></div><div class="row"><span class="label">Aus Artikeln berechnet</span><span class="value" id="calcTotal">–</span></div><div class="row"><span class="label">Rechencheck</span><span class="value" id="check">–</span></div>
 <div class="items"><b>Erkannte Kaufpositionen</b><div id="items"></div></div>
-<div class="warn good"><b>Nächster Schritt: echte Vergleichspreise.</b><br>Nur wenn Artikel eindeutig identifiziert und eine belastbare Quelle gefunden wurde, darf ECHTPREIS einen Vergleich anzeigen. Sonst steht ausdrücklich „kein verlässlicher Vergleich gefunden“.</div>
+<div class="warn good"><b>Rechnung wird geprüft.</b><br>ECHTPREIS gleicht die Summe der erkannten Kaufpositionen mit dem Gesamtbetrag ab. Preisvergleiche werden erst angezeigt, wenn dafür eine belastbare externe Quelle vorhanden ist.</div>
 <details style="margin-top:17px"><summary><b>Erkannten Bon-Text anzeigen</b></summary><div id="raw" class="raw"></div></details>
 </section>
-<section id="error" class="result error"></section><div class="foot">ECHTPREIS · v0.4 · Testversion</div>
+<section id="error" class="result error"></section><div class="foot">ECHTPREIS · v0.5 · Testversion</div>
 </main>
 <script>
 const $=s=>document.querySelector(s);
@@ -50,14 +50,22 @@ function norm(s){return s.replace(".",",")}
 function merchant(text){const t=text.toLowerCase();for(const [k,v] of [["new yorker","NEW YORKER"],["lidl","Lidl"],["aldi","ALDI"],["rewe","REWE"],["edeka","EDEKA"],["kaufland","Kaufland"],["media markt","MediaMarkt"],["mediamarkt","MediaMarkt"],["saturn","Saturn"]])if(t.includes(k))return v;return "Nicht sicher erkannt"}
 function dateOf(text){const m=text.match(/\b([0-3]?\d[.\/-][01]?\d[.\/-](?:20)?\d{2})\b/);return m?m[1]:"Nicht sicher erkannt"}
 function totalOf(text){for(const line of text.split("\n"))if(/gesamt|summe|zu zahlen|total/i.test(line)){const m=line.match(euro);if(m)return norm(m[1])+" €"}return "Nicht sicher erkannt"}
-function articleId(line){let m=line.match(/\b\d{6,14}\b/);return m?m[0]:""}
+function articleId(line){
+ let m=line.match(/\b\d{2}[.]\d{2}[.]\d{3}[.]\d{4}\b/);
+ if(m)return m[0];
+ m=line.match(/\b\d{6,14}\b/);return m?m[0]:""
+}
 function parseItems(text){
  const lines=text.split("\n").map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean), out=[];
  const reject=/gesamt|summe|total|betrag|zu zahlen|bar\b|cash|ec\b|karte|visa|master|wechsel|rückgeld|gegeben|datum|uhr|mwst|ust|steuer|eur\b|filiale|kasse|beleg|bon|transaktion/i;
  for(let i=0;i<lines.length;i++){
    const line=lines[i], m=line.match(euro); if(!m||reject.test(line))continue;
    const price=norm(m[1])+" €";
-   let name=line.slice(0,m.index).replace(/\b\d{6,14}\b/g,"").replace(/[*xX]\s*$/,"").trim();
+   let name=line.slice(0,m.index)
+ .replace(/\b\d{2}[.]\d{2}[.]\d{3}[.]\d{4}\b/g,"")
+ .replace(/\b\d{6,14}\b/g,"")
+ .replace(/^\s*\d+\s*[xX]\s*/,"")
+ .replace(/\s+[a-zA-Z]\s*$/,"").trim();
    let id=articleId(line);
    if((name.length<2||!/[\p{L}]/u.test(name))&&i>0&&!reject.test(lines[i-1])){
      const prev=lines[i-1]; if(/[\p{L}]{2}/u.test(prev)){name=prev.replace(/\b\d{6,14}\b/g,"").trim();id=id||articleId(prev)}
@@ -66,14 +74,22 @@ function parseItems(text){
  }
  const seen=new Set();return out.filter(x=>{const k=x.name+"|"+x.price;if(seen.has(k))return false;seen.add(k);return true}).slice(0,20)
 }
+function cents(v){return Math.round(parseFloat(v.replace(" €","").replace(",","."))*100)}
+function formatCents(c){return (c/100).toFixed(2).replace(".",",")+" €"}
+function totalNumber(t){const m=t.match(/(\d{1,4}[.,]\d{2})/);return m?cents(norm(m[1])+" €"):null}
 async function read(e){
  const file=e.target.files&&e.target.files[0];if(!file)return;
  $("#preview").src=URL.createObjectURL(file);$("#preview").style.display="block";$("#result").style.display="none";$("#error").style.display="none";$("#progress").style.display="block";$("#bar").style.width="5%";
  try{
   const out=await Tesseract.recognize(file,"deu+eng",{logger:m=>{if(m.status==="recognizing text"){const p=Math.round((m.progress||0)*100);$("#status").textContent="Bon wird gelesen … "+p+" %";$("#bar").style.width=Math.max(8,p)+"%"}else $("#status").textContent="Texterkennung wird vorbereitet …"}});
   const text=out.data.text||"", items=parseItems(text);
-  $("#merchant").textContent=merchant(text);$("#date").textContent=dateOf(text);$("#total").textContent=totalOf(text);$("#raw").textContent=text||"Kein Text erkannt.";
-  $("#items").innerHTML=items.length?items.map(x=>`<div class="item"><div class="itemtop"><span class="itemname">${esc(x.name)}</span><span class="itemprice">${x.price}</span></div>${x.id?`<div class="meta">Mögliche Artikelnummer: ${x.id}</div>`:""}</div>`).join(""):`<div class="warn">Noch keine Kaufposition sicher erkannt. Öffne unten den Bon-Text – damit können wir den Parser gezielt verbessern.</div>`;
+  const detectedTotal=totalOf(text), calc=items.reduce((n,x)=>n+cents(x.price),0), detectedCents=totalNumber(detectedTotal);
+  $("#merchant").textContent=merchant(text);$("#date").textContent=dateOf(text);$("#total").textContent=detectedTotal;
+  $("#calcTotal").textContent=items.length?formatCents(calc):"–";
+  $("#check").textContent=!items.length?"–":(detectedCents===null?"Summe aus Positionen":(Math.abs(detectedCents-calc)<=1?"✓ stimmt überein":"⚠ Abweichung"));
+  if(detectedCents===null && items.length) $("#total").textContent=formatCents(calc)+"*";
+  $("#raw").textContent=text||"Kein Text erkannt.";
+  $("#items").innerHTML=items.length?items.map(x=>`<div class="item"><div class="itemtop"><span class="itemname">${esc(x.name)}</span><span class="itemprice">${x.price}</span></div>${x.id?`<div class="meta">Erkannter Artikelcode: ${x.id}</div>`:""}</div>`).join(""):`<div class="warn">Noch keine Kaufposition sicher erkannt. Öffne unten den Bon-Text – damit können wir den Parser gezielt verbessern.</div>`;
   $("#progress").style.display="none";$("#result").style.display="block";$("#result").scrollIntoView({behavior:"smooth",block:"start"});
  }catch(err){$("#progress").style.display="none";$("#error").style.display="block";$("#error").innerHTML="<b>Texterkennung fehlgeschlagen.</b><br>Bitte Bon gerade, nah und bei gutem Licht fotografieren."}
  e.target.value="";
