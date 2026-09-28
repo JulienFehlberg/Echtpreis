@@ -172,7 +172,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
    {store:"PENNY",unit:"kg",price:1.99,label:"Bananen",source:"PENNY Wochenangebot",validFrom:"2026-09-28",validTo:"2026-10-03"}
   ]
  };
- function seededPriceIsActive(p){const d=new Date().toISOString().slice(0,10);return (!p.validFrom||p.validFrom<=d)&&(!p.validTo||p.validTo>=d);}
+ function seededPriceIsActive(p){const d=window.EchtpreisRuntime.localDateKey();return (!p.validFrom||p.validFrom<=d)&&(!p.validTo||p.validTo>=d);}
  async function loadCommunityPrices(){
   try{
    const res=await fetch((window.ECHTPREIS_CONFIG?.apiBase||"https://echtpreis-api.onrender.com")+"/v1/observations");
@@ -522,7 +522,7 @@ function normalizeObservation(x){
 }
 function freshnessDays(x){return x.kind==="official"?null:7}
 function usableObservation(x){
- const today=new Date().toISOString().slice(0,10);if(!x.key||!x.store||!x.date||!Number.isFinite(x.price)||x.price<=0)return false;
+ const today=window.EchtpreisRuntime.localDateKey();if(!x.key||!x.store||!x.date||!Number.isFinite(x.price)||x.price<=0)return false;
  if(x.date>today)return false;if(x.validTo&&x.validTo<today)return false;
  const max=freshnessDays(x);if(max!=null&&!x.validTo&&((new Date(today)-new Date(x.date))/86400000)>max)return false;
  return true;
@@ -552,7 +552,7 @@ const storeAssortment={alcohol:new Set(["Lidl","Kaufland","REWE","EDEKA","PENNY"
 function storeCanCarry(store,wish,key){const product=wish?.key||key;if(store==="dm"||store==="Rossmann")return storeAssortment.drugstore.has(product);if(product==="wodka"||product==="bier")return storeAssortment.alcohol.has(store);return true;}
 function referencePrice(key,store,wish=null){
  if(!storeCanCarry(store,wish,key))return null;
- const today=new Date().toISOString().slice(0,10);
+ const today=window.EchtpreisRuntime.localDateKey();
  let history=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation)
   .filter(x=>x.key===key&&x.store===store&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0&&((new Date(today+"T12:00:00")-new Date(x.date+"T12:00:00"))/86400000)<=60);
  if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);history=history.filter(x=>normalizeProduct(x.product||"").includes(brand));}
@@ -982,7 +982,7 @@ function renderStatsReceipts(){
  box.querySelectorAll("[data-stat-delete]").forEach(b=>b.onclick=async()=>{const r=getPersonalReceipts().find(x=>String(x.id)===b.dataset.statDelete);if(!r)return;if(!confirm("Diesen Bon aus deiner Statistik löschen?"))return;b.disabled=true;try{await deletePersonalReceipt(r);refreshStats();await renderPersonalReceipts()}catch(e){alert(e.message);b.disabled=false}});
 }
 function refreshStats(){
- const receipts=getPersonalReceipts(),today=new Date(),todayKey=today.toISOString().slice(0,10),year=String(today.getFullYear()),month=year+"-"+String(today.getMonth()+1).padStart(2,"0"),weekStart=new Date(today.getFullYear(),today.getMonth(),today.getDate()-(today.getDay()+6)%7),weekKey=weekStart.getFullYear()+"-"+String(weekStart.getMonth()+1).padStart(2,"0")+"-"+String(weekStart.getDate()).padStart(2,"0"),sum=rows=>rows.reduce((n,r)=>n+(Number(r.total)||0),0),known=receipts.filter(r=>r.potentialSaving!=null&&Number.isFinite(Number(r.potentialSaving))&&r.savingConfidence!=="niedrig"),paid=receipts.filter(r=>Number(r.total)>0&&String(r.date||"")<=todayKey);
+ const receipts=getPersonalReceipts(),today=new Date(),todayKey=window.EchtpreisRuntime.localDateKey(today),year=String(today.getFullYear()),month=year+"-"+String(today.getMonth()+1).padStart(2,"0"),weekStart=new Date(today.getFullYear(),today.getMonth(),today.getDate()-(today.getDay()+6)%7),weekKey=weekStart.getFullYear()+"-"+String(weekStart.getMonth()+1).padStart(2,"0")+"-"+String(weekStart.getDate()).padStart(2,"0"),sum=rows=>rows.reduce((n,r)=>n+(Number(r.total)||0),0),known=receipts.filter(r=>r.potentialSaving!=null&&Number.isFinite(Number(r.potentialSaving))&&r.savingConfidence!=="niedrig"),paid=receipts.filter(r=>Number(r.total)>0&&String(r.date||"")<=todayKey);
  $("statsReceipts").textContent=String(receipts.length);
  $("statsSpent").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(year)&&String(r.date||"")<=todayKey)));
  $("statsWeekly").textContent=eur(sum(receipts.filter(r=>String(r.date||"")>=weekKey&&String(r.date||"")<=todayKey)));
@@ -1204,7 +1204,7 @@ async function runImageReceiptOCR(file){
  }catch(err){$("ocrStatus").textContent="Automatische Erkennung fehlgeschlagen. Bitte den Bon erneut fotografieren.";receiptDraft=[];receiptCash=null;drawReviewRows();checkReceiptTotal()}
 }
 const runDupeTestBtn=$("runDupeTest");if(runDupeTestBtn)runDupeTestBtn.onclick=async()=>{
- let store=$("receiptStore").value||"ECHTPREIS TEST",date=$("receiptDate").value||new Date().toISOString().slice(0,10);
+ let store=$("receiptStore").value||"ECHTPREIS TEST",date=$("receiptDate").value||window.EchtpreisRuntime.localDateKey();
  let valid=receiptDraft.map(r=>({name:(r.name||"").trim()||"Testartikel",price:Number(String(r.price||"0.01").replace(",","."))||.01})).slice(0,20);if(!valid.length)valid=[{name:"ECHTPREIS TESTARTIKEL",price:.01}];
  let token=detectedReceiptBarcode||("DEV-"+Date.now()),payload={store:"TEST "+store,purchasedAt:date+"T12:00:00",date,total:valid.reduce((n,x)=>n+x.price,0).toFixed(2),receiptBarcode:"ECHTPREIS-DEV-"+token,items:valid.map(x=>({rawName:x.name,lineTotal:x.price,price:x.price}))};
  $("dupeTestResult").textContent="1. Einreichung läuft …";
