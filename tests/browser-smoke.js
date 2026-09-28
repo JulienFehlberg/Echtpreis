@@ -195,4 +195,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(w.storeCanCarry("EDEKA",w.parseWish("500 g Rinderhack"),"rinderhack"),true,"supermarket assortment gate regressed");
  console.log("browser smoke OK · single basket · quantity parser · receipt parser");
  dom.window.close();
+})().catch(e=>{console.error(e);process.exit(1)});const endToEndWish=w.parseWish("0,5 kg Cherrytomaten");assert.strictEqual(endToEndWish.key,"tomaten");assert.strictEqual(endToEndWish.needsClarification,false,"comparison-ready basket items must remain ready for pricing");
+ assert.strictEqual(w.storeCanCarry("EDEKA",w.parseWish("500 g Rinderhack"),"rinderhack"),true,"supermarket assortment gate regressed");
+ console.log("browser smoke OK · single basket · quantity parser · receipt parser");
+ dom.window.close();
 })().catch(e=>{console.error(e);process.exit(1)});
