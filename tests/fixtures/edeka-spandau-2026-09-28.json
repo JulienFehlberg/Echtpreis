@@ -1,0 +1,25 @@
+{
+  "name": "EDEKA Spandau Referenzbon 001",
+  "capturedAt": "2026-09-28",
+  "expected": {
+    "merchant": "EDEKA",
+    "storeNumber": "5491",
+    "storeAddress": "Elstaler Str. 6, 13583 Berlin OT Spandau",
+    "date": "2026-09-28",
+    "time": "16:20",
+    "total": 8.46,
+    "lineItems": [
+      {"rawName":"G&G Mini-Hörnchen","lineTotal":1.49},
+      {"rawName":"Oetker Ristorante","lineTotal":3.49},
+      {"rawName":"Red Bull 0,25","unitPrice":1.49,"count":2,"lineTotal":2.98},
+      {"rawName":"Pfand","unitPrice":0.25,"count":2,"lineTotal":0.50,"isDeposit":true}
+    ],
+    "positionCount": 6,
+    "receiptCodeExpected": true
+  },
+  "notes": [
+    "Ground truth transcribed from a real user-supplied receipt photo.",
+    "Do not publish personal/payment data from the receipt.",
+    "Position count on receipt includes multiplied/deposit positions as printed by merchant."
+  ]
+}
