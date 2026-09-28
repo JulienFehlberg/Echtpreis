@@ -17,5 +17,9 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Check API syntax
         run: node --check server.js
-      - name: Run release smoke tests
-        run: npm test
+      - name: Static app guards
+        run: npm run test:static
+      - name: API unit smoke
+        run: npm run test:server
+      - name: Browser smoke
+        run: npm run test:browser
