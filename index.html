@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.38.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.39.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -555,6 +555,9 @@ function locationLabel(x){
  const l=x.location||{};
  return l.name||l.osm_name||l.display_name||x.location_name||("Beobachteter Händler / Ort"+(x.location_id?" #"+x.location_id:""));
 }
+const basketStateKey="echtpreis_basket_state_v1";
+function loadBasketState(){try{return JSON.parse(localStorage.getItem(basketStateKey)||"[]")}catch(e){return[]}}
+function saveBasketState(){try{localStorage.setItem(basketStateKey,JSON.stringify(basket.map(w=>({raw:w.raw,checked:!!w.checked,ean:w.ean||null,label:w.label||null}))))}catch(e){}}
 let basket=[];let selected=new Set(storeNames);
 const $=id=>document.getElementById(id), eur=n=>n.toLocaleString("de-DE",{style:"currency",currency:"EUR"});
 function normalizeProduct(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9%]+/g," ").replace(/\s+/g," ").trim()}
@@ -647,17 +650,25 @@ function parseWish(raw){
 function wishText(w){const u=w.unit==="piece"?"×":w.unit;return (w.unit==="piece"?w.amount+"×":String(w.amount).replace(".",",")+" "+u)+" "+w.label}
 function drawSuggestions(){let a=["500 g Rinderhack","1 kg Bananen","10 Eier","2 Liter Milch"];$("suggestions").innerHTML=a.map(x=>'<span class="chip" data-add="'+x+'">+ '+x+'</span>').join("");document.querySelectorAll("[data-add]").forEach(e=>e.onclick=()=>add(e.dataset.add));}
 function drawStores(){ $("stores").innerHTML=storeNames.map(st=>'<span class="chip '+(selected.has(st)?"on":"")+'" data-store="'+st+'">'+st+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores()});}
-function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;let w=parseWish(raw);let duplicate=basket.find(x=>x.raw.toLowerCase()===w.raw.toLowerCase()&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}basket.push(w);try{learnFrequent(raw)}catch(e){}$("productInput").value="";drawList();}
+function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;let w=parseWish(raw);let duplicate=basket.find(x=>x.raw.toLowerCase()===w.raw.toLowerCase()&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}w.checked=false;basket.push(w);try{learnFrequent(raw)}catch(e){}$("productInput").value="";saveBasketState();drawList();}
 window.addEchtpreisItem=raw=>add(raw);
 window.addEchtpreisBarcode=async(name,qty,code)=>{
  const ean=String(code||"").trim(),raw=(qty?qty+" ":"")+name,key="ean:"+ean;
  if(basket.some(x=>x.ean===ean)){alert(name+" steht bereits auf deiner Liste.");return false;}
- basket.push({raw,label:name+(qty?" · "+qty:""),amount:1,unit:"piece",calcAmount:1,key,matched:true,note:"Exaktes Barcode-Produkt",explicit:true,matchMode:"exact",exactBrand:"",ean});
+ basket.push({raw,label:name+(qty?" · "+qty:""),amount:1,unit:"piece",calcAmount:1,key,matched:true,note:"Exaktes Barcode-Produkt",explicit:true,matchMode:"exact",exactBrand:"",ean,checked:false});saveBasketState();
  try{learnFrequent(raw)}catch(e){}drawList();await ingestOpenPriceForBarcode(ean,key,name);return true;
 };
 window.getEchtpreisRawList=()=>basket.map(x=>x.raw);
-window.replaceEchtpreisList=rows=>{basket=(rows||[]).map(parseWish).filter(x=>x.raw);drawList();};
-function drawList(){let rows=basket.map((w,i)=>'<div class="item"><div class="itemname">'+escHtml(wishText(w))+'<div class="qty">'+(w.matched?'✓ erkannt':'⚠ Produkt prüfen')+(w.note?' · '+escHtml(w.note):'')+'</div></div><button class="x" data-del="'+i+'" aria-label="Produkt entfernen">✕</button></div>').join("");$("list").innerHTML=basket.length?rows:'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';let preview=$("basketPreview"),previewItems=$("basketPreviewItems");if(preview&&previewItems){preview.style.display=basket.length?"block":"none";previewItems.innerHTML=rows;}document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
+window.replaceEchtpreisList=rows=>{basket=(rows||[]).map(x=>{let w=parseWish(typeof x==="string"?x:x.raw);w.checked=!!(x&&x.checked);return w}).filter(x=>x.raw);saveBasketState();drawList();};
+function drawList(){
+ const ordered=basket.map((w,i)=>({w,i})).sort((a,b)=>Number(a.w.checked)-Number(b.w.checked));
+ const row=({w,i})=>'<div class="item" style="'+(w.checked?'opacity:.55;':'')+'"><button type="button" data-check="'+i+'" aria-label="'+(w.checked?'Wieder auf die Liste':'Im Einkaufswagen')+'" style="width:32px;height:32px;border-radius:9px;border:2px solid '+(w.checked?'#35d07f':'#718079')+';background:'+(w.checked?'#35d07f':'transparent')+';color:#07150d;font-weight:900;font-size:18px;flex:0 0 32px">'+(w.checked?'✓':'')+'</button><div class="itemname" style="'+(w.checked?'text-decoration:line-through;':'')+'">'+escHtml(wishText(w))+'<div class="qty">'+(w.checked?'Im Einkaufswagen':(w.matched?'✓ erkannt':'⚠ Produkt prüfen')+(w.note?' · '+escHtml(w.note):''))+'</div></div><button class="x" data-del="'+i+'" aria-label="Produkt entfernen">✕</button></div>';
+ let rows=ordered.map(row).join(""),done=basket.filter(w=>w.checked).length;
+ $("list").innerHTML=basket.length?rows+'<div class="muted" style="padding-top:10px;text-align:center">'+done+' von '+basket.length+' im Einkaufswagen'+(done===basket.length&&basket.length?' · ✓ Einkauf komplett':'')+'</div>':'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';
+ let preview=$("basketPreview"),previewItems=$("basketPreviewItems");if(preview&&previewItems){preview.style.display=basket.length?"block":"none";previewItems.innerHTML=rows+(basket.length?'<div class="muted" style="padding-top:8px">'+done+' von '+basket.length+' im Einkaufswagen</div>':'');}
+ document.querySelectorAll("[data-check]").forEach(e=>e.onclick=()=>{let w=basket[+e.dataset.check];if(w){w.checked=!w.checked;saveBasketState();drawList()}});
+ document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);saveBasketState();drawList()});
+}
 window.compare=function compare(){
  if(!basket.length){alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");return false;}
  if(!selected.size){alert("Bitte mindestens einen Markt auswählen.");return false;}
