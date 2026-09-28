@@ -74,4 +74,7 @@ assert(html.includes("echtpreis_nearby_store_cache_v1"),"nearby stores should pe
 
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
 const products=(html.match(/label:"/g)||[]).length;assert(products>=30,"primary product catalog unexpectedly small: "+products);
-assert(!html.includes("stableBasket"),"obsolete duplicate basket state must stay removed");\nassert(html.includes("if(dataEngineCache)return dataEngineCache"),"normalized observation engine should be cached");\nassert(html.includes("priceLookupMemo"),"basket price lookups should be memoized within a comparison");\nconsole.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
+assert(!html.includes("stableBasket"),"obsolete duplicate basket state must stay removed");
+assert(html.includes("if(dataEngineCache)return dataEngineCache"),"normalized observation engine should be cached");
+assert(html.includes("priceLookupMemo"),"basket price lookups should be memoized within a comparison");
+console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
