@@ -558,12 +558,12 @@ function referencePrice(key,store,wish=null){
 }
 function trustedPrice(key,store,wish=null){
  let rows=dataEngine().filter(x=>x.key===key&&x.store===store);
- if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);rows=rows.filter(x=>normalizeProduct(x.product||"").includes(brand));}
- const sortRows=a=>a.sort((x,y)=>x.price-y.price||String(y.date||"").localeCompare(String(x.date||""))||Number(y.trust||0)-Number(x.trust||0));
- const official=sortRows(rows.filter(x=>x.kind==="official"&&x.trust>=90));if(official.length)return {...official[0],confidence:"hoch"};
- const open=sortRows(rows.filter(x=>x.kind==="openprices"&&x.proof&&x.trust>=70));if(open.length)return {...open[0],confidence:"mittel"};
+ if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);rows=rows.filter(x=>normalizeProduct(x.product||"").includes(brand))}
+ const newestFirst=a=>a.sort((x,y)=>String(y.date||"").localeCompare(String(x.date||""))||Number(y.trust||0)-Number(x.trust||0)||x.price-y.price);
+ const official=newestFirst(rows.filter(x=>x.kind==="official"&&x.trust>=90));if(official.length)return {...official[0],confidence:"hoch"};
+ const open=newestFirst(rows.filter(x=>x.kind==="openprices"&&x.proof&&x.trust>=70));if(open.length)return {...open[0],confidence:"mittel"};
  const groups={};rows.filter(x=>x.kind==="community"&&x.proof).forEach(x=>{let k=[x.price,x.per,x.date].join("|");(groups[k]??=[]).push(x)});
- const confirmed=Object.values(groups).filter(g=>new Set(g.map(x=>x.proof)).size>=2).sort((a,b)=>a[0].price-b[0].price||b.length-a.length);
+ const confirmed=Object.values(groups).filter(g=>new Set(g.map(x=>x.proof)).size>=2).sort((a,b)=>String(b[0].date||"").localeCompare(String(a[0].date||""))||b.length-a.length||Number(b[0].trust||0)-Number(a[0].trust||0));
  if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:85,status:"confirmed",confidence:"mittel"}}
  return null;
 }
