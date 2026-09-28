@@ -66,6 +66,9 @@ assert(html.includes('referenceType:"brand-estimate"'),"estimated exact-brand pr
 assert(html.includes("verifiedBest.total<=win.total*1.12"),"basket ranking must balance evidence quality with useful cold-start savings");
 assert(html.includes('type:"first-receipt-fact"'),"first receipt should produce an immediate useful fact");
 assert(html.includes("currentReceiptSaving=Number(saving.toFixed(2))"),"estimated receipt savings should remain available with confidence labeling");
+assert(html.includes("void refresh()"),"shopping comparison should render cache-first instead of blocking on network refresh");
+assert(html.includes("Promise.allSettled([loadNearbyStores(),ingestOpenPrices(false,keys)])"),"location and live price refresh should run in parallel");
+assert(html.includes("echtpreis_nearby_store_cache_v1"),"nearby stores should persist across sessions for fast repeat comparisons");
 
 
 
