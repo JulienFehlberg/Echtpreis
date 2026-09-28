@@ -929,9 +929,13 @@ function comparisonQuality(row,totalItems){
  if(row.confirmedCount===0)return {label:historical&&!modeled?"historische Orientierung":"Modellschätzung",detail:"0 von "+totalItems+" Preisen aktuell belegt"+(historical?" · "+historical+" zuletzt bekannt":"")+(modeled?" · "+modeled+" modelliert":""),level:"low"};
  return {label:"teilweise geschätzt",detail:row.confirmedCount+" von "+totalItems+" Preisen aktuell belegt"+(historical?" · "+historical+" zuletzt bekannt":"")+(modeled?" · "+modeled+" modelliert":""),level:"medium"};
 }
-window.compare=async function compare({skipLocation=false,scroll=true}={}){
- hasCompared=true;const revision=comparisonRevision;$("compareStatus").textContent=skipLocation?"Vergleich wird aktualisiert …":"Vergleich wird berechnet …";
- if(!skipLocation){await loadNearbyStores();await ingestOpenPrices(false,basket.map(w=>w.key).filter(Boolean));}
+window.compare=async function compare({skipLocation=false,scroll=true,backgroundRefresh=false}={}){
+ hasCompared=true;const revision=comparisonRevision;$("compareStatus").textContent=backgroundRefresh?"Preise wurden im Hintergrund aktualisiert.":skipLocation?"Vergleich wird aktualisiert …":"Vergleich aus vorhandenem Preisstand …";
+ if(!skipLocation&&!backgroundRefresh){
+  const keys=basket.map(w=>w.key).filter(Boolean);
+  const refresh=async()=>{const before=comparisonRevision;await Promise.allSettled([loadNearbyStores(),ingestOpenPrices(false,keys)]);if(before===comparisonRevision&&basket.length)void compare({skipLocation:true,scroll:false,backgroundRefresh:true})};
+  void refresh();
+ }
  if(revision!==comparisonRevision)return false;
  if(!basket.length){$("results").style.display="none";$("compareStatus").textContent="Schreib zuerst deinen Einkauf auf.";if(!skipLocation)alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");return false}
  if(!selected.size){$("results").style.display="none";$("compareStatus").textContent="Bitte mindestens einen Markt auswählen.";if(!skipLocation)alert("Bitte mindestens einen Markt auswählen.");return false}
