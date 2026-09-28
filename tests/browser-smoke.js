@@ -195,7 +195,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  d.getElementById("productInput").value="0,5 kg Cherrytomaten";d.getElementById("addBtn").click();assert.strictEqual(d.querySelectorAll("#list .item").length,3,"add button should add exactly one item");
  d.getElementById("compareBtn").click();await new Promise(r=>setTimeout(r,20));assert.notStrictEqual(d.getElementById("results").style.display,"none","compare should render results");assert(d.getElementById("winnerPrice").textContent.trim().length>0,"comparison should render a price state");
  assert(!/\bdm\b|Rossmann/.test(d.getElementById("merchantResults").textContent),"drugstores must not appear as complete baskets containing meat");
- assert(d.getElementById("merchantResults").textContent.length>0,"comparison should render market-level result details");
+ assert(d.getElementById("winnerName").textContent.trim().length>0,"comparison should render a winner or explicit incomplete-comparison state");
  assert.strictEqual(d.querySelectorAll("#list .item").length,3,"basket should render only once");
  console.log("browser smoke OK · single basket · quantity parser · receipt parser");
  dom.window.close();
