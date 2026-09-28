@@ -69,7 +69,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}.receipt-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #e5eae7;text-align:left}.receipt-item strong{white-space:nowrap}.receipt-item-name{min-width:0;overflow-wrap:anywhere}.receipt-item small{display:block;color:#68736d;margin-top:3px}.ocrbox #receiptTotalCheck,.ocrbox #receiptPaymentDetail{font-size:14px;margin:10px 0;text-align:left}.insight-card{margin:16px 0;padding:18px;border-radius:20px;background:#fff8e8;border:1px solid #f0dfb7;text-align:left}.insight-card .insight-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:900;color:#8a6a18}.insight-card strong{display:block;font-size:20px;line-height:1.25;margin:5px 0}.insight-card .detail{font-size:13px}.feedback-box{max-width:560px;margin:22px auto 6px;text-align:left;color:#66736c;font-size:12px}.feedback-box summary{cursor:pointer;text-align:center;font-weight:800}.feedback-box textarea{width:100%;box-sizing:border-box;margin-top:10px;min-height:82px;resize:vertical}.feedback-box button{width:100%;margin-top:8px;padding:10px}.feedback-status{text-align:center;margin-top:7px;font-size:12px}@media(max-width:430px){.insight-card{padding:15px}.insight-card strong{font-size:18px}}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.120.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.121.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -236,9 +236,13 @@ function usableObservation(x){
  const max=freshnessDays(x);if(max!=null&&!x.validTo&&((new Date(today)-new Date(x.date))/86400000)>max)return false;
  return true;
 }
+let dataEngineCache=null,dataEngineCacheVersion=0;
+function invalidateDataEngine(){dataEngineCache=null;dataEngineCacheVersion++}
 function dataEngine(){
- const all=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation).filter(usableObservation);
- const seen=new Set();return all.filter(x=>{let sig=[x.key,x.store,x.price,x.per,x.date,x.proof||x.source,x.locationId||""].join("|");if(seen.has(sig))return false;seen.add(sig);return true});
+ if(dataEngineCache)return dataEngineCache;
+ const all=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation).filter(usableObservation),seen=new Set();
+ dataEngineCache=all.filter(x=>{let sig=[x.key,x.store,x.price,x.per,x.date,x.proof||x.source,x.locationId||""].join("|");if(seen.has(sig))return false;seen.add(sig);return true});
+ return dataEngineCache;
 }
 const referenceBase={
  bananen:1.79,"rote paprika":3.49,tomaten:3.29,gurken:.89,aepfel:2.49,kartoffeln:1.29,zwiebeln:1.69,
@@ -303,10 +307,17 @@ function relevantDealSignal(wish,offer){
  const baseline=personal.usualPrice||Number(referenceBase[wish.key])||null;if(!(baseline>0))return null;const discount=(baseline-Number(offer.price))/baseline;
  const relevant=personal.regular&&discount>=.2&&["exact","variant","category"].includes(match);return {relevant,discount,baseline,personal,match,reason:!personal.regular?"noch kein regelmäßiger persönlicher Kauf":discount<.2?"Preisvorteil noch nicht außergewöhnlich":"regelmäßig gekauft und deutlich unter deinem üblichen Preis"};
 }
-function activePrice(key,store,wish=null){if(!storeCanCarry(store,wish,key))return null;const verified=trustedPrice(key,store,wish);if(store==="dm"||store==="Rossmann")return verified;if(wish&&wish.matchMode==="exact")return verified||exactBrandFallbackPrice(key,store,wish);return verified||referencePrice(key,store,wish)}
+let priceLookupMemo=new Map();
+function resetPriceLookupMemo(){priceLookupMemo.clear()}
+function priceWishSignature(w){return JSON.stringify([w?.key,w?.matchMode,w?.exactBrand,w?.choice||{}])}
+function activePrice(key,store,wish=null){
+ store=canonicalStoreName(store);const cacheKey=[dataEngineCacheVersion,key,store,priceWishSignature(wish)].join("|");if(priceLookupMemo.has(cacheKey))return priceLookupMemo.get(cacheKey);
+ let result=null;if(storeCanCarry(store,wish,key)){const verified=trustedPrice(key,store,wish);result=(store==="dm"||store==="Rossmann")?verified:(wish&&wish.matchMode==="exact"?verified||exactBrandFallbackPrice(key,store,wish):verified||referencePrice(key,store,wish))}
+ priceLookupMemo.set(cacheKey,result);return result;
+}
 function addCommunityObservation(obs){
  const x=normalizeObservation({...obs,kind:"community",trust:60});if(!x.proof||!x.key||!x.store||!Number.isFinite(x.price)||!x.date)return false;
- const rows=loadJson(communityKey);rows.push(x);saveJson(communityKey,rows);drawDataMachine();return true;
+ const rows=loadJson(communityKey);rows.push(x);saveJson(communityKey,rows);invalidateDataEngine();drawDataMachine();return true;
 }
 function retailerFromLocation(x){
  const t=((x?.location?.osm_brand||"")+" "+(x?.location?.osm_name||"")+" "+(x?.location?.osm_display_name||"")).toLowerCase();
@@ -331,7 +342,7 @@ async function ingestOpenPrices(force=false,keys=null){
  });
  const results=await Promise.allSettled(jobs),ok=results.filter(x=>x.status==="fulfilled").length;
  if(ok){
-  const kept=previous.filter(x=>!successfulKeys.has(x.key));saveJson(openPricesCacheKey,[...kept,...fresh].slice(-10000));
+  const kept=previous.filter(x=>!successfulKeys.has(x.key));saveJson(openPricesCacheKey,[...kept,...fresh].slice(-10000));invalidateDataEngine();
   successfulKeys.forEach(key=>sync[key]=now);saveJson(syncKey,sync);dataMachineState.openPrices="verbunden · "+ok+"/"+entries.length+" benötigte Kategorien geprüft";
  }else dataMachineState.openPrices="nicht erreichbar · Cache bleibt aktiv";
  dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();
@@ -345,7 +356,7 @@ async function ingestOpenPriceForBarcode(code,key,label){
    const o=normalizeObservation({key,store,price:+x.price,per:"piece",date:String(x.date||"").slice(0,10),region:x.location?.osm_address_city||"Deutschland",kind:"openprices",source:"Open Prices",product:x.product?.product_name||x.product_name||label,proof:"op:"+x.proof_id,locationId:x.location_id,trust:80});
    if(usableObservation(o))fresh.push(o);
   });
-  const previous=loadJson(openPricesCacheKey).filter(x=>x.key!==key);saveJson(openPricesCacheKey,[...previous,...fresh].slice(-10000));drawDataMachine();return fresh.length;
+  const previous=loadJson(openPricesCacheKey).filter(x=>x.key!==key);saveJson(openPricesCacheKey,[...previous,...fresh].slice(-10000));invalidateDataEngine();drawDataMachine();return fresh.length;
  }catch(e){return 0}
 }
 function drawDataMachine(){
@@ -598,7 +609,7 @@ function comparisonQuality(row,totalItems){
  return {label:"teilweise geschätzt",detail:row.confirmedCount+" von "+totalItems+" Preisen aktuell belegt"+(historical?" · "+historical+" zuletzt bekannt":"")+(modeled?" · "+modeled+" modelliert":""),level:"medium"};
 }
 window.compare=async function compare({skipLocation=false,scroll=true,backgroundRefresh=false}={}){
- hasCompared=true;const revision=comparisonRevision;$("compareStatus").textContent=backgroundRefresh?"Preise wurden im Hintergrund aktualisiert.":skipLocation?"Vergleich wird aktualisiert …":"Vergleich aus vorhandenem Preisstand …";
+ hasCompared=true;resetPriceLookupMemo();const revision=comparisonRevision;$("compareStatus").textContent=backgroundRefresh?"Preise wurden im Hintergrund aktualisiert.":skipLocation?"Vergleich wird aktualisiert …":"Vergleich aus vorhandenem Preisstand …";
  if(!skipLocation&&!backgroundRefresh){
   const keys=basket.map(w=>w.key).filter(Boolean);
   const refresh=async()=>{const before=comparisonRevision;await Promise.allSettled([loadNearbyStores(),ingestOpenPrices(false,keys)]);if(before===comparisonRevision&&basket.length)void compare({skipLocation:true,scroll:false,backgroundRefresh:true})};
