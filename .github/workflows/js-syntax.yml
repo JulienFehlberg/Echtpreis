@@ -23,4 +23,3 @@ jobs:
         run: npm run test:server
       - name: Browser smoke
         run: npm run test:browser
-        continue-on-error: true
