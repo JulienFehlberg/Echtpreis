@@ -930,7 +930,7 @@ function comparableProductSignature(item){
  if(!item||item.isDeposit)return "";const name=normalizeProduct(item.name||"");if(!name)return "";const pack=inferPackFromName(item.name||"");return name+(pack&&pack.packAmount&&pack.packUnit?"|"+pack.packAmount+"|"+pack.packUnit:"");
 }
 function renderStatsMarketProfile(receipts){
- const box=$("statsMarketProfile");if(!box)return,byProduct={};
+ const box=$("statsMarketProfile");if(!box)return;const byProduct={};
  (receipts||[]).forEach(r=>(r.items||[]).forEach(i=>{const sig=comparableProductSignature(i),price=Number(i.price)||0;if(!sig||price<=0||!r.store)return;byProduct[sig]=byProduct[sig]||{};let s=byProduct[sig][r.store]||(byProduct[sig][r.store]={sum:0,count:0});s.sum+=price;s.count++}));
  const storeScores={};
  Object.values(byProduct).forEach(stores=>{const names=Object.keys(stores);if(names.length<2)return;const avgs=names.map(name=>({name,avg:stores[name].sum/stores[name].count})).filter(x=>x.avg>0),base=Math.min(...avgs.map(x=>x.avg));if(!Number.isFinite(base)||base<=0)return;avgs.forEach(x=>{storeScores[x.name]=storeScores[x.name]||{ratios:[],products:0};storeScores[x.name].ratios.push(x.avg/base);storeScores[x.name].products++})});
