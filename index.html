@@ -62,7 +62,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.57.2</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.57.3</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
@@ -136,8 +136,9 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
     if(pro)pro.style.display=which==="profile"?"block":"none";if(st)st.style.display=which==="stats"?"block":"none";document.body.classList.toggle("subview",which!=="home");
   }
   document.addEventListener("DOMContentLoaded",function(){
-    // Keep the expanded shopping list directly below its menu button.
+    // Keep each expanded panel directly below its menu button.
     byId("homePlan").after(byId("planner"));
+    byId("homeReceipt").after(byId("receipt"));
     show("home");
     var map={homePlan:"plan",planTab:"plan",backPlanBtn:"home",pointsBack:"home",homeReceipt:"receipt",receiptTab:"receipt",toReceiptBtn:"receipt",homePoints:"points",homeProfile:"profile",profileBack:"home",profileReceipts:"points",homeStats:"stats",statsBack:"home"};
     Object.keys(map).forEach(function(id){var e=byId(id);if(e)e.addEventListener("click",function(){show(map[id])})});
