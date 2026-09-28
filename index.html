@@ -660,8 +660,8 @@ function parseWish(raw){
  return hydrateChoice({raw:original,label:c?c.label:(t.replace(/\b\w/g,x=>x.toUpperCase())||original),amount,unit,calcAmount,key,matched:!!c,note,explicit,matchMode:exactBrand?"exact":"comparable",exactBrand});
 }
 const productChoices={
- wasser:{title:"Welches Mineralwasser?",groups:[{name:"Sorte",options:[["Still","still"],["Medium","medium"],["Classic","classic"]]},{name:"Größe",options:[["0,5 l","0.5l"],["1,0 l","1l"],["1,5 l","1.5l"],["6 × 1,5 l","6x1.5l"]}]},
- lachs:{title:"Welchen Lachs meinst du?",groups:[{name:"Art",options:[["Frisches Lachsfilet","fresh"],["Räucherlachs","smoked"],["TK-Lachs","frozen"],["Frischetheke","counter"]]},{name:"Menge",options:[["200 g","200g"],["250 g","250g"],["500 g","500g"],["1 kg","1kg"]}]},
+ wasser:{title:"Welches Mineralwasser?",groups:[{name:"Sorte",options:[["Still","still"],["Medium","medium"],["Classic","classic"]]},{name:"Größe",options:[["0,5 l","0.5l"],["1,0 l","1l"],["1,5 l","1.5l"],["6 × 1,5 l","6x1.5l"]]}]},
+ lachs:{title:"Welchen Lachs meinst du?",groups:[{name:"Art",options:[["Frisches Lachsfilet","fresh"],["Räucherlachs","smoked"],["TK-Lachs","frozen"],["Frischetheke","counter"]]},{name:"Menge",options:[["200 g","200g"],["250 g","250g"],["500 g","500g"],["1 kg","1kg"]]}]},
  nutella:{title:"Welche Glasgröße?",groups:[{name:"Größe",options:[["450 g","450g"],["750 g","750g"],["1 kg","1kg"]]}]}
 };
 function inferChoice(w){
