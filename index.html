@@ -23,23 +23,24 @@ h2{font-size:29px;letter-spacing:-.035em;margin:12px 0}.row{display:flex;justify
 </style></head>
 <body><main class="app">
 <div class="brand">ECHTPREIS</div><h1 class="hero">Ist der Preis wirklich fair?</h1>
-<div class="sub">Preis, Bon oder Rechnung fotografieren. ECHTPREIS erkennt, was du gekauft hast – und schafft die Grundlage für einen echten Preisvergleich.</div>
+<div class="sub">Rechnung, Kostenvoranschlag, Angebot, Kassenbon oder Preisschild fotografieren. ECHTPREIS erkennt den Preis und bereitet die faire Einordnung vor.</div>
 <section class="card">
-<button class="primary" id="cam">📷 Kassenbon fotografieren</button><button class="secondary" id="lib">Foto auswählen</button>
+<button class="primary" id="cam">📷 Preis prüfen</button><button class="secondary" id="lib">Foto auswählen</button>
 <input id="cameraInput" type="file" accept="image/*" capture="environment"><input id="libraryInput" type="file" accept="image/*">
 <img id="preview" class="preview"><div id="progress" class="progress"><p id="status" class="status">Foto wird vorbereitet …</p><div class="bar"><i id="bar"></i></div></div>
-<p class="tiny">Texterkennung im Browser. Das Bonfoto wird von dieser Testversion nicht an ECHTPREIS hochgeladen oder gespeichert.</p>
+<p class="tiny">Rechnung · Kostenvoranschlag · Angebot · Kassenbon · Preisschild</p>
+<p class="tiny">Texterkennung im Browser. Das Foto wird von dieser Testversion nicht an ECHTPREIS hochgeladen oder gespeichert.</p>
 </section>
 <section id="result" class="result">
-<span class="badge">ECHTPREIS 0.6</span><h2>Bon erkannt</h2>
+<span class="badge">ECHTPREIS 0.7</span><h2 id="resultTitle">Dokument erkannt</h2><div class="row"><span class="label">Dokumenttyp</span><span class="value" id="docType">–</span></div>
 <div class="row"><span class="label">Händler</span><span class="value" id="merchant">–</span></div>
 <div class="row"><span class="label">Datum</span><span class="value" id="date">–</span></div>
 <div class="row"><span class="label">Gesamtbetrag</span><span class="value total" id="total">–</span></div><div class="row"><span class="label">Aus Artikeln berechnet</span><span class="value" id="calcTotal">–</span></div><div class="row"><span class="label">Rechencheck</span><span class="value" id="check">–</span></div>
-<div class="items"><b>Erkannte Kaufpositionen</b><div id="items"></div></div>
-<div class="warn good"><b>Erkennung abgeschlossen.</b><br>ECHTPREIS ordnet Artikelcode, Produktname und Preis zusammen und prüft die Summe. Eine Fairness-Bewertung erscheint erst, wenn ein belastbarer Vergleichspreis vorhanden ist.</div>
-<details style="margin-top:17px"><summary><b>Erkannten Bon-Text anzeigen</b></summary><div id="raw" class="raw"></div></details>
+<div class="items"><b id="positionsTitle">Erkannte Positionen</b><div id="items"></div></div>
+<div class="warn good"><b>Erkennung abgeschlossen.</b><br>ECHTPREIS strukturiert erkannte Positionen und Preise. Eine Fairness-Bewertung erscheint erst, wenn dafür belastbare Vergleichsdaten vorhanden sind – ohne erfundene Preise.</div>
+<details style="margin-top:17px"><summary><b>Erkannten Text anzeigen</b></summary><div id="raw" class="raw"></div></details>
 </section>
-<section id="error" class="result error"></section><div class="foot">ECHTPREIS · v0.6 · Testversion</div>
+<section id="error" class="result error"></section><div class="foot">ECHTPREIS · v0.7 · Testversion</div>
 </main>
 <script>
 const $=s=>document.querySelector(s);
@@ -55,6 +56,17 @@ function articleId(line){
  if(m)return m[0];
  m=line.match(/\b\d{6,14}\b/);return m?m[0]:""
 }
+
+function documentType(text){
+ const t=text.toLowerCase();
+ if(/kostenvoranschlag|kostenangebot/.test(t)) return "Kostenvoranschlag";
+ if(/rechnung|rechnungsnr|rechnungsnummer/.test(t)) return "Rechnung";
+ if(/angebot|angebotsnr|angebotspreis/.test(t)) return "Angebot";
+ if(/kassenbon|bonnummer|gegeben eur|zurück eur|kasse:/.test(t)) return "Kassenbon";
+ if(/preisschild|artikelpreis/.test(t)) return "Preisschild";
+ return "Preis-Dokument";
+}
+
 function cleanProductName(line){
  return line
   .replace(/\b\d{2}[.]\d{2}[.]\d{3}[.]\d{4}\b/g,"")
@@ -79,13 +91,23 @@ function parseItems(text){
    if(id && i+1<lines.length && looksLikeProductName(lines[i+1],reject)){
       name=cleanProductName(lines[i+1]);
    }
+   // OCR kann bei langen Bezeichnungen Teile verschlucken. Niemals den Namen
+   // der vorherigen Position wiederverwenden, wenn ein neuer Artikelcode vorliegt.
+   if(id && out.length && name && out[out.length-1].name===name){
+      for(let j=i+1;j<Math.min(lines.length,i+4);j++){
+        if(looksLikeProductName(lines[j],reject)){
+          const candidate=cleanProductName(lines[j]);
+          if(candidate && candidate!==out[out.length-1].name){name=candidate;break}
+        }
+      }
+   }
    // Falls der Produktname bereits auf derselben Zeile steht.
    if(!name){
       const same=cleanProductName(line.slice(0,m.index));
       if(same.length>1 && /[\p{L}]/u.test(same)) name=same;
    }
    // Allgemeiner Fallback: vorherige Textzeile.
-   if(!name && i>0 && looksLikeProductName(lines[i-1],reject)) name=cleanProductName(lines[i-1]);
+   if(!name && !id && i>0 && looksLikeProductName(lines[i-1],reject)) name=cleanProductName(lines[i-1]);
    if(!name && id) name="Artikel "+id;
    if(name) out.push({name:name.slice(0,60),price,id});
  }
@@ -102,6 +124,10 @@ async function read(e){
   const out=await Tesseract.recognize(file,"deu+eng",{logger:m=>{if(m.status==="recognizing text"){const p=Math.round((m.progress||0)*100);$("#status").textContent="Bon wird gelesen … "+p+" %";$("#bar").style.width=Math.max(8,p)+"%"}else $("#status").textContent="Texterkennung wird vorbereitet …"}});
   const text=out.data.text||"", items=parseItems(text);
   const detectedTotal=totalOf(text), calc=items.reduce((n,x)=>n+cents(x.price),0), detectedCents=totalNumber(detectedTotal);
+  const dtype=documentType(text);
+  $("#docType").textContent=dtype;
+  $("#resultTitle").textContent=dtype==="Kassenbon"?"Kassenbon erkannt":dtype+" erkannt";
+  $("#positionsTitle").textContent=dtype==="Kassenbon"?"Erkannte Kaufpositionen":"Erkannte Positionen";
   $("#merchant").textContent=merchant(text);$("#date").textContent=dateOf(text);$("#total").textContent=detectedTotal;
   $("#calcTotal").textContent=items.length?formatCents(calc):"–";
   $("#check").textContent=!items.length?"–":(detectedCents===null?"✓ "+formatCents(calc)+" aus Positionen":(Math.abs(detectedCents-calc)<=1?"✓ "+formatCents(calc)+" bestätigt":"⚠ Abweichung"));
