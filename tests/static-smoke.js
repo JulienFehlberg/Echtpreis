@@ -59,6 +59,10 @@ assert(html.includes("reward.ok&&!reward.duplicate&&receiptTotalVerified"),"dupl
 assert(html.includes("Number(r.packAmount||0)*(Number(r.count)||1)"),"multipack receipt observations must normalize by total purchased quantity");
 assert(html.includes("lineTotal:Number(x.price)||0,price:Number(x.price)||0,count:Number(x.count)||1"),"receipt sync must preserve line total so multipacks are not divided twice after reload");
 assert(html.includes("globalAdjustments=receiptDraft.filter"),"coupon receipts must not produce misleading cross-store savings");
+assert(html.includes("plausibleObservationPrice(x)"),"trusted prices must reject implausible price outliers");
+assert(html.includes("x.per!==catalog[x.key].unit"),"price observations with the wrong comparison unit must be rejected");
+assert(html.includes('if(wish&&wish.matchMode==="exact")return verified'),"exact-brand requests must never fall back to modeled prices");
+
 
 
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
