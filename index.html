@@ -117,7 +117,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <div class="homeaction"><span>📅</span><b id="statsMonthly">0,00 €</b><small>in diesem Monat</small></div>
 <div class="homeaction"><span>💡</span><b id="statsPotential">–</b><small>geschätztes Sparpotenzial</small></div>
 <div class="homeaction"><span>🛒</span><b id="statsAverage">0,00 €</b><small>Ø pro Einkauf</small></div>
-</div><div id="statsInsight" class="insight-card" style="display:none"><div class="insight-kicker">✨ Dein Einkaufsprofil</div><strong id="statsInsightTitle"></strong><div id="statsInsightDetail" class="detail"></div></div><div class="muted" style="margin-top:14px">Basiert auf deinen gespeicherten Bons. Je mehr Bons du scannst, desto persönlicher werden die Auswertungen.</div><div id="statsBreakdown" style="margin-top:16px"></div><div id="statsDiscoveries" style="margin-top:16px"></div><div id="statsRecent" style="margin-top:14px"></div>
+</div><div id="statsInsight" class="insight-card" style="display:none"><div class="insight-kicker">✨ Dein Einkaufsprofil</div><strong id="statsInsightTitle"></strong><div id="statsInsightDetail" class="detail"></div></div><div class="muted" style="margin-top:14px">Basiert auf deinen gespeicherten Bons. Je mehr Bons du scannst, desto persönlicher werden die Auswertungen.</div><div id="statsBreakdown" style="margin-top:16px"></div><div id="statsTrend" style="margin-top:16px"></div><div id="statsDiscoveries" style="margin-top:16px"></div><div id="statsRecent" style="margin-top:14px"></div>
 <button class="ghost" id="statsBack" style="width:100%;margin-top:14px">Zurück</button></section>
 <section class="card" id="profileCard" style="display:none">
 <h2>Mein Profil</h2><div class="muted">Dein ECHTPREIS-Konto.</div>
@@ -912,6 +912,16 @@ function buildReceiptInsight(receipts,current){
 function renderReceiptInsight(receipts,current){
  const card=$("receiptInsight");if(!card)return;const insight=buildReceiptInsight(receipts,current);card.style.display="block";$("receiptInsightTitle").textContent=insight.title;$("receiptInsightDetail").textContent=insight.detail;try{let h=JSON.parse(localStorage.getItem("echtpreis_recent_insight_types")||"[]");h.push(insight.type);localStorage.setItem("echtpreis_recent_insight_types",JSON.stringify(h.slice(-6)));let history=JSON.parse(localStorage.getItem("echtpreis_insight_history_v1")||"[]"),entry={receiptId:String(current?.id||""),date:current?.date||"",store:current?.store||"",type:insight.type,title:insight.title,detail:insight.detail};history=history.filter(x=>x.receiptId!==entry.receiptId);history.unshift(entry);localStorage.setItem("echtpreis_insight_history_v1",JSON.stringify(history.slice(0,20)))}catch(e){}
 }
+function monthKeyOffset(offset){
+ const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+offset);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+}
+function renderStatsTrend(receipts){
+ const box=$("statsTrend");if(!box)return;const nowKey=monthKeyOffset(0),prevKey=monthKeyOffset(-1),current=(receipts||[]).filter(r=>String(r.date||"").startsWith(nowKey)&&Number(r.total)>0),previous=(receipts||[]).filter(r=>String(r.date||"").startsWith(prevKey)&&Number(r.total)>0);
+ if(current.length<2||previous.length<2){box.innerHTML="";return}
+ const sum=a=>a.reduce((n,r)=>n+Number(r.total||0),0),a=sum(current),b=sum(previous),avgA=a/current.length,avgB=b/previous.length,diff=b?((a-b)/b)*100:0,avgDiff=avgB?((avgA-avgB)/avgB)*100:0;
+ const cats=rows=>{let out={};rows.forEach(r=>(r.items||[]).forEach(i=>{let x=receiptItemProfile(i);if(x.isDeposit||x.price<=0)return;out[x.category]=(out[x.category]||0)+x.price}));return out},ca=cats(current),cb=cats(previous),changes=Object.keys({...ca,...cb}).map(k=>({name:k,delta:(ca[k]||0)-(cb[k]||0)})).sort((x,y)=>Math.abs(y.delta)-Math.abs(x.delta)),driver=changes.find(x=>Math.abs(x.delta)>=5);
+ box.innerHTML='<div style="font-weight:900;margin-bottom:7px">Monat im Vergleich</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="homeaction" style="min-height:0;text-align:left;padding:12px"><small>Ausgaben</small><b>'+eur(a)+'</b><div class="detail">'+(diff===0?'unverändert':Math.abs(diff).toFixed(0).replace(".",",")+' % '+(diff>0?'mehr':'weniger'))+' als im Vormonat</div></div><div class="homeaction" style="min-height:0;text-align:left;padding:12px"><small>Ø pro Einkauf</small><b>'+eur(avgA)+'</b><div class="detail">'+(avgDiff===0?'unverändert':Math.abs(avgDiff).toFixed(0).replace(".",",")+' % '+(avgDiff>0?'höher':'niedriger'))+'</div></div></div><div class="detail">'+current.length+' Einkäufe aktuell · '+previous.length+' im Vormonat'+(driver?' · Größte erkannte Veränderung: '+escHtml(driver.name)+' '+(driver.delta>0?'+':'')+eur(driver.delta):'')+'.</div>';
+}
 function renderStatsDiscoveries(){
  const box=$("statsDiscoveries");if(!box)return;let rows=[];try{rows=JSON.parse(localStorage.getItem("echtpreis_insight_history_v1")||"[]")}catch(e){}
  rows=Array.isArray(rows)?rows.slice(0,4):[];box.innerHTML=rows.length?'<div style="font-weight:900;margin-bottom:7px">Letzte Entdeckungen</div>'+rows.map(x=>'<div style="padding:9px 0;border-bottom:1px solid #edf0ee"><b>'+escHtml(x.title)+'</b><div class="detail">'+escHtml([formatReceiptDate(x.date),x.store].filter(Boolean).join(" · "))+(x.detail?' · '+escHtml(x.detail):'')+'</div></div>').join(""):"";
@@ -942,7 +952,7 @@ function refreshStats(){
  $("statsWeekly").textContent=eur(sum(receipts.filter(r=>String(r.date||"")>=weekKey&&String(r.date||"")<=todayKey)));
  $("statsMonthly").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(month)&&String(r.date||"")<=todayKey)));
  $("statsPotential").textContent=known.length?"ca. "+eur(known.reduce((n,r)=>n+Number(r.potentialSaving),0)):"–";
- $("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderStatsInsight(receipts);renderStatsBreakdown(receipts);renderStatsDiscoveries();renderStatsReceipts();
+ $("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderStatsInsight(receipts);renderStatsBreakdown(receipts);renderStatsTrend(receipts);renderStatsDiscoveries();renderStatsReceipts();
 }
 async function refreshStatsFromServer(){const merged=await loadServerReceipts();if(Array.isArray(merged)){savePersonalReceipts(merged.slice(0,250));refreshStats()}}
 window.refreshEchtpreisStats=()=>{refreshStats();void refreshStatsFromServer()};
