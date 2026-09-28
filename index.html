@@ -166,7 +166,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
    {store:"PENNY",unit:"kg",price:1.99,label:"Bananen",source:"PENNY Wochenangebot",validFrom:"2026-09-28",validTo:"2026-10-03"}
   ]
  };
- function activePrice(p){const d=new Date().toISOString().slice(0,10);return (!p.validFrom||p.validFrom<=d)&&(!p.validTo||p.validTo>=d);}
+ function seededPriceIsActive(p){const d=new Date().toISOString().slice(0,10);return (!p.validFrom||p.validFrom<=d)&&(!p.validTo||p.validTo>=d);}
  async function loadCommunityPrices(){
   try{
    const res=await fetch("https://echtpreis-api.onrender.com/v1/observations");
@@ -268,7 +268,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
  }
  function money(n){return n.toLocaleString("de-DE",{style:"currency",currency:"EUR"})}
  function priceMatchesItem(p,i){
-  if(!p||!i||p.unit!==i.unit||!activePrice(p))return false;
+  if(!p||!i||p.unit!==i.unit||!seededPriceIsActive(p))return false;
   if(i.matchMode!=="exact")return true;
   if(!i.exactBrand)return false;
   return norm(p.label||p.product||"").includes(norm(i.exactBrand));
