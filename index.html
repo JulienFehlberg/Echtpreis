@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v3.2</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v3.3</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="tabs"><button class="tab active" id="planTab">1 · Planen</button><button class="tab" id="receiptTab">2 · Bon abschließen</button></div>
 
@@ -86,7 +86,7 @@ function usableObservation(x){
  return true;
 }
 function dataEngine(){
- const all=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey)].map(normalizeObservation).filter(usableObservation);
+ const all=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation).filter(usableObservation);
  const seen=new Set();return all.filter(x=>{let sig=[x.key,x.store,x.price,x.per,x.date,x.proof||x.source,x.locationId||""].join("|");if(seen.has(sig))return false;seen.add(sig);return true});
 }
 function trustedPrice(key,store){
@@ -125,7 +125,7 @@ async function ingestOpenPrices(){
 }
 function drawDataMachine(){
  const el=$("dataMachineStatus");if(!el)return;const rows=dataEngine(),by={};rows.forEach(x=>by[x.source]=(by[x.source]||0)+1);
- el.innerHTML="<b>Datenmaschine aktiv:</b> "+rows.length+" aktuell nutzbare Beobachtungen<br><span class='detail'>Open Prices: "+escHtml(dataMachineState.openPrices)+(dataMachineState.lastSync?" · Sync "+dataMachineState.lastSync:"")+"<br>"+(Object.entries(by).map(([k,v])=>escHtml(k)+": "+v).join(" · ")||"Noch keine nutzbaren Quellen")+"</span>";
+ el.innerHTML="<b>Datenmaschine aktiv:</b> "+rows.length+" aktuell nutzbare Beobachtungen<br><span class='detail'>ECHTPREIS API: "+escHtml(apiState)+"<br>Open Prices: "+escHtml(dataMachineState.openPrices)+(dataMachineState.lastSync?" · Sync "+dataMachineState.lastSync:"")+"<br>"+(Object.entries(by).map(([k,v])=>escHtml(k)+": "+v).join(" · ")||"Noch keine nutzbaren Quellen")+"</span>";
 }
 const storeNames=["Lidl","Kaufland","REWE","EDEKA"];
 function escHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -162,6 +162,16 @@ function identifyReceiptProduct(name){
  return best;
 }
 function confidenceLabel(m){return !m.key?"unsicher":m.score>=.95?"sehr sicher":m.score>=.85?"sicher":"prüfen"}
+const API_BASE="https://echtpreis-api.onrender.com";
+const sharedCacheKey="echtpreis_shared_observations_v1";
+let apiState="wird verbunden …";
+async function syncSharedData(){
+ try{let r=await fetch(API_BASE+"/v1/observations?since="+new Date(Date.now()-14*86400000).toISOString().slice(0,10));if(!r.ok)throw 0;let d=await r.json();saveJson(sharedCacheKey,d.items||[]);apiState="verbunden · "+(d.items||[]).length+" gemeinsame Beobachtungen";drawDataMachine()}
+ catch(e){apiState="offline · lokaler Fallback";drawDataMachine()}
+}
+async function pushSharedReceipt(proof,items){
+ try{let r=await fetch(API_BASE+"/v1/receipt-observations",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({proof,items})});if(!r.ok)throw 0;let d=await r.json();apiState="verbunden · "+d.accepted+" neue Beobachtungen übertragen";await syncSharedData();return d}catch(e){apiState="Upload später erneut nötig · lokal gespeichert";drawDataMachine();return null}
+}
 const productIndexKey="echtpreis_product_index_v1";
 function loadProductIndex(){return loadJson(productIndexKey,[])}
 function saveProductIndex(rows){saveJson(productIndexKey,rows.slice(-2500))}
@@ -275,11 +285,11 @@ $("finishPurchaseBtn").onclick=()=>{
  if(!$("receiptFile").files[0])return;let store=$("receiptStore").value,date=$("receiptDate").value;if(!store||!date)return alert("Bitte Händler und Bon-Datum kontrollieren.");
  let valid=receiptDraft.map(r=>({name:(r.name||"").trim(),price:Number(String(r.price).replace(",","."))})).filter(r=>r.name&&Number.isFinite(r.price)&&r.price>0);
  if(!valid.length&&!confirm("Es wurden keine Artikelpreise bestätigt. Einkauf trotzdem abschließen?"))return;
- let proofId="receipt_"+Date.now(),saved=0;
- if($("contribute").checked){valid.forEach(r=>{let match=identifyReceiptProduct(r.name),key=match.key;if(!key)return;let c=catalog[key];learnProductAlias(r.name,key,{ean:match.ean,brand:match.brand,quantity:match.quantity,source:"confirmed-receipt"});let amount=1,per=c.unit;if(addCommunityObservation({key,store,price:r.price/amount,per,date,region:"",source:"ECHTPREIS Bon",product:r.name,proof:proofId,status:"observed"}))saved++})}
+ let proofId="receipt_"+Date.now(),saved=0,sharedItems=[];
+ if($("contribute").checked){valid.forEach(r=>{let match=identifyReceiptProduct(r.name),key=match.key;if(!key)return;let c=catalog[key];learnProductAlias(r.name,key,{ean:match.ean,brand:match.brand,quantity:match.quantity,source:"confirmed-receipt"});let amount=1,per=c.unit,obs={key,store,price:r.price/amount,per,date,region:"",source:"ECHTPREIS Bon",product:r.name,rawName:r.name,proof:proofId,status:"observed"};if(addCommunityObservation(obs)){saved++;sharedItems.push(obs)}});if(sharedItems.length)pushSharedReceipt(proofId,sharedItems)}
  try{localStorage.setItem("echtpreis_last_proof",JSON.stringify({id:proofId,type:"RECEIPT",file:$("receiptFile").files[0].name,created:new Date().toISOString(),consent:$("contribute").checked,rows:valid.length,saved}))}catch(e){}
  closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> "+valid.length+" Preiszeilen bestätigt.";$("finishPurchaseBtn").textContent="✓ Einkauf abgeschlossen";$("finishPurchaseBtn").disabled=true;$("noReceiptBtn").style.display="none";$("receiptMsg").textContent=$("contribute").checked?(saved+" erkannte Produktpreise als unbestätigte Community-Beobachtungen gespeichert."):"Bon geprüft · keine Community-Freigabe.";drawDataMachine();
 };
 $("noReceiptBtn").onclick=()=>{if(!confirm("Bon verloren oder nicht mehr vorhanden? Du kannst den Einkauf trotzdem abschließen. Diesmal können daraus nur keine Preise zur ECHTPREIS-Datenbasis beitragen."))return;closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Diesmal ohne Bon – kein Problem.";$("receiptMsg").textContent="Keine Preisdaten beigetragen.";$("noReceiptBtn").style.display="none";$("finishPurchaseBtn").style.display="none";};
-drawSuggestions();drawStores();drawList();drawDataMachine();ingestOpenPrices();
+drawSuggestions();drawStores();drawList();drawDataMachine();syncSharedData();ingestOpenPrices();
 </script></body></html>
