@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.6.1</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v2.7</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="tabs"><button class="tab active" id="planTab">1 · Planen</button><button class="tab" id="receiptTab">2 · Bon abschließen</button></div>
 
@@ -43,7 +43,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 <section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div></div>
 <div class="card"><h2>Alle Märkte</h2><div class="muted">Nur bekannte Positionen werden summiert. Fehlende Preise werden nicht erfunden.</div><div id="merchantResults"></div></div>
 <div class="card"><h2>Lohnt sich Aufteilen?</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
-<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.6.1 · Bon erwünscht · keine doppelten Listeneinträge</span></div>
+<div class="card"><h2>So wird gerechnet</h2><div class="muted">Jede Position hat Händlerpreis, Datenstatus und Abdeckung. Ein Händler mit fehlenden Preisen kann nicht einfach zum Sieger erklärt werden. Bei echten Daten kommen zusätzlich Datum, Filiale/Region und Quelle dazu.</div><span class="source">v2.7 · echte Händlerbeobachtungen · keine Schätzpreise</span></div>
 <div class="card" id="finishCard"><h2>Nach dem Einkauf geht’s mit dem Bon weiter</h2><div class="muted">Dein Einkauf bleibt offen, bis du den Kassenbon hochlädst. So kann ECHTPREIS geplante und tatsächlich bezahlte Preise verbinden und – nur mit deiner Zustimmung – anonymisierte Preisbeobachtungen zur Datenbasis beitragen lassen.</div><div class="notice" style="margin-top:14px"><b>🧾 Bon nicht vergessen!</b><br>Ein Foto nach dem Einkauf hilft, echte Preise aktuell zu halten.</div><button class="green" id="toReceiptBtn">Ich war einkaufen → Bon hochladen</button></div>
 </section>
 </section>
@@ -67,8 +67,8 @@ const catalog={
 // Verifizierte Preisbeobachtungen. Kein Eintrag = kein Preis.
 // Gültigkeit/Region sind Teil des Datensatzes; historische Werte werden NICHT als "heute" verkauft.
 const verifiedPrices=[
- {key:"bananen",store:"Kaufland",price:0.88,per:"kg",date:"2026-09-10",validTo:"2026-09-16",region:"Deutschland",kind:"Angebot",source:"Kaufland"},
- {key:"hackfleisch",store:"Kaufland",price:6.98,per:"kg",date:"2026-09-10",validTo:"2026-09-16",region:"Deutschland",kind:"Angebot",source:"Kaufland"}
+ {key:"bananen",store:"Kaufland",price:1.99,per:"kg",date:"2026-09-24",validTo:"2026-09-30",region:"Berlin",kind:"Angebot",source:"Kaufland offiziell",sourceUrl:"https://filiale.kaufland.de/?FilialID=8830",product:"Chiquita Bananen"},
+ {key:"rinderhack",store:"REWE",price:13.96,per:"kg",date:"2026-09-28",validTo:"2026-10-04",region:"Berlin",kind:"Angebot",source:"REWE offiziell",sourceUrl:"https://www.rewe.de/marktseite/berlin-prenzlauer-berg/1931149/rewe-markt-john-schehr-str-20-24/",product:"Rinder-Hackfleisch 250 g"}
 ];
 function activePrice(key,store){
  const today=new Date().toISOString().slice(0,10);
@@ -141,7 +141,7 @@ function compare(){
  let complete=rows.filter(r=>r.known===basket.length).sort((a,b)=>a.total-b.total);
  if(complete.length){let win=complete[0];$("winnerLabel").textContent="Günstigster vollständig belegter Warenkorb";$("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);$("winnerCoverage").textContent="100 % Abdeckung · Preise mit Quelle und Gültigkeit";}
  else{$("winnerLabel").textContent="Noch kein vollständiger aktueller Preisvergleich möglich";$("winnerName").textContent="Für mindestens eine Position fehlen gültige Preisdaten";$("winnerPrice").textContent="—";let best=[...rows].sort((a,b)=>b.coverage-a.coverage)[0];$("winnerCoverage").textContent="Beste aktuelle Datenabdeckung: "+Math.round(best.coverage*100)+" % bei "+best.store+". Keine fehlenden Preise werden geschätzt."}
- $("merchantResults").innerHTML=[...rows].sort((a,b)=>b.coverage-a.coverage||a.total-b.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+'/'+basket.length+' aktuell belegte Positionen · '+Math.round(r.coverage*100)+'% Abdeckung'+(r.missing.length?'<br>Keine gültigen Daten: '+r.missing.map(escHtml).join(", "):'<br>Vollständig belegt')+(r.sources.length?'<br>Quelle: '+[...new Set(r.sources.map(x=>x.source+" · "+x.date+(x.validTo?"–"+x.validTo:"")))].join("; "):"")+'</div></div><div class="price">'+(r.known?eur(r.total)+'<div class="coverage" style="text-align:right">'+(r.coverage===1?"Gesamt":"belegte Zwischensumme")+'</div>':"—")+'</div></div>').join("");
+ $("merchantResults").innerHTML=[...rows].sort((a,b)=>b.coverage-a.coverage||a.total-b.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+'/'+basket.length+' aktuell belegte Positionen · '+Math.round(r.coverage*100)+'% Abdeckung'+(r.missing.length?'<br>Keine gültigen Daten: '+r.missing.map(escHtml).join(", "):'<br>Vollständig belegt')+(r.sources.length?'<br>Quelle: '+[...new Set(r.sources.map(x=>x.source+" · "+x.product+" · gültig "+x.date+(x.validTo?"–"+x.validTo:"")))].join("; "):"")+'</div></div><div class="price">'+(r.known?eur(r.total)+'<div class="coverage" style="text-align:right">'+(r.coverage===1?"Gesamt":"belegte Zwischensumme")+'</div>':"—")+'</div></div>').join("");
  let allSplitKnown=basket.every(w=>w.key&&[...selected].some(st=>activePrice(w.key,st)));
  if(!allSplitKnown){$("splitTitle").textContent="Noch nicht vollständig berechenbar";$("splitDetail").textContent="Für mindestens eine Position gibt es bei keinem ausgewählten Markt einen aktuell gültigen, belegten Preis.";$("splitSave").textContent="Keine Ersparnis berechnet."}
  else{let split=0,alloc={};basket.forEach(w=>{let opts=[...selected].map(st=>[st,activePrice(w.key,st)]).filter(x=>x[1]).sort((a,b)=>a[1].price-b[1].price);split+=opts[0][1].price*w.calcAmount;(alloc[opts[0][0]]??=[]).push(w.label)});$("splitTitle").textContent=eur(split)+" bei günstigster belegter Produkt-Aufteilung";$("splitDetail").textContent=Object.entries(alloc).map(([st,n])=>st+": "+n.join(", ")).join(" · ");$("splitSave").textContent=complete.length?"Ersparnis ggü. "+complete[0].store+": "+eur(Math.max(0,complete[0].total-split)):"Kein vollständiger Ein-Markt-Vergleich als Referenz."}
