@@ -69,7 +69,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}.receipt-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #e5eae7;text-align:left}.receipt-item strong{white-space:nowrap}.receipt-item-name{min-width:0;overflow-wrap:anywhere}.receipt-item small{display:block;color:#68736d;margin-top:3px}.ocrbox #receiptTotalCheck,.ocrbox #receiptPaymentDetail{font-size:14px;margin:10px 0;text-align:left}.insight-card{margin:16px 0;padding:18px;border-radius:20px;background:#fff8e8;border:1px solid #f0dfb7;text-align:left}.insight-card .insight-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:900;color:#8a6a18}.insight-card strong{display:block;font-size:20px;line-height:1.25;margin:5px 0}.insight-card .detail{font-size:13px}.feedback-box{max-width:560px;margin:22px auto 6px;text-align:left;color:#66736c;font-size:12px}.feedback-box summary{cursor:pointer;text-align:center;font-weight:800}.feedback-box textarea{width:100%;box-sizing:border-box;margin-top:10px;min-height:82px;resize:vertical}.feedback-box button{width:100%;margin-top:8px;padding:10px}.feedback-status{text-align:center;margin-top:7px;font-size:12px}@media(max-width:430px){.insight-card{padding:15px}.insight-card strong{font-size:18px}}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.114.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.115.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -524,8 +524,16 @@ const openPricesCacheKey="echtpreis_openprices_cache_v1";
 const dataMachineState={openPrices:"noch nicht synchronisiert",loaded:0,rejected:0,lastSync:null};
 function loadJson(key,fallback=[]){try{let value=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));return Array.isArray(fallback)&&!Array.isArray(value)?fallback:value}catch(e){return fallback}}
 function saveJson(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch(e){}}
+function canonicalStoreName(store){
+ const raw=String(store||"").trim(),n=normalizeProduct(raw);if(!n)return null;
+ if(n.includes("aldi sud")||n.includes("aldi sued"))return "ALDI Süd";if(n.includes("aldi nord"))return "ALDI Nord";
+ if(n==="aldi")return "ALDI";
+ if(n.includes("netto marken")||n==="netto")return "Netto";
+ for(const [name,needle] of [["Kaufland","kaufland"],["Lidl","lidl"],["REWE","rewe"],["EDEKA","edeka"],["PENNY","penny"],["NORMA","norma"],["Rossmann","rossmann"],["dm","dm"]])if(n.includes(needle))return name;
+ return raw;
+}
 function normalizeObservation(x){
- return {id:x.id||("ep_"+Date.now()+"_"+Math.random().toString(36).slice(2)),key:x.key||null,store:x.store||null,price:Number(x.price),per:x.per||"piece",date:x.date||null,validTo:x.validTo||null,region:x.region||null,kind:x.kind||"community",source:x.source||"ECHTPREIS Bon",product:x.product||x.key||"Unbekannt",proof:x.proof||null,locationId:x.locationId||null,trust:Number(x.trust||0),status:x.status||"observed"};
+ return {id:x.id||("ep_"+Date.now()+"_"+Math.random().toString(36).slice(2)),key:x.key||null,store:canonicalStoreName(x.store),price:Number(x.price),per:x.per||"piece",date:x.date||null,validTo:x.validTo||null,region:x.region||null,kind:x.kind||"community",source:x.source||"ECHTPREIS Bon",product:x.product||x.key||"Unbekannt",proof:x.proof||null,locationId:x.locationId||null,trust:Number(x.trust||0),status:x.status||"observed"};
 }
 function freshnessDays(x){return x.kind==="official"?null:7}
 function usableObservation(x){
@@ -554,14 +562,14 @@ const referenceBase={
  apfelsaft:1.49,multivitaminsaft:1.59,limonade:1.29,eistee:1.29,tee:1.99,kakao:7.98,pommes:2.49,tk_gemuese:2.99,tk_obst:5.99,
  spuelmaschinentabs:4.99,muellbeutel:2.49,alufolie:2.49,backpapier:1.99,handseife:1.49,duschgel:1.49,deo:2.49,rasierer:4.99,windeln:6.99,feuchttuecher:1.49
 };
-const referenceStoreFactor={"Lidl":.94,"Kaufland":.96,"REWE":1.06,"EDEKA":1.08,"PENNY":.95,"ALDI Nord":.93,"Netto":.94,"NORMA":.93,"dm":1.02,"Rossmann":1.03};
-const storeAssortment={alcohol:new Set(["Lidl","Kaufland","REWE","EDEKA","PENNY","ALDI Nord","Netto","NORMA"]),drugstore:new Set(["haferdrink","nudeln","reis","mehl","zucker","haferflocken","muesli","cornflakes","linsen","bohnen","kichererbsen","couscous","passierte_tomaten","tomatenmark","oel","olivenoel","essig","salz","pfeffer","honig","marmelade","erdnussbutter","schokolade","chips","kekse","gummibaerchen","apfelsaft","multivitaminsaft","tee","kakao","kaffee","toilettenpapier","kuechenrolle","waschmittel","spuelmittel","zahnpasta","shampoo","katzenfutter","hundefutter","spuelmaschinentabs","muellbeutel","alufolie","backpapier","handseife","duschgel","deo","rasierer","windeln","feuchttuecher"])};
+const referenceStoreFactor={"Lidl":.94,"Kaufland":.96,"REWE":1.06,"EDEKA":1.08,"PENNY":.95,"ALDI Nord":.93,"ALDI Süd":.93,"Netto":.94,"NORMA":.93,"dm":1.02,"Rossmann":1.03};
+const storeAssortment={alcohol:new Set(["Lidl","Kaufland","REWE","EDEKA","PENNY","ALDI Nord","ALDI Süd","Netto","NORMA"]),drugstore:new Set(["haferdrink","nudeln","reis","mehl","zucker","haferflocken","muesli","cornflakes","linsen","bohnen","kichererbsen","couscous","passierte_tomaten","tomatenmark","oel","olivenoel","essig","salz","pfeffer","honig","marmelade","erdnussbutter","schokolade","chips","kekse","gummibaerchen","apfelsaft","multivitaminsaft","tee","kakao","kaffee","toilettenpapier","kuechenrolle","waschmittel","spuelmittel","zahnpasta","shampoo","katzenfutter","hundefutter","spuelmaschinentabs","muellbeutel","alufolie","backpapier","handseife","duschgel","deo","rasierer","windeln","feuchttuecher"])};
 function storeCanCarry(store,wish,key){const product=wish?.key||key;if(store==="dm"||store==="Rossmann")return storeAssortment.drugstore.has(product);if(product==="wodka"||product==="bier")return storeAssortment.alcohol.has(store);return true;}
 function referencePrice(key,store,wish=null){
  if(!storeCanCarry(store,wish,key))return null;
  const today=localDateKey();
  let history=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation)
-  .filter(x=>x.key===key&&x.store===store&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0&&((new Date(today+"T12:00:00")-new Date(x.date+"T12:00:00"))/86400000)<=60);
+  .filter(x=>x.key===key&&x.store===canonicalStoreName(store)&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0&&((new Date(today+"T12:00:00")-new Date(x.date+"T12:00:00"))/86400000)<=60);\n if(wish&&wish.choice&&Object.keys(wish.choice).length)history=history.filter(x=>choiceMatchesProductText(wish.choice,x.product||""));
  if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);history=history.filter(x=>normalizeProduct(x.product||"").includes(brand));}
  history.sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0)||a.price-b.price);
  if(store==="dm"||store==="Rossmann")return null;
