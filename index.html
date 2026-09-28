@@ -70,7 +70,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.134.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.135.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -1154,7 +1154,7 @@ async function refreshReceiptPrices(){
  if(!receiptTotalVerified)return;
  const keys=[...new Set(receiptDraft.filter(r=>!r.isDeposit&&!r.isAdjustment).map(r=>parseWish(r.name).key).filter(Boolean))];
  if(!keys.length)return;
- try{await ingestOpenPrices(false,keys)}catch(e){return}
+ await Promise.allSettled([ingestOpenPrices(false,keys),loadNearbyStores()]);
  if(revision===receiptPriceRefreshRevision&&receiptTotalVerified)updateReceiptAnalysis();
 }
 function updateReceiptAnalysis(){
@@ -1166,14 +1166,14 @@ function updateReceiptAnalysis(){
  $("analysisBestRow").style.display=receiptTotalVerified?"flex":"none";$("analysisSavingRow").style.display=receiptTotalVerified?"block":"none";
  if(!receiptTotalVerified){$("analysisBestStore").textContent="Vergleich wartet auf sicheren Scan";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="–";$("analysisNote").textContent="";let ic=$("receiptInsight");if(ic)ic.style.display="none";return}
  const store=$("receiptStore").value||"Dein Markt";const globalAdjustments=receiptDraft.filter(r=>r.isAdjustment&&Number(r.price)<0);if(globalAdjustments.length){$("analysisBestRow").style.display="none";$("analysisSavingRow").style.display="none";$("analysisBestStore").textContent="Einkauf enthält Gesamt-Rabatt / Coupon";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="–";$("analysisNote").textContent="Ein marktübergreifender Vergleich wäre mit einem Bon-Coupon nicht fair. ECHTPREIS speichert den echten Zahlbetrag, erfindet daraus aber keine mögliche Ersparnis.";previewReceiptInsight();return}if(store==="Unbekannter Händler"){$("analysisBestRow").style.display="none";$("analysisSavingRow").style.display="none";$("analysisBestStore").textContent="Händler nicht erkannt";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="–";$("analysisNote").textContent="Der Einkauf wird trotzdem gespeichert und fließt in deine persönliche Statistik ein. Ein Marktvergleich ist für diesen Bon noch nicht möglich.";previewReceiptInsight();return}const wishes=valid.map(r=>{let w=parseWish(r.name);if(r.packAmount&&r.packUnit)w.calcAmount=Number(r.packAmount)*(Number(r.count)||1)*(r.packUnit==="g"||r.packUnit==="ml"?.001:1);return w});
- const markets=storeNames.filter(st=>store==="ALDI"?!st.startsWith("ALDI"):st!==store).map(st=>receiptMarketComparison(st,valid));
- const complete=markets.filter(m=>m.complete).sort((a,b)=>a.total-b.total),best=complete[0]||null;
+ const markets=storeNames.filter(st=>store==="ALDI"?!st.startsWith("ALDI"):st!==store).map(st=>({...receiptMarketComparison(st,valid),branch:nearestStore(st)}));
+ const complete=markets.filter(m=>m.complete&&(!nearbyStores.length||m.branch)).sort((a,b)=>a.total-b.total),best=complete[0]||null;
  $("analysisSavingRow").style.display="none";
  if(best){
-  $("analysisBestStore").textContent="Günstigster Vergleich · "+best.store;$("analysisBestPrice").textContent=(best.estimated?"ca. ":"")+eur(best.total);
+  $("analysisBestStore").textContent="Günstigster Vergleich · "+best.store+(best.branch?" · "+best.branch.distance.toFixed(1).replace(".",",")+" km Luftlinie":"");$("analysisBestPrice").textContent=(best.estimated?"ca. ":"")+eur(best.total);
   $("analysisNote").textContent=best.estimated?"Grobe Orientierung mit ähnlichen Artikeln und Richtwerten; kein bestätigter Filialpreis.":"Vergleich mit belegten Preisen; Filialbestand und heutiger Preis können abweichen.";
   const saving=Number((paid-best.total).toFixed(2));
-  if(saving>0){$("analysisSavingRow").style.display="block";$("analysisSavingRow").firstChild.textContent=best.estimated?"Vermutlich günstiger bei "+best.store+": ":"Preisunterschied: ";$("analysisSaving").textContent=(best.estimated?"ca. ":"")+eur(saving);if(!best.estimated){currentReceiptSaving=saving;currentReceiptSavingConfidence="hoch"}}
+  if(saving>0){$("analysisSavingRow").style.display="block";$("analysisSavingRow").firstChild.textContent=best.estimated?"Vermutlich günstiger bei "+best.store+(best.branch?" ("+best.branch.distance.toFixed(1).replace(".",",")+" km Luftlinie)":"")+": ":"Preisunterschied: ";$("analysisSaving").textContent=(best.estimated?"ca. ":"")+eur(saving);if(!best.estimated){currentReceiptSaving=saving;currentReceiptSavingConfidence="hoch"}}
  }
  else{$("analysisBestRow").style.display="none";$("analysisNote").textContent="Für keinen anderen Markt sind alle Artikel ausreichend vergleichbar."}
  $("receiptMarketRows").innerHTML='<div style="margin-top:16px;font-weight:800">Andere Märkte</div>'+markets.sort((a,b)=>Number(b.complete)-Number(a.complete)||a.total-b.total||a.store.localeCompare(b.store)).map(m=>{
@@ -1181,7 +1181,7 @@ function updateReceiptAnalysis(){
   const difference=m.complete?Number((paid-m.total).toFixed(2)):null;
   const hint=difference!=null?(difference>0?" · möglicherweise "+eur(difference)+" günstiger":difference<0?" · "+eur(-difference)+" höher":" · etwa gleich"):"";
   const details=m.lines.map(x=>'<div>'+escHtml(x.name)+(x.alternative?' → '+escHtml(x.product):'')+' · '+(x.reference||x.alternative?'ca. ':'')+eur(x.value)+'</div>').join("")+(m.deposit?'<div>Pfand · '+eur(m.deposit)+'</div>':"")+(m.missing.length?'<div>Ohne Vergleich: '+escHtml(m.missing.join(", "))+'</div>':"");
-  return '<details style="border-top:1px solid rgba(255,255,255,.18);padding:10px 0"><summary style="cursor:pointer">'+escHtml(m.store)+' · '+title+hint+'</summary><div class="detail" style="margin-top:8px">'+details+(m.estimated?'<div>Richtwerte/ähnliche Artikel; tatsächlicher Preis und Sortiment nicht bestätigt.</div>':'')+'</div></details>';
+  return '<details style="border-top:1px solid rgba(255,255,255,.18);padding:10px 0"><summary style="cursor:pointer">'+escHtml(m.store)+(m.branch?' · '+m.branch.distance.toFixed(1).replace('.',',')+' km Luftlinie':'')+' · '+title+hint+'</summary><div class="detail" style="margin-top:8px">'+(m.branch?'<a class="route-link" href="'+routeUrl(m.branch)+'" target="_blank" rel="noopener">Route öffnen →</a>':'')+details+(m.estimated?'<div>Richtwerte/ähnliche Artikel; tatsächlicher Preis und Sortiment nicht bestätigt.</div>':'')+'</div></details>';
  }).join("");
 
  previewReceiptInsight();
