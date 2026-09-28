@@ -59,10 +59,10 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .card{background:rgba(255,255,255,.91);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .footer{opacity:.55;letter-spacing:.3px}
 .receipt-simple{text-align:center}.receipt-simple h2{font-size:27px}.receipt-camera{width:84px;height:84px;margin:22px auto;display:grid;place-items:center;border-radius:26px;background:#e8f5ed;font-size:38px}.receipt-main-action,.receipt-file-action{display:block;width:100%;cursor:pointer}.receipt-file-action{margin-top:10px;padding:15px;border-radius:17px;font-weight:800}.receipt-why{text-align:left;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}.receipt-why b{font-size:15px}.quick-suggestions{margin:14px 0 4px}.quick-label{font-size:12px;font-weight:800;color:#77847d;margin-bottom:8px}.quick-row{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}.quick-row::-webkit-scrollbar{display:none}.quick-chip{white-space:nowrap;padding:9px 12px;border-radius:999px;background:#eef5f0;color:#174b34;font-size:13px;border:1px solid rgba(8,116,67,.08)}.receipt-analysis{text-align:left;margin:20px 0;padding:18px;border-radius:20px;background:linear-gradient(145deg,#071d13,#0b7042);color:#fff}.receipt-analysis .smallcap{color:#b9dfca}.analysis-paid,.analysis-best{display:flex;align-items:end;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12)}.analysis-paid strong,.analysis-best strong{font-size:22px}.analysis-save{margin-top:14px;font-size:18px}.analysis-save strong{color:#bdf0d2}.receipt-analysis .detail{color:#c9ddd2}
-.list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}</style>
+.list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.58.3</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.58.4</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
@@ -102,7 +102,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <input id="receiptFile" type="file" accept="image/*,application/pdf" capture="environment" style="display:none">
 <label class="ghost receipt-file-action" for="receiptFile">Foto oder Dokument auswählen</label>
 <div id="receiptMsg" class="detail"></div>
-<div id="ocrBox" class="ocrbox"><h2>Bon kontrollieren</h2><div id="ocrStatus" class="detail" role="status"></div><div id="receiptStoreDetail" class="detail"></div><div id="receiptTotalCheck" class="detail"></div><div id="reviewRows"></div><button id="addReviewRow" class="ghost" type="button">Artikel hinzufügen</button><select id="receiptStore"><option value="">Händler wählen</option><option>Lidl</option><option>Kaufland</option><option>REWE</option><option>EDEKA</option><option>PENNY</option><option>ALDI Nord</option><option>Netto</option><option>NORMA</option><option>dm</option><option>Rossmann</option></select><input id="receiptDate" type="date"><label><input type="checkbox" id="contribute" checked> Anonymisierte Preisdaten beitragen</label><button class="green" id="finishPurchaseBtn" disabled>Bon speichern</button><button class="ghost" id="noReceiptBtn">Abbrechen</button></div>
+<div id="ocrBox" class="ocrbox"><h2>Bon kontrollieren</h2><div id="ocrStatus" class="detail" role="status"></div><div id="receiptStoreDetail" class="detail"></div><label for="receiptTotalInput" style="display:block;margin-top:12px;text-align:left;font-weight:800">Bon-Summe in €</label><input id="receiptTotalInput" type="text" inputmode="decimal" placeholder="z. B. 8,46" style="width:100%;box-sizing:border-box;margin:6px 0"><div id="receiptTotalCheck" class="detail"></div><div id="reviewRows"></div><button id="addReviewRow" class="ghost" type="button">Artikel hinzufügen</button><select id="receiptStore"><option value="">Händler wählen</option><option>Lidl</option><option>Kaufland</option><option>REWE</option><option>EDEKA</option><option>PENNY</option><option>ALDI Nord</option><option>Netto</option><option>NORMA</option><option>dm</option><option>Rossmann</option></select><input id="receiptDate" type="date"><label><input type="checkbox" id="contribute" checked> Anonymisierte Preisdaten beitragen</label><button class="green" id="finishPurchaseBtn" disabled>Bon speichern</button><button class="ghost" id="noReceiptBtn">Abbrechen</button></div>
 <div id="receiptAnalysis" class="receipt-analysis" style="display:none"><div class="smallcap">Deine Bon-Analyse</div><div class="analysis-paid"><span>Bezahlt</span><strong id="analysisPaid">–</strong></div><div class="analysis-best"><span id="analysisBestStore">Günstigere Alternative</span><strong id="analysisBestPrice">–</strong></div><div class="analysis-save">Du hättest <strong id="analysisSaving">–</strong> sparen können.</div><div id="analysisNote" class="detail"></div></div><div class="receipt-why"><b>Warum Bons?</b><div class="muted">Mit echten Kassenbons baut ECHTPREIS eine eigene Preisdatenbank auf. Je mehr bestätigte Preise wir haben, desto genauer werden deine Vergleiche.</div></div>
 <button class="ghost" id="backPlanBtn" style="width:100%;margin-top:14px">Zurück</button>
 <div id="openPurchaseNotice" style="display:none"></div><div id="testModeBox" style="display:none"><button id="runDupeTest" disabled></button><div id="dupeTestResult"></div></div>
@@ -111,6 +111,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <div class="homeactions coreactions" style="grid-template-columns:1fr 1fr;margin-top:12px">
 <div class="homeaction"><span>🧾</span><b id="statsReceipts">0</b><small>gespeicherte Bons</small></div>
 <div class="homeaction"><span>💶</span><b id="statsSpent">0,00 €</b><small>dieses Jahr</small></div>
+<div class="homeaction"><span>📅</span><b id="statsWeekly">0,00 €</b><small>in dieser Woche</small></div>
 <div class="homeaction"><span>📅</span><b id="statsMonthly">0,00 €</b><small>in diesem Monat</small></div>
 <div class="homeaction"><span>💡</span><b id="statsPotential">–</b><small>geschätztes Sparpotenzial</small></div>
 </div><div class="muted" style="margin-top:14px">Basiert auf den auf diesem Gerät gespeicherten Bons. Sparpotenzial erscheint nur, wenn ein vollständiger Vergleich möglich war.</div>
@@ -640,7 +641,7 @@ const productAliases={
  tomaten:["tomate","tomaten","cherrytomaten","cocktailtomaten","strauchtomaten"],gurken:["gurke","gurken","salatgurke"],
  aepfel:["apfel","aepfel","äpfel"],kartoffeln:["kartoffel","kartoffeln","speisekartoffeln"],zwiebeln:["zwiebel","zwiebeln"],
  rinderhack:["rinderhack","rinder hack","rinderhackfleisch","rind hack","hackfleisch rind"],hackfleisch:["hackfleisch","gemischtes hack","hack gemischt"],
- haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],energydrink:["energy drink","energydrink","red bull","monster energy"],tiefkuehlpizza:["tiefkühlpizza","tiefkuhlpizza","tk pizza","pizza ristorante","ristorante pizza","dr oetker ristorante"],croissants:["croissant","croissants","hörnchen","hornchen","mini hörnchen","mini hornchen"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
+ haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],energydrink:["energy drink","energydrink","red bull","monster energy"],tiefkuehlpizza:["tiefkühlpizza","tiefkuhlpizza","tk pizza","pizza ristorante","ristorante pizza","dr oetker ristorante"],croissants:["croissant","croissants","hörnchen","hornchen","mini hörnchen","mini hornchen","mini hdrncher"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
  milch:["milch","vollmilch","frischmilch","haltbare milch","h milch"],haferdrink:["haferdrink","hafer drink","hafermilch","oat drink","alpro hafer"],
  butter:["butter"],kaese:["käse","kase","kaese","gouda","emmentaler","mozzarella"],joghurt:["joghurt","yoghurt"],skyr:["skyr"],quark:["quark","magerquark"],
  nudeln:["nudeln","nudel","pasta","spaghetti","penne","fusilli"],reis:["reis","basmatireis","jasminreis"],mehl:["mehl","weizenmehl"],zucker:["zucker"],
@@ -811,7 +812,7 @@ function showReceipt(){hidePoints();$("planner").style.display="none";$("receipt
 function showPoints(){$("planner").style.display="none";$("receipt").style.display="none";$("pointsCard").style.display="block";window.scrollTo({top:0,behavior:"smooth"});refreshPoints()}
 function getPersonalReceipts(){try{return JSON.parse(localStorage.getItem("echtpreis_personal_receipts")||"[]")}catch(e){return[]}}
 function savePersonalReceipts(v){localStorage.setItem("echtpreis_personal_receipts",JSON.stringify(v))}
-function refreshStats(){const receipts=getPersonalReceipts(),year=new Date().toISOString().slice(0,4),month=new Date().toISOString().slice(0,7),sum=rows=>rows.reduce((n,r)=>n+(Number(r.total)||0),0),known=receipts.filter(r=>Number.isFinite(Number(r.potentialSaving))&&r.potentialSaving!=null);$("statsReceipts").textContent=String(receipts.length);$("statsSpent").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(year))));$("statsMonthly").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(month))));$("statsPotential").textContent=known.length?"ca. "+eur(known.reduce((n,r)=>n+Number(r.potentialSaving),0)):"–"}
+function refreshStats(){const receipts=getPersonalReceipts(),today=new Date(),year=String(today.getFullYear()),month=year+"-"+String(today.getMonth()+1).padStart(2,"0"),weekStart=new Date(today.getFullYear(),today.getMonth(),today.getDate()-(today.getDay()+6)%7),weekKey=weekStart.getFullYear()+"-"+String(weekStart.getMonth()+1).padStart(2,"0")+"-"+String(weekStart.getDate()).padStart(2,"0"),sum=rows=>rows.reduce((n,r)=>n+(Number(r.total)||0),0),known=receipts.filter(r=>Number.isFinite(Number(r.potentialSaving))&&r.potentialSaving!=null);$("statsReceipts").textContent=String(receipts.length);$("statsSpent").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(year))));$("statsWeekly").textContent=eur(sum(receipts.filter(r=>String(r.date||"")>=weekKey)));$("statsMonthly").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(month))));$("statsPotential").textContent=known.length?"ca. "+eur(known.reduce((n,r)=>n+Number(r.potentialSaving),0)):"–"}
 window.refreshEchtpreisStats=refreshStats;
 async function loadServerReceipts(){let cid=localStorage.getItem("echtpreis_contributor_id")||"";if(!cid)return getPersonalReceipts();try{let r=await fetch(API_BASE+"/v1/my-receipts?contributorId="+encodeURIComponent(cid)),d=await r.json();if(r.ok&&Array.isArray(d.items))return d.items.map(x=>({id:x.id,store:x.store,date:String(x.purchasedAt||"").slice(0,10),total:"",private:!!x.private,source:"server"}))}catch(e){}return getPersonalReceipts()}
 async function setReceiptPrivate(r,value){if(r.source==="server"){let cid=localStorage.getItem("echtpreis_contributor_id")||"";let q=await fetch(API_BASE+"/v1/receipt-privacy",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({receiptId:r.id,contributorId:cid,private:value})});if(!q.ok)throw new Error("Server konnte den Privatstatus nicht ändern")}else{let a=getPersonalReceipts(),x=a.find(v=>v.id===r.id);if(x)x.private=value;savePersonalReceipts(a)}}
@@ -826,10 +827,10 @@ function guessKey(name){return identifyReceiptProduct(name).key||""}
 function drawReviewRows(){
  $("reviewRows").innerHTML=receiptDraft.map((r,i)=>(()=>{let m=identifyReceiptProduct(r.name||"");return '<div class="reviewrow"><div><input aria-label="Artikel" data-rname="'+i+'" value="'+escHtml(r.name||"")+'" placeholder="Artikel"><div class="detail">'+(r.isDeposit?'↪ Pfand · wird nicht als Produktpreis verglichen':(m.key?'✓ '+escHtml(m.label)+' · '+confidenceLabel(m):'⚠ '+escHtml(m.label)))+'</div></div><input data-rprice="'+i+'" inputmode="decimal" value="'+(r.price||"")+'" placeholder="Preis €" aria-label="Preis"><input data-ramount="'+i+'" inputmode="decimal" value="'+(r.packAmount||"")+'" placeholder="Menge" aria-label="Menge"><select aria-label="Einheit" data-runit="'+i+'"><option value="">Einheit</option><option value="kg" '+(r.packUnit==='kg'?'selected':'')+'>kg</option><option value="g" '+(r.packUnit==='g'?'selected':'')+'>g</option><option value="l" '+(r.packUnit==='l'?'selected':'')+'>l</option><option value="ml" '+(r.packUnit==='ml'?'selected':'')+'>ml</option><option value="piece" '+(r.packUnit==='piece'?'selected':'')+'>Stück</option></select><button aria-label="Artikel löschen" class="x" data-rdel="'+i+'">✕</button></div>'})()).join("");
  document.querySelectorAll("[data-rname]").forEach(e=>e.onchange=()=>{receiptDraft[+e.dataset.rname].name=e.value;drawReviewRows()});
- document.querySelectorAll("[data-rprice]").forEach(e=>e.oninput=()=>{receiptDraft[+e.dataset.rprice].price=e.value;receiptTotalVerified=false;const tc=$("receiptTotalCheck");if(tc)tc.textContent="Preis geändert · Bon-Summe wird beim erneuten Einlesen geprüft.";updateReceiptAnalysis()});
+ document.querySelectorAll("[data-rprice]").forEach(e=>e.oninput=()=>{receiptDraft[+e.dataset.rprice].price=e.value;checkReceiptTotal()});
  document.querySelectorAll("[data-ramount]").forEach(e=>e.oninput=()=>receiptDraft[+e.dataset.ramount].packAmount=e.value);
  document.querySelectorAll("[data-runit]").forEach(e=>e.onchange=()=>receiptDraft[+e.dataset.runit].packUnit=e.value);
- document.querySelectorAll("[data-rdel]").forEach(e=>e.onclick=()=>{receiptDraft.splice(+e.dataset.rdel,1);drawReviewRows()});
+ document.querySelectorAll("[data-rdel]").forEach(e=>e.onclick=()=>{receiptDraft.splice(+e.dataset.rdel,1);drawReviewRows();checkReceiptTotal()});
  updateReceiptAnalysis();
 }
 function parseReceiptNumber(v){return Number(String(v||"").replace(/\./g,"").replace(",","."))}
@@ -843,10 +844,12 @@ function inferPackFromName(name){
 function parseReceiptText(text){
  const lines=text.split(/\n+/).map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean),rows=[];let last=null;
  for(let i=0;i<lines.length;i++){
-  const line=lines[i];
+  const line=lines[i].replace(/(\d)\s*([,.])\s*(\d{2})/g,"$1$2$3");
   let discount=line.match(/(?:aktionsrabatt|preisvorteil|rabatt)\s*-?\s*(\d+[,.]\d{2})\s*(?:€|EUR)?/i);
   if(discount&&last){let d=parseReceiptNumber(discount[1]);last.discount=Number(((last.discount||0)+d).toFixed(2));last.regularTotal=Number((Number(last.price)+last.discount).toFixed(2));continue}
   let pf=line.match(/^pfand(?:\s+\d+[,.]\d{2})?\s+(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)\s+(\d+[,.]\d{2})/i)||line.match(/^pfand\s+(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)\s+(\d+[,.]\d{2})/i);
+  let pfBasic=line.match(/^pfand\s+(\d+[,.]\d{2})\s*(?:€|EUR)?\s*[x×]\s*(\d+)/i);
+  if(pfBasic){let unitPrice=parseReceiptNumber(pfBasic[1]),count=Number(pfBasic[2]);last={name:"Pfand",price:String(Number((unitPrice*count).toFixed(2))),packAmount:count,packUnit:"piece",count,unitLinePrice:unitPrice,isDeposit:true,pricingType:"deposit"};rows.push(last);continue}
   if(pf){last={name:"Pfand",price:String(parseReceiptNumber(pf[3])),packAmount:Number(pf[2]),packUnit:"piece",count:Number(pf[2]),unitLinePrice:parseReceiptNumber(pf[1]),isDeposit:true,pricingType:"deposit"};rows.push(last);continue}
   let inlineMult=line.match(/^(.{2,48}?)\s+(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)\s+(\d+[,.]\d{2})(?:\s*[AB])?$/i);
   if(inlineMult&&!/summe|gesamt|bar|karte|mwst|gegeben|rückgeld/i.test(inlineMult[1])){
@@ -863,6 +866,21 @@ function parseReceiptText(text){
  }
  return rows.slice(0,40);
 }
+function extractReceiptTotal(text){
+ const lines=String(text||"").split(/\n+/),amounts=[];
+ for(let i=0;i<lines.length;i++)if(/\b(?:summe|gesamt(?:betrag)?|zu zahlen)\b/i.test(lines[i])){
+  const tail=lines[i].replace(/^.*?\b(?:summe|gesamt(?:betrag)?|zu zahlen)\b/i,"");
+  const amount=(tail.match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[]).pop()||((lines[i+1]||"").match(/^\s*(?:€|EUR|£)?\s*(\d{1,5}\s*[,.]\s*\d{2})/)||[])[1];
+  if(amount)amounts.push(parseReceiptNumber(amount.replace(/\s+/g,"")));
+ }
+ return amounts.find(n=>Number.isFinite(n)&&n>0)||null;
+}
+function checkReceiptTotal(){
+ const total=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,"")),recognized=Number(receiptDraft.reduce((n,r)=>n+(Number(String(r.price).replace(",","."))||0),0).toFixed(2));
+ receiptTotalVerified=total>0&&receiptDraft.length>0&&Math.abs(total-recognized)<.011;
+ $("receiptTotalCheck").textContent=total>0?(receiptTotalVerified?"✓ Bon-Summe stimmt mit den erkannten Positionen überein.":receiptDraft.length?"Bon-Summe "+eur(total)+" · erkannte Positionen "+eur(recognized)+". Bitte Artikel kontrollieren.":"Bon-Summe erkannt. Für einen Marktvergleich bitte Artikel ergänzen oder erneut fotografieren."):"Bitte die Bon-Summe vom Beleg eintragen.";
+ updateReceiptAnalysis();
+}
 async function extractPdfText(file){
  if(!window.pdfjsLib){await new Promise((resolve,reject)=>{let sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc)});pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"}
  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;let text="";
@@ -876,24 +894,22 @@ async function renderPdfFirstPage(file){
 function updateReceiptAnalysis(){
  const box=$("receiptAnalysis");if(!box)return;
  currentReceiptSaving=null;
- const valid=receiptDraft.filter(r=>!r.isDeposit&&r.name&&Number(r.price)>0),paid=valid.reduce((n,r)=>n+Number(r.price||0),0);
- if(!valid.length||!paid){box.style.display="none";return;}
- const store=$("receiptStore").value||"Dein Markt",wishes=valid.map(r=>{let w=parseWish(r.name);return w});
- let rows=[...selected].filter(st=>st!==store).map(st=>{let total=0,known=0;wishes.forEach(w=>{let p=w.key?activePrice(w.key,st,w):null;if(p){total+=p.price*w.calcAmount;known++}});return {store:st,total,known}}).filter(x=>x.known===wishes.length&&x.total>0).sort((a,b)=>a.total-b.total);
+ const valid=receiptDraft.filter(r=>!r.isDeposit&&r.name&&Number(r.price)>0),paid=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,""));
+ if(!paid){box.style.display="none";return;}
+ const store=$("receiptStore").value||"Dein Markt",wishes=valid.map(r=>{let w=parseWish(r.name);w.matchMode="comparable";if(r.packAmount&&r.packUnit){w.calcAmount=Number(r.packAmount)*(Number(r.count)||1)*(r.packUnit==="g"||r.packUnit==="ml"?.001:1)}return w});
+ let rows=valid.length&&receiptTotalVerified?[...selected].filter(st=>st!==store).map(st=>{let total=receiptDraft.filter(r=>r.isDeposit).reduce((n,r)=>n+Number(r.price||0),0),known=0;wishes.forEach(w=>{let p=w.key?activePrice(w.key,st,w):null;if(p){total+=p.price*w.calcAmount;known++}});return {store:st,total,known}}).filter(x=>x.known===wishes.length&&x.total>0).sort((a,b)=>a.total-b.total):[];
  $("analysisPaid").textContent=eur(paid);box.style.display="block";
  if(rows.length&&rows[0].total<paid){let best=rows[0],saving=paid-best.total;currentReceiptSaving=saving;$("analysisBestStore").textContent=best.store+" · geschätzt";$("analysisBestPrice").textContent="ca. "+eur(best.total);$("analysisSaving").textContent="ca. "+eur(saving);$("analysisNote").textContent="Vergleich auf Basis der aktuell verfügbaren ECHTPREIS- und Referenzpreise. Filialpreise können abweichen.";}
- else{$("analysisBestStore").textContent="Keine günstigere vollständige Alternative gefunden";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="aktuell nichts";$("analysisNote").textContent="Wir zeigen nur Vergleiche, für die alle erkannten Produkte bepreist werden können.";}
+ else{$("analysisBestStore").textContent=rows.length?rows[0].store+" · geschätzt":valid.length?"Kein vollständiger Marktvergleich möglich":"Artikel für Marktvergleich fehlen";$("analysisBestPrice").textContent=rows.length?"ca. "+eur(rows[0].total):"–";$("analysisSaving").textContent=rows.length?"0,00 €":"noch keinen Betrag";if(rows.length)currentReceiptSaving=0;$("analysisNote").textContent=rows.length?"Der günstigste bekannte Vergleich liegt nicht unter deiner Bon-Summe. Filialpreise können abweichen.":valid.length?"Für einen belastbaren Vergleich müssen die Bon-Summe und alle erkannten Positionen übereinstimmen und alle Produkte bepreist werden können.":"Die Bon-Summe wird gespeichert. Ergänze die Artikel mit ihren Preisen oder fotografiere den Bon erneut, um eine mögliche Ersparnis zu berechnen.";}
 }
 function applyReceiptText(text,label){
  receiptDraft=parseReceiptText(text);let low=text.toLowerCase();if(low.includes("lidl"))$("receiptStore").value="Lidl";else if(low.includes("kaufland"))$("receiptStore").value="Kaufland";else if(low.includes("rewe"))$("receiptStore").value="REWE";else if(low.includes("edeka"))$("receiptStore").value="EDEKA";else if(low.includes("penny"))$("receiptStore").value="PENNY";else if(low.includes("aldi"))$("receiptStore").value="ALDI Nord";else if(low.includes("netto"))$("receiptStore").value="Netto";else if(low.includes("norma"))$("receiptStore").value="NORMA";else if(low.includes("rossmann"))$("receiptStore").value="Rossmann";else if(/\bdm\b/.test(low))$("receiptStore").value="dm";
- let dm=text.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2})\b/);$("receiptDate").value=dm?dm[3]+"-"+dm[2]+"-"+dm[1]:new Date().toISOString().slice(0,10);
+ let dm=text.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2}|\d{2})\b/);$("receiptDate").value=dm?(dm[3].length===2?"20"+dm[3]:dm[3])+"-"+dm[2]+"-"+dm[1]:new Date().toISOString().slice(0,10);
  let ed=text.match(/EDEKA\s+Fil\.?\s*(\d+)/i),addr=text.match(/(?:^|\n)\s*([^\n]{3,45}(?:str\.|straße|strasse)[^\n]*)/i),detail=$("receiptStoreDetail");
  if(detail)detail.textContent=ed?("✓ EDEKA Filiale "+ed[1]+(addr?" · "+addr[1].trim():"")):"";
  if(!detectedReceiptBarcode){let bc=text.match(/\b(\d{20,24})\b/);if(bc)detectedReceiptBarcode=bc[1];}
- let tm=text.match(/(?:SUMME|GESAMT)\s*(?:€|EUR)?\s*(\d+[,.]\d{2})/i),tc=$("receiptTotalCheck");
- receiptTotalVerified=false;
- if(tc&&tm){let printed=parseReceiptNumber(tm[1]),recognized=Number(receiptDraft.reduce((n,r)=>n+(Number(r.price)||0),0).toFixed(2)),diff=Number(Math.abs(printed-recognized).toFixed(2));receiptTotalVerified=diff<0.011;tc.textContent=receiptTotalVerified?"✓ Bon-Summe "+printed.toFixed(2).replace(".",",")+" € stimmt mit den erkannten Positionen überein.":"⚠ Bon-Summe "+printed.toFixed(2).replace(".",",")+" € · erkannte Positionen "+recognized.toFixed(2).replace(".",",")+" € · bitte kontrollieren.";}else if(tc)tc.textContent="";
- $("ocrStatus").textContent=receiptDraft.length?receiptDraft.length+" mögliche Preiszeilen aus "+label+" erkannt. Bitte kontrollieren.":"Keine sicheren Preiszeilen erkannt. Du kannst Artikel manuell ergänzen.";drawReviewRows();
+ const printed=extractReceiptTotal(text);$("receiptTotalInput").value=printed?printed.toFixed(2).replace(".",","):"";
+ $("ocrStatus").textContent=receiptDraft.length?receiptDraft.length+" mögliche Preiszeilen aus "+label+" erkannt. Bitte kontrollieren.":"Keine sicheren Preiszeilen erkannt. Du kannst Artikel manuell ergänzen.";drawReviewRows();checkReceiptTotal();
 }
 async function detectReceiptBarcode(file){
  detectedReceiptBarcode="";
@@ -926,6 +942,10 @@ async function runImageReceiptOCR(file){
  try{if(!window.Tesseract){$("ocrStatus").textContent="Lokale Texterkennung wird geladen …";await new Promise((resolve,reject)=>{let sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc)})}
   const out=await Tesseract.recognize(file,"deu",{logger:m=>{if(m.status==="recognizing text")$("ocrStatus").textContent="Bon lesen: "+Math.round((m.progress||0)*100)+" %"}});let text=out.data.text||"";
   applyReceiptText(text,"Foto");
+  if(!receiptDraft.length||!extractReceiptTotal(text)){
+   $("ocrStatus").textContent="Bon-Ausschnitt wird erneut gelesen …";
+   try{const image=await createImageBitmap(file),canvas=document.createElement("canvas"),crop=[image.width*.16,image.height*.12,image.width*.70,image.height*.36];canvas.width=1800;canvas.height=Math.round(1800*crop[3]/crop[2]);let ctx=canvas.getContext("2d");ctx.filter="grayscale(1) contrast(1.7)";ctx.drawImage(image,...crop,0,0,canvas.width,canvas.height);image.close();const retry=await Tesseract.recognize(canvas,"deu",{config:{tessedit_pageseg_mode:6}}),retryText=retry.data.text||"";if(parseReceiptText(retryText).length>receiptDraft.length||(!extractReceiptTotal(text)&&extractReceiptTotal(retryText)))applyReceiptText(retryText,"Bonausschnitt");}catch(err){}
+  }
  }catch(err){$("ocrStatus").textContent="Automatische Erkennung fehlgeschlagen. Bitte Artikel manuell ergänzen.";receiptDraft=[];drawReviewRows()}
 }
 const runDupeTestBtn=$("runDupeTest");if(runDupeTestBtn)runDupeTestBtn.onclick=async()=>{
@@ -936,36 +956,40 @@ const runDupeTestBtn=$("runDupeTest");if(runDupeTestBtn)runDupeTestBtn.onclick=a
  try{let r1=await fetch(API_BASE+"/v1/receipt-submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),d1=await r1.json();$("dupeTestResult").textContent="1. Bon: "+(d1.duplicate?"bereits bekannt":"akzeptiert · +"+(d1.xp||0)+" XP")+" · 2. Einreichung läuft …";let r2=await fetch(API_BASE+"/v1/receipt-submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),d2=await r2.json();$("dupeTestResult").innerHTML=(d1.duplicate?"⚠️ Test-ID war schon vorhanden.":"✅ 1. Einreichung akzeptiert.")+"<br>"+(d2.duplicate&&Number(d2.xp||0)===0?"✅ 2. Einreichung korrekt als Dublette erkannt · 0 XP":"❌ Dublettenprüfung unerwartet: "+escHtml(JSON.stringify(d2)));}catch(e){$("dupeTestResult").textContent="❌ Backend-Test fehlgeschlagen: "+e.message}
 };
 $("addReviewRow").onclick=()=>{receiptDraft.push({name:"",price:"",packAmount:"",packUnit:""});drawReviewRows()};
+$("receiptTotalInput").oninput=checkReceiptTotal;
 $("receiptStore").onchange=updateReceiptAnalysis;
-$("receiptFile").onchange=async e=>{let file=e.target.files[0],button=$("finishPurchaseBtn");$("receiptMsg").textContent=file?"✓ Bon ausgewählt: "+file.name:"";button.disabled=true;if(!file)return;try{await processReceiptFile(file)}catch(err){$("ocrBox").style.display="block";$("ocrStatus").textContent="Bon konnte nicht gelesen werden. Bitte Artikel manuell ergänzen.";receiptDraft=[];drawReviewRows()}button.disabled=false};
+$("receiptFile").onchange=async e=>{let file=e.target.files[0],button=$("finishPurchaseBtn");$("receiptMsg").textContent=file?"✓ Bon ausgewählt: "+file.name:"";button.disabled=true;$("receiptTotalInput").value="";receiptDraft=[];if(!file)return;try{await processReceiptFile(file)}catch(err){$("ocrBox").style.display="block";$("ocrStatus").textContent="Bon konnte nicht gelesen werden. Bitte Artikel manuell ergänzen.";receiptDraft=[];drawReviewRows();checkReceiptTotal()}button.disabled=false};
 function closePurchase(){try{localStorage.removeItem("echtpreis_open_purchase")}catch(e){}}
 const autoImports=$("autoReceiptImports");if(autoImports)autoImports.onchange=()=>localStorage.setItem("echtpreis_auto_imports",autoImports.checked?"1":"0");
-async function submitReceiptReward(store,date,valid){
+async function submitReceiptReward(store,date,valid,total){
  const contributorId=localStorage.getItem("echtpreis_contributor_id")||"";
- const total=valid.reduce((n,x)=>n+(Number(x.price)||0),0);
  const payload={store,purchasedAt:date+"T12:00:00",date,total:total.toFixed(2),contributorId,receiptBarcode:detectedReceiptBarcode||undefined,items:valid.map(x=>({rawName:x.name,lineTotal:x.price,price:x.price}))};
  try{
   const r=await fetch(API_BASE+"/v1/receipt-submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
   const d=await r.json();if(!r.ok)throw new Error(d.error||"HTTP "+r.status);
-  if(d.contributorId)localStorage.setItem("echtpreis_contributor_id",d.contributorId);if(d.receiptId){let a=getPersonalReceipts();if(!a.some(x=>x.id===d.receiptId)){a.unshift({id:d.receiptId,store,date,total:total.toFixed(2),potentialSaving:currentReceiptSaving,private:false,source:"server"});savePersonalReceipts(a.slice(0,250))}}
-  if(d.duplicate)return {ok:true,duplicate:true,xp:0,rewardPoints:0};
+  if(d.contributorId)localStorage.setItem("echtpreis_contributor_id",d.contributorId);
+  if(d.duplicate)return {ok:true,duplicate:true,xp:0,rewardPoints:0,receiptId:d.receiptId};
   let xp=Number(localStorage.getItem("echtpreis_xp")||0)+Number(d.xp||0),n=Number(localStorage.getItem("echtpreis_receipts")||0)+1;
   localStorage.setItem("echtpreis_xp",String(xp));localStorage.setItem("echtpreis_receipts",String(n));refreshPoints();
-  return {ok:true,duplicate:false,xp:Number(d.xp||0),rewardPoints:Number(d.rewardPoints||0),status:d.rewardStatus||""};
+  return {ok:true,duplicate:false,xp:Number(d.xp||0),rewardPoints:Number(d.rewardPoints||0),status:d.rewardStatus||"",receiptId:d.receiptId};
  }catch(e){return {ok:false,error:String(e.message||e)}}
 }
 $("finishPurchaseBtn").onclick=async()=>{
  if(!$("receiptFile").files[0])return;let store=$("receiptStore").value,date=$("receiptDate").value;if(!store||!date)return alert("Bitte Händler und Bon-Datum kontrollieren.");
+ const total=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,""));if(!Number.isFinite(total)||total<=0)return alert("Bitte die Bon-Summe vom Beleg eintragen und kontrollieren.");
  let valid=receiptDraft.map(r=>({name:(r.name||"").trim(),price:Number(String(r.price).replace(",",".")),packAmount:Number(String(r.packAmount||"").replace(",",".")),packUnit:r.packUnit||"",discount:Number(r.discount||0),regularTotal:Number(r.regularTotal||r.price||0),count:Number(r.count||1),quantitySource:r.quantitySource||"",isDeposit:!!r.isDeposit})).filter(r=>r.name&&Number.isFinite(r.price)&&r.price>0);
- if(!valid.length&&!confirm("Es wurden keine Artikelpreise bestätigt. Einkauf trotzdem abschließen?"))return;
  $("finishPurchaseBtn").disabled=true;$("finishPurchaseBtn").textContent="Bon wird geprüft …";
- let reward=await submitReceiptReward(store,date,valid);
- if(reward.ok&&reward.duplicate){$("openPurchaseNotice").innerHTML="<b>🧾 Bon bereits erfasst.</b> Dieser Einkauf wurde schon bei ECHTPREIS eingereicht."; $("receiptMsg").textContent="Keine erneuten XP oder Punkte für denselben Bon.";$("finishPurchaseBtn").textContent="Bereits erfasst";return}
+ let reward=await submitReceiptReward(store,date,valid,total);
+ let receipts=getPersonalReceipts(),existing=receipts.find(r=>r.id===reward.receiptId)||receipts.find(r=>r.store===store&&r.date===date&&Number(r.total)===0);
+ if(existing){existing.total=total.toFixed(2);existing.potentialSaving=currentReceiptSaving;}
+ else receipts.unshift({id:reward.receiptId||"local_"+Date.now(),store,date,total:total.toFixed(2),potentialSaving:currentReceiptSaving,private:false,source:reward.receiptId?"server":"local"});
+ savePersonalReceipts(receipts.slice(0,250));refreshStats();
+ if(reward.ok&&reward.duplicate){$("receiptMsg").textContent="Bon bereits erfasst · Summe "+eur(total)+" in der Statistik aktualisiert. Keine erneuten XP.";$("finishPurchaseBtn").textContent="Bereits erfasst";return}
  let proofId="receipt_"+Date.now(),saved=0,sharedItems=[];
  if($("contribute").checked&&!receiptTotalVerified){$("receiptMsg").textContent="⚠ Bon kann gespeichert werden, aber Community-Preise bleiben gesperrt, bis die Bon-Summe zu den erkannten Positionen passt.";}
  if($("contribute").checked&&receiptTotalVerified){valid.filter(r=>!r.isDeposit).forEach(r=>{let match=identifyReceiptProduct(r.name),key=match.key;if(!key)return;let c=catalog[key];learnProductAlias(r.name,key,{ean:match.ean,brand:match.brand,quantity:match.quantity,source:"confirmed-receipt"});let amount=r.packAmount,unit=r.packUnit,per=c.unit,normalizedAmount=null;if(amount>0){if(unit==="g")normalizedAmount=amount/1000;else if(unit==="ml")normalizedAmount=amount/1000;else if(unit==="kg"||unit==="l"||unit==="piece")normalizedAmount=amount}let compatible=normalizedAmount>0&&((per==="kg"&&(unit==="kg"||unit==="g"))||(per==="l"&&(unit==="l"||unit==="ml"))||(per==="piece"&&unit==="piece"));if(!compatible)return;let unitPrice=r.price/normalizedAmount;if(!Number.isFinite(unitPrice)||unitPrice<=0)return;let obs={key,store,price:unitPrice,per,date,region:"",source:"ECHTPREIS Bon",product:r.name,rawName:r.name,proof:proofId,status:"observed",lineTotal:r.price,regularTotal:r.regularTotal||r.price,discount:r.discount||0,packAmount:amount,packUnit:unit,pricingConfidence:"confirmed"};if(addCommunityObservation(obs)){saved++;sharedItems.push(obs)}});if(sharedItems.length)pushSharedReceipt(proofId,sharedItems)}
  try{localStorage.setItem("echtpreis_last_proof",JSON.stringify({id:proofId,type:"RECEIPT",file:$("receiptFile").files[0].name,created:new Date().toISOString(),consent:$("contribute").checked,rows:valid.length,saved}))}catch(e){}
- closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> "+valid.length+" Preiszeilen bestätigt.";$("finishPurchaseBtn").textContent="✓ Einkauf abgeschlossen";$("finishPurchaseBtn").disabled=true;$("noReceiptBtn").style.display="none";
+ closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Bon-Summe "+eur(total)+" gespeichert · "+valid.length+" Preiszeilen bestätigt.";$("finishPurchaseBtn").textContent="✓ Einkauf abgeschlossen";$("finishPurchaseBtn").disabled=true;$("noReceiptBtn").style.display="none";
  let rewardText=reward.ok?(" · +"+reward.xp+" XP"+(reward.status?" · "+reward.status:"")):" · XP-Server momentan nicht erreichbar";
  $("receiptMsg").textContent=(($("contribute").checked&&receiptTotalVerified)?(saved+" erkannte Produktpreise beigetragen."):$("contribute").checked?"Bon gespeichert · Community-Preise wegen ungeprüfter Summe nicht übernommen.":"Bon geprüft · keine Community-Freigabe.")+rewardText;drawDataMachine();refreshPoints();
 };
