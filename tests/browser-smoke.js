@@ -153,7 +153,6 @@ const {JSDOM,VirtualConsole}=require("jsdom");
 
  const receipt=w.parseReceiptText("G&G Mini-Hörnchen 1,49\nOetker Ristorante 3,49\nRed Bull 0,25 1,49 x 2 2,98\nPfand 0,25 x 2 0,50\nSUMME 8,46");
  await w.addEchtpreisBarcode("Testprodukt","250 g","12345678");assert.strictEqual(d.querySelectorAll("#list .item").length,1,"barcode product should enter the primary basket");w.replaceEchtpreisList([]);
- w.replaceEchtpreisList([]);
  assert(receipt.length>=4,"receipt parser lost rows");
  const longReceipt=Array.from({length:55},(_,i)=>"Milch "+String(i+1)+" 1,00").join("\n")+"\nSUMME 55,00";assert.strictEqual(w.parseReceiptText(longReceipt).length,55,"normal large grocery receipts must not be truncated at 40 lines");
 
