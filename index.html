@@ -553,6 +553,7 @@ function referencePrice(key,store,wish=null){
  history.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  if(store==="dm"||store==="Rossmann")return null;
  if(history.length){const x=history[0];return {...x,reference:true,referenceType:"historical",confidence:"niedrig",source:"Letzter bekannter Preis · "+(x.source||"ECHTPREIS"),status:"reference"};}
+ if(wish&&wish.matchMode==="exact"&&wish.exactBrand)return null;
  const base=referenceBase[key],factor=referenceStoreFactor[store];if(!Number.isFinite(base)||!Number.isFinite(factor))return null;
  return {key,store,price:Number((base*factor).toFixed(2)),per:catalog[key]?.unit||"piece",date:"",validTo:null,region:"Deutschland",kind:"reference",source:"Markt-Referenz",product:catalog[key]?.label||key,trust:25,status:"reference",reference:true,referenceType:"estimate",confidence:"niedrig"};
 }
