@@ -16,6 +16,8 @@
     window.open(url,"_blank","noopener");
   }
 
+  function localDateKey(date){const d=date instanceof Date?date:new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);}
+
   function storage(){
     return {
       get:key=>localStorage.getItem(key),
@@ -30,6 +32,7 @@
     config,
     currentPosition,
     openExternal,
+    localDateKey,
     storage:storage()
   });
 })();
