@@ -15,6 +15,8 @@ assert(!html.includes('label for="receiptTotalInput"'),"manual receipt-total edi
 assert.strictEqual((html.match(/function importRecipeIngredients\s*\(/g)||[]).length,1,"recipe import must have one implementation");
 assert(html.includes("plausibleReceiptItemName"),"receipt item plausibility guard missing");
 assert(html.includes("comparisonQuality"),"comparison confidence labelling missing");
+assert(html.includes('String(b.validFrom||"").localeCompare(String(a.validFrom||""))||(Number(b.trust)||0)-(Number(a.trust)||0)||a.price-b.price'),"legacy price chooser must prioritize freshness and trust before cheapness");
+assert(html.includes('history.sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0)||a.price-b.price)'),"historical fallback must prioritize freshness and trust");
 const cat=(html.match(/openPricesCategory:/g)||[]).length;assert(cat>=15,"too few live Open Prices categories: "+cat);
 const products=(html.match(/label:"/g)||[]).length;assert(products>=30,"primary product catalog unexpectedly small: "+products);
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
