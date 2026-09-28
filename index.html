@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.4.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.4.1</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -149,7 +149,17 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
  }
  async function scanBarcodeFile(file){
   const st=document.getElementById("barcodeStatus");if(st)st.textContent="Barcode wird gelesen …";
-  if(!("BarcodeDetector" in window)){if(st)st.textContent="Barcode-Scanner wird auf diesem Gerät noch nicht unterstützt. Kostenloser Kamera-Fallback folgt.";return;}
+  if(!("BarcodeDetector" in window)){
+   try{
+    if(!window.ZXing){await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc)});}
+    const url=URL.createObjectURL(file),img=new Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});
+    const canvas=document.createElement("canvas");canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;canvas.getContext("2d").drawImage(img,0,0);URL.revokeObjectURL(url);
+    const reader=new ZXing.BrowserMultiFormatReader(),result=await reader.decodeFromImageElement(img).catch(()=>reader.decodeFromImageUrl(canvas.toDataURL("image/jpeg",.92)));
+    const code=String(result&&result.getText?result.getText():result?.text||"").trim();
+    if(!/^\\d{8,14}$/.test(code)){if(st)st.textContent="Kein Lebensmittel-Barcode erkannt. Bitte näher und scharf fotografieren.";return;}
+    await lookupBarcode(code);return;
+   }catch(e){if(st)st.textContent="Barcode konnte nicht erkannt werden. Bitte erneut fotografieren.";return;}
+  }
   try{
    const formats=await BarcodeDetector.getSupportedFormats(),wanted=["ean_13","ean_8","upc_a","upc_e","code_128"].filter(x=>formats.includes(x));
    const detector=new BarcodeDetector({formats:wanted}),bmp=await createImageBitmap(file),hits=await detector.detect(bmp);bmp.close();
