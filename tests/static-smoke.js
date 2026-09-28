@@ -35,6 +35,8 @@ assert(html.includes("function renderStatsCategoryChanges"),"monthly category-ch
 assert(html.includes("function renderStatsYearTrend"),"fair year-to-date comparison missing");
 assert(html.includes('id="statsMore"'),"advanced statistics should be grouped for mobile readability");
 assert(html.includes("function renderStatsMarketProfile"),"personal market profile missing");
+assert(html.includes("<details><summary style=\"cursor:pointer;font-weight:900\">Meine Märkte"),"secondary market analytics should stay compact");
+assert(html.includes('x.category==="Sonstiges"'),"uncertain categories should be filtered from trend drivers");
 assert(html.includes("function renderStatsPriceMemory"),"personal product price memory missing");
 assert(html.includes("function renderStatsRhythm"),"personal shopping rhythm analysis missing");
 assert(html.includes("function searchPersonalPurchases"),"personal purchase search missing");
