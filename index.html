@@ -28,7 +28,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.24.2</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.30.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkaufsliste erstellen</button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen</button></div>
 <div class="tabs"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
@@ -65,7 +65,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </section>
 </section>
 
-<section class="receipt" id="receipt"><div class="card"><div class="smallcap">Schritt 2 von 2</div><h2 style="margin-top:6px">Einkauf mit Bon abschließen</h2><div class="muted">Der Bon ist fester Bestandteil des ECHTPREIS-Kreislaufs: Er bestätigt, was du wirklich gekauft und bezahlt hast. Dein aktueller Einkauf wird bis zum Abschluss lokal auf diesem Gerät als offen markiert.</div><div class="notice" id="openPurchaseNotice"><b>Offener Einkauf:</b> Noch kein Bon hinterlegt.</div><label class="upload" for="receiptFile">📎 Bon hinzufügen · Foto, Screenshot oder PDF</label><input id="receiptFile" type="file" accept="image/*,application/pdf" style="display:none"><div id="receiptMsg" class="detail"></div><div id="testModeBox" class="notice" style="display:none"><b>🧪 Entwicklungs-Testmodus</b><br>Dieser Modus prüft Barcode/OCR und zeigt dir das Ergebnis, ohne den Testbon als Community-Preisdaten zu veröffentlichen.<button class="ghost" id="runDupeTest" style="width:100%;margin-top:9px" disabled>Backend-Dublettentest starten</button><div id="dupeTestResult" class="detail"></div></div><div class="ocrbox" id="ocrBox"><h2>Bon kontrollieren</h2><div class="muted"><b>Neu in v3.6:</b> Für Preisdaten bitte neben dem bezahlten Preis auch Menge und Einheit bestätigen. Ohne sichere Menge wird kein Grundpreis gelernt.<br><br>ECHTPREIS liest lokal einen ersten Entwurf. Bestätigte Zuordnungen merkt sich dein Produktindex für kommende Bons. EANs können mit Open Food Facts angereichert werden.</div><div class="inputrow"><select id="receiptStore"><option value="">Händler wählen</option><option>Lidl</option><option>Kaufland</option><option>REWE</option><option>EDEKA</option></select><input id="receiptDate" type="date"></div><div id="receiptStoreDetail" class="detail"></div><div id="receiptTotalCheck" class="detail"></div><div id="ocrStatus" class="detail"></div><div id="reviewRows"></div><button class="ghost" id="addReviewRow" style="width:100%;margin-top:8px">+ Artikel ergänzen</button></div><label style="display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13px;line-height:1.4"><input type="checkbox" id="contribute" style="flex:0 0 auto;margin-top:2px"> <span><b>Anonymisierte Preisdaten beitragen</b><br><span class="muted">Händler/Filiale, Datum, Produkt, Menge, Preis und Rabatt dürfen ECHTPREIS verbessern. Personen- und Zahlungsdaten gehören nicht in die Preisdatenbank.</span></span></label><button class="green" id="finishPurchaseBtn" disabled>Einkauf mit Bon abschließen</button><button class="ghost" id="noReceiptBtn" style="width:100%;margin-top:8px">Bon nicht mehr vorhanden</button><button class="ghost" id="backPlanBtn" style="width:100%;margin-top:8px">Zurück zur Liste</button></div>
+<section class="receipt" id="receipt"><div class="card"><div class="smallcap">Schritt 2 von 2</div><h2 style="margin-top:6px">Einkauf mit Bon abschließen</h2><div class="muted">Der Bon ist fester Bestandteil des ECHTPREIS-Kreislaufs: Er bestätigt, was du wirklich gekauft und bezahlt hast. Dein aktueller Einkauf wird bis zum Abschluss lokal auf diesem Gerät als offen markiert.</div><div class="notice" id="openPurchaseNotice"><b>Offener Einkauf:</b> Noch kein Bon hinterlegt.</div><label class="upload" for="receiptFile">📎 Bon hinzufügen · Foto, Screenshot oder PDF</label><input id="receiptFile" type="file" accept="image/*,application/pdf" style="display:none"><div id="receiptMsg" class="detail"></div><div id="testModeBox" class="notice" style="display:none"><b>🧪 Entwicklungs-Testmodus</b><br>Dieser Modus prüft Barcode/OCR und zeigt dir das Ergebnis, ohne den Testbon als Community-Preisdaten zu veröffentlichen.<button class="ghost" id="runDupeTest" style="width:100%;margin-top:9px" disabled>Backend-Dublettentest starten</button><div id="dupeTestResult" class="detail"></div></div><div class="ocrbox" id="ocrBox"><h2>Bon kontrollieren</h2><div class="muted"><b>Neu in v3.6:</b> Für Preisdaten bitte neben dem bezahlten Preis auch Menge und Einheit bestätigen. Ohne sichere Menge wird kein Grundpreis gelernt.<br><br>ECHTPREIS liest lokal einen ersten Entwurf. Bestätigte Zuordnungen merkt sich dein Produktindex für kommende Bons. EANs können mit Open Food Facts angereichert werden.</div><div class="inputrow"><select id="receiptStore"><option value="">Händler wählen</option><option>Lidl</option><option>Kaufland</option><option>REWE</option><option>EDEKA</option><option>PENNY</option><option>ALDI Nord</option><option>Netto</option><option>NORMA</option><option>dm</option><option>Rossmann</option></select><input id="receiptDate" type="date"></div><div id="receiptStoreDetail" class="detail"></div><div id="receiptTotalCheck" class="detail"></div><div id="ocrStatus" class="detail"></div><div id="reviewRows"></div><button class="ghost" id="addReviewRow" style="width:100%;margin-top:8px">+ Artikel ergänzen</button></div><label style="display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13px;line-height:1.4"><input type="checkbox" id="contribute" style="flex:0 0 auto;margin-top:2px"> <span><b>Anonymisierte Preisdaten beitragen</b><br><span class="muted">Händler/Filiale, Datum, Produkt, Menge, Preis und Rabatt dürfen ECHTPREIS verbessern. Personen- und Zahlungsdaten gehören nicht in die Preisdatenbank.</span></span></label><button class="green" id="finishPurchaseBtn" disabled>Einkauf mit Bon abschließen</button><button class="ghost" id="noReceiptBtn" style="width:100%;margin-top:8px">Bon nicht mehr vorhanden</button><button class="ghost" id="backPlanBtn" style="width:100%;margin-top:8px">Zurück zur Liste</button></div>
 <div class="card"><h2>Warum der Bon wichtig ist</h2><div class="muted">Externe Quellen sagen, was Preise sein sollen. Bons zeigen, was tatsächlich bezahlt wurde. Neue Bonpreise werden später zunächst als Beobachtung gespeichert und nicht ungeprüft zum Referenzpreis.</div></section>
 <section class="card" id="profileCard" style="display:none">
 <h2>Mein Profil</h2><div class="muted">Dein ECHTPREIS-Konto.</div>
@@ -95,7 +95,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
     var sp=byId("saveProfile");if(sp)sp.addEventListener("click",function(){localStorage.setItem("echtpreis_profile_name",(pn&&pn.value||"").trim());sp.textContent="✓ Gespeichert";setTimeout(function(){sp.textContent="Profil speichern"},1200)});
     var lo=byId("logoutBtn");if(lo)lo.addEventListener("click",function(){alert("Echter Login folgt als nächster Schritt. Aktuell läuft ECHTPREIS noch ohne Benutzerkonto.")});
     var da=byId("deleteAccountBtn");if(da)da.addEventListener("click",function(){alert("Kontolöschung wird aktiviert, sobald der echte Login angeschlossen ist.")});
-    var demo=byId("demoListBtn");if(demo)demo.addEventListener("click",function(){var list=byId("list");if(list)list.innerHTML='<div class="item"><div class="itemname">5× Bananen</div></div><div class="item"><div class="itemname">3× Rote Paprika</div></div><div class="item"><div class="itemname">500 g Rinderhack</div></div><div class="item"><div class="itemname">10× Eier</div></div><div class="item"><div class="itemname">2 l Milch</div></div>'});
+
   });
 })();
 </script>
@@ -270,16 +270,17 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
  }
  function getSavedLists(){try{return JSON.parse(localStorage.getItem("echtpreis_saved_lists")||"{}")}catch(e){return {}}}
  function saveCurrentList(){
-  if(!stableBasket.length){alert("Deine Einkaufsliste ist noch leer.");return;}
+  const current=window.getEchtpreisRawList?window.getEchtpreisRawList():stableBasket.map(x=>x.raw);
+  if(!current.length){alert("Deine Einkaufsliste ist noch leer.");return;}
   const name=prompt("Wie soll die Liste heißen?","Wocheneinkauf");if(!name||!name.trim())return;
-  const all=getSavedLists();all[name.trim()]=stableBasket.map(x=>x.raw);
+  const all=getSavedLists();all[name.trim()]=current;
   localStorage.setItem("echtpreis_saved_lists",JSON.stringify(all));renderSavedLists();
  }
  function renderSavedLists(){
   const box=document.getElementById("savedLists");if(!box)return;const all=getSavedLists(),names=Object.keys(all);
   box.innerHTML='<button type="button" class="ghost" id="saveCurrentListBtn" style="padding:9px 12px">＋ Liste speichern</button>'+(names.length?'<div class="muted" style="margin:12px 0 7px">Gespeicherte Listen</div><div style="display:flex;gap:7px;flex-wrap:wrap">'+names.map(n=>'<span style="display:inline-flex;gap:4px"><button type="button" class="ghost" data-load-list="'+esc(n)+'" style="padding:9px 12px">'+esc(n)+'</button><button type="button" class="ghost" data-delete-list="'+esc(n)+'" aria-label="'+esc(n)+' löschen" style="padding:9px">✕</button></span>').join("")+'</div>':'');
   const save=document.getElementById("saveCurrentListBtn");if(save)save.onclick=saveCurrentList;
-  box.querySelectorAll("[data-load-list]").forEach(b=>b.onclick=()=>{stableBasket=(all[b.dataset.loadList]||[]).map(parseLine);renderStable();});
+  box.querySelectorAll("[data-load-list]").forEach(b=>b.onclick=()=>{const rows=all[b.dataset.loadList]||[];if(window.replaceEchtpreisList)window.replaceEchtpreisList(rows);else{stableBasket=rows.map(parseLine);renderStable();}});
   box.querySelectorAll("[data-delete-list]").forEach(b=>b.onclick=()=>{const x=getSavedLists();delete x[b.dataset.deleteList];localStorage.setItem("echtpreis_saved_lists",JSON.stringify(x));renderSavedLists();});
  }
  function getFrequent(){try{return JSON.parse(localStorage.getItem("echtpreis_frequent_products")||"{}")}catch(e){return {}}}
@@ -295,10 +296,12 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
  }
  function addStable(raw){
   raw=String(raw||"").trim();if(!raw)return;
+  learnFrequent(raw);
+  if(window.addEchtpreisItem){window.addEchtpreisItem(raw);return;}
   const item=parseLine(raw),learned=learnedKey(item.label);
   if(!item.key&&learned)item.key=learned;
   if(item.key)rememberProduct(item.label,item.key);
-  stableBasket.push(item);learnFrequent(raw);renderStable();
+  stableBasket.push(item);renderStable();
   const inp=document.getElementById("productInput");if(inp)inp.value="";
  }
  function stableItems(){return stableBasket.length?stableBasket:listItems();}
@@ -375,38 +378,23 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
  }
  listItems=function(){return stableBasket.slice();}
  document.addEventListener("DOMContentLoaded",function(){
-  const b=document.getElementById("compareBtn"),add=document.getElementById("addBtn"),inp=document.getElementById("productInput"),demo=document.getElementById("demoListBtn"),bar=document.getElementById("barcodeBtn"),bf=document.getElementById("barcodeFile");
-  if(b)b.addEventListener("click",compareStable);
-  if(add)add.addEventListener("click",function(){addStable(inp&&inp.value);});
-  if(inp)inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();addStable(inp.value);}});
-  if(demo)demo.addEventListener("click",function(){stableBasket=[parseLine("500 g Rinderhack"),parseLine("1 kg Bananen")];renderStable();});if(bar)bar.addEventListener("click",function(){startLiveBarcode();});
- const closeLive=document.getElementById("closeBarcodeLive"),photoFallback=document.getElementById("photoBarcodeFallback");
- if(closeLive)closeLive.addEventListener("click",function(){stopLiveBarcode();});
- if(photoFallback){const captureNow=async function(e){if(e){e.preventDefault();e.stopPropagation();}
-  const st=document.getElementById("barcodeStatus"),video=document.getElementById("barcodeVideo");
-  try{
-   if(!video||!video.videoWidth)throw new Error("camera frame unavailable");
-   const c=document.createElement("canvas");c.width=video.videoWidth;c.height=video.videoHeight;
-   c.getContext("2d").drawImage(video,0,0,c.width,c.height);
-   if(st)st.textContent="Barcode wird aus dem Kamerabild gelesen …";
-   await ensureZXing();
-   const hints=new Map();hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E]);hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
-   const reader=new ZXing.BrowserMultiFormatReader(hints);
-   const result=await reader.decodeFromImageUrl(c.toDataURL("image/jpeg",.98));
-   const code=String(result&&result.getText?result.getText():result?.text||"").trim();
-   if(!/^\\d{8,14}$/.test(code))throw new Error("no ean");
-   await stopLiveBarcode();
-   if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>Produkt wird gesucht …";
-   await lookupBarcode(code);
-  }catch(e){
-   if(st)st.textContent="Barcode auf dem Bild noch nicht erkannt. Bitte Barcode gerade, nah und vollständig in den Rahmen halten.";
-  }
- };photoFallback.addEventListener("click",captureNow);photoFallback.addEventListener("touchend",captureNow,{passive:false});}
- if(bf)bf.addEventListener("change",function(){const file=bf.files&&bf.files[0];if(file)scanBarcodeFile(file);bf.value="";});
-  loadCommunityPrices();
-  renderFrequent();
-  renderSavedLists();
-  renderStable();
+  const bar=document.getElementById("barcodeBtn"),bf=document.getElementById("barcodeFile");
+  if(bar)bar.addEventListener("click",function(){startLiveBarcode();});
+  const closeLive=document.getElementById("closeBarcodeLive"),photoFallback=document.getElementById("photoBarcodeFallback");
+  if(closeLive)closeLive.addEventListener("click",function(){stopLiveBarcode();});
+  if(photoFallback){const captureNow=async function(e){if(e){e.preventDefault();e.stopPropagation();}
+   const st=document.getElementById("barcodeStatus"),video=document.getElementById("barcodeVideo");
+   try{
+    if(!video||!video.videoWidth)throw new Error("camera frame unavailable");
+    const c=document.createElement("canvas");c.width=video.videoWidth;c.height=video.videoHeight;c.getContext("2d").drawImage(video,0,0,c.width,c.height);
+    if(st)st.textContent="Barcode wird aus dem Kamerabild gelesen …";await ensureZXing();
+    const hints=new Map();hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E]);hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
+    const reader=new ZXing.BrowserMultiFormatReader(hints),result=await reader.decodeFromImageUrl(c.toDataURL("image/jpeg",.98)),code=String(result&&result.getText?result.getText():result?.text||"").trim();
+    if(!/^\d{8,14}$/.test(code))throw new Error("no ean");await stopLiveBarcode();if(st)st.innerHTML="✅ Barcode erkannt: <strong>"+code+"</strong><br>Produkt wird gesucht …";await lookupBarcode(code);
+   }catch(e){if(st)st.textContent="Barcode auf dem Bild noch nicht erkannt. Bitte Barcode gerade, nah und vollständig in den Rahmen halten.";}
+  };photoFallback.addEventListener("click",captureNow);}
+  if(bf)bf.addEventListener("change",function(){const file=bf.files&&bf.files[0];if(file)scanBarcodeFile(file);bf.value="";});
+  renderFrequent();renderSavedLists();
  });
  window.compareStable=compareStable;
 })();
@@ -415,13 +403,28 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 const catalog={
 "bananen":{label:"Bananen",unit:"kg",unitWeight:.18,openPricesCategory:"en:bananas"},
 "rote paprika":{label:"Rote Paprika",unit:"kg",unitWeight:.18,openPricesCategory:"en:red-bell-peppers"},
+"tomaten":{label:"Tomaten",unit:"kg",unitWeight:.12,openPricesCategory:"en:tomatoes"},
+"gurken":{label:"Gurken",unit:"piece",openPricesCategory:"en:cucumbers"},
+"aepfel":{label:"Äpfel",unit:"kg",unitWeight:.18,openPricesCategory:"en:apples"},
+"kartoffeln":{label:"Kartoffeln",unit:"kg",openPricesCategory:"en:potatoes"},
+"zwiebeln":{label:"Zwiebeln",unit:"kg",unitWeight:.1,openPricesCategory:"en:onions"},
 "rinderhack":{label:"Rinderhack",unit:"kg",openPricesCategory:"en:ground-beef"},
 "hackfleisch":{label:"Hackfleisch",unit:"kg",openPricesCategory:"en:ground-meat"},
+"haehnchenbrust":{label:"Hähnchenbrust",unit:"kg"},
 "eier":{label:"Eier",unit:"piece",openPricesCategory:"en:eggs"},
 "milch":{label:"Milch",unit:"l",openPricesCategory:"en:milks"},
 "haferdrink":{label:"Haferdrink",unit:"l"},
-"kartoffeln":{label:"Kartoffeln",unit:"kg"},
-"skyr":{label:"Skyr",unit:"kg"}
+"butter":{label:"Butter",unit:"kg",openPricesCategory:"en:butters"},
+"kaese":{label:"Käse",unit:"kg",openPricesCategory:"en:cheeses"},
+"joghurt":{label:"Joghurt",unit:"kg",openPricesCategory:"en:yogurts"},
+"skyr":{label:"Skyr",unit:"kg"},"quark":{label:"Quark",unit:"kg"},
+"nudeln":{label:"Nudeln",unit:"kg",openPricesCategory:"en:pastas"},"reis":{label:"Reis",unit:"kg",openPricesCategory:"en:rices"},
+"mehl":{label:"Mehl",unit:"kg"},"zucker":{label:"Zucker",unit:"kg"},"brot":{label:"Brot",unit:"piece"},"toast":{label:"Toast",unit:"piece"},
+"wasser":{label:"Mineralwasser",unit:"l",openPricesCategory:"en:waters"},"cola":{label:"Cola",unit:"l",openPricesCategory:"en:colas"},
+"orangensaft":{label:"Orangensaft",unit:"l"},"kaffee":{label:"Kaffee",unit:"kg",openPricesCategory:"en:coffees"},
+"toilettenpapier":{label:"Toilettenpapier",unit:"piece"},"kuechenrolle":{label:"Küchenrolle",unit:"piece"},"waschmittel":{label:"Waschmittel",unit:"piece"},
+"spuelmittel":{label:"Spülmittel",unit:"piece"},"zahnpasta":{label:"Zahnpasta",unit:"piece"},"shampoo":{label:"Shampoo",unit:"piece"},
+"katzenfutter":{label:"Katzenfutter",unit:"kg"},"hundefutter":{label:"Hundefutter",unit:"kg"}
 };
 // ECHTPREIS Data Engine v2
 // Ein Preis ist immer eine Beobachtung: Produkt + Händler + Betrag + Einheit + Datum + Quelle + Trust.
@@ -451,45 +454,49 @@ function dataEngine(){
  const all=[...seedPrices,...loadJson(communityKey),...loadJson(openPricesCacheKey),...loadJson(sharedCacheKey)].map(normalizeObservation).filter(usableObservation);
  const seen=new Set();return all.filter(x=>{let sig=[x.key,x.store,x.price,x.per,x.date,x.proof||x.source,x.locationId||""].join("|");if(seen.has(sig))return false;seen.add(sig);return true});
 }
-function trustedPrice(key,store){
- const rows=dataEngine().filter(x=>x.key===key&&x.store===store);
- const official=rows.filter(x=>x.kind==="official"&&x.trust>=90).sort((a,b)=>b.date.localeCompare(a.date));if(official.length)return {...official[0],confidence:"hoch"};
- const open=rows.filter(x=>x.kind==="openprices"&&x.proof&&x.trust>=70).sort((a,b)=>b.date.localeCompare(a.date));if(open.length)return {...open[0],confidence:"mittel"};
+function trustedPrice(key,store,wish=null){
+ let rows=dataEngine().filter(x=>x.key===key&&x.store===store);
+ if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);rows=rows.filter(x=>normalizeProduct(x.product||"").includes(brand));}
+ const sortRows=a=>a.sort((x,y)=>x.price-y.price||String(y.date||"").localeCompare(String(x.date||""))||Number(y.trust||0)-Number(x.trust||0));
+ const official=sortRows(rows.filter(x=>x.kind==="official"&&x.trust>=90));if(official.length)return {...official[0],confidence:"hoch"};
+ const open=sortRows(rows.filter(x=>x.kind==="openprices"&&x.proof&&x.trust>=70));if(open.length)return {...open[0],confidence:"mittel"};
  const groups={};rows.filter(x=>x.kind==="community"&&x.proof).forEach(x=>{let k=[x.price,x.per,x.date].join("|");(groups[k]??=[]).push(x)});
- const confirmed=Object.values(groups).filter(g=>new Set(g.map(x=>x.proof)).size>=2).sort((a,b)=>b.length-a.length);
+ const confirmed=Object.values(groups).filter(g=>new Set(g.map(x=>x.proof)).size>=2).sort((a,b)=>a[0].price-b[0].price||b.length-a.length);
  if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:85,status:"confirmed",confidence:"mittel"}}
  return null;
 }
-function activePrice(key,store){return trustedPrice(key,store)}
+function activePrice(key,store,wish=null){return trustedPrice(key,store,wish)}
 function addCommunityObservation(obs){
  const x=normalizeObservation({...obs,kind:"community",trust:60});if(!x.proof||!x.key||!x.store||!Number.isFinite(x.price)||!x.date)return false;
  const rows=loadJson(communityKey);rows.push(x);saveJson(communityKey,rows);drawDataMachine();return true;
 }
 function retailerFromLocation(x){
  const t=((x?.location?.osm_brand||"")+" "+(x?.location?.osm_name||"")+" "+(x?.location?.osm_display_name||"")).toLowerCase();
- if(t.includes("kaufland"))return"Kaufland";if(t.includes("lidl"))return"Lidl";if(t.includes("rewe"))return"REWE";if(t.includes("edeka"))return"EDEKA";return null;
+ const chains=[["Kaufland","kaufland"],["Lidl","lidl"],["REWE","rewe"],["EDEKA","edeka"],["PENNY","penny"],["ALDI Nord","aldi"],["Netto","netto"],["NORMA","norma"],["dm","dm"],["Rossmann","rossmann"]];
+ for(const [name,needle] of chains)if(t.includes(needle))return name;return null;
 }
 function normalizePer(p){p=String(p||"").toUpperCase();if(["KG","KILOGRAM"].includes(p))return"kg";if(["L","LITER"].includes(p))return"l";if(["UNIT","PIECE"].includes(p))return"piece";return null}
 async function ingestOpenPrices(){
- const fresh=[];dataMachineState.loaded=0;dataMachineState.rejected=0;
+ const previous=loadJson(openPricesCacheKey),fresh=[],successfulKeys=new Set();dataMachineState.loaded=0;dataMachineState.rejected=0;
  const jobs=Object.entries(catalog).filter(([,c])=>c.openPricesCategory).map(async([key,c])=>{
-  const url="https://prices.openfoodfacts.org/api/v1/prices?category_tag="+encodeURIComponent(c.openPricesCategory)+"&currency=EUR&size=30&order_by=-date";
-  const r=await fetch(url);if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json(),items=d.items||d.results||[];
+  const url="https://prices.openfoodfacts.org/api/v1/prices?category_tag="+encodeURIComponent(c.openPricesCategory)+"&currency=EUR&size=50&order_by=-date";
+  const r=await fetch(url);if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json(),items=d.items||d.results||[];successfulKeys.add(key);
   items.forEach(x=>{const store=retailerFromLocation(x),per=normalizePer(x.price_per),country=(x.location?.osm_address_country_code||"").toLowerCase();
    if(!store||per!==c.unit||(country&&country!=="de")||!x.proof_id){dataMachineState.rejected++;return}
-   const o=normalizeObservation({key,store,price:+x.price,per,date:x.date,region:x.location?.osm_address_city||"Deutschland",kind:"openprices",source:"Open Prices",product:x.product_name||c.label,proof:"op:"+x.proof_id,locationId:x.location_id,trust:75});
+   const o=normalizeObservation({key,store,price:+x.price,per,date:String(x.date||"").slice(0,10),region:x.location?.osm_address_city||"Deutschland",kind:"openprices",source:"Open Prices",product:x.product?.product_name||x.product_name||c.label,proof:"op:"+x.proof_id,locationId:x.location_id,trust:75});
    if(usableObservation(o)){fresh.push(o);dataMachineState.loaded++}else dataMachineState.rejected++;
   });
  });
  const results=await Promise.allSettled(jobs),ok=results.filter(x=>x.status==="fulfilled").length;
- if(ok){saveJson(openPricesCacheKey,fresh);dataMachineState.openPrices="verbunden · "+ok+"/"+jobs.length+" Kategorien geprüft"}else dataMachineState.openPrices="nicht erreichbar · Cache bleibt aktiv";
+ if(ok){const kept=previous.filter(x=>!successfulKeys.has(x.key));saveJson(openPricesCacheKey,[...kept,...fresh].slice(-10000));dataMachineState.openPrices="verbunden · "+ok+"/"+jobs.length+" Kategorien geprüft";}
+ else dataMachineState.openPrices="nicht erreichbar · Cache bleibt aktiv";
  dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();
 }
 function drawDataMachine(){
  const el=$("dataMachineStatus");if(!el)return;const rows=dataEngine(),by={};rows.forEach(x=>by[x.source]=(by[x.source]||0)+1);
  el.innerHTML="<b>Datenmaschine aktiv:</b> "+rows.length+" aktuell nutzbare Beobachtungen<br><span class='detail'>ECHTPREIS API: "+escHtml(apiState)+"<br>Open Prices: "+escHtml(dataMachineState.openPrices)+(dataMachineState.lastSync?" · Sync "+dataMachineState.lastSync:"")+"<br>"+(Object.entries(by).map(([k,v])=>escHtml(k)+": "+v).join(" · ")||"Noch keine nutzbaren Quellen")+"</span>";
 }
-const storeNames=["Lidl","Kaufland","REWE","EDEKA","PENNY"];
+const storeNames=["Lidl","Kaufland","REWE","EDEKA","PENNY","ALDI Nord","Netto","NORMA","dm","Rossmann"];
 function escHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function locationLabel(x){
  const l=x.location||{};
@@ -499,16 +506,20 @@ let basket=[];let selected=new Set(storeNames);
 const $=id=>document.getElementById(id), eur=n=>n.toLocaleString("de-DE",{style:"currency",currency:"EUR"});
 function normalizeProduct(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9%]+/g," ").replace(/\s+/g," ").trim()}
 const productAliases={
- bananen:["banane","bananen","chiquita bananen","bio bananen"],
- "rote paprika":["paprika rot","rote paprika","paprika red","spitzpaprika rot"],
- rinderhack:["rinderhack","rinder hack","rinderhackfleisch","rind hack","hackfleisch rind"],
- hackfleisch:["hackfleisch","gemischtes hack","hack gemischt"],
- eier:["eier","bio eier","bio-eier","freiland eier","bodenhaltung eier","eier 10er","bio eier okt 10er"],
- milch:["milch","vollmilch","frischmilch","haltbare milch","h milch"],
- haferdrink:["haferdrink","hafer drink","hafermilch","oat drink"],
- kartoffeln:["kartoffeln","speisekartoffeln","kartoffel"],
- skyr:["skyr"]
+ bananen:["banane","bananen","chiquita bananen","bio bananen"],"rote paprika":["paprika","paprika rot","rote paprika","spitzpaprika"],
+ tomaten:["tomate","tomaten","cherrytomaten","cocktailtomaten","strauchtomaten"],gurken:["gurke","gurken","salatgurke"],
+ aepfel:["apfel","aepfel","äpfel"],kartoffeln:["kartoffel","kartoffeln","speisekartoffeln"],zwiebeln:["zwiebel","zwiebeln"],
+ rinderhack:["rinderhack","rinder hack","rinderhackfleisch","rind hack","hackfleisch rind"],hackfleisch:["hackfleisch","gemischtes hack","hack gemischt"],
+ haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
+ milch:["milch","vollmilch","frischmilch","haltbare milch","h milch"],haferdrink:["haferdrink","hafer drink","hafermilch","oat drink","alpro hafer"],
+ butter:["butter"],kaese:["käse","kase","kaese","gouda","emmentaler","mozzarella"],joghurt:["joghurt","yoghurt"],skyr:["skyr"],quark:["quark","magerquark"],
+ nudeln:["nudeln","nudel","pasta","spaghetti","penne","fusilli"],reis:["reis","basmatireis","jasminreis"],mehl:["mehl","weizenmehl"],zucker:["zucker"],
+ brot:["brot","vollkornbrot","mischbrot"],toast:["toast","toastbrot"],wasser:["wasser","mineralwasser"],cola:["cola","coca cola","coca-cola","cola zero","coca cola zero"],
+ orangensaft:["orangensaft","orange saft","o-saft"],kaffee:["kaffee","kaffeebohnen","filterkaffee"],toilettenpapier:["toilettenpapier","klopapier"],
+ kuechenrolle:["küchenrolle","kuchenrolle","kuechenrolle","küchenpapier"],waschmittel:["waschmittel"],spuelmittel:["spülmittel","spulmittel","spuelmittel"],
+ zahnpasta:["zahnpasta","zahncreme"],shampoo:["shampoo"],katzenfutter:["katzenfutter"],hundefutter:["hundefutter"]
 };
+const exactBrandNames=["coca cola","coca-cola","red bull","dr oetker","dr. oetker","alpro","milka","ehrmann","nissin"];
 const receiptNoise=["bio","bioland","okt","xxl","vegan","vegane","veganer","natur","classic","original","frisch","regional"];
 function receiptTokens(t){return normalizeProduct(t).replace(/\b\d+(?:\s?g|\s?kg|\s?ml|\s?l|er)?\b/g," ").split(" ").filter(x=>x&&!receiptNoise.includes(x))}
 function tokenScore(a,b){const A=new Set(receiptTokens(a)),B=new Set(receiptTokens(b));if(!A.size||!B.size)return 0;let hit=[...A].filter(x=>B.has(x)).length;return hit/Math.max(A.size,B.size)}
@@ -556,35 +567,38 @@ async function attachEANToDraft(rawText){
  const ean=extractEAN(rawText);if(!ean)return null;return await enrichByEAN(ean);
 }
 function parseWish(raw){
- let t=normalizeProduct(raw), amount=1, unit="piece", explicit=false;
- let m=t.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stck|x)?\s+(.+)$/i);
+ const original=String(raw||"").trim(),normalized=normalizeProduct(original);let amount=1,unit="piece",explicit=false,t=normalized;
+ const rawForAmount=original.toLowerCase().replace(/ß/g,"ss").trim();
+ let m=rawForAmount.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x)?\s+(.+)$/i);
  if(m){amount=parseFloat(m[1].replace(",","."));let u=(m[2]||"stück").toLowerCase(),rest=m[3];explicit=true;
-   if(u==="g"||u==="gramm"){amount/=1000;unit="kg"} else if(u==="ml"){amount/=1000;unit="l"} else if(u==="kg"){unit="kg"} else if(u==="l"||u==="liter"){unit="l"} else unit="piece";t=rest;
- }
- t=t.replace(/^(frische|frischer|frisches)\s+/,"").trim();
- let key=Object.keys(catalog).find(k=>t===k||t.includes(k)||k.includes(t));
- let c=key?catalog[key]:null;
- let calcAmount=amount, note="";
+  if(u==="g"||u==="gramm"){amount/=1000;unit="kg"}else if(u==="ml"){amount/=1000;unit="l"}else if(u==="kg"){unit="kg"}else if(u==="l"||u==="liter"){unit="l"}else unit="piece";t=normalizeProduct(rest);}
+ t=t.replace(/^(frische|frischer|frisches)\s+/,"").trim();let key=null,best=0;
+ for(const [k,aliases] of Object.entries(productAliases)){for(const alias of [k,...aliases]){const a=normalizeProduct(alias);let score=t===a?1:(t.includes(a)||a.includes(t)?0.9:tokenScore(t,a));if(score>best){best=score;key=k}}}
+ if(best<0.72)key=null;const c=key?catalog[key]:null;let calcAmount=amount,note="";
  if(c&&unit==="piece"&&c.unit==="kg"&&c.unitWeight){calcAmount=amount*c.unitWeight;note="≈ "+calcAmount.toFixed(2).replace(".",",")+" kg für Preisvergleich";}
  else if(c&&unit!==c.unit&&c.unit==="piece"){note="Mengenangabe wird als Stück interpretiert";}
- return {raw,label:c?c.label:t.replace(/\b\w/g,x=>x.toUpperCase()),amount,unit,calcAmount,key,matched:!!c,note,explicit};
+ const exactBrand=exactBrandNames.find(b=>normalized.includes(normalizeProduct(b)))||"";
+ return {raw:original,label:c?c.label:(t.replace(/\b\w/g,x=>x.toUpperCase())||original),amount,unit,calcAmount,key,matched:!!c,note,explicit,matchMode:exactBrand?"exact":"comparable",exactBrand};
 }
 function wishText(w){const u=w.unit==="piece"?"×":w.unit;return (w.unit==="piece"?w.amount+"×":String(w.amount).replace(".",",")+" "+u)+" "+w.label}
 function drawSuggestions(){let a=["500 g Rinderhack","1 kg Bananen","10 Eier","2 Liter Milch"];$("suggestions").innerHTML=a.map(x=>'<span class="chip" data-add="'+x+'">+ '+x+'</span>').join("");document.querySelectorAll("[data-add]").forEach(e=>e.onclick=()=>add(e.dataset.add));}
 function drawStores(){ $("stores").innerHTML=storeNames.map(st=>'<span class="chip '+(selected.has(st)?"on":"")+'" data-store="'+st+'">'+st+'</span>').join("");document.querySelectorAll("[data-store]").forEach(e=>e.onclick=()=>{selected.has(e.dataset.store)?selected.delete(e.dataset.store):selected.add(e.dataset.store);drawStores()});}
-function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;let w=parseWish(raw);let duplicate=basket.find(x=>x.key&&w.key&&x.key===w.key&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}basket.push(w);$("productInput").value="";drawList();}
+function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return;let w=parseWish(raw);let duplicate=basket.find(x=>x.raw.toLowerCase()===w.raw.toLowerCase()&&x.amount===w.amount&&x.unit===w.unit);if(duplicate){$("productInput").value="";return alert(wishText(w)+" steht bereits auf deiner Liste.");}basket.push(w);try{learnFrequent(raw)}catch(e){}$("productInput").value="";drawList();}
+window.addEchtpreisItem=raw=>add(raw);
+window.getEchtpreisRawList=()=>basket.map(x=>x.raw);
+window.replaceEchtpreisList=rows=>{basket=(rows||[]).map(parseWish).filter(x=>x.raw);drawList();};
 function drawList(){ $("list").innerHTML=basket.length?basket.map((w,i)=>'<div class="item"><div class="itemname">'+escHtml(wishText(w))+'<div class="qty">'+(w.matched?'✓ erkannt':'⚠ Noch kein sicherer Produkt-Match')+'</div></div><button class="x" data-del="'+i+'">✕</button></div>').join(""):'<div class="muted" style="padding-top:15px">Noch nichts auf der Liste.</div>';document.querySelectorAll("[data-del]").forEach(e=>e.onclick=()=>{basket.splice(+e.dataset.del,1);drawList()});}
 window.compare=function compare(){
  if(!basket.length)return alert("Schreib zuerst deinen Einkauf auf oder nutze die Beispielliste.");
  if(!selected.size)return alert("Bitte mindestens einen Markt auswählen.");
- let rows=[...selected].map(store=>{let total=0,known=0,missing=[],sources=[];basket.forEach(w=>{let p=w.key?activePrice(w.key,store):null;if(p){total+=p.price*w.calcAmount;known++;sources.push(p)}else missing.push(w.label)});return{store,total,known,missing,sources,coverage:known/basket.length}});
+ let rows=[...selected].map(store=>{let total=0,known=0,missing=[],sources=[];basket.forEach(w=>{let p=w.key?activePrice(w.key,store,w):null;if(p){total+=p.price*w.calcAmount;known++;sources.push(p)}else missing.push(w.label)});return{store,total,known,missing,sources,coverage:known/basket.length}});
  let complete=rows.filter(r=>r.known===basket.length).sort((a,b)=>a.total-b.total);
  if(complete.length){let win=complete[0];$("winnerLabel").textContent="Günstigster vollständig belegter Warenkorb";$("winnerName").textContent=win.store;$("winnerPrice").textContent=eur(win.total);$("winnerCoverage").textContent="100 % Abdeckung · Preise mit Quelle und Gültigkeit";}
  else{$("winnerLabel").textContent="Noch nicht genug Preisdaten";$("winnerName").textContent="Wir kennen noch nicht alle Preise für deinen Einkauf";$("winnerPrice").textContent="—";let best=[...rows].sort((a,b)=>b.coverage-a.coverage)[0];$("winnerCoverage").textContent="Von "+basket.length+" Produkten kennen wir bei "+best.store+" aktuell "+best.known+". Fehlende Preise erfinden wir nicht."}
  $("merchantResults").innerHTML=[...rows].sort((a,b)=>b.coverage-a.coverage||a.total-b.total).map(r=>'<div class="merchant"><div><b>'+r.store+'</b><div class="coverage">'+r.known+' von '+basket.length+' Preisen vorhanden'+(r.missing.length?'<br>Noch ohne Preis: '+r.missing.map(escHtml).join(", "):'<br>Vollständig belegt')+(r.sources.length?'<br>Quelle: '+[...new Set(r.sources.map(x=>x.source+" · "+x.product+" · gültig "+x.date+(x.validTo?"–"+x.validTo:"")))].join("; "):"")+'</div></div><div class="price">'+(r.known?eur(r.total)+'<div class="coverage" style="text-align:right">'+(r.coverage===1?"Gesamt":"belegte Zwischensumme")+'</div>':"—")+'</div></div>').join("");
- let allSplitKnown=basket.every(w=>w.key&&[...selected].some(st=>activePrice(w.key,st)));
+ let allSplitKnown=basket.every(w=>w.key&&[...selected].some(st=>activePrice(w.key,st,w)));
  if(!allSplitKnown){$("splitTitle").textContent="Noch nicht vollständig berechenbar";$("splitDetail").textContent="Für mindestens eine Position gibt es bei keinem ausgewählten Markt einen aktuell gültigen, belegten Preis.";$("splitSave").textContent="Keine Ersparnis berechnet."}
- else{let split=0,alloc={};basket.forEach(w=>{let opts=[...selected].map(st=>[st,activePrice(w.key,st)]).filter(x=>x[1]).sort((a,b)=>a[1].price-b[1].price);split+=opts[0][1].price*w.calcAmount;(alloc[opts[0][0]]??=[]).push(w.label)});let shops=Object.keys(alloc).length;$("splitTitle").textContent=eur(split)+" · "+shops+" "+(shops===1?"Laden":"Läden");$("splitDetail").textContent=Object.entries(alloc).map(([st,n])=>st+": "+n.join(", ")).join(" · ");let saving=complete.length?Math.max(0,complete[0].total-split):null;$("splitSave").textContent=saving===null?"Kein vollständiger 1-Laden-Vergleich als Referenz.":saving<0.5?"Aufteilen spart nur "+eur(saving)+" – ein Laden ist wahrscheinlich sinnvoller.":"Maximal belegte Ersparnis ggü. "+complete[0].store+": "+eur(saving);}
+ else{let split=0,alloc={};basket.forEach(w=>{let opts=[...selected].map(st=>[st,activePrice(w.key,st,w)]).filter(x=>x[1]).sort((a,b)=>a[1].price-b[1].price);split+=opts[0][1].price*w.calcAmount;(alloc[opts[0][0]]??=[]).push(w.label)});let shops=Object.keys(alloc).length;$("splitTitle").textContent=eur(split)+" · "+shops+" "+(shops===1?"Laden":"Läden");$("splitDetail").textContent=Object.entries(alloc).map(([st,n])=>st+": "+n.join(", ")).join(" · ");let saving=complete.length?Math.max(0,complete[0].total-split):null;$("splitSave").textContent=saving===null?"Kein vollständiger 1-Laden-Vergleich als Referenz.":saving<0.5?"Aufteilen spart nur "+eur(saving)+" – ein Laden ist wahrscheinlich sinnvoller.":"Maximal belegte Ersparnis ggü. "+complete[0].store+": "+eur(saving);}
  $("results").style.display="block";$("results").scrollIntoView({behavior:"smooth"});
 }
 $("demoListBtn").onclick=()=>{basket=["500 g Rinderhack","1 kg Bananen"].map(parseWish);drawList()};$("addBtn").onclick=()=>add();$("productInput").onkeydown=e=>{if(e.key==="Enter")add()};$("compareBtn").onclick=()=>{compare();try{localStorage.setItem("echtpreis_open_purchase","1")}catch(e){}};
