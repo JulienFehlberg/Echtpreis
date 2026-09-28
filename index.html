@@ -1165,7 +1165,7 @@ function detectReceiptStore(text){
  const lines=String(text||"").split(/\n+/).map(x=>x.trim()).filter(Boolean),head=lines.slice(0,18).join(" ").toLowerCase();
  const rules=[
   [/\blidl\b/,"Lidl"],[/\bkaufland\b/,"Kaufland"],[/\brewe\b/,"REWE"],[/\bedeka\b/,"EDEKA"],[/\bpenny\b/,"PENNY"],
-  [/aldi\s+s(?:ü|u|ue)d|aldi süd|aldi sued/,"ALDI Süd"],[/\baldi(?:\s+nord)?\b/,"ALDI Nord"],
+  [/aldi\s+s(?:ü|u|ue)d|aldi süd|aldi sued/,"ALDI Süd"],[/\baldi\s+nord\b/,"ALDI Nord"],[/\baldi\b/,"ALDI"],
   [/netto\s+(?:marken|filiale|discount)|netto-marken/,"Netto"],[/\bnorma\b/,"NORMA"],[/\brossmann\b/,"Rossmann"],[/(?:^|\s)dm(?:\s|$)|dm-drogerie/,"dm"],
   [/\bmarktkauf\b/,"Marktkauf"],[/\bglobus\b/,"Globus"],[/\btegut\b/,"tegut"],[/\bhit\s*(?:markt|handelsgruppe)?\b/,"HIT"],
   [/\bfamila\b/,"famila"],[/\bcombi\b/,"Combi"],[/\bwasgau\b/,"Wasgau"],[/\bv-?markt\b/,"V-Markt"],
