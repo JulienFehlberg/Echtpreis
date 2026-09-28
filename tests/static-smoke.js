@@ -61,8 +61,11 @@ assert(html.includes("lineTotal:Number(x.price)||0,price:Number(x.price)||0,coun
 assert(html.includes("globalAdjustments=receiptDraft.filter"),"coupon receipts must not produce misleading cross-store savings");
 assert(html.includes("plausibleObservationPrice(x)"),"trusted prices must reject implausible price outliers");
 assert(html.includes("x.per!==catalog[x.key].unit"),"price observations with the wrong comparison unit must be rejected");
-assert(html.includes('if(wish&&wish.matchMode==="exact")return verified'),"exact-brand requests must never fall back to modeled prices");
-assert(html.includes("verifiedComplete=complete.filter(r=>r.referenceCount===0)"),"fully evidenced baskets must outrank cheaper estimated baskets");
+assert(html.includes("function exactBrandFallbackPrice"),"cold-start exact-brand orientation is missing");
+assert(html.includes('referenceType:"brand-estimate"'),"estimated exact-brand prices must be explicitly labeled");
+assert(html.includes("verifiedBest.total<=win.total*1.12"),"basket ranking must balance evidence quality with useful cold-start savings");
+assert(html.includes('type:"first-receipt-fact"'),"first receipt should produce an immediate useful fact");
+assert(html.includes("currentReceiptSaving=Number(saving.toFixed(2))"),"estimated receipt savings should remain available with confidence labeling");
 
 
 
