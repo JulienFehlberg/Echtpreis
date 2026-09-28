@@ -70,7 +70,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.132.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.133.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -1148,6 +1148,15 @@ function receiptMarketComparison(store,items){
  }
  return {store,total:Number(total.toFixed(2)),deposit,lines,missing,complete:missing.length===0,estimated};
 }
+let receiptPriceRefreshRevision=0;
+async function refreshReceiptPrices(){
+ const revision=++receiptPriceRefreshRevision;
+ if(!receiptTotalVerified)return;
+ const keys=[...new Set(receiptDraft.filter(r=>!r.isDeposit&&!r.isAdjustment).map(r=>parseWish(r.name).key).filter(Boolean))];
+ if(!keys.length)return;
+ try{await ingestOpenPrices(false,keys)}catch(e){return}
+ if(revision===receiptPriceRefreshRevision&&receiptTotalVerified)updateReceiptAnalysis();
+}
 function updateReceiptAnalysis(){
  const box=$("receiptAnalysis");if(!box)return;currentReceiptSaving=null;currentReceiptSavingConfidence=null;
  const valid=receiptDraft.filter(r=>!r.isDeposit&&!r.isAdjustment&&r.name&&Number(r.price)>0),paid=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,""));
@@ -1203,7 +1212,7 @@ async function processReceiptFile(file){
  if(devTestMode){$("runDupeTest").disabled=false;$("dupeTestResult").textContent=barcode?"Barcode erkannt · bereit für Backend-Test.":"Kein Barcode erkannt · Backend-Test nutzt den Bon-Fingerprint.";}
  if(file.type==="application/pdf"||/\.pdf$/i.test(file.name)){
   $("ocrStatus").textContent="Digitalen PDF-Bon lesen …";
-  try{let text=await extractPdfText(file);if(text.replace(/\s/g,"").length>40){applyReceiptText(text,"PDF");return}
+  try{let text=await extractPdfText(file);if(text.replace(/\s/g,"").length>40){applyReceiptText(text,"PDF");void refreshReceiptPrices();return}
    $("ocrStatus").textContent="PDF enthält kein nutzbares Text-Layer · erste Seite wird per OCR gelesen …";let img=await renderPdfFirstPage(file);await runImageReceiptOCR(img);return;
   }catch(e){$("ocrStatus").textContent="PDF konnte nicht direkt gelesen werden. Bitte anderen Export oder Screenshot versuchen.";receiptDraft=[];drawReviewRows();return}
  }
@@ -1244,6 +1253,7 @@ async function runImageReceiptOCR(file){
   }
   if(receiptCandidateVerified(best))$("ocrStatus").textContent="✓ Bon automatisch erkannt.";
   else{$("ocrStatus").textContent="Scan noch unvollständig. Bitte den Artikelbereich erneut fotografieren.";$("finishPurchaseBtn").disabled=true}
+  void refreshReceiptPrices();
  }catch(err){$("ocrStatus").textContent="Automatische Erkennung fehlgeschlagen. Bitte den Bon erneut fotografieren.";receiptDraft=[];receiptCash=null;drawReviewRows();checkReceiptTotal()}
 }
 const runDupeTestBtn=$("runDupeTest");if(runDupeTestBtn)runDupeTestBtn.onclick=async()=>{
