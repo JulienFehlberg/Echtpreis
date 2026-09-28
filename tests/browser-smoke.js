@@ -137,6 +137,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert(receipt.length>=4,"receipt parser lost rows");
  assert(receipt.some(x=>x.isDeposit),"deposit line not recognized");
  const prof=w.receiptItemProfile({name:"Pfand",price:.5,isDeposit:true});assert.strictEqual(prof.isDeposit,true,"deposit analytics flag missing");assert.strictEqual(prof.category,"Pfand","deposit must not enter normal spending categories");
+ assert.strictEqual(w.comparableItemPrice({price:2.98,count:2,unitLinePrice:1.49}),1.49,"multipack personal price must normalize to unit price");
+ const searchRows=w.searchPersonalPurchases("Red Bull",[{id:"a",store:"EDEKA",date:"2026-09-28",items:[{name:"Red Bull 0,25",price:2.98,count:2,unitLinePrice:1.49}]},{id:"b",store:"Lidl",date:"2026-09-20",items:[{name:"Red Bull 0,25",price:1.49,count:1}]}]);assert.strictEqual(searchRows[0].price,1.49,"purchase search must compare multipacks per unit");
  const searchRows=w.searchPersonalPurchases("Milch",[{id:"a",store:"EDEKA",date:"2026-09-01",items:[{name:"Milch 1 l",price:1.49}]},{id:"b",store:"Kaufland",date:"2026-09-05",items:[{name:"Milch 1 l",price:1.19},{name:"Pfand",price:.25,isDeposit:true}]}]);assert.strictEqual(searchRows.length,2,"personal purchase search should find matching receipt items");assert.strictEqual(searchRows[0].store,"Kaufland","personal purchase search should sort newest first");
  assert.strictEqual(w.personalComparablePrice({price:2.98,count:2}),1.49,"multipack personal comparison must normalize line total by count");
  assert.strictEqual(w.personalComparablePrice({price:1.49,count:1}),1.49,"single-item personal comparison must preserve price");
