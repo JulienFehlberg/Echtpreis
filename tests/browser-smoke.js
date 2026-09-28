@@ -143,6 +143,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  d.getElementById("productInput").value="0,5 kg Tomaten";d.getElementById("addBtn").click();assert.strictEqual(d.querySelectorAll("#list .item").length,3,"add button should add exactly one item");
  d.getElementById("compareBtn").click();await new Promise(r=>setTimeout(r,20));assert.notStrictEqual(d.getElementById("results").style.display,"none","compare should render results");assert(/ca\.|Referenz/i.test(d.getElementById("winnerPrice").textContent+" "+d.getElementById("winnerCoverage").textContent),"reference fallback should be visibly marked");
  assert(!/\bdm\b|Rossmann/.test(d.getElementById("merchantResults").textContent),"drugstores must not appear as complete baskets containing meat");
+ assert(d.getElementById("merchantResults").textContent.includes("Preisquellen anzeigen"),"market totals should expose their underlying product price sources");
  assert.strictEqual(d.querySelectorAll("#list .item").length,3,"basket should render only once");
  const oldPrice=d.getElementById("winnerPrice").textContent;
  w.addEchtpreisItem("10 Eier");assert.strictEqual(d.querySelectorAll("#list .item").length,4);
