@@ -40,11 +40,17 @@ body{background:radial-gradient(circle at 50% -10%,#e6f3eb 0,#f7f8f6 34%,#f4f5f2
 button{transition:transform .12s ease,filter .12s ease}button:active{transform:scale(.98)}.primary{background:var(--ink)}.green{background:linear-gradient(135deg,var(--green),var(--green2));border-radius:17px;box-shadow:0 9px 22px rgba(8,116,67,.18)}
 .ghost{background:#eef2ef}.winner{background:linear-gradient(135deg,#075f37,#0d8a50);box-shadow:0 15px 35px rgba(8,116,67,.18)}.split{background:linear-gradient(135deg,#edf9f2,#f8fcf9)}
 @media(max-width:430px){.app{padding-left:13px;padding-right:13px}.hero{padding:24px 20px}.coreactions .homeaction{min-height:122px;padding:16px}.coreactions .homeaction span{width:44px;height:44px;margin-bottom:12px}}
-.home-main-actions .homeaction:first-child{grid-column:1/-1;min-height:138px}.home-main-actions .homeaction:first-child span{background:#e7f5ed}</style>
+.home-main-actions .homeaction:first-child{grid-column:1/-1;min-height:138px}.home-main-actions .homeaction:first-child span{background:#e7f5ed}/* v5.50 compact app-shell */
+.app{max-width:520px;padding:18px 16px 32px}.top{margin-bottom:18px}.brand{font-size:20px;letter-spacing:1.4px}.version{font-size:10px;padding:5px 8px}
+.hero{min-height:0;padding:20px 21px;margin-bottom:14px;border-radius:24px}.hero:after{font-size:105px;top:-29px}.hero h1{font-size:28px!important;line-height:1.06;margin:0!important;letter-spacing:-1px}
+.home-main-actions{display:grid!important;grid-template-columns:1fr!important;gap:10px}.home-main-actions .homeaction,.home-main-actions .homeaction:first-child{grid-column:auto;min-height:82px!important;display:flex;align-items:center;gap:16px;padding:14px 16px;text-align:left;border-radius:20px;font-size:17px}
+.home-main-actions .homeaction span{flex:0 0 48px;margin:0!important}.footer{margin-top:18px}
+@media(max-width:430px){.app{padding-top:14px}.hero{padding:19px}.hero h1{font-size:27px!important}.home-main-actions .homeaction{min-height:78px!important}}
+</style>
 </head>
 <body><main class="app">
-<div class="top"><div></div><span class="version">v5.49.0</span></div>
-<section class="hero"><div class="eyebrow">ECHTPREIS</div><h1 style="font-size:38px;margin-bottom:7px">ECHTPREIS</h1><div style="font-size:17px;font-weight:750;color:#d9eee3">Dein Einkauf. Dein Preis.</div></section>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.50.0</span></div>
+<section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen</button>
@@ -52,7 +58,7 @@ button{transition:transform .12s ease,filter .12s ease}button:active{transform:s
 </div>
 <div class="tabs" style="display:none"><button class="tab active" id="planTab">Liste</button><button class="tab" id="receiptTab">Bon</button></div>
 
-<section id="planner">
+<section id="planner" style="display:none">
 <div class="card"><h2>Deine Einkaufsliste</h2><div class="muted">Menge, Einheit und Produkt dürfen zusammen in ein Feld. Beispiele: „5 Bananen“, „3 rote Paprika“, „500 g Rinderhack“, „2 Liter Milch“.</div>
 <div style="display:flex;gap:8px;margin:12px 0"><button class="ghost" id="addRecipeBtn" type="button">🍳 Rezept hinzufügen</button><button class="ghost" id="savedRecipesBtn" type="button">♡ Meine Rezepte</button></div><div id="recipeImport" style="display:none;margin:14px 0;padding:14px;border:1px solid #263329;border-radius:14px"><b id="recipeEditorTitle">🍳 Rezept hinzufügen</b><input id="recipeName" style="width:100%;box-sizing:border-box;margin:10px 0;padding:12px;border-radius:12px" placeholder="Name des Rezepts, z. B. Chili con Carne"><div class="muted" style="margin-bottom:8px">Eine Zutat pro Zeile. Unklare Produkte kannst du anschließend genauer auswählen.</div><textarea id="recipeIngredients" rows="7" style="width:100%;box-sizing:border-box;padding:12px;border-radius:12px" placeholder="500 g Rinderhack\n2 Dosen Kidneybohnen\n1 Dose Mais\n2 Zwiebeln"></textarea><div class="inputrow" style="margin-top:8px"><button class="primary" id="importRecipeBtn" type="button">In Liste übernehmen</button><button class="ghost" id="saveRecipeBtn" type="button">♡ Speichern</button><button class="ghost" id="closeRecipeBtn" type="button">Schließen</button></div></div><div id="savedRecipesPanel" style="display:none;margin:14px 0;padding:14px;border:1px solid #263329;border-radius:14px"><b>♡ Meine Rezepte</b><div id="savedRecipesList" style="margin-top:10px"></div></div><div id="basketPreview" style="display:none;margin:14px 0 10px"><div style="font-weight:900;font-size:16px;margin-bottom:8px">Dein Einkauf</div><div id="basketPreviewItems"></div></div><div class="inputrow"><input id="productInput" placeholder="z. B. 5 Bananen oder 500 g Rinderhack"><button class="primary" id="addBtn">Hinzufügen</button><button class="ghost" id="barcodeBtn" type="button" aria-label="Barcode scannen">📷</button></div>
 <div id="frequentProducts" style="display:none"></div><div id="savedLists" style="display:none"></div><div id="locationStatus" style="display:none"><span id="locationStatusText">Standort wird beim Vergleichen abgefragt.</span></div><input id="barcodeFile" type="file" accept="image/*" capture="environment" style="display:none">
@@ -103,10 +109,11 @@ button{transition:transform .12s ease,filter .12s ease}button:active{transform:s
     if(p)p.style.display=which==="plan"?"block":"none";
     if(r)r.style.display=which==="receipt"?"block":"none";
     if(pts)pts.style.display=which==="points"?"block":"none";
-    if(pro)pro.style.display=which==="profile"?"block":"none";if(st)st.style.display=which==="stats"?"block":"none";
+    if(pro)pro.style.display=which==="profile"?"block":"none";if(st)st.style.display=which==="stats"?"block":"none";document.body.classList.toggle("subview",which!=="home");
   }
   document.addEventListener("DOMContentLoaded",function(){
-    var map={homePlan:"plan",planTab:"plan",backPlanBtn:"plan",pointsBack:"plan",homeReceipt:"receipt",receiptTab:"receipt",toReceiptBtn:"receipt",homePoints:"points",homeProfile:"profile",profileBack:"plan",profileReceipts:"points",homeStats:"stats",statsBack:"plan"};
+    show("home");
+    var map={homePlan:"plan",planTab:"plan",backPlanBtn:"plan",pointsBack:"plan",homeReceipt:"receipt",receiptTab:"receipt",toReceiptBtn:"receipt",homePoints:"points",homeProfile:"profile",profileBack:"plan",profileReceipts:"points",homeStats:"stats",statsBack:"home"};
     Object.keys(map).forEach(function(id){var e=byId(id);if(e)e.addEventListener("click",function(){show(map[id])})});
     var pn=byId("profileName");if(pn)pn.value=localStorage.getItem("echtpreis_profile_name")||"";
     var px=byId("profileXp");if(px)px.textContent=(localStorage.getItem("echtpreis_xp")||"0")+" XP gesammelt";
