@@ -258,6 +258,11 @@ input{display:none}
 @media(max-width:400px){
   .hero{font-size:39px}
 }
+
+.ocrbox{display:none;margin-top:16px;background:#0b0d11;color:#e9edf2;border-radius:18px;padding:15px;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;max-height:280px;overflow:auto}
+.progress{height:7px;background:#e6e9ed;border-radius:99px;overflow:hidden;margin-top:12px;display:none}
+.progressbar{height:100%;width:0;background:#111;transition:width .2s}
+.realbadge{display:inline-block;background:#eaf7ee;color:#23633a;padding:5px 8px;border-radius:99px;font-size:11px;font-weight:850;margin-bottom:8px}
 </style>
 </head>
 
@@ -267,7 +272,7 @@ input{display:none}
 
 <div class="brand">
 ECHTPREIS
-<span class="version">v1.0.1</span>
+<span class="version">v1.1</span>
 </div>
 
 <h1 class="hero">Versteh, was du bezahlst.</h1>
@@ -302,9 +307,9 @@ und zeigt dir, welche Preise sich zuverlässig vergleichen lassen.
 
 <img id="preview" class="preview">
 
-<div id="status" class="status">
-Bon wird vorbereitet …
-</div>
+<div id="status" class="status">Bon wird vorbereitet …</div>
+<div class="progress" id="progress"><div class="progressbar" id="progressbar"></div></div>
+<div id="ocrbox" class="ocrbox"></div>
 
 <div class="demo" id="demoButton">
 Testanalyse mit unserem Lidl-Bon anzeigen
@@ -317,6 +322,8 @@ Wenn zuverlässige Daten fehlen, sagen wir das.
 
 </section>
 
+
+<section id="realResult" class="result"></section>
 
 <section id="result" class="result">
 
@@ -498,100 +505,114 @@ ECHTPREIS · Einkaufsanalyse · Testversion
 </main>
 
 
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
 
-const cameraButton =
-document.getElementById("cameraButton");
+const cameraButton=document.getElementById("cameraButton");
+const uploadButton=document.getElementById("uploadButton");
+const cameraInput=document.getElementById("cameraInput");
+const fileInput=document.getElementById("fileInput");
+const preview=document.getElementById("preview");
+const status=document.getElementById("status");
+const result=document.getElementById("result");
+const realResult=document.getElementById("realResult");
+const demoButton=document.getElementById("demoButton");
+const progress=document.getElementById("progress");
+const progressbar=document.getElementById("progressbar");
+const ocrbox=document.getElementById("ocrbox");
 
-const uploadButton =
-document.getElementById("uploadButton");
+cameraButton.onclick=()=>cameraInput.click();
+uploadButton.onclick=()=>fileInput.click();
+cameraInput.onchange=handleFile;
+fileInput.onchange=handleFile;
 
-const cameraInput =
-document.getElementById("cameraInput");
+function euro(v){return Number(v).toFixed(2).replace(".",",")+" €";}
+function num(s){return Number(String(s).replace(".","").replace(",","."));}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
 
-const fileInput =
-document.getElementById("fileInput");
-
-const preview =
-document.getElementById("preview");
-
-const status =
-document.getElementById("status");
-
-const result =
-document.getElementById("result");
-
-const demoButton =
-document.getElementById("demoButton");
-
-
-cameraButton.onclick = () => {
-  cameraInput.click();
-};
-
-
-uploadButton.onclick = () => {
-  fileInput.click();
-};
-
-
-cameraInput.onchange = handleFile;
-fileInput.onchange = handleFile;
-
-
-function handleFile(event){
-
-  const file =
-  event.target.files &&
-  event.target.files[0];
-
-  if(!file) return;
-
-  preview.src =
-  URL.createObjectURL(file);
-
-  preview.style.display =
-  "block";
-
-  status.style.display =
-  "block";
-
-  result.style.display =
-  "none";
-
-  status.innerHTML =
-  "Bon erkannt.<br>Die automatische kostenlose Analyse wird als Nächstes angeschlossen.";
-
-  setTimeout(() => {
-
-    result.style.display =
-    "block";
-
-    status.style.display =
-    "none";
-
-    result.scrollIntoView({
-      behavior:"smooth",
-      block:"start"
-    });
-
-  },900);
-
+function parseReceipt(text){
+ const lines=text.split(/\r?\n/).map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean);
+ let total=null,saving=null,shop=/lidl/i.test(text)?"LIDL":"Kassenbon";
+ for(let i=0;i<lines.length;i++){
+   const l=lines[i];
+   let m=l.match(/(?:zu zahlen|summe|gesamt(?:betrag)?|total)\D{0,12}(\d+[.,]\d{2})/i);
+   if(m) total=num(m[1]);
+   m=l.match(/gesamter? preisvorteil\D{0,12}(\d+[.,]\d{2})/i);
+   if(m) saving=num(m[1]);
+ }
+ const ignore=/^(summe|total|zu zahlen|bar|ec|visa|master|mwst|ust|steuer|gegeben|rückgeld|datum|uhrzeit|kasse|bon|filiale|transaktion|gesamter preisvorteil|preisvorteil|aktionsrabatt|eur\b)/i;
+ const items=[];
+ for(let i=0;i<lines.length;i++){
+   const l=lines[i];
+   if(ignore.test(l)||/www\.|danke|steuer-nr|ust-id/i.test(l)) continue;
+   const prices=[...l.matchAll(/(-?\d+[.,]\d{2})(?:\s*€|\s*[AB]\b|\s*$)/gi)];
+   if(!prices.length) continue;
+   const pm=prices[prices.length-1], price=num(pm[1]);
+   if(price<=0) continue;
+   let name=l.slice(0,pm.index).replace(/\b\d+[.,]\d+\s*(?:kg|g|x)\b.*$/i,"").replace(/[\s.:*-]+$/,"").trim();
+   if(name.length<3||/^\d/.test(name)) continue;
+   if(items.some(x=>x.raw===l)) continue;
+   items.push({name,price,raw:l});
+ }
+ return {shop,total,saving,items,lines};
 }
 
+function renderReal(p,confidence){
+ const total=p.total!==null?euro(p.total):"nicht sicher erkannt";
+ const saving=p.saving!==null?euro(p.saving):"–";
+ const items=p.items.slice(0,40);
+ realResult.innerHTML=`
+ <div class="card">
+   <span class="realbadge">✓ Echte OCR-Analyse</span>
+   <div class="shopline">${esc(p.shop)} · hochgeladener Beleg</div>
+   <div class="total">${total}</div>
+   <div class="stats">
+    <div class="stat"><div class="statnum">${items.length}</div><div class="statlabel">mögliche Positionen erkannt</div></div>
+    <div class="stat"><div class="statnum">${Math.round(confidence||0)}%</div><div class="statlabel">OCR-Lesbarkeit</div></div>
+   </div>
+   <div class="saving">Erkannte Preisvorteile<br><b>${saving}</b></div>
+ </div>
+ <div class="sectiontitle">Vom Bon gelesen</div>
+ ${items.length?items.map(x=>`<div class="item"><div class="itemtop"><div class="itemname">${esc(x.name)}</div><div class="itemprice">${euro(x.price)}</div></div><div class="meta">Direkt aus dem Bon gelesen · noch kein externer Preisvergleich</div><span class="tag uncertain">Produkt-Match folgt</span></div>`).join(""):`<div class="info">Noch keine Positionen zuverlässig erkannt. Unten kannst du den gelesenen Rohtext prüfen.</div>`}
+ <div class="sectiontitle">Transparenz</div>
+ <div class="info">Diese Version liest den gedruckten Bon lokal im Browser mit OCR. Sie erfindet keine Vergleichspreise. Produkt-Matching und externe Vergleichsdaten sind der nächste Schritt.</div>`;
+ realResult.style.display="block";
+}
 
-demoButton.onclick = () => {
+async function handleFile(event){
+ const file=event.target.files&&event.target.files[0]; if(!file)return;
+ preview.src=URL.createObjectURL(file); preview.style.display="block";
+ result.style.display="none"; realResult.style.display="none"; ocrbox.style.display="none";
+ status.style.display="block"; progress.style.display="block"; progressbar.style.width="2%";
+ status.textContent="OCR wird geladen …";
+ try{
+   const worker=await Tesseract.createWorker("deu",1,{logger:m=>{
+     if(m.status==="recognizing text"){
+       const pct=Math.round((m.progress||0)*100);
+       progressbar.style.width=pct+"%"; status.textContent="Bon wird gelesen … "+pct+"%";
+     } else if(m.status){ status.textContent="OCR: "+m.status.replace(/_/g," ")+" …"; }
+   }});
+   const ret=await worker.recognize(file,{rotateAuto:true});
+   await worker.terminate();
+   const text=ret.data.text||"";
+   const parsed=parseReceipt(text);
+   renderReal(parsed,ret.data.confidence);
+   ocrbox.textContent=text||"Kein Text erkannt.";
+   ocrbox.style.display="block";
+   status.innerHTML="<b>Analyse fertig.</b> Prüfe bitte, ob Summe und Artikel stimmen.";
+   progressbar.style.width="100%";
+   realResult.scrollIntoView({behavior:"smooth",block:"start"});
+ }catch(err){
+   console.error(err);
+   status.innerHTML="<b>OCR konnte nicht gestartet werden.</b><br>Bitte Seite neu laden und erneut versuchen.";
+   progress.style.display="none";
+ }
+}
 
-  result.style.display =
-  "block";
-
-  result.scrollIntoView({
-    behavior:"smooth",
-    block:"start"
-  });
-
+demoButton.onclick=()=>{
+ realResult.style.display="none"; result.style.display="block";
+ result.scrollIntoView({behavior:"smooth",block:"start"});
 };
-
 </script>
 
 </body>
