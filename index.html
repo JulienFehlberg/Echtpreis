@@ -25,10 +25,25 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 .footer{text-align:center;color:#8a938f;font-size:11px;margin-top:28px}.detail{font-size:12px;color:#68736d;margin-top:7px}.source{font-size:11px;background:#eef1ef;border-radius:8px;padding:4px 7px;display:inline-block;margin-top:6px}.reviewrow{display:grid;grid-template-columns:1.4fr .55fr .55fr .55fr auto;gap:7px;margin:8px 0}.reviewrow input,.reviewrow select{width:100%;padding:10px;font-size:13px}.ocrbox{display:none;margin-top:14px;padding-top:14px;border-top:1px solid #e5eae7}
 @media(max-width:430px){h1{font-size:31px}.inputrow{flex-wrap:wrap}.inputrow input{flex-basis:100%}.inputrow select{flex:1}}
 .coreactions{grid-template-columns:1fr 1fr}.coreactions .homeaction{min-height:118px;font-size:17px}.coreactions .homeaction span{font-size:32px}.hero{padding:22px}.hero h1{font-size:28px;margin-bottom:0}@media(max-width:430px){.coreactions{grid-template-columns:1fr 1fr}.coreactions .homeaction{min-height:105px;padding:14px 6px;font-size:15px}}
+/* v5.47 visual polish */
+:root{--ink:#102019;--green:#087443;--green2:#16a263;--mint:#e7f5ed;--cream:#f7f5ef;--line:rgba(16,32,25,.09)}
+body{background:radial-gradient(circle at 50% -10%,#e6f3eb 0,#f7f8f6 34%,#f4f5f2 100%);color:var(--ink)}
+.app{padding-top:20px}.top{margin-bottom:18px}.brand{font-size:18px;color:#0a653c}.version{background:rgba(255,255,255,.72);border:1px solid var(--line);backdrop-filter:blur(10px)}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#071b12 0%,#0b5d39 100%);border-radius:30px;padding:27px 24px;box-shadow:0 18px 45px rgba(5,65,38,.18)}
+.hero:after{content:"€";position:absolute;right:-8px;top:-32px;font-size:145px;font-weight:950;color:rgba(255,255,255,.055);transform:rotate(10deg)}
+.hero h1{max-width:420px}.eyebrow{color:#a8e6c5}
+.homeactions{gap:12px}.coreactions .homeaction{position:relative;overflow:hidden;min-height:128px;border:1px solid rgba(11,107,58,.09);border-radius:24px;background:rgba(255,255,255,.9);box-shadow:0 10px 30px rgba(18,48,32,.075);transition:transform .15s ease,box-shadow .15s ease;text-align:left;padding:18px}
+.coreactions .homeaction:active{transform:scale(.975)}.coreactions .homeaction span{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:15px;background:var(--mint);font-size:25px;margin:0 0 15px}
+.coreactions .homeaction:nth-child(2) span{background:#fff2dc}.coreactions .homeaction:nth-child(3) span{background:#e9efff}.coreactions .homeaction:nth-child(4) span{background:#f2eaff}
+.coreactions .homeaction b{font-size:22px}.coreactions .homeaction small{font-size:12px}
+.card{border-color:var(--line);border-radius:25px;box-shadow:0 10px 32px rgba(18,48,32,.055)}input,select,textarea{border:1px solid rgba(16,32,25,.13);background:#fbfcfb;outline:none}input:focus,textarea:focus{border-color:#55ae7e;box-shadow:0 0 0 4px rgba(22,162,99,.09)}
+button{transition:transform .12s ease,filter .12s ease}button:active{transform:scale(.98)}.primary{background:var(--ink)}.green{background:linear-gradient(135deg,var(--green),var(--green2));border-radius:17px;box-shadow:0 9px 22px rgba(8,116,67,.18)}
+.ghost{background:#eef2ef}.winner{background:linear-gradient(135deg,#075f37,#0d8a50);box-shadow:0 15px 35px rgba(8,116,67,.18)}.split{background:linear-gradient(135deg,#edf9f2,#f8fcf9)}
+@media(max-width:430px){.app{padding-left:13px;padding-right:13px}.hero{padding:24px 20px}.coreactions .homeaction{min-height:122px;padding:16px}.coreactions .homeaction span{width:44px;height:44px;margin-bottom:12px}}
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.46.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.47.0</span></div>
 <section class="hero"><div class="eyebrow">ECHTPREIS</div><h1>Was möchtest du machen?</h1></section>
 <div class="homeactions coreactions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
