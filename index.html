@@ -1159,17 +1159,22 @@ async function renderPdfFirstPage(file){
 }
 function detectReceiptStore(text){
  const lines=String(text||"").split(/\n+/).map(x=>x.trim()).filter(Boolean),head=lines.slice(0,18).join(" ").toLowerCase();
- if(/\blidl\b/.test(head))return "Lidl";
- if(/\bkaufland\b/.test(head))return "Kaufland";
- if(/\brewe\b/.test(head))return "REWE";
- if(/\bedeka\b/.test(head))return "EDEKA";
- if(/\bpenny\b/.test(head))return "PENNY";
- if(/\baldi(?:\s+nord)?\b/.test(head))return "ALDI Nord";
- if(/netto\s+(?:marken|filiale|discount)|netto-marken/i.test(head)||lines.slice(0,5).some(x=>/^netto\b/i.test(x)))return "Netto";
- if(/\bnorma\b/.test(head))return "NORMA";
- if(/\brossmann\b/.test(head))return "Rossmann";
- if(/(?:^|\s)dm(?:\s|$)|dm-drogerie/i.test(head))return "dm";
+ const rules=[
+  [/\blidl\b/,"Lidl"],[/\bkaufland\b/,"Kaufland"],[/\brewe\b/,"REWE"],[/\bedeka\b/,"EDEKA"],[/\bpenny\b/,"PENNY"],
+  [/aldi\s+s(?:ü|u|ue)d|aldi süd|aldi sued/,"ALDI Süd"],[/\baldi(?:\s+nord)?\b/,"ALDI Nord"],
+  [/netto\s+(?:marken|filiale|discount)|netto-marken/,"Netto"],[/\bnorma\b/,"NORMA"],[/\brossmann\b/,"Rossmann"],[/(?:^|\s)dm(?:\s|$)|dm-drogerie/,"dm"],
+  [/\bmarktkauf\b/,"Marktkauf"],[/\bglobus\b/,"Globus"],[/\btegut\b/,"tegut"],[/\bhit\s*(?:markt|handelsgruppe)?\b/,"HIT"],
+  [/\bfamila\b/,"famila"],[/\bcombi\b/,"Combi"],[/\bwasgau\b/,"Wasgau"],[/\bv-?markt\b/,"V-Markt"],
+  [/\balnatura\b/,"Alnatura"],[/\bdenn'?s\b|denns biomarkt/,"denn's Biomarkt"],[/\bbio company\b/,"BIO COMPANY"],[/\bmüller\b|\bmueller\b/,"Müller"]
+ ];
+ for(const [pattern,name] of rules)if(pattern.test(head))return name;
+ if(lines.slice(0,5).some(x=>/^netto\b/i.test(x)))return "Netto";
  return "";
+}
+function setReceiptStoreValue(store){
+ const select=$("receiptStore");if(!select||!store)return false;
+ if(![...select.options].some(o=>o.value===store)){const opt=document.createElement("option");opt.value=store;opt.textContent=store;select.appendChild(opt)}
+ select.value=store;return select.value===store;
 }
 function updateReceiptAnalysis(){
  const box=$("receiptAnalysis");if(!box)return;currentReceiptSaving=null;currentReceiptSavingConfidence=null;
@@ -1184,7 +1189,7 @@ function updateReceiptAnalysis(){
  previewReceiptInsight();
 }
 function applyReceiptText(text,label){
- receiptDraft=parseReceiptText(text);let cash=extractReceiptCash(text);if(cash.paid||cash.change)receiptCash=cash;let detectedStore=detectReceiptStore(text);if(detectedStore)$("receiptStore").value=detectedStore;
+ receiptDraft=parseReceiptText(text);let cash=extractReceiptCash(text);if(cash.paid||cash.change)receiptCash=cash;let detectedStore=detectReceiptStore(text);if(detectedStore)setReceiptStoreValue(detectedStore);
  let detectedDate=detectReceiptDate(text);if(detectedDate)$("receiptDate").value=detectedDate;
  let ed=text.match(/EDEKA\s+Fil\.?\s*(\d+)/i),addr=text.match(/(?:^|\n)\s*([^\n]{3,45}(?:str\.|straße|strasse)[^\n]*)/i),detail=$("receiptStoreDetail"),meta=[];
  if(detectedStore)meta.push("✓ "+detectedStore+" erkannt");if(ed)meta.push("Filiale "+ed[1]);if(detectedDate)meta.push(detectedDate.split("-").reverse().join("."));if(addr)meta.push(addr[1].trim());
