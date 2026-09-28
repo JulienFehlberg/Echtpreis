@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v3.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v3.1</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="tabs"><button class="tab active" id="planTab">1 · Planen</button><button class="tab" id="receiptTab">2 · Bon abschließen</button></div>
 
@@ -135,7 +135,33 @@ function locationLabel(x){
 }
 let basket=[];let selected=new Set(storeNames);
 const $=id=>document.getElementById(id), eur=n=>n.toLocaleString("de-DE",{style:"currency",currency:"EUR"});
-function normalizeProduct(t){return t.toLowerCase().replace(/[.,]/g," ").replace(/\s+/g," ").trim()}
+function normalizeProduct(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9%]+/g," ").replace(/\s+/g," ").trim()}
+const productAliases={
+ bananen:["banane","bananen","chiquita bananen","bio bananen"],
+ "rote paprika":["paprika rot","rote paprika","paprika red","spitzpaprika rot"],
+ rinderhack:["rinderhack","rinder hack","rinderhackfleisch","rind hack","hackfleisch rind"],
+ hackfleisch:["hackfleisch","gemischtes hack","hack gemischt"],
+ eier:["eier","bio eier","bio-eier","freiland eier","bodenhaltung eier","eier 10er","bio eier okt 10er"],
+ milch:["milch","vollmilch","frischmilch","haltbare milch","h milch"],
+ haferdrink:["haferdrink","hafer drink","hafermilch","oat drink"],
+ kartoffeln:["kartoffeln","speisekartoffeln","kartoffel"],
+ skyr:["skyr"]
+};
+const receiptNoise=["bio","bioland","okt","xxl","vegan","vegane","veganer","natur","classic","original","frisch","regional"];
+function receiptTokens(t){return normalizeProduct(t).replace(/\b\d+(?:\s?g|\s?kg|\s?ml|\s?l|er)?\b/g," ").split(" ").filter(x=>x&&!receiptNoise.includes(x))}
+function tokenScore(a,b){const A=new Set(receiptTokens(a)),B=new Set(receiptTokens(b));if(!A.size||!B.size)return 0;let hit=[...A].filter(x=>B.has(x)).length;return hit/Math.max(A.size,B.size)}
+function identifyReceiptProduct(name){
+ const n=normalizeProduct(name);let best=null;
+ for(const [key,aliases] of Object.entries(productAliases)){for(const alias of aliases){
+  const a=normalizeProduct(alias);let score=0,type="none";
+  if(n===a){score=1;type="exact"}else if(n.includes(a)||a.includes(n)){score=.92;type="alias"}else{score=tokenScore(n,a);type="fuzzy"}
+  if(!best||score>best.score)best={key,label:catalog[key]?.label||key,score,type,matched:alias};
+ }}
+ if(!best||best.score<.58)return {key:null,label:"Nicht sicher erkannt",score:best?.score||0,type:"unknown"};
+ if(best.score<.78)return {...best,key:null,label:"Möglicherweise "+best.label,type:"uncertain"};
+ return best;
+}
+function confidenceLabel(m){return !m.key?"unsicher":m.score>=.95?"sehr sicher":m.score>=.85?"sicher":"prüfen"}
 function parseWish(raw){
  let t=normalizeProduct(raw), amount=1, unit="piece", explicit=false;
  let m=t.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stck|x)?\s+(.+)$/i);
@@ -174,10 +200,10 @@ function showReceipt(){$("planner").style.display="none";$("receipt").style.disp
 $("toReceiptBtn").onclick=showReceipt;$("backPlanBtn").onclick=showPlan;
 $("planTab").onclick=showPlan;$("receiptTab").onclick=showReceipt;
 let receiptDraft=[];
-function guessKey(name){let t=normalizeProduct(name);return Object.keys(catalog).find(k=>t===k||t.includes(k)||k.includes(t))||""}
+function guessKey(name){return identifyReceiptProduct(name).key||""}
 function drawReviewRows(){
- $("reviewRows").innerHTML=receiptDraft.map((r,i)=>'<div class="reviewrow"><input data-rname="'+i+'" value="'+escHtml(r.name||"")+'" placeholder="Artikel"><input data-rprice="'+i+'" inputmode="decimal" value="'+(r.price||"")+'" placeholder="€"><button class="x" data-rdel="'+i+'">✕</button></div>').join("");
- document.querySelectorAll("[data-rname]").forEach(e=>e.oninput=()=>receiptDraft[+e.dataset.rname].name=e.value);
+ $("reviewRows").innerHTML=receiptDraft.map((r,i)=>(()=>{let m=identifyReceiptProduct(r.name||"");return '<div class="reviewrow"><div><input data-rname="'+i+'" value="'+escHtml(r.name||"")+'" placeholder="Artikel"><div class="detail">'+(m.key?'✓ '+escHtml(m.label)+' · '+confidenceLabel(m):'⚠ '+escHtml(m.label))+'</div></div><input data-rprice="'+i+'" inputmode="decimal" value="'+(r.price||"")+'" placeholder="€"><button class="x" data-rdel="'+i+'">✕</button></div>'})()).join("");
+ document.querySelectorAll("[data-rname]").forEach(e=>e.onchange=()=>{receiptDraft[+e.dataset.rname].name=e.value;drawReviewRows()});
  document.querySelectorAll("[data-rprice]").forEach(e=>e.oninput=()=>receiptDraft[+e.dataset.rprice].price=e.value);
  document.querySelectorAll("[data-rdel]").forEach(e=>e.onclick=()=>{receiptDraft.splice(+e.dataset.rdel,1);drawReviewRows()});
 }
