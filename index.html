@@ -62,7 +62,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 .list-edit{display:flex;gap:7px;margin-top:9px}.list-edit input{width:100%;padding:10px;font-size:15px}.list-edit button{padding:10px 12px}.itemname .edit-trigger{font-size:12px;padding:6px 0;background:transparent;color:#087443;text-decoration:underline}.route-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;margin-top:9px;border-radius:12px;background:#e6f5ec;color:#075f37;font-size:14px;font-weight:850;text-decoration:none}.winner .route-link{background:#fff;color:#075f37}.savings-card{border-color:#b9dfc9;background:#f1faf5}.savings-card .split{margin-top:9px}.savings-card .split strong{font-size:22px}.compare-status{margin-top:9px;text-align:center}#statsCard .homeaction{display:block;min-width:0;overflow:visible}#statsCard .homeaction b,#statsCard .homeaction small{display:block;overflow-wrap:anywhere}#statsCard .homeaction b{font-size:19px}#statsCard .homeaction small{line-height:1.25}.receipt-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #e5eae7;text-align:left}.receipt-item strong{white-space:nowrap}.receipt-item-name{min-width:0;overflow-wrap:anywhere}.receipt-item small{display:block;color:#68736d;margin-top:3px}.ocrbox #receiptTotalCheck,.ocrbox #receiptPaymentDetail{font-size:14px;margin:10px 0;text-align:left}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.59.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.60.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homePlan" type="button"><span>🛒</span>Einkaufsliste</button>
@@ -114,7 +114,8 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <div class="homeaction"><span>📅</span><b id="statsWeekly">0,00 €</b><small>in dieser Woche</small></div>
 <div class="homeaction"><span>📅</span><b id="statsMonthly">0,00 €</b><small>in diesem Monat</small></div>
 <div class="homeaction"><span>💡</span><b id="statsPotential">–</b><small>geschätztes Sparpotenzial</small></div>
-</div><div class="muted" style="margin-top:14px">Basiert auf den auf diesem Gerät gespeicherten Bons. Sparpotenzial erscheint nur, wenn ein vollständiger Vergleich möglich war.</div>
+<div class="homeaction"><span>🛒</span><b id="statsAverage">0,00 €</b><small>Ø pro Einkauf</small></div>
+</div><div class="muted" style="margin-top:14px">Basiert auf den auf diesem Gerät gespeicherten Bons. Sparpotenzial erscheint nur, wenn ein vollständiger Vergleich möglich war.</div><div id="statsRecent" style="margin-top:14px"></div>
 <button class="ghost" id="statsBack" style="width:100%;margin-top:14px">Zurück</button></section>
 <section class="card" id="profileCard" style="display:none">
 <h2>Mein Profil</h2><div class="muted">Dein ECHTPREIS-Konto.</div>
@@ -814,11 +815,19 @@ function showReceipt(){hidePoints();$("planner").style.display="none";$("receipt
 function showPoints(){$("planner").style.display="none";$("receipt").style.display="none";$("pointsCard").style.display="block";window.scrollTo({top:0,behavior:"smooth"});refreshPoints()}
 function getPersonalReceipts(){try{return JSON.parse(localStorage.getItem("echtpreis_personal_receipts")||"[]")}catch(e){return[]}}
 function savePersonalReceipts(v){localStorage.setItem("echtpreis_personal_receipts",JSON.stringify(v))}
-function refreshStats(){const receipts=getPersonalReceipts(),today=new Date(),year=String(today.getFullYear()),month=year+"-"+String(today.getMonth()+1).padStart(2,"0"),weekStart=new Date(today.getFullYear(),today.getMonth(),today.getDate()-(today.getDay()+6)%7),weekKey=weekStart.getFullYear()+"-"+String(weekStart.getMonth()+1).padStart(2,"0")+"-"+String(weekStart.getDate()).padStart(2,"0"),sum=rows=>rows.reduce((n,r)=>n+(Number(r.total)||0),0),known=receipts.filter(r=>Number.isFinite(Number(r.potentialSaving))&&r.potentialSaving!=null);$("statsReceipts").textContent=String(receipts.length);$("statsSpent").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(year))));$("statsWeekly").textContent=eur(sum(receipts.filter(r=>String(r.date||"")>=weekKey)));$("statsMonthly").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(month))));$("statsPotential").textContent=known.length?"ca. "+eur(known.reduce((n,r)=>n+Number(r.potentialSaving),0)):"–"}
+function renderStatsReceipts(){
+ const box=$("statsRecent");if(!box)return;const rs=getPersonalReceipts().slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))).slice(0,8);
+ box.innerHTML=rs.length?'<div style="font-weight:900;margin-bottom:7px">Letzte Einkäufe</div>'+rs.map(r=>'<div style="display:flex;align-items:center;gap:10px;border-top:1px solid #e6ebe8;padding:10px 0"><div style="flex:1;min-width:0"><b>'+escHtml(r.store||"Bon")+'</b><div class="detail">'+escHtml(r.date||"")+(Number(r.total)>0?' · '+eur(Number(r.total)):'')+(Number.isFinite(Number(r.potentialSaving))&&r.potentialSaving!=null?' · ca. '+eur(Number(r.potentialSaving))+' Sparpotenzial':'')+'</div></div><button class="x" aria-label="Bon löschen" data-stat-delete="'+escHtml(String(r.id||""))+'">🗑</button></div>').join(""):'<div class="detail">Noch keine Bons gespeichert.</div>';
+ box.querySelectorAll("[data-stat-delete]").forEach(b=>b.onclick=async()=>{const r=getPersonalReceipts().find(x=>String(x.id)===b.dataset.statDelete);if(!r)return;if(!confirm("Diesen Bon aus deiner Statistik löschen?"))return;b.disabled=true;try{await deletePersonalReceipt(r);refreshStats();await renderPersonalReceipts()}catch(e){alert(e.message);b.disabled=false}});
+}
+function refreshStats(){
+ const receipts=getPersonalReceipts(),today=new Date(),year=String(today.getFullYear()),month=year+"-"+String(today.getMonth()+1).padStart(2,"0"),weekStart=new Date(today.getFullYear(),today.getMonth(),today.getDate()-(today.getDay()+6)%7),weekKey=weekStart.getFullYear()+"-"+String(weekStart.getMonth()+1).padStart(2,"0")+"-"+String(weekStart.getDate()).padStart(2,"0"),sum=rows=>rows.reduce((n,r)=>n+(Number(r.total)||0),0),known=receipts.filter(r=>Number.isFinite(Number(r.potentialSaving))&&r.potentialSaving!=null),paid=receipts.filter(r=>Number(r.total)>0);
+ $("statsReceipts").textContent=String(receipts.length);$("statsSpent").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(year))));$("statsWeekly").textContent=eur(sum(receipts.filter(r=>String(r.date||"")>=weekKey)));$("statsMonthly").textContent=eur(sum(receipts.filter(r=>String(r.date||"").startsWith(month))));$("statsPotential").textContent=known.length?"ca. "+eur(known.reduce((n,r)=>n+Number(r.potentialSaving),0)):"–";$("statsAverage").textContent=paid.length?eur(sum(paid)/paid.length):eur(0);renderStatsReceipts();
+}
 window.refreshEchtpreisStats=refreshStats;
 async function loadServerReceipts(){let cid=localStorage.getItem("echtpreis_contributor_id")||"";if(!cid)return getPersonalReceipts();try{let r=await fetch(API_BASE+"/v1/my-receipts?contributorId="+encodeURIComponent(cid)),d=await r.json();if(r.ok&&Array.isArray(d.items))return d.items.map(x=>({id:x.id,store:x.store,date:String(x.purchasedAt||"").slice(0,10),total:"",private:!!x.private,source:"server"}))}catch(e){}return getPersonalReceipts()}
 async function setReceiptPrivate(r,value){if(r.source==="server"){let cid=localStorage.getItem("echtpreis_contributor_id")||"";let q=await fetch(API_BASE+"/v1/receipt-privacy",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({receiptId:r.id,contributorId:cid,private:value})});if(!q.ok)throw new Error("Server konnte den Privatstatus nicht ändern")}else{let a=getPersonalReceipts(),x=a.find(v=>v.id===r.id);if(x)x.private=value;savePersonalReceipts(a)}}
-async function deletePersonalReceipt(r){if(r.source==="server"){let cid=localStorage.getItem("echtpreis_contributor_id")||"";let q=await fetch(API_BASE+"/v1/receipt-delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({receiptId:r.id,contributorId:cid})});if(!q.ok)throw new Error("Server konnte den Bon nicht löschen")}else{savePersonalReceipts(getPersonalReceipts().filter(v=>v.id!==r.id))}}
+async function deletePersonalReceipt(r){if(r.source==="server"){let cid=localStorage.getItem("echtpreis_contributor_id")||"";let q=await fetch(API_BASE+"/v1/receipt-delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({receiptId:r.id,contributorId:cid})});if(!q.ok)throw new Error("Server konnte den Bon nicht löschen")}savePersonalReceipts(getPersonalReceipts().filter(v=>String(v.id)!==String(r.id)));refreshStats()}
 async function renderPersonalReceipts(){let box=$("myReceipts");if(!box)return;box.innerHTML='<div class="detail">Bons werden geladen …</div>';let rs=await loadServerReceipts();box.innerHTML=rs.length?rs.map((r,i)=>'<div style="border:1px solid #ddd;border-radius:12px;padding:10px;margin:7px 0"><b>'+escHtml(r.store||"Bon")+'</b> · '+escHtml(r.date||"")+(r.total?' · '+escHtml(r.total)+' €':'')+(r.private?' · 🔒 Privat':'')+'<div style="display:flex;gap:7px;margin-top:7px"><button class="ghost" data-private-receipt="'+i+'">'+(r.private?'Privat aus':'🔒 Privat')+'</button><button class="ghost" data-delete-receipt="'+i+'">🗑 Löschen</button></div></div>').join(""):'<div class="detail">Noch keine persönlichen Bons gespeichert.</div>';document.querySelectorAll("[data-private-receipt]").forEach(b=>b.onclick=async()=>{let r=rs[+b.dataset.privateReceipt];b.disabled=true;try{await setReceiptPrivate(r,!r.private);await renderPersonalReceipts()}catch(e){alert(e.message);b.disabled=false}});document.querySelectorAll("[data-delete-receipt]").forEach(b=>b.onclick=async()=>{let r=rs[+b.dataset.deleteReceipt];if(!confirm("Diesen Bon aus deinem persönlichen Verlauf löschen?"))return;b.disabled=true;try{await deletePersonalReceipt(r);await renderPersonalReceipts()}catch(e){alert(e.message);b.disabled=false}})}
 function refreshPoints(){let xp=Number(localStorage.getItem("echtpreis_xp")||0),n=Number(localStorage.getItem("echtpreis_receipts")||0),xt=$("xpTotal"),pm=$("pointsMini"),cs=$("contributionStats");if(xt)xt.textContent=xp+" XP";if(pm)pm.textContent=xp+" XP";if(cs)cs.textContent=n?n+" Bon"+(n===1?"":"s")+" auf diesem Gerät erfolgreich beigetragen.":"Noch keine Beiträge auf diesem Gerät.";refreshStats();renderPersonalReceipts();let ai=$("autoReceiptImports");if(ai)ai.checked=localStorage.getItem("echtpreis_auto_imports")==="1"}
 let hp=$("homePoints");if(hp)hp.onclick=showPoints;$("pointsBack").onclick=showPlan;
@@ -885,6 +894,14 @@ function extractReceiptCash(text){
  m=t.match(/(?:rückgeld|rueckgeld|wechselgeld)\s*(?:€|EUR)?\s*-?\s*(\d{1,5}[,.]\d{2})/i);if(m)out.change=parseReceiptNumber(m[1]);
  return out;
 }
+function receiptCandidateScore(text){
+ const rows=parseReceiptText(text),total=extractReceiptTotal(text),recognized=Number(rows.reduce((n,r)=>n+(Number(String(r.price).replace(",","."))||0),0).toFixed(2)),cash=extractReceiptCash(text),low=String(text||"").toLowerCase();
+ let score=0;if(total>0)score+=35;score+=Math.min(rows.length,5)*9;if(total>0&&rows.length&&Math.abs(total-recognized)<.011)score+=55;if(/lidl|kaufland|rewe|edeka|penny|aldi|netto|norma|rossmann|\bdm\b/.test(low))score+=8;if(/\b\d{2}[.\/-]\d{2}[.\/-](?:20)?\d{2}\b/.test(text))score+=4;if(cash.paid)score+=3;
+ rows.forEach(r=>{let n=(r.name||"").trim();if(n.length<2||/^(?:bar|summe|gesamt|mwst|netto|umsatz|steuer|rückgeld|eur|€)$/i.test(n))score-=25});
+ return {score,rows,total,recognized,cash,text};
+}
+function receiptCandidateVerified(candidate){return !!(candidate&&candidate.total>0&&candidate.rows.length>=2&&Math.abs(candidate.total-candidate.recognized)<.011&&candidate.score>=70)}
+
 function checkReceiptTotal(){
  const total=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,"")),recognized=Number(receiptDraft.reduce((n,r)=>n+(Number(String(r.price).replace(",","."))||0),0).toFixed(2));
  const arithmeticMatch=total>0&&receiptDraft.length>0&&Math.abs(total-recognized)<.011;
@@ -917,12 +934,12 @@ function updateReceiptAnalysis(){
  else{$("analysisBestStore").textContent=rows.length?rows[0].store+" · geschätzt":valid.length?"Kein vollständiger Marktvergleich möglich":"Artikel für Marktvergleich fehlen";$("analysisBestPrice").textContent=rows.length?"ca. "+eur(rows[0].total):"–";$("analysisSaving").textContent=rows.length?"0,00 €":"noch keinen Betrag";if(rows.length)currentReceiptSaving=0;$("analysisNote").textContent=rows.length?"Der günstigste bekannte Vergleich liegt nicht unter deiner Bon-Summe. Filialpreise können abweichen.":valid.length?"Für einen belastbaren Vergleich müssen die Bon-Summe und alle erkannten Positionen übereinstimmen und alle Produkte bepreist werden können.":"Die Bon-Summe wird gespeichert. Ergänze die Artikel mit ihren Preisen oder fotografiere den Bon erneut, um eine mögliche Ersparnis zu berechnen.";}
 }
 function applyReceiptText(text,label){
- receiptDraft=parseReceiptText(text);receiptCash=extractReceiptCash(text);let low=text.toLowerCase();if(low.includes("lidl"))$("receiptStore").value="Lidl";else if(low.includes("kaufland"))$("receiptStore").value="Kaufland";else if(low.includes("rewe"))$("receiptStore").value="REWE";else if(low.includes("edeka"))$("receiptStore").value="EDEKA";else if(low.includes("penny"))$("receiptStore").value="PENNY";else if(low.includes("aldi"))$("receiptStore").value="ALDI Nord";else if(low.includes("netto"))$("receiptStore").value="Netto";else if(low.includes("norma"))$("receiptStore").value="NORMA";else if(low.includes("rossmann"))$("receiptStore").value="Rossmann";else if(/\bdm\b/.test(low))$("receiptStore").value="dm";
- let dm=text.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2}|\d{2})\b/);$("receiptDate").value=dm?(dm[3].length===2?"20"+dm[3]:dm[3])+"-"+dm[2]+"-"+dm[1]:new Date().toISOString().slice(0,10);
+ receiptDraft=parseReceiptText(text);let cash=extractReceiptCash(text);if(cash.paid||cash.change)receiptCash=cash;let low=text.toLowerCase();if(low.includes("lidl"))$("receiptStore").value="Lidl";else if(low.includes("kaufland"))$("receiptStore").value="Kaufland";else if(low.includes("rewe"))$("receiptStore").value="REWE";else if(low.includes("edeka"))$("receiptStore").value="EDEKA";else if(low.includes("penny"))$("receiptStore").value="PENNY";else if(low.includes("aldi"))$("receiptStore").value="ALDI Nord";else if(low.includes("netto"))$("receiptStore").value="Netto";else if(low.includes("norma"))$("receiptStore").value="NORMA";else if(low.includes("rossmann"))$("receiptStore").value="Rossmann";else if(/\bdm\b/.test(low))$("receiptStore").value="dm";
+ let dm=text.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2}|\d{2})\b/);if(dm)$("receiptDate").value=(dm[3].length===2?"20"+dm[3]:dm[3])+"-"+dm[2]+"-"+dm[1];else if(!$("receiptDate").value)$("receiptDate").value=new Date().toISOString().slice(0,10);
  let ed=text.match(/EDEKA\s+Fil\.?\s*(\d+)/i),addr=text.match(/(?:^|\n)\s*([^\n]{3,45}(?:str\.|straße|strasse)[^\n]*)/i),detail=$("receiptStoreDetail");
  if(detail)detail.textContent=ed?("✓ EDEKA Filiale "+ed[1]+(addr?" · "+addr[1].trim():"")):"";
  if(!detectedReceiptBarcode){let bc=text.match(/\b(\d{20,24})\b/);if(bc)detectedReceiptBarcode=bc[1];}
- const printed=extractReceiptTotal(text);$("receiptTotalInput").value=printed?printed.toFixed(2).replace(".",","):"";
+ const printed=extractReceiptTotal(text);if(printed)$("receiptTotalInput").value=printed.toFixed(2).replace(".",",");
  $("ocrStatus").textContent=receiptDraft.length?receiptDraft.length+" Positionen erkannt.":"Bon konnte noch nicht sicher gelesen werden.";drawReviewRows();checkReceiptTotal();
 }
 async function detectReceiptBarcode(file){
@@ -951,20 +968,35 @@ async function processReceiptFile(file){
  }
  await runImageReceiptOCR(file);
 }
+async function receiptCrop(file,crop,lang,psm){
+ const image=await createImageBitmap(file),canvas=document.createElement("canvas");canvas.width=1800;canvas.height=Math.round(1800*crop[3]/crop[2]);let ctx=canvas.getContext("2d");ctx.filter="grayscale(1) contrast(1.75)";ctx.drawImage(image,...crop,0,0,canvas.width,canvas.height);image.close();const out=await Tesseract.recognize(canvas,lang,{config:{tessedit_pageseg_mode:psm}});return out.data.text||"";
+}
 async function runImageReceiptOCR(file){
- $("ocrBox").style.display="block";$("ocrStatus").textContent="Bon wird lokal gelesen …";
- try{if(!window.Tesseract){$("ocrStatus").textContent="Lokale Texterkennung wird geladen …";await new Promise((resolve,reject)=>{let sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc)})}
-  const out=await Tesseract.recognize(file,"deu",{logger:m=>{if(m.status==="recognizing text")$("ocrStatus").textContent="Bon lesen: "+Math.round((m.progress||0)*100)+" %"}});let text=out.data.text||"";
-  applyReceiptText(text,"Foto");
-  if(receiptDraft.length<2||!extractReceiptTotal(text)||!receiptTotalVerified){
-   $("ocrStatus").textContent="Bon-Ausschnitt wird erneut gelesen …";
-   try{
-    const image=await createImageBitmap(file),canvas=document.createElement("canvas"),crop=[image.width*.16,image.height*.12,image.width*.70,image.height*.27];
-    canvas.width=1800;canvas.height=Math.round(1800*crop[3]/crop[2]);let ctx=canvas.getContext("2d");ctx.filter="grayscale(1) contrast(1.7)";ctx.drawImage(image,...crop,0,0,canvas.width,canvas.height);image.close();
-    const retry=await Tesseract.recognize(canvas,"eng",{config:{tessedit_pageseg_mode:6}}),retryText=retry.data.text||"",newRows=parseReceiptText(retryText),printed=extractReceiptTotal(text);
-    if(newRows.length>receiptDraft.length||(!printed&&extractReceiptTotal(retryText)))applyReceiptText(retryText+(printed&&!extractReceiptTotal(retryText)?"\nSUMME "+printed.toFixed(2).replace(".",","):""),"Bonausschnitt");
-   }catch(err){}
+ $("ocrBox").style.display="block";$("ocrStatus").textContent="Bon wird lokal gelesen …";receiptCash=null;
+ try{
+  if(!window.Tesseract){$("ocrStatus").textContent="Lokale Texterkennung wird geladen …";await new Promise((resolve,reject)=>{let sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc)})}
+  const first=await Tesseract.recognize(file,"deu",{logger:m=>{if(m.status==="recognizing text")$("ocrStatus").textContent="Bon lesen: "+Math.round((m.progress||0)*100)+" %"}}),texts=[first.data.text||""];
+  let best=receiptCandidateScore(texts[0]);applyReceiptText(best.text,"Foto");
+  if(!receiptCandidateVerified(best)){
+   $("ocrStatus").textContent="Artikelbereich wird genauer gelesen …";
+   try{const image=await createImageBitmap(file),w=image.width,h=image.height;image.close();texts.push(await receiptCrop(file,[w*.16,h*.12,w*.70,h*.27],"eng",6))}catch(e){}
+   // Convert fractional crop values to the actual image size on the next pass.
+   if(texts.length>1){
+    let candidate=receiptCandidateScore(texts[1]);if(candidate.score>best.score)best=candidate;
+    applyReceiptText(best.text,"Bonausschnitt");
+   }
   }
+  if(!receiptCandidateVerified(best)){
+   $("ocrStatus").textContent="Bon wird ein drittes Mal geprüft …";
+   try{
+    const image=await createImageBitmap(file),w=image.width,h=image.height;image.close();
+    texts.push(await receiptCrop(file,[w*.10,h*.07,w*.80,h*.40],"deu",4));
+    let candidate=receiptCandidateScore(texts[texts.length-1]);if(candidate.score>best.score)best=candidate;
+    applyReceiptText(best.text,"Detailprüfung");
+   }catch(e){}
+  }
+  if(receiptCandidateVerified(best))$("ocrStatus").textContent="✓ Bon automatisch erkannt.";
+  else{$("ocrStatus").textContent="Bon nicht sicher genug erkannt. Bitte näher, gerade und ohne Schatten erneut fotografieren.";$("finishPurchaseBtn").disabled=true}
  }catch(err){$("ocrStatus").textContent="Automatische Erkennung fehlgeschlagen. Bitte den Bon erneut fotografieren.";receiptDraft=[];receiptCash=null;drawReviewRows();checkReceiptTotal()}
 }
 const runDupeTestBtn=$("runDupeTest");if(runDupeTestBtn)runDupeTestBtn.onclick=async()=>{
