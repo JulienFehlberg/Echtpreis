@@ -27,7 +27,7 @@ button{border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:
 </style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v4.3</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v4.4</span></div>
 <section class="hero"><div class="eyebrow">Dein Einkauf, vorher & nachher</div><h1>Wo ist dein Einkauf heute am günstigsten?</h1><p class="sub">Schreib einfach deine Liste wie du sie denkst: „5 Bananen, 3 rote Paprika, 500 g Rinderhack“. ECHTPREIS strukturiert daraus deinen Einkauf.</p></section>
 <div class="homeactions"><button class="homeaction" id="homePlan"><span>🛒</span>Einkauf planen<small>Preise vergleichen</small></button><button class="homeaction" id="homeReceipt"><span>🧾</span>Bon scannen<small>Preise bestätigen</small></button><button class="homeaction" id="homePoints"><span>🎁</span>Beiträge & Punkte<small id="pointsMini">0 XP</small></button></div><div class="tabs"><button class="tab active" id="planTab">Planen</button><button class="tab" id="receiptTab">Bon scannen</button></div>
 
@@ -305,14 +305,33 @@ async function runImageReceiptOCR(file){
 $("addReviewRow").onclick=()=>{receiptDraft.push({name:"",price:"",packAmount:"",packUnit:""});drawReviewRows()};
 $("receiptFile").onchange=e=>{let file=e.target.files[0];$("receiptMsg").textContent=file?"✓ Bon ausgewählt: "+file.name:"";$("finishPurchaseBtn").disabled=!file;if(file)processReceiptFile(file)};
 function closePurchase(){try{localStorage.removeItem("echtpreis_open_purchase")}catch(e){}}
-$("finishPurchaseBtn").onclick=()=>{
+async function submitReceiptReward(store,date,valid){
+ const contributorId=localStorage.getItem("echtpreis_contributor_id")||"";
+ const total=valid.reduce((n,x)=>n+(Number(x.price)||0),0);
+ const payload={store,purchasedAt:date+"T12:00:00",date,total:total.toFixed(2),contributorId,items:valid.map(x=>({rawName:x.name,lineTotal:x.price,price:x.price}))};
+ try{
+  const r=await fetch(API_BASE+"/v1/receipt-submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const d=await r.json();if(!r.ok)throw new Error(d.error||"HTTP "+r.status);
+  if(d.contributorId)localStorage.setItem("echtpreis_contributor_id",d.contributorId);
+  if(d.duplicate)return {ok:true,duplicate:true,xp:0,rewardPoints:0};
+  let xp=Number(localStorage.getItem("echtpreis_xp")||0)+Number(d.xp||0),n=Number(localStorage.getItem("echtpreis_receipts")||0)+1;
+  localStorage.setItem("echtpreis_xp",String(xp));localStorage.setItem("echtpreis_receipts",String(n));refreshPoints();
+  return {ok:true,duplicate:false,xp:Number(d.xp||0),rewardPoints:Number(d.rewardPoints||0),status:d.rewardStatus||""};
+ }catch(e){return {ok:false,error:String(e.message||e)}}
+}
+$("finishPurchaseBtn").onclick=async()=>{
  if(!$("receiptFile").files[0])return;let store=$("receiptStore").value,date=$("receiptDate").value;if(!store||!date)return alert("Bitte Händler und Bon-Datum kontrollieren.");
  let valid=receiptDraft.map(r=>({name:(r.name||"").trim(),price:Number(String(r.price).replace(",",".")),packAmount:Number(String(r.packAmount||"").replace(",",".")),packUnit:r.packUnit||"",discount:Number(r.discount||0),regularTotal:Number(r.regularTotal||r.price||0),count:Number(r.count||1),quantitySource:r.quantitySource||""})).filter(r=>r.name&&Number.isFinite(r.price)&&r.price>0);
  if(!valid.length&&!confirm("Es wurden keine Artikelpreise bestätigt. Einkauf trotzdem abschließen?"))return;
+ $("finishPurchaseBtn").disabled=true;$("finishPurchaseBtn").textContent="Bon wird geprüft …";
+ let reward=await submitReceiptReward(store,date,valid);
+ if(reward.ok&&reward.duplicate){$("openPurchaseNotice").innerHTML="<b>🧾 Bon bereits erfasst.</b> Dieser Einkauf wurde schon bei ECHTPREIS eingereicht."; $("receiptMsg").textContent="Keine erneuten XP oder Punkte für denselben Bon.";$("finishPurchaseBtn").textContent="Bereits erfasst";return}
  let proofId="receipt_"+Date.now(),saved=0,sharedItems=[];
  if($("contribute").checked){valid.forEach(r=>{let match=identifyReceiptProduct(r.name),key=match.key;if(!key)return;let c=catalog[key];learnProductAlias(r.name,key,{ean:match.ean,brand:match.brand,quantity:match.quantity,source:"confirmed-receipt"});let amount=r.packAmount,unit=r.packUnit,per=c.unit,normalizedAmount=null;if(amount>0){if(unit==="g")normalizedAmount=amount/1000;else if(unit==="ml")normalizedAmount=amount/1000;else if(unit==="kg"||unit==="l"||unit==="piece")normalizedAmount=amount}let compatible=normalizedAmount>0&&((per==="kg"&&(unit==="kg"||unit==="g"))||(per==="l"&&(unit==="l"||unit==="ml"))||(per==="piece"&&unit==="piece"));if(!compatible)return;let unitPrice=r.price/normalizedAmount;if(!Number.isFinite(unitPrice)||unitPrice<=0)return;let obs={key,store,price:unitPrice,per,date,region:"",source:"ECHTPREIS Bon",product:r.name,rawName:r.name,proof:proofId,status:"observed",lineTotal:r.price,regularTotal:r.regularTotal||r.price,discount:r.discount||0,packAmount:amount,packUnit:unit,pricingConfidence:"confirmed"};if(addCommunityObservation(obs)){saved++;sharedItems.push(obs)}});if(sharedItems.length)pushSharedReceipt(proofId,sharedItems)}
  try{localStorage.setItem("echtpreis_last_proof",JSON.stringify({id:proofId,type:"RECEIPT",file:$("receiptFile").files[0].name,created:new Date().toISOString(),consent:$("contribute").checked,rows:valid.length,saved}))}catch(e){}
- closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> "+valid.length+" Preiszeilen bestätigt.";$("finishPurchaseBtn").textContent="✓ Einkauf abgeschlossen";$("finishPurchaseBtn").disabled=true;$("noReceiptBtn").style.display="none";$("receiptMsg").textContent=$("contribute").checked?(saved+" erkannte Produktpreise als unbestätigte Community-Beobachtungen gespeichert."):"Bon geprüft · keine Community-Freigabe.";drawDataMachine();
+ closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> "+valid.length+" Preiszeilen bestätigt.";$("finishPurchaseBtn").textContent="✓ Einkauf abgeschlossen";$("finishPurchaseBtn").disabled=true;$("noReceiptBtn").style.display="none";
+ let rewardText=reward.ok?(" · +"+reward.xp+" XP"+(reward.status?" · "+reward.status:"")):" · XP-Server momentan nicht erreichbar";
+ $("receiptMsg").textContent=($("contribute").checked?(saved+" erkannte Produktpreise beigetragen.":"Bon geprüft · keine Community-Freigabe.")+rewardText);drawDataMachine();refreshPoints();
 };
 $("noReceiptBtn").onclick=()=>{if(!confirm("Bon verloren oder nicht mehr vorhanden? Du kannst den Einkauf trotzdem abschließen. Diesmal können daraus nur keine Preise zur ECHTPREIS-Datenbasis beitragen."))return;closePurchase();$("openPurchaseNotice").innerHTML="<b>✓ Einkauf abgeschlossen.</b> Diesmal ohne Bon – kein Problem.";$("receiptMsg").textContent="Keine Preisdaten beigetragen.";$("noReceiptBtn").style.display="none";$("finishPurchaseBtn").style.display="none";};
 refreshPoints();drawSuggestions();drawStores();drawList();drawDataMachine();syncSharedData();ingestOpenPrices();
