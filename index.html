@@ -70,7 +70,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.131.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.132.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -111,7 +111,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <label class="ghost receipt-file-action" for="receiptFile">Foto oder Dokument auswählen</label>
 <div id="receiptMsg" class="detail"></div>
 <div id="ocrBox" class="ocrbox"><h2>Bon-Analyse</h2><div id="ocrStatus" class="detail" role="status"></div><div id="receiptStoreDetail" class="detail"></div><input id="receiptTotalInput" type="hidden"><div id="receiptTotalCheck" class="detail"></div><div id="receiptPaymentDetail" class="detail"></div><div id="reviewRows"></div><button id="addReviewRow" class="ghost" type="button" style="display:none">Artikel hinzufügen</button><select id="receiptStore" style="display:none"><option value="">Händler wählen</option><option>Lidl</option><option>Kaufland</option><option>REWE</option><option>EDEKA</option><option>PENNY</option><option>ALDI Nord</option><option>ALDI Süd</option><option>ALDI</option><option>Netto</option><option>NORMA</option><option>dm</option><option>Rossmann</option><option>Marktkauf</option><option>HIT</option><option>Globus</option><option>tegut</option><option>Alnatura</option><option>Denns Biomarkt</option><option>BIO COMPANY</option><option>Müller</option><option>BUDNI</option></select><input id="receiptDate" type="date" style="display:none"><details style="margin:12px 0 6px;text-align:left"><summary class="detail" style="cursor:pointer">Optional: Preisdaten teilen</summary><label class="detail" style="display:flex;align-items:flex-start;gap:8px;margin-top:9px"><input type="checkbox" id="contribute" style="flex:0 0 auto;margin-top:2px"> Anonymisierte Produktpreise dieses Bons zur Verbesserung von ECHTPREIS teilen</label></details><button class="green" id="finishPurchaseBtn" disabled>Bon speichern</button><button class="ghost" id="noReceiptBtn">Erneut fotografieren</button></div>
-<div id="receiptAnalysis" class="receipt-analysis" style="display:none"><div class="smallcap">Deine Bon-Analyse</div><div class="analysis-paid"><span>Bezahlt</span><strong id="analysisPaid">–</strong></div><div class="analysis-best" id="analysisBestRow"><span id="analysisBestStore">Günstigster Vergleich</span><strong id="analysisBestPrice">–</strong></div><div class="analysis-save" id="analysisSavingRow">Preisunterschied: <strong id="analysisSaving">–</strong></div><div id="analysisNote" class="detail"></div></div><div id="receiptInsight" class="insight-card" style="display:none"><div class="insight-kicker">✨ Dein Fakt zu diesem Einkauf</div><strong id="receiptInsightTitle"></strong><div id="receiptInsightDetail" class="detail"></div></div><details class="receipt-why"><summary>Warum Bons?</summary><div class="muted">Jeder gespeicherte Bon macht dein persönliches Einkaufsprofil schlauer: Ausgaben, Preisentwicklungen, Gewohnheiten und Marktvergleiche. Preisdaten für die Community teilst du nur, wenn du es ausdrücklich aktivierst.</div></details>
+<div id="receiptAnalysis" class="receipt-analysis" style="display:none"><div class="smallcap">Deine Bon-Analyse</div><div class="analysis-paid"><span>Bezahlt</span><strong id="analysisPaid">–</strong></div><div class="analysis-best" id="analysisBestRow"><span id="analysisBestStore">Günstigster Vergleich</span><strong id="analysisBestPrice">–</strong></div><div class="analysis-save" id="analysisSavingRow">Preisunterschied: <strong id="analysisSaving">–</strong></div><div id="analysisNote" class="detail"></div><div id="receiptMarketRows"></div></div><div id="receiptInsight" class="insight-card" style="display:none"><div class="insight-kicker">✨ Dein Fakt zu diesem Einkauf</div><strong id="receiptInsightTitle"></strong><div id="receiptInsightDetail" class="detail"></div></div><details class="receipt-why"><summary>Warum Bons?</summary><div class="muted">Jeder gespeicherte Bon macht dein persönliches Einkaufsprofil schlauer: Ausgaben, Preisentwicklungen, Gewohnheiten und Marktvergleiche. Preisdaten für die Community teilst du nur, wenn du es ausdrücklich aktivierst.</div></details>
 <button class="ghost" id="backPlanBtn" style="width:100%;margin-top:14px">Zurück</button>
 <div id="openPurchaseNotice" style="display:none"></div><div id="testModeBox" style="display:none"><button id="runDupeTest" disabled></button><div id="dupeTestResult"></div></div>
 </div></section>
@@ -1131,19 +1131,44 @@ function setReceiptStoreValue(store){
  if(![...select.options].some(o=>o.value===store)){const opt=document.createElement("option");opt.value=store;opt.textContent=store;select.appendChild(opt)}
  select.value=store;return select.value===store;
 }
+function receiptMarketComparison(store,items){
+ const deposit=receiptDraft.filter(r=>r.isDeposit).reduce((n,r)=>n+Number(r.price||0),0),lines=[],missing=[];let total=deposit,estimated=false;
+ for(const r of items){
+  const wish=parseWish(r.name),quantity=r.packAmount&&r.packUnit?Number(r.packAmount)*(Number(r.count)||1)*(r.packUnit==="g"||r.packUnit==="ml"?.001:1):Number(r.count)||1;
+  if(!wish.key||!storeCanCarry(store,wish,wish.key)){missing.push(r.name);continue}
+  let price=activePrice(wish.key,store,wish),alternative=false;
+  if(price?.referenceType==="brand-estimate")price=null;
+  if(!price&&wish.matchMode==="exact"){
+   const comparable={...wish,matchMode:"comparable",exactBrand:""};price=activePrice(wish.key,store,comparable);alternative=!!price;
+  }
+  if(!price){missing.push(r.name);continue}
+  const amount=(wish.unit==="piece"&&catalog[wish.key]?.unit==="kg"?wish.calcAmount:quantity);
+  const value=Number((price.price*amount).toFixed(2));total+=value;estimated=estimated||!!price.reference||alternative;
+  lines.push({name:r.name,product:alternative?catalog[wish.key].label:r.name,value,alternative,reference:!!price.reference});
+ }
+ return {store,total:Number(total.toFixed(2)),deposit,lines,missing,complete:missing.length===0,estimated};
+}
 function updateReceiptAnalysis(){
  const box=$("receiptAnalysis");if(!box)return;currentReceiptSaving=null;currentReceiptSavingConfidence=null;
  const valid=receiptDraft.filter(r=>!r.isDeposit&&!r.isAdjustment&&r.name&&Number(r.price)>0),paid=parseReceiptNumber($("receiptTotalInput").value.replace(/\s+/g,""));
  if(!paid){box.style.display="none";let ic=$("receiptInsight");if(ic)ic.style.display="none";return}
  $("analysisPaid").textContent=eur(paid);box.style.display="block";
+ $("receiptMarketRows").innerHTML="";
  $("analysisBestRow").style.display=receiptTotalVerified?"flex":"none";$("analysisSavingRow").style.display=receiptTotalVerified?"block":"none";
  if(!receiptTotalVerified){$("analysisBestStore").textContent="Vergleich wartet auf sicheren Scan";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="–";$("analysisNote").textContent="";let ic=$("receiptInsight");if(ic)ic.style.display="none";return}
  const store=$("receiptStore").value||"Dein Markt";const globalAdjustments=receiptDraft.filter(r=>r.isAdjustment&&Number(r.price)<0);if(globalAdjustments.length){$("analysisBestRow").style.display="none";$("analysisSavingRow").style.display="none";$("analysisBestStore").textContent="Einkauf enthält Gesamt-Rabatt / Coupon";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="–";$("analysisNote").textContent="Ein marktübergreifender Vergleich wäre mit einem Bon-Coupon nicht fair. ECHTPREIS speichert den echten Zahlbetrag, erfindet daraus aber keine mögliche Ersparnis.";previewReceiptInsight();return}if(store==="Unbekannter Händler"){$("analysisBestRow").style.display="none";$("analysisSavingRow").style.display="none";$("analysisBestStore").textContent="Händler nicht erkannt";$("analysisBestPrice").textContent="–";$("analysisSaving").textContent="–";$("analysisNote").textContent="Der Einkauf wird trotzdem gespeichert und fließt in deine persönliche Statistik ein. Ein Marktvergleich ist für diesen Bon noch nicht möglich.";previewReceiptInsight();return}const wishes=valid.map(r=>{let w=parseWish(r.name);if(r.packAmount&&r.packUnit)w.calcAmount=Number(r.packAmount)*(Number(r.count)||1)*(r.packUnit==="g"||r.packUnit==="ml"?.001:1);return w});
- let rows=storeNames.filter(st=>store==="ALDI"?!st.startsWith("ALDI"):st!==store).filter(st=>wishes.every(w=>storeCanCarry(st,w,w.key))).map(st=>{let total=receiptDraft.filter(r=>r.isDeposit).reduce((n,r)=>n+Number(r.price||0),0),known=0,referenceCount=0,confirmedCount=0;wishes.forEach(w=>{let p=w.key?activePrice(w.key,st,w):null;if(p){total+=p.price*w.calcAmount;known++;p.reference?referenceCount++:confirmedCount++}});return {store:st,total,known,referenceCount,confirmedCount}}).filter(x=>x.known===wishes.length&&x.total>0).sort((a,b)=>a.total-b.total);
- const best=rows[0]||null;
- if(!best){$("analysisBestRow").style.display="none";$("analysisSavingRow").style.display="none";$("analysisNote").textContent="Für diesen Bon fehlen noch passende Vergleichspreise."}
- else if(best.referenceCount>0){$("analysisBestStore").textContent="Preisorientierung bei "+best.store;$("analysisBestPrice").textContent="ca. "+eur(best.total);$("analysisSavingRow").style.display="none";$("analysisNote").textContent="Richtwerte sind keine bestätigten Filialpreise. Daher zeigen wir hier keine Ersparnis."}
- else{$("analysisBestStore").textContent=best.store+" · Preisbelege";$("analysisBestPrice").textContent=eur(best.total);const saving=Number((paid-best.total).toFixed(2));if(saving>0){currentReceiptSaving=Number(saving.toFixed(2));currentReceiptSavingConfidence="hoch";$("analysisSaving").textContent=eur(saving);$("analysisNote").textContent="Vergleich mit aktuell belegten Preisen; Filialpreis und Verfügbarkeit können abweichen."}else{$("analysisSavingRow").style.display="none";$("analysisNote").textContent="Kein niedrigerer Vergleichspreis belegt."}}
+ const markets=storeNames.filter(st=>store==="ALDI"?!st.startsWith("ALDI"):st!==store).map(st=>receiptMarketComparison(st,valid));
+ const complete=markets.filter(m=>m.complete).sort((a,b)=>a.total-b.total),best=complete[0]||null;
+ $("analysisSavingRow").style.display="none";
+ if(best){$("analysisBestStore").textContent="Günstigster Vergleich · "+best.store;$("analysisBestPrice").textContent=(best.estimated?"ca. ":"")+eur(best.total);$("analysisNote").textContent=best.estimated?"Ungefährer Vergleich mit ähnlichen Artikeln und Richtwerten. Kein bestätigter Filialpreis.":"Vergleich mit belegten Preisen; Filialbestand und heutiger Preis können abweichen.";if(!best.estimated&&best.total<paid){currentReceiptSaving=Number((paid-best.total).toFixed(2));currentReceiptSavingConfidence="hoch";$("analysisSavingRow").style.display="block";$("analysisSaving").textContent=eur(currentReceiptSaving)}}
+ else{$("analysisBestRow").style.display="none";$("analysisNote").textContent="Für keinen anderen Markt sind alle Artikel ausreichend vergleichbar."}
+ $("receiptMarketRows").innerHTML='<div style="margin-top:16px;font-weight:800">Andere Märkte</div>'+markets.sort((a,b)=>Number(b.complete)-Number(a.complete)||a.total-b.total||a.store.localeCompare(b.store)).map(m=>{
+  const title=m.complete?(m.estimated?"ca. ":"")+eur(m.total):m.lines.length+" von "+valid.length+" Artikeln vergleichbar";
+  const difference=m.complete?Number((paid-m.total).toFixed(2)):null;
+  const hint=difference!=null?(difference>0?" · möglicherweise "+eur(difference)+" günstiger":difference<0?" · "+eur(-difference)+" höher":" · etwa gleich"):"";
+  const details=m.lines.map(x=>'<div>'+escHtml(x.name)+(x.alternative?' → '+escHtml(x.product):'')+' · '+(x.reference||x.alternative?'ca. ':'')+eur(x.value)+'</div>').join("")+(m.deposit?'<div>Pfand · '+eur(m.deposit)+'</div>':"")+(m.missing.length?'<div>Ohne Vergleich: '+escHtml(m.missing.join(", "))+'</div>':"");
+  return '<details style="border-top:1px solid rgba(255,255,255,.18);padding:10px 0"><summary style="cursor:pointer">'+escHtml(m.store)+' · '+title+hint+'</summary><div class="detail" style="margin-top:8px">'+details+(m.estimated?'<div>Richtwerte/ähnliche Artikel; tatsächlicher Preis und Sortiment nicht bestätigt.</div>':'')+'</div></details>';
+ }).join("");
 
  previewReceiptInsight();
 }
