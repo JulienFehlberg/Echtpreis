@@ -1,0 +1,35 @@
+name: ECHTPREIS JavaScript check
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  inline-js-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check inline JavaScript syntax
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const cp = require('child_process');
+          const html = fs.readFileSync('index.html','utf8');
+          const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
+            .map(m => m[1]).filter(x => x.trim());
+          let failed = false;
+          scripts.forEach((code, i) => {
+            const file = `/tmp/echtpreis-inline-${i+1}.js`;
+            fs.writeFileSync(file, code);
+            const r = cp.spawnSync(process.execPath, ['--check', file], {encoding:'utf8'});
+            if (r.status !== 0) {
+              failed = true;
+              console.error(`Inline script ${i+1} failed:\n${r.stderr || r.stdout}`);
+            } else {
+              console.log(`Inline script ${i+1}: OK`);
+            }
+          });
+          if (failed) process.exit(1);
+          NODE
