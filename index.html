@@ -146,9 +146,17 @@ body.subview .top{min-height:40px;margin-bottom:8px}.receipt-simple{padding-top:
 .feedback-box{margin-top:30px!important;opacity:.66;border:0!important;background:transparent!important;box-shadow:none!important}.feedback-box summary{font-size:12px!important;font-weight:700!important;color:#748078!important}
 .footer{margin-top:26px!important;padding:0 4px 10px!important;opacity:.62;text-align:center!important;font-size:10px!important;letter-spacing:.015em}
 @media(max-width:359px){.home-main-actions .homeaction,.home-main-actions .homeaction:first-child{grid-template-columns:42px minmax(0,1fr) 15px!important;min-height:70px!important;padding:11px 13px!important;gap:11px!important}.home-main-actions .ep-icon{width:42px!important;height:42px!important}.ep-icon svg{width:23px;height:23px}}
+</style><style>
+/* v5.194.1 home action collision fix */
+.home-main-actions .homeaction .homeaction-copy{width:auto!important;height:auto!important;display:block!important;flex:initial!important;flex-basis:auto!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;font-size:inherit!important;color:inherit!important;min-width:0!important}
+.home-main-actions .homeaction .homeaction-copy b{width:auto!important;height:auto!important;margin:0!important;padding:0!important}
+.home-main-actions .homeaction .homeaction-copy small{width:auto!important;height:auto!important;min-width:0!important;margin:4px 0 0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important}
+.home-main-actions .homeaction>.ep-icon{width:46px!important;height:46px!important;display:grid!important;place-items:center!important;flex:0 0 46px!important;margin:0!important;padding:0!important}
+.home-main-actions .homeaction{overflow:hidden!important}
+@media(max-width:359px){.home-main-actions .homeaction>.ep-icon{width:42px!important;height:42px!important;flex-basis:42px!important}}
 </style></style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.194.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.194.1</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
