@@ -481,3 +481,7 @@ assert(html.includes('energy=x.energy||cached.energy||receiptEnergySnapshot(item
 assert(html.includes('savingMeta:x.savingMeta||cached.savingMeta||null')&&html.includes('planComparison:x.planComparison||cached.planComparison||null'),"server receipt sync should preserve rich savings and plan evidence");
 assert(html.includes('itemsComplete:x.itemsComplete!=null?!!x.itemsComplete:cached.itemsComplete')&&html.includes('unassignedAmount:x.unassignedAmount!=null?Number(x.unassignedAmount):cached.unassignedAmount'),"server receipt sync should preserve receipt completeness evidence");
 assert(html.includes('fingerprint:x.fingerprint||cached.fingerprint||""'),"server receipt sync should retain receipt fingerprint provenance");
+
+// v7.209 stale receipt refresh guard
+assert(html.includes('function applyReceiptText(text,label){\n receiptPriceRefreshRevision++;\n receiptDraft=parseReceiptText(text);'),"starting a new receipt must invalidate any older asynchronous price refresh before replacing the draft");
+assert(html.includes('<span class="version">v7.209.0 RC</span>')&&html.includes('version:"7.209"'),"visible and health-check versions must stay aligned after stale-refresh hardening");
