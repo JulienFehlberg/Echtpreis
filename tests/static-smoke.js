@@ -105,3 +105,8 @@ assert(html.includes('erkannten Artikel-Ausgaben'),"category insights must be ba
 assert(html.includes('die kcal-Zahl beschreibt deshalb ausdrücklich nur den erkannten Teil des Einkaufs'),"calorie insight must disclose partial receipt coverage");
 assert(html.includes('itemsComplete:!!receiptArithmeticVerified')&&html.includes('id:"preview"'),"receipt preview must carry completeness metadata");
 assert(html.includes('v5.172.0'),"expected app version v5.172.0");
+
+assert(html.includes('type:"receipt-coverage"')&&html.includes('noch nicht einzelnen Artikeln zugeordnet'),"partial receipts should generate a transparent coverage insight");
+assert(html.includes('type:"cost-concentration"'),"receipt insights should detect concentrated spending");
+assert(html.includes('im Schnitt "+eur(avg)+" pro Einkauf'),"monthly receipt insight should include average basket value");
+assert(html.includes('v5.173.0'),"expected app version v5.173.0");
