@@ -350,3 +350,8 @@ assert(html.includes('g.plannedUnits+=units'),"duplicate planned rows should com
 assert(html.includes('g.sourcePlanRows.push(index)')&&html.includes('g.sourcePlanCount++'),"aggregated planned products should retain source-row traceability");
 assert(html.includes('let planned=aggregatePlannedItems(plan.items)'),"plan-vs-receipt matching should consume aggregated planned products");
 assert(html.includes('plannedSourceRows:plan.items.length'),"plan comparison should preserve original planned-row count separately from unique products");
+
+assert(html.includes('function receiptPlanFallbackName(raw)'),"receipt-plan matching should normalize fallback product names consistently");
+assert(html.includes('kg|g|ml|cl|l|stk|stueck|stuck|pack'),"fallback receipt-plan identity should ignore common quantity and package tokens");
+assert(html.includes('if(m&&m.key)return "key:"+m.key'),"known catalog products should still prefer stable product keys over fuzzy fallback names");
+assert(html.includes('const fallback=receiptPlanFallbackName(raw);return fallback?"raw:"+fallback:""'),"unknown products should use normalized fallback identities without creating empty match keys");
