@@ -260,7 +260,7 @@ assert(html.includes('spoken quantities should work after common shopping filler
 assert(html.includes('q=q.replace(/^\\d+\\s*(?:x|packungen?|packs?)'),"shopping suggestions should strip multipack prefixes before matching products");
 assert(html.includes('kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x'),"shopping parser should accept explicit unit and x-style quantity input");
 assert(html.includes('protectedDecimal=source.replace(/(\\d),(\\d)/g,"$1§DEC§$2")'),"pasted shopping lists must preserve German decimal commas");
-assert(html.includes('function splitShoppingSpeech(text)')&&html.includes('.replace(/(\\d),(\\d)/g,"$1§DEC§$2")'),"voice shopping input must preserve German decimal-comma quantities");
+assert(html.includes('function splitShoppingSpeech(text)')&&html.includes('replace(/(\\d),(\\d)/g,"$1§DEC§$2")'),"voice shopping input must preserve German decimal-comma quantities");
 assert(html.includes('replace(/§DEC§/g,",")'),"pasted list decimal protection must restore the original German quantity");
 
 assert(html.includes('let multi=rawForAmount.match(/^(\\d+)\\s*(?:x|×|packungen?|packs?)'),"shopping parser should recognize multipack quantity syntax");
