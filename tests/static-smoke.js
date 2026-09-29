@@ -326,6 +326,7 @@ assert(html.includes('function receiptTotalBoundary(line)')&&html.includes('zahl
 assert(html.includes('endsumme|rechnungsbetrag'),"receipt total extraction should recognize additional authoritative German total labels");
 assert(html.includes('betrag fällig|betrag faellig'),"receipt total extraction should recognize Betrag fällig OCR variants");
 assert(html.includes('label==="betrag fällig"||label==="betrag faellig"'),"Betrag fällig labels should be treated as primary authoritative receipt totals");
+assert(html.includes('bezahlt|erhalten|betrag erhalten|rückgeld|rueckgeld|wechselgeld|zurück|zurueck|herausgegeben|karte|kartenzahlung|kontaktlos|cash'),"split total extraction should not consume a following payment or change line as the receipt total");
 assert(html.includes('function receiptFooterNoise(line,store="")'),"receipt parser should explicitly filter footer/payment noise");
 assert(html.includes('const receiptStoreHint=detectReceiptStore(text)'),"receipt parsing should use merchant context for chain-specific noise filtering");
 assert(html.includes('Kaufland:/^(?:kaufland card|k-card|treuepunkte|punkte)/'),"Kaufland loyalty footer text should not become product rows");
