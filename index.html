@@ -2140,7 +2140,7 @@ function extractReceiptPaymentMethod(text){
 function detectReceiptDate(text){
  const s=String(text||"").replace(/(\d)\s*([.\/-])\s*(\d)/g,"$1$2$3");let m=s.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2}|\d{2})\b/),iso="";
  if(m){const year=m[3].length===2?"20"+m[3]:m[3];iso=year+"-"+m[2]+"-"+m[1]}
- else{m=s.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);if(m)iso=m[1]+"-"+m[2]+"-"+m[3]}
+ else{m=s.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);if(m)iso=m[1]+"-"+m[2]+"-"+m[3];else{m=s.match(/\b(\d{2})\s+(\d{2})\s+(20\d{2}|\d{2})\b/);if(m){const year=m[3].length===2?"20"+m[3]:m[3];iso=year+"-"+m[2]+"-"+m[1]}}}
  if(!iso)return "";const parts=iso.split("-").map(Number),d=new Date(Date.UTC(parts[0],parts[1]-1,parts[2]));
  return d.getUTCFullYear()===parts[0]&&d.getUTCMonth()===parts[1]-1&&d.getUTCDate()===parts[2]?iso:"";
 }
