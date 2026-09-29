@@ -65,3 +65,36 @@ In der Testphase sollen keine zwingenden laufenden Kosten entstehen. Kostenpflic
 - API-Rate-Limits und Produktionsdatenbank
 - echte Geräte-Tests auf iPhone und Android
 - Review der verwendeten Drittanbieter und deren Datenschutzbedingungen
+
+
+## Legal / Trust Gate (29.09.2026)
+
+Dieser Abschnitt ist ein technischer Release-Gate und ersetzt keine individuelle anwaltliche Freigabe.
+
+### Preisvergleich und Händler-Ranking
+- Ein Händler darf nur dann als „günstigster“ oder in einer Preis-Rangfolge dargestellt werden, wenn der gesamte verglichene Warenkorb für diesen Händler mit belastbaren, nicht bloß modellierten Referenzpreisen belegt ist.
+- Modellierte Markt-Referenzwerte, Marken-Schätzungen und historische Preise dürfen keinen Händler zum Gewinner oder Verlierer machen.
+- Reine Referenzwert-Vergleiche werden neutral und ohne Preis-Rangfolge dargestellt.
+- Spar-Aussagen nach Bon-Scan setzen eine ausreichende Abdeckung mit aktuellen, nicht bloß historischen/Richtwert-Preisen voraus.
+- Vergleichbare Produkte müssen denselben Bedarf/Zweck erfüllen; Marken-/Packungsabweichungen und Mengenannahmen sind sichtbar zu kennzeichnen.
+- Datenquelle, Aktualität, Abdeckung und Schätzstatus müssen am Vergleich nachvollziehbar bleiben.
+- Die Hauptparameter der Rangfolge und ihre Gewichtung müssen für Nutzer unmittelbar leicht zugänglich erklärt werden.
+- Händler dürfen nicht abgewertet oder mit unbelegten Tatsachenbehauptungen beschrieben werden.
+
+### Preiswahrheit
+- Gedruckte Bon-Gesamtsumme ist für den konkreten Einkauf die autoritative Quelle.
+- Referenzpreise sind keine Behauptung eines aktuellen Filialpreises oder einer Verfügbarkeit.
+- Grund-/Mengeneinheiten müssen bei mengenbezogenen Vergleichen konsistent normalisiert werden.
+- „Du hättest X € gespart“ darf nicht aus Modellschätzungen abgeleitet werden.
+
+### Datenschutz / Anbieterpflichten – Release-Blocker
+Vor öffentlichem kommerziellem Release müssen mindestens abgeschlossen sein:
+- finale Datenschutzerklärung auf Basis der tatsächlich produktiv eingesetzten Datenflüsse und Auftragsverarbeiter;
+- vollständige Anbieterkennzeichnung/Impressum mit realem Betreiber, ladungsfähiger Anschrift und Kontaktangaben;
+- dokumentierte Rechtsgrundlagen, Löschfristen, Betroffenenrechte und Auftragsverarbeitung für alle produktiven Dienste;
+- funktionierender Export und Löschweg für personenbezogene Serverdaten, soweit solche Daten produktiv verarbeitet werden;
+- Prüfung der Store-Datenschutzangaben und Einwilligungs-/Berechtigungsdialoge;
+- anwaltlicher Release-Review insbesondere zu UWG/vergleichender Werbung, Datenschutz, Marken-/Logonutzung, AGB/Abonnement/Widerruf und Preisangaben.
+
+### Harte Freigaberegel
+Kein öffentlicher kommerzieller Release darf allein aufgrund automatisierter Tests als „rechtlich freigegeben“ bezeichnet werden. Die technische Test-Suite verhindert bekannte riskante Vergleichsmuster; die finale rechtliche Freigabe muss anhand des dann tatsächlichen Produkts, Betreibers, Geschäftsmodells, Datenflusses und Vertriebswegs erfolgen.
