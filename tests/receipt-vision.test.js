@@ -14,6 +14,9 @@ assert.strictEqual(normalized.total, 48.82, "printed total must be independent o
 assert.strictEqual(normalized.items[0].lineTotal, 2.85);
 assert.strictEqual(normalized.items[0].count, 3);
 assert.strictEqual(normalized.items[1].isDeposit, true);
+const visionSource = require("fs").readFileSync(require.resolve("../receipt-vision"), "utf8");
+assert(visionSource.includes("ENDSUMME/RECHNUNGSBETRAG/BETRAG FÄLLIG"), "vision prompt should recognize expanded authoritative total labels");
+assert(visionSource.includes("Rückgeld oder Kartenbeträge niemals mit der Gesamtsumme"), "vision prompt should keep payment/change amounts separate from printed total");
 
 (async () => {
   let request;
