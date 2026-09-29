@@ -98,3 +98,13 @@ Vor öffentlichem kommerziellem Release müssen mindestens abgeschlossen sein:
 
 ### Harte Freigaberegel
 Kein öffentlicher kommerzieller Release darf allein aufgrund automatisierter Tests als „rechtlich freigegeben“ bezeichnet werden. Die technische Test-Suite verhindert bekannte riskante Vergleichsmuster; die finale rechtliche Freigabe muss anhand des dann tatsächlichen Produkts, Betreibers, Geschäftsmodells, Datenflusses und Vertriebswegs erfolgen.
+
+
+### Geplantes Plus-/Abo-Modell
+Vor Aktivierung eines kostenpflichtigen ECHTPREIS-Abos ist zusätzlich ein eigener Checkout-Review Pflicht:
+- Preis, Abrechnungszeitraum, automatische Verlängerung, Mindestlaufzeit und Kündigungsbedingungen unmittelbar vor Vertragsschluss klar darstellen.
+- Web-Checkout nur mit eindeutig zahlungspflichtiger Bestellschaltfläche.
+- Bei auf der Webseite abschließbaren Dauerschuldverhältnissen die gesetzlich erforderliche Online-Kündigungsmöglichkeit vorsehen.
+- Widerrufsbelehrung und – soweit für den konkreten Vertriebskanal anwendbar – die elektronische Widerrufsfunktion korrekt umsetzen.
+- App-Store-Abos zusätzlich gegen die jeweils aktuellen Apple-/Google-Regeln prüfen; Store-Abrechnung nicht mit einem eigenen Web-Checkout gleichsetzen.
+- Keine künstliche „Ersparnis“ oder Referenzpreis-Rangfolge als Verkaufsargument für Plus verwenden.
