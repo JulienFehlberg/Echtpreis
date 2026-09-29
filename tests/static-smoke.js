@@ -239,3 +239,9 @@ assert(html.includes('@media(max-width:359px)')&&html.includes('@media(min-width
 assert(html.includes('min-height:46px')&&html.includes('min-height:52px'),"primary controls should retain comfortable mobile touch targets");
 assert(html.includes('prefers-reduced-motion:reduce'),"premium motion should respect accessibility preferences");
 assert(html.includes('hierarchy + interaction refinement')&&html.includes('#receiptHeroInsight strong'),"receipt result should visually prioritize the strongest insight");
+
+assert(html.includes('v5.193.0'),"expected app version v5.193.0");
+assert(html.includes('memory-ring')&&html.includes('conic-gradient'),"personal price memory should use a responsive visual progress graphic");
+assert(html.includes('Die Anzeige beschreibt nur, wie viel eigene Vergleichshistorie bereits vorhanden ist'),"price memory graphic must not imply a quality score");
+assert(html.includes('memory-metrics')&&html.includes('Preishistorien'),"price memory should surface evidence-based metrics visually");
+assert(html.includes('stat-bar-track')&&html.includes('stat-bar-fill'),"monthly category changes should use responsive data bars");
