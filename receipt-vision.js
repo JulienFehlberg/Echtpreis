@@ -57,7 +57,7 @@ function normalizeReceipt(result) {
     return [{ name, lineTotal: Number(lineTotal.toFixed(2)), count, unitPrice: Number(unitPrice.toFixed(2)), isDeposit: !!item.is_deposit, isAdjustment: !!item.is_adjustment }];
   });
   if (!Number.isFinite(total) || total <= 0 || total > 100000) throw new Error("KI konnte die aufgedruckte Gesamtsumme nicht sicher lesen.");
-  const date = /^20\d\d-\d\d-\d\d$/.test(String(result.date || "")) ? result.date : "";
+  const rawDate=String(result.date||"");let date="";if(/^20\d\d-\d\d-\d\d$/.test(rawDate)){const p=rawDate.split("-").map(Number),d=new Date(Date.UTC(p[0],p[1]-1,p[2]));if(d.getUTCFullYear()===p[0]&&d.getUTCMonth()===p[1]-1&&d.getUTCDate()===p[2])date=rawDate}
   return { merchant: String(result.merchant || "").trim().slice(0, 80), date, total: Number(total.toFixed(2)), items };
 }
 
