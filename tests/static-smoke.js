@@ -283,3 +283,10 @@ assert(html.includes('const comma=s.lastIndexOf(",")')&&html.includes('const dec
 assert(html.includes('replace(/[€£]/g,"")')&&html.includes('replace(/\\s+/g,"")'),"receipt money parser should tolerate currency signs and OCR whitespace");
 assert(html.includes('zu zahlen|zahlbetrag|endbetrag'),"receipt total parser should recognize common German total labels");
 assert(html.includes('bar(?: gegeben)?')&&html.includes('apple pay|google pay'),"payment labels should be rejected as product names");
+
+assert(html.includes('function receiptStoreSearchText(text)'),"receipt merchant detection should normalize OCR header text");
+assert(html.includes('replace(/\\bk\\s*a\\s*u\\s*f\\s*l\\s*a\\s*n\\s*d\\b/g,"kaufland")'),"merchant OCR should recover spaced Kaufland logos");
+assert(html.includes('replace(/\\be\\s*d\\s*e\\s*k\\s*a\\b/g,"edeka")'),"merchant OCR should recover spaced EDEKA logos");
+assert(html.includes('replace(/\\bp\\s*e\\s*n\\s*n\\s*y\\b/g,"penny")'),"merchant OCR should recover spaced PENNY logos");
+assert(html.includes('replace(/\\ba\\s+l\\s+d\\s+i\\b/g,"aldi")'),"merchant OCR should recover spaced ALDI logos");
+assert(html.includes('kaufland\\.de|kaufland-card')&&html.includes('edeka\\.de')&&html.includes('penny\\.de'),"merchant detection should use strong chain-specific receipt markers");
