@@ -1285,8 +1285,8 @@ function renderHomePulse(receipts=getPersonalReceipts()){
  const box=$("homePulse");if(!box)return;const month=window.echtpreisLocalDateKey().slice(0,7),rows=(receipts||[]).filter(r=>String(r.date||"").startsWith(month)&&Number(r.total)>0);
  if(!rows.length){box.style.display="none";return}
  const sum=rows.reduce((n,r)=>n+Number(r.total||0),0),monthName=new Intl.DateTimeFormat("de-DE",{month:"long"}).format(new Date(month+"-01T12:00:00")),history=(()=>{try{let h=JSON.parse(localStorage.getItem("echtpreis_insight_history_v1")||"[]");return Array.isArray(h)?h:[]}catch(e){return[]}})();
- $("homePulseTitle").textContent=monthName+" · "+rows.length+" Bon"+(rows.length===1?"":"s")+" · "+eur(sum)+" erfasst";
- $("homePulseDetail").textContent=history.length?"Zuletzt entdeckt: "+history[0].title:"Mit jedem Bon wird dein persönliches Einkaufsprofil genauer.";
+ $("homePulseTitle").textContent=history.length?"💡 "+history[0].title:monthName+" · "+rows.length+" Bon"+(rows.length===1?"":"s")+" · "+eur(sum)+" erfasst";
+ $("homePulseDetail").textContent=history.length?monthName+" · "+rows.length+" Bon"+(rows.length===1?"":"s")+" · "+eur(sum)+" erfasst · "+history[0].detail:"Mit jedem Bon wird dein persönliches Einkaufsprofil genauer.";
  box.style.display="block";
 }
 function refreshStats(){
