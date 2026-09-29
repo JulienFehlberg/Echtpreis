@@ -2002,11 +2002,14 @@ function inferPackFromName(name){
 }
 function receiptMultipackTotal(total,count,unitPrice,isReturn=false){const printed=parseReceiptNumber(total),unit=parseReceiptNumber(unitPrice),n=Math.abs(Number(count)||0),derived=(isReturn?-1:1)*Number((n*unit).toFixed(2));return n>0&&unit>0&&Math.abs(printed-derived)>Math.max(.05,derived*.03)?derived:printed}
 function isReceiptDepositLabel(name){return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z]/g,"").startsWith("pfandwert")}
+function receiptTotalBoundary(line){return /^\s*(?:summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag)\b/i.test(String(line||""))}
+function receiptFooterNoise(line,store=""){const s=String(line||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");if(!s)return true;const common=/^(?:bar|cash|gegeben|erhalten|ruckgeld|wechselgeld|zuruck|kartenzahlung|girocard|visa|mastercard|maestro|v pay|apple pay|google pay|zahlart|zahlung|terminal|transaktion|trace|beleg(?:nummer| nr)?|bon(?:nummer| nr)?|kasse|bediener|filiale|datum|uhrzeit|mwst|ust|steuer|netto|brutto|summe|gesamt|zu zahlen|zahlbetrag|endbetrag)\b/;if(common.test(s))return true;const chain={Kaufland:/^(?:kaufland card|k-card|treuepunkte|punkte)/,EDEKA:/^(?:deutschlandcard|genusspunkte|edeka app)/,PENNY:/^(?:payback|penny app|oecobon|ecobon)/,ALDI:/^(?:aldi app|aldi talk)/};return !!(chain[store]&&chain[store].test(s))}
 function parseReceiptText(text){
- const lines=text.split(/\n+/).map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean),rows=[];let last=null,pendingName="",pendingMultiple=null;
+ const lines=text.split(/\n+/).map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean),rows=[];const receiptStoreHint=detectReceiptStore(text);let last=null,pendingName="",pendingMultiple=null;
  for(let i=0;i<lines.length;i++){
   const line=lines[i].replace(/(\d)\s*([,.])\s*(\d{2})/g,"$1$2$3").replace(/\bxX\b/g,"x");
-  if(/^\s*(?:summe|gesamt(?:betrag)?|zu zahlen)\b/i.test(line))break;
+  if(receiptTotalBoundary(line))break;
+  if(receiptFooterNoise(line,receiptStoreHint)){pendingName="";continue}
   if(/\b(?:mwst|netto|umsatz|steuer)\b/i.test(line)||/^\s*[AB]\s*(?:7|19)\s*%/i.test(line))continue;
   const pendingTotal=line.match(/^(-?\d+[,.]\d{2})\s*(?:€|EUR)?\s*(?:[AB]|[12])?$/i);
   if(pendingMultiple&&pendingTotal){const name=pendingName||pendingMultiple.name;if(name&&plausibleReceiptItemName(name)){let pack=inferPackFromName(name),amount=receiptMultipackTotal(pendingTotal[1],pendingMultiple.count,pendingMultiple.unitPrice,pendingMultiple.isReturn);last=pendingMultiple.isReturn?{name:"Pfand-Rückgabe",price:String(amount),count:Math.abs(pendingMultiple.count),unitLinePrice:pendingMultiple.unitPrice,isDeposit:true,pricingType:"deposit"}:{name:pendingMultiple.isDeposit?"Pfand":name,price:String(amount),count:pendingMultiple.count,unitLinePrice:pendingMultiple.unitPrice,quantitySource:"receipt-multipack",discount:0,regularTotal:amount,...(pendingMultiple.isDeposit?{isDeposit:true,pricingType:"deposit"}:{}),...pack};rows.push(last)}pendingMultiple=null;pendingName="";continue}
