@@ -71,7 +71,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 </head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Bons. Deine Entscheidung.</h2><p>Du kannst Bons nur für dich speichern oder mit deinen erkannten Bon-Preisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Bon-Summe und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Bons künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Bons & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.144.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.145.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -181,10 +181,10 @@ const catalog={
 "tiefkuehlpizza":{label:"Tiefkühlpizza",unit:"piece",openPricesCategory:"en:frozen-pizzas"},
 "croissants":{label:"Croissants / Hörnchen",unit:"piece",openPricesCategory:"en:croissants"},
 "eier":{label:"Eier",unit:"piece",openPricesCategory:"en:eggs"},
-"milch":{label:"Milch",unit:"l",openPricesCategory:"en:milks"},
+"milch":{label:"Milch",unit:"l",openPricesCategory:"en:milks"},"kokosmilch":{label:"Kokosmilch",unit:"l"},
 "haferdrink":{label:"Haferdrink",unit:"l"},
 "butter":{label:"Butter",unit:"kg",openPricesCategory:"en:butters"},
-"kaese":{label:"Käse",unit:"kg",openPricesCategory:"en:cheeses"},
+"kaese":{label:"Käse",unit:"kg",openPricesCategory:"en:cheeses"},"streukaese":{label:"Streukäse",unit:"kg"},
 "joghurt":{label:"Joghurt",unit:"kg",openPricesCategory:"en:yogurts"},
 "skyr":{label:"Skyr",unit:"kg"},"quark":{label:"Quark",unit:"kg"},
 "nudeln":{label:"Nudeln",unit:"kg",openPricesCategory:"en:pastas"},"reis":{label:"Reis",unit:"kg",openPricesCategory:"en:rices"},
@@ -274,7 +274,8 @@ window.addEventListener("storage",e=>{if([communityKey,sharedCacheKey,openPrices
 const referenceBase={
  bananen:1.79,"rote paprika":3.49,tomaten:3.29,gurken:.89,aepfel:2.49,kartoffeln:1.29,zwiebeln:1.69,
  rinderhack:13.98,hackfleisch:10.98,haehnchenbrust:12.99,energydrink:5.96,tiefkuehlpizza:3.49,croissants:2.49,
- eier:.32,milch:1.09,haferdrink:1.79,butter:7.16,kaese:8.98,joghurt:2.38,skyr:3.98,quark:2.78,
+ // Kokosmilch/Streukäse: grobe Grundpreise je l/kg, kalibriert an ALDI Nord 400 ml für 1,19 € und geriebenem Käse 250 g für 1,79 € (29.09.2026). Keine Filialpreis-Zusage.
+ eier:.32,milch:1.09,kokosmilch:3.20,haferdrink:1.79,butter:7.16,kaese:8.98,streukaese:7.70,joghurt:2.38,skyr:3.98,quark:2.78,
  nudeln:1.98,reis:2.79,mehl:.89,zucker:1.29,brot:2.49,toast:1.79,wasser:.59,cola:1.79,orangensaft:1.99,
  kaffee:15.98,toilettenpapier:3.99,kuechenrolle:3.49,waschmittel:5.99,spuelmittel:1.49,zahnpasta:1.99,
  shampoo:2.49,katzenfutter:4.49,hundefutter:3.99,nutella:5.49,wodka:14.99,bier:2.52,
@@ -456,8 +457,8 @@ const productAliases={
  aepfel:["apfel","aepfel","äpfel"],kartoffeln:["kartoffel","kartoffeln","speisekartoffeln"],zwiebeln:["zwiebel","zwiebeln"],
  rinderhack:["rinderhack","rinder hack","rinderhackfleisch","rind hack","hackfleisch rind"],hackfleisch:["hackfleisch","gemischtes hack","hack gemischt"],
  haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],energydrink:["energy drink","energydrink","red bull","monster energy"],tiefkuehlpizza:["tiefkühlpizza","tiefkuhlpizza","tk pizza","pizza ristorante","ristorante pizza","dr oetker ristorante"],croissants:["croissant","croissants","französische hörnchen","mini hörnchen","mini hornchen","mini horncher","mini hdrncher","mini hdrnchen"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
- milch:["milch","vollmilch","frischmilch","haltbare milch","h milch"],haferdrink:["haferdrink","hafer drink","hafermilch","oat drink","alpro hafer"],
- butter:["butter"],kaese:["käse","kase","kaese","gouda","emmentaler","mozzarella"],joghurt:["joghurt","yoghurt"],skyr:["skyr"],quark:["quark","magerquark"],
+ milch:["milch","vollmilch","frischmilch","haltbare milch","h milch"],kokosmilch:["kokosmilch","kokosnussmilch","kokos milch"],haferdrink:["haferdrink","hafer drink","hafermilch","oat drink","alpro hafer"],
+ butter:["butter"],kaese:["käse","kase","kaese","gouda","emmentaler","mozzarella"],streukaese:["streukäse","streukaese","geriebener käse","reibekäse","gratinkäse","pizzakäse"],joghurt:["joghurt","yoghurt"],skyr:["skyr"],quark:["quark","magerquark"],
  nudeln:["nudeln","nudel","pasta","spaghetti","penne","fusilli","hörnchennudeln","hornchennudeln"],reis:["reis","basmatireis","jasminreis"],mehl:["mehl","weizenmehl"],zucker:["zucker"],
  brot:["brot","vollkornbrot","mischbrot"],toast:["toast","toastbrot"],wasser:["wasser","mineralwasser"],cola:["cola","coca cola","coca-cola","cola zero","coca cola zero"],
  orangensaft:["orangensaft","orange saft","o-saft"],kaffee:["kaffee","kaffeebohnen","filterkaffee"],toilettenpapier:["toilettenpapier","klopapier"],
@@ -579,6 +580,11 @@ function resolveUnknownWish(w,key,amount=null){
  return true;
 }
 const productChoices={
+ kokosmilch:{title:"Wie viel Kokosmilch?",groups:[{name:"Größe",options:[["200 ml", "200ml"],["400 ml Dose", "400ml"],["1 l", "1l"]]}]},
+ streukaese:{title:"Welche Packungsgröße Streukäse?",groups:[{name:"Größe",options:[["150 g", "150g"],["200 g", "200g"],["250 g", "250g"],["500 g", "500g"]]}]},
+ kaese:{title:"Wie viel Käse?",groups:[{name:"Größe",options:[["150 g", "150g"],["200 g", "200g"],["250 g", "250g"],["500 g", "500g"]]}]},
+ erdnussbutter:{title:"Welche Glasgröße Erdnussbutter?",groups:[{name:"Größe",options:[["250 g", "250g"],["350 g", "350g"],["500 g", "500g"],["1 kg", "1kg"]]}]},
+ nudeln:{title:"Wie viel Nudeln?",groups:[{name:"Größe",options:[["250 g", "250g"],["500 g", "500g"],["1 kg", "1kg"]]}]},
  wasser:{title:"Welches Mineralwasser?",groups:[{name:"Sorte",options:[["Still","still"],["Medium","medium"],["Classic","classic"]]},{name:"Größe",options:[["0,5 l","0.5l"],["1,0 l","1l"],["1,5 l","1.5l"],["6 × 1,5 l","6x1.5l"]]}]},
  toilettenpapier:{title:"Welches Toilettenpapier?",groups:[{name:"Lagen",options:[["2-lagig","2ply"],["3-lagig","3ply"],["4-lagig","4ply"],["Egal · günstigste","any"]]},{name:"Packung",optional:true,options:[["4 Rollen","4roll"],["8 Rollen","8roll"],["10 Rollen","10roll"],["16 Rollen","16roll"],["Egal","any"]]}]},
   tomaten:{title:"Welche Tomaten?",groups:[{name:"Sorte",options:[["Rispentomaten","vine"],["Cherry","cherry"],["Cocktail","cocktail"],["Roma","roma"],["Fleischtomaten","beef"],["Egal · günstigste","any"]]}]},
@@ -589,6 +595,8 @@ const productChoices={
 };
 function inferChoice(w){
  let n=normalizeProduct(w.raw),v={};
+ if(["kokosmilch","streukaese","kaese","erdnussbutter","nudeln"].includes(w.key)&&w.explicit&&w.unit===catalog[w.key].unit)v["Größe"]="custom";
+
  if(w.key==="toilettenpapier"){if(/2\s*lag/.test(n))v.Lagen="2ply";else if(/3\s*lag/.test(n))v.Lagen="3ply";else if(/4\s*lag/.test(n))v.Lagen="4ply";let r=w.raw.match(/\b(4|8|10|16)\s*(?:rollen|rolle|er)\b/i);if(r)v.Packung=r[1]+"roll";}
  if(w.key==="tomaten"){if(/rispe|rispen|strauch/.test(n))v.Sorte="vine";else if(/cherry|kirschtom/.test(n))v.Sorte="cherry";else if(/cocktail/.test(n))v.Sorte="cocktail";else if(/roma|pflaumen/.test(n))v.Sorte="roma";else if(/fleisch/.test(n))v.Sorte="beef";}
  if(w.key==="wasser"){if(/\bstill/.test(n))v.Sorte="still";else if(/medium/.test(n))v.Sorte="medium";else if(/classic|sprudel/.test(n))v.Sorte="classic";if(/6\s*x\s*1[,.]?5/.test(w.raw.toLowerCase()))v["Größe"]="6x1.5l";else if(/1[,.]?5\s*l/.test(w.raw.toLowerCase()))v["Größe"]="1.5l";else if(/0[,.]?5\s*l/.test(w.raw.toLowerCase()))v["Größe"]="0.5l";else if(/1(?:[,.]0)?\s*l/.test(w.raw.toLowerCase()))v["Größe"]="1l";}
@@ -598,7 +606,9 @@ function inferChoice(w){
  if(w.key==="bohnen"){if(/kidney/.test(n))v.Sorte="kidney";else if(/weiss|weiße|weisse/.test(n))v.Sorte="white";else if(/schwarz/.test(n))v.Sorte="black";else if(/grun|grün|brech/.test(n))v.Sorte="green";if(/dose|dosen|glas|konserve/.test(n))v.Art="canned";else if(/trocken|getrocknet/.test(n))v.Art="dry";else if(/frisch|tiefkuhl|tiefkühl|\btk\b/.test(n))v.Art="fresh";}
  return v;
 }
-function hydrateChoice(w){w.choice={...inferChoice(w),...(w.choice||{})};let spec=productChoices[w.key];w.needsClarification=!!spec&&spec.groups.some(g=>!g.optional&&!w.choice[g.name]);return w}
+function hydrateChoice(w){w.choice={...inferChoice(w),...(w.choice||{})};let spec=productChoices[w.key];w.needsClarification=!!spec&&spec.groups.some(g=>!g.optional&&!w.choice[g.name]);
+ if(spec?.groups.some(g=>g.name==="Größe")&&w.unit==="piece"&&w.choice.Größe){const m=w.choice.Größe.match(/^(\d+)(g|ml|kg|l)$/);if(m)w.calcAmount=Number(m[1])*(m[2]==="g"||m[2]==="ml"?.001:1)}
+ return w}
 function choiceLabel(w){let spec=productChoices[w.key];if(!spec)return"";return spec.groups.map(g=>{let v=w.choice&&w.choice[g.name],o=g.options.find(x=>x[1]===v);return o?o[0]:""}).filter(Boolean).join(" · ")}
 function choiceEditor(w,i){let spec=productChoices[w.key];if(!spec||!w.needsClarification)return"";let missing=spec.groups.filter(g=>!w.choice[g.name]);for(const g of missing){let learned=learnedChoiceSuggestion(w.key,g.name);if(learned&&!w.choice[g.name]){w.choice[g.name]=learned;hydrateChoice(w)}}if(!w.needsClarification)return"";missing=spec.groups.filter(g=>!w.choice[g.name]);return '<div style="margin-top:8px;padding:10px;border:1px solid #705d27;border-radius:12px;background:#211d12"><b style="color:#ffd86b">'+escHtml(spec.title)+'</b><div class="qty" style="margin-top:4px">Ein Tipp reicht. Du kannst auch einfach „egal“ wählen.</div>'+missing.map(g=>'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px">'+g.options.map(o=>'<button type="button" class="chip" data-choice="'+i+'" data-group="'+escHtml(g.name)+'" data-value="'+escHtml(o[1])+'">'+escHtml(o[0])+'</button>').join("")+'</div>').join("")+'</div>'}
 function wishText(w){const u=w.unit==="piece"?"×":w.unit;return (w.unit==="piece"?w.amount+"×":String(w.amount).replace(".",",")+" "+u)+" "+w.label}
