@@ -266,3 +266,8 @@ assert(html.includes('extraUnits:Math.max(0,bought-plannedCount)'),"receipt-plan
 assert(html.includes('Math.round(fulfilledUnits/plannedUnits*100)'),"plan adherence percentage should be based on fulfilled units, not merely matching product rows");
 assert(html.includes('Nur teilweise gekauft')&&html.includes('Mehr als geplant'),"plan-vs-receipt UI should explain under- and over-buying");
 assert(html.includes('von "+x.plannedUnits+" Pack."'),"partial purchases should show bought versus planned pack counts");
+
+assert(html.includes('const countStkTotal=line.match')&&html.includes('receipt-stueck'),"receipt parser should recognize German Stk/Stück quantity lines");
+assert(html.includes('unitLinePrice:count?Number((total/count).toFixed(2)):null'),"Stück receipt lines should derive a useful per-item price");
+assert(html.includes('(?:[x×]|stk\\.?|stück|stueck)'),"receipt quantity fallback should recognize x, multiplication sign and German Stück abbreviations");
+assert(html.includes('const countOnly=line.match')&&html.includes('quantityOnly:true'),"receipt parser should retain standalone Stück counts for adjacent receipt lines");
