@@ -50,6 +50,8 @@ assert(html.includes("gleiche")||html.includes("identisch"),"market profile must
 assert(html.includes("function renderStatsTrend"),"month-over-month shopping trend missing");
 assert(html.includes("function renderHomePulse"),"personal home pulse missing");
 assert(html.includes('API_BASE+"/v1/feedback"'),"tester feedback endpoint is not wired into the UI");
+assert(html.includes('id="receiptAiButton"')&&html.includes("Foto wird an OpenAI gesendet"),"receipt AI fallback must disclose external image processing before the user taps");
+assert(html.includes('/v1/receipt-vision/status'),"receipt AI button must stay hidden until backend vision is configured");
 assert(html.includes("echtpreis_feedback_queue_v1"),"offline feedback queue missing");
 assert(html.includes("flushFeedbackQueue"),"queued feedback retry missing");
 assert(html.includes("items:valid.map"),"local receipt history must retain line items for future insights");
