@@ -294,6 +294,7 @@ assert(html.includes('unitPriceAfterCount=line.match')&&html.includes('(?:\\/|je
 
 assert(html.includes('betrag erhalten|zahlbetrag bar')&&html.includes('herausgegeben|rückgabe|rueckgabe'),"receipt cash extraction should accept common German paid/change labels");
 assert(html.includes('bar(?:\\s+(?:gegeben|bezahlt))?')&&html.includes('zahlbetrag bar|bezahlt'),"receipt cash extraction should recognize Bar bezahlt and Bezahlt labels");
+assert(html.includes('bar(?:\\s+(?:gegeben|bezahlt))?|cash|gegeben|bezahlt|betrag erhalten|zahlbetrag bar'),"receipt payment method should classify the same expanded cash labels as cash extraction");
 assert(html.includes('function receiptCashConsistency(total,cash)'),"receipt parser should independently validate cash/change arithmetic");
 assert(html.includes('difference<=.02'),"cash/change validation should allow only cent-level OCR tolerance");
 assert(html.includes('score+=cashCheck.ok?28:-18'),"OCR candidate scoring should reward consistent cash arithmetic and penalize contradictions");
