@@ -54,7 +54,9 @@ function normalizeReceipt(result) {
     const unitPrice = Number(item.unit_price);
     if (!name || !Number.isFinite(lineTotal) || lineTotal === 0 || Math.abs(lineTotal) > 100000) return [];
     if (!Number.isFinite(count) || count < 1 || count > 1000 || !Number.isFinite(unitPrice) || Math.abs(unitPrice) > 100000) return [];
-    return [{ name, lineTotal: Number(lineTotal.toFixed(2)), count, unitPrice: Number(unitPrice.toFixed(2)), isDeposit: !!item.is_deposit, isAdjustment: !!item.is_adjustment }];
+    const roundedCount=Number(count.toFixed(3));
+    if (!item.is_adjustment && !item.is_deposit && roundedCount > 1 && unitPrice > 0 && Math.abs(Math.abs(lineTotal) - roundedCount * Math.abs(unitPrice)) > Math.max(0.08, Math.abs(lineTotal) * 0.05)) return [];
+    return [{ name, lineTotal: Number(lineTotal.toFixed(2)), count: roundedCount, unitPrice: Number(unitPrice.toFixed(2)), isDeposit: !!item.is_deposit, isAdjustment: !!item.is_adjustment }];
   });
   if (!Number.isFinite(total) || total <= 0 || total > 100000) throw new Error("KI konnte die aufgedruckte Gesamtsumme nicht sicher lesen.");
   const rawDate=String(result.date||"");let date="";if(/^20\d\d-\d\d-\d\d$/.test(rawDate)){const p=rawDate.split("-").map(Number),d=new Date(Date.UTC(p[0],p[1]-1,p[2]));if(d.getUTCFullYear()===p[0]&&d.getUTCMonth()===p[1]-1&&d.getUTCDate()===p[2])date=rawDate}
