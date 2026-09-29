@@ -1015,18 +1015,24 @@ function clearOpenPurchasePlan(){try{localStorage.removeItem(openPurchasePlanKey
 function receiptPlanMatchKey(x){
  let raw=String(x&&x.name||x&&x.label||x&&x.raw||"");try{let m=identifyReceiptProduct(raw);if(m&&m.key)return "key:"+m.key}catch(e){}return "raw:"+normalizeProduct(raw).replace(/\b\d+(?:[.,]\d+)?\s*(?:g|kg|ml|l|stk|stueck)\b/g,"").trim();
 }
+function receiptItemUnits(item){const direct=Number(item?.quantity||item?.qty||item?.count||item?.packCount);if(Number.isFinite(direct)&&direct>0)return Math.max(1,Math.round(direct));const raw=String(item?.name||item?.raw||"");let m=raw.match(/(?:^|\s)(\d+)\s*[x×]\b/i);return m?Math.max(1,parseInt(m[1],10)):1}
 function buildPlanVsReceipt(plan,current){
- if(!plan||!plan.items?.length||!current?.items?.length)return null;let planned=plan.items.map(x=>({...x,match:receiptPlanMatchKey(x)})),actual=current.items.filter(i=>!i.isDeposit&&!i.isAdjustment&&Number(i.price)>0).map(x=>({...x,match:receiptPlanMatchKey(x)})),used=new Set(),matched=[];
- planned.forEach(p=>{let i=actual.findIndex((a,j)=>!used.has(j)&&a.match&&a.match===p.match);if(i>=0){used.add(i);matched.push({planned:p,actual:actual[i]})}});
- let missing=planned.filter(p=>!matched.some(m=>m.planned===p)),extra=actual.filter((a,i)=>!used.has(i)),extraSpend=extra.reduce((n,x)=>n+Number(x.price||0),0),matchPct=planned.length?Math.round(matched.length/planned.length*100):0;
- let plannedUnits=planned.reduce((n,x)=>n+Math.max(1,Number(x.packCount)||1),0),matchedUnits=matched.reduce((n,x)=>n+Math.max(1,Number(x.planned.packCount)||1),0);return {plannedCount:planned.length,plannedUnits,matchedUnits,actualCount:actual.length,matched,missing,extra,extraSpend,matchPct};
+ if(!plan||!plan.items?.length||!current?.items?.length)return null;
+ let planned=plan.items.map(x=>({...x,match:receiptPlanMatchKey(x),plannedUnits:Math.max(1,Number(x.packCount)||1)}));
+ let actual=current.items.filter(i=>!i.isDeposit&&!i.isAdjustment&&Number(i.price)>0).map(x=>({...x,match:receiptPlanMatchKey(x),actualUnits:receiptItemUnits(x)})),used=new Set(),matched=[];
+ planned.forEach(p=>{let candidates=actual.map((a,j)=>({a,j})).filter(x=>!used.has(x.j)&&x.a.match&&x.a.match===p.match);if(!candidates.length)return;let found=candidates[0];used.add(found.j);let bought=Math.max(1,found.a.actualUnits||1),plannedCount=Math.max(1,p.plannedUnits||1);matched.push({planned:p,actual:found.a,plannedUnits:plannedCount,boughtUnits:bought,fulfilledUnits:Math.min(plannedCount,bought),shortUnits:Math.max(0,plannedCount-bought),extraUnits:Math.max(0,bought-plannedCount)})});
+ let missing=planned.filter(p=>!matched.some(m=>m.planned===p)),partial=matched.filter(m=>m.shortUnits>0),over=matched.filter(m=>m.extraUnits>0),extra=actual.filter((a,i)=>!used.has(i)),extraSpend=extra.reduce((n,x)=>n+Number(x.price||0),0);
+ let plannedUnits=planned.reduce((n,x)=>n+x.plannedUnits,0),fulfilledUnits=matched.reduce((n,x)=>n+x.fulfilledUnits,0),matchedUnits=matched.reduce((n,x)=>n+x.boughtUnits,0),matchPct=plannedUnits?Math.round(fulfilledUnits/plannedUnits*100):0;
+ return {plannedCount:planned.length,plannedUnits,fulfilledUnits,matchedUnits,actualCount:actual.length,matched,missing,partial,over,extra,extraSpend,matchPct};
 }
 function renderPlanVsReceipt(current){
  const box=$("receiptPlanCheck");if(!box)return;let result=buildPlanVsReceipt(getOpenPurchasePlan(),current);if(!result){box.style.display="none";return}
- box.style.display="block";$("receiptPlanCheckTitle").textContent=result.matchPct+" % deiner geplanten Positionen wurden auf dem Beleg erkannt.";
- let bits=[result.matched.length+" geplant & gekauft"];if(result.extra.length)bits.push(result.extra.length+" zusätzlich"+(result.extraSpend>0?" · "+eur(result.extraSpend):""));if(result.missing.length)bits.push(result.missing.length+" geplant, auf dem Beleg nicht erkannt");
+ box.style.display="block";$("receiptPlanCheckTitle").textContent=result.matchPct+" % deiner geplanten Menge wurde auf dem Beleg erkannt.";
+ let bits=[result.fulfilledUnits+"/"+result.plannedUnits+" geplante Packungen erkannt"];if(result.partial.length)bits.push(result.partial.length+" Position"+(result.partial.length===1?"":"en")+" nur teilweise");if(result.extra.length)bits.push(result.extra.length+" zusätzlich"+(result.extraSpend>0?" · "+eur(result.extraSpend):""));if(result.missing.length)bits.push(result.missing.length+" nicht erkannt");
  $("receiptPlanCheckDetail").textContent=bits.join(" · ")+".";
- $("receiptPlanCheckRows").innerHTML=(result.extra.length?'<div style="margin-top:8px"><b>Zusätzlich gekauft</b><div class="detail">'+result.extra.slice(0,5).map(x=>escHtml(x.name)+" "+eur(Number(x.price))).join(" · ")+'</div></div>':'')+(result.missing.length?'<div style="margin-top:8px"><b>Nicht auf dem Beleg erkannt</b><div class="detail">'+result.missing.slice(0,5).map(x=>escHtml(x.label||x.raw)).join(" · ")+'</div></div>':'');
+ let partialHtml=result.partial.length?'<div style="margin-top:8px"><b>Nur teilweise gekauft</b><div class="detail">'+result.partial.slice(0,5).map(x=>escHtml(x.planned.label||x.planned.raw)+": "+x.boughtUnits+" von "+x.plannedUnits+" Pack.").join(" · ")+'</div></div>':"";
+ let overHtml=result.over.length?'<div style="margin-top:8px"><b>Mehr als geplant</b><div class="detail">'+result.over.slice(0,5).map(x=>escHtml(x.planned.label||x.planned.raw)+": +"+x.extraUnits+" Pack.").join(" · ")+'</div></div>':"";
+ $("receiptPlanCheckRows").innerHTML=partialHtml+overHtml+(result.extra.length?'<div style="margin-top:8px"><b>Zusätzlich gekauft</b><div class="detail">'+result.extra.slice(0,5).map(x=>escHtml(x.name)+" "+eur(Number(x.price))).join(" · ")+'</div></div>':'')+(result.missing.length?'<div style="margin-top:8px"><b>Nicht auf dem Beleg erkannt</b><div class="detail">'+result.missing.slice(0,5).map(x=>escHtml(x.label||x.raw)).join(" · ")+'</div></div>':'');
 }
 const basketStateKey="echtpreis_basket_state_v1";
 function loadBasketState(){const parse=key=>{try{const raw=localStorage.getItem(key);if(raw==null)return null;let value=JSON.parse(raw);return Array.isArray(value)?value:null}catch(e){return null}};let main=parse(basketStateKey);if(main)return main;let backup=parse(basketStateKey+"_backup");if(backup){try{localStorage.setItem(basketStateKey,JSON.stringify(backup))}catch(e){}return backup}return[]}
