@@ -195,9 +195,19 @@ body.subview .hero{margin-bottom:10px}.home-main-actions{gap:9px!important}.home
 #receiptNextMove{background:#edf7f1!important;border:1px solid rgba(7,108,61,.12)!important;padding:14px!important}#receiptNextMove .insight-kicker{font-size:9px!important;letter-spacing:.13em!important;color:#397052!important}#receiptNextMove strong{font-size:16px!important;line-height:1.2!important;margin-top:5px!important}
 #receiptPlanCheck,#receiptDiagnosis,#receiptBasketStory,#receiptInsight{box-shadow:none!important;background:#fafbfa!important;border:1px solid rgba(11,23,17,.07)!important}#receiptPlanCheck .insight-kicker,#receiptDiagnosis .insight-kicker,#receiptBasketStory .insight-kicker,#receiptInsight .insight-kicker{font-size:9px!important;letter-spacing:.12em!important;color:#748078!important}
 #receiptDiagnosisGrid .homeaction{border-radius:12px!important;background:#fff!important;box-shadow:none!important}#receiptDiagnosisGrid .homeaction small{font-size:9px!important}#receiptDiagnosisGrid .homeaction b{line-height:1.2!important}
-</style></style></head>
+</style><style>
+/* v5.199 navigation stability + compact accordion */
+body.subview .home-main-actions{display:grid!important;position:relative;z-index:2}
+body.subview .home-main-actions .homeaction{min-height:68px!important;padding:10px 14px!important}
+body.subview .home-main-actions .homeaction>.ep-icon{width:40px!important;height:40px!important;flex-basis:40px!important}
+body.subview .home-main-actions .ep-icon svg{width:22px;height:22px}
+body.subview .home-main-actions .homeaction{grid-template-columns:40px minmax(0,1fr) 16px!important}
+body.subview .home-main-actions .homeaction b{font-size:16px!important}
+body.subview .home-main-actions .homeaction small{font-size:10px!important;margin-top:2px!important}
+body.subview #planner,body.subview #receipt,body.subview #statsCard{scroll-margin-top:12px}
+</style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.198.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.199.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
@@ -283,7 +293,7 @@ body.subview .hero{margin-bottom:10px}.home-main-actions{gap:9px!important}.home
     show("home");
     var map={planTab:"plan",backPlanBtn:"home",pointsBack:"home",receiptTab:"receipt",toReceiptBtn:"receipt",homePoints:"points",homeProfile:"profile",profileBack:"home",profileReceipts:"points",statsBack:"home"};
     Object.keys(map).forEach(function(id){var e=byId(id);if(e)e.addEventListener("click",function(){show(map[id])})});
-    [["homePlan","plan"],["homeReceipt","receipt"],["homeStats","stats"]].forEach(function(entry){byId(entry[0]).addEventListener("click",function(){var panel=byId({plan:"planner",receipt:"receipt",stats:"statsCard"}[entry[1]]);var opening=panel.style.display==="none";show(opening?entry[1]:"home");if(opening&&entry[1]==="stats"&&window.refreshEchtpreisStats)window.refreshEchtpreisStats()})});
+    [["homePlan","plan"],["homeReceipt","receipt"],["homeStats","stats"]].forEach(function(entry){byId(entry[0]).addEventListener("click",function(){var panel=byId({plan:"planner",receipt:"receipt",stats:"statsCard"}[entry[1]]);var opening=panel.style.display==="none";show(opening?entry[1]:"home");if(opening){panel.scrollIntoView({behavior:"smooth",block:"start"});if(entry[1]==="stats"&&window.refreshEchtpreisStats)window.refreshEchtpreisStats()}else window.scrollTo({top:0,behavior:"smooth"})})});
     var pn=byId("profileName");if(pn)pn.value=localStorage.getItem("echtpreis_profile_name")||"";
     var px=byId("profileXp");if(px)px.textContent=(localStorage.getItem("echtpreis_xp")||"0")+" XP gesammelt";
     var sp=byId("saveProfile");if(sp)sp.addEventListener("click",function(){localStorage.setItem("echtpreis_profile_name",(pn&&pn.value||"").trim());sp.textContent="✓ Gespeichert";setTimeout(function(){sp.textContent="Profil speichern"},1200)});
