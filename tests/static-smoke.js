@@ -358,3 +358,8 @@ assert(html.includes('const fallback=receiptPlanFallbackName(raw);return fallbac
 
 assert(html.includes('replace(/^\\s*\\d{1,3}\\s*[x×*]\\s*/,"")'),"fallback product identity should remove explicit leading multipack quantities");
 assert(html.includes('(?:stk\\.?|stueck|stuck|pack(?:ung)?(?:en)?|pcs?)\\s+'),"fallback product identity should remove explicit leading piece/package counts");
+
+assert(html.includes('item?.quantity??item?.qty??item?.count??item?.packCount'),"receipt unit extraction should use one explicit quantity source without multiplying duplicate representations");
+assert(html.includes('function receiptPackPieces(item)'),"receipt quantity model should distinguish pieces contained in a pack");
+assert(html.includes('item?.packUnit==="piece"'),"piece multipacks should only affect physical piece count when pack metadata explicitly says piece");
+assert(html.includes('function receiptPhysicalPieces(item){return receiptItemUnits(item)*receiptPackPieces(item)}'),"physical piece count should be derived separately from purchased-unit count");
