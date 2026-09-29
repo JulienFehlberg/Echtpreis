@@ -179,3 +179,11 @@ assert(html.includes('planComparison:buildPlanVsReceipt'),"new receipts should p
 assert(html.includes('Wie nah kaufst du an deiner Liste?')&&html.includes('Bon-OCR kann einzelne Positionen übersehen'),"stats should learn plan adherence without overstating OCR evidence");
 assert(html.includes('clearOpenPurchasePlan()'),"completed purchases should clear the consumed shopping plan snapshot");
 assert(html.includes('v5.184.0'),"expected app version v5.184.0");
+
+assert(html.includes('id="statsImpulseProfile"')&&html.includes('Deine ungeplanten Käufe'),"stats should remember recurring unplanned purchases");
+assert(html.includes('wiederholt ungeplant auf'),"impulse profile should identify repeated extras");
+assert(html.includes('id="statsImpulseMonth"')&&html.includes('Geplant vs. zusätzlich'),"stats should compare monthly recognized extra spending");
+assert(html.includes('Nur Bons mit vorher gespeichertem Einkaufsplan'),"monthly impulse insight must disclose its evidence scope");
+assert(html.includes('id="statsImpulseRoutine"')&&html.includes('Vom Spontankauf zur Routine'),"stats should detect extras that later become planned purchases");
+assert(html.includes('erstmals ungeplant')&&html.includes('in einem geplanten Einkauf wiedergefunden'),"impulse-to-routine explanation should be explicit");
+assert(html.includes('v5.185.0'),"expected app version v5.185.0");
