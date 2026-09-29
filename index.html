@@ -108,6 +108,22 @@ input:focus,select:focus,textarea:focus{border-color:#52a97a;box-shadow:0 0 0 4p
  .app{max-width:600px;padding-left:24px;padding-right:24px}.hero{min-height:180px}.home-main-actions .homeaction{min-height:94px!important}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style><style>
+/* v5.192 hierarchy + interaction refinement */
+body.subview .top{min-height:40px;margin-bottom:8px}.receipt-simple{padding-top:4px}.receipt-simple h2{font-size:clamp(25px,7vw,32px);letter-spacing:-.035em}.receipt-camera{width:76px;height:76px;margin:18px auto;border-radius:23px;background:linear-gradient(145deg,#eef8f2,#dff1e7);font-size:34px;box-shadow:inset 0 0 0 1px rgba(7,108,61,.06)}
+.receipt-main-action,.receipt-file-action{min-height:54px}.upload{padding:18px;border-radius:17px;border-color:#b8c7bf}
+.receipt-item{padding:13px 0;gap:12px}.receipt-item-name{font-size:15px;line-height:1.35}.receipt-item strong{font-size:16px}
+.analysis-paid{padding:6px 0 13px}.analysis-paid span{font-size:13px;color:#c9ded3}.analysis-paid strong{font-weight:950}.receipt-top-market{min-height:56px}
+#receiptHeroInsight{border:1px solid rgba(7,108,61,.22)!important;background:linear-gradient(145deg,#f4fbf7,#ffffff)!important;box-shadow:0 10px 30px rgba(7,108,61,.07)}#receiptHeroInsight .insight-kicker{color:var(--ep-green)!important}#receiptHeroInsight strong{font-size:clamp(21px,6vw,27px)}
+#receiptNextMove{border-color:rgba(7,108,61,.12)!important;background:#f7faf8!important}.receipt-why summary,details summary{min-height:40px;display:flex;align-items:center}
+.quick-row{padding-bottom:2px}.quick-chip{min-height:38px;font-size:13px;padding:8px 13px}
+.chip{min-height:38px;display:inline-flex;align-items:center;padding:8px 12px}.notice{font-size:13px;line-height:1.5;border-radius:16px}
+.itemname{font-size:15px}.item-pack-size{font-size:12px}.qty{font-size:12px}.qty-stepper button{width:38px;height:38px;border-radius:11px}
+.split{padding:16px;border-radius:18px}.split strong{font-size:clamp(18px,5vw,23px)}
+.savings-card{background:linear-gradient(145deg,#f1faf5,#fff);border-color:rgba(7,108,61,.18)}
+.sharing-welcome{padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom))}.sharing-welcome-card{border-radius:27px;padding:clamp(20px,6vw,28px)}.sharing-welcome-card h2{font-size:clamp(24px,7vw,30px);letter-spacing:-.035em}
+@media(hover:hover){button:hover{filter:brightness(.985)}.home-main-actions .homeaction:hover{transform:translateY(-2px)}}
+@media(max-width:430px){.reviewrow{grid-template-columns:1.35fr .62fr .62fr auto}.reviewrow>*:nth-child(4){display:none}}
 </style></style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.192.0</span></div>
