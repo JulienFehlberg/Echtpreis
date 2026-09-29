@@ -84,3 +84,9 @@ assert(!html.includes("stableBasket"),"obsolete duplicate basket state must stay
 assert(html.includes("if(dataEngineCache&&dataEngineCacheDay===today)return dataEngineCache"),"normalized observation engine should be cached only for the current day");
 assert(html.includes("priceLookupMemo"),"basket price lookups should be memoized within a comparison");
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
+
+assert(!html.includes("anonymisierte Preisbeobachtungen"),"price observations must not be described as anonymous");
+assert(html.includes("Noch ohne Login oder Synchronisierung zwischen Geräten"),"alpha profile must disclose the lack of accounts and device sync");
+const privacy=fs.readFileSync("privacy.html","utf8");
+assert(!privacy.includes("in der Bon-Analyse"),"privacy settings location must match the current UI");
+assert(privacy.includes("im Profil unter „Meine Bons &amp; Privatsphäre“"),"privacy notice must point to the actual sharing settings");
