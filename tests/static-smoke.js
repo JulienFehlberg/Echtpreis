@@ -366,3 +366,10 @@ assert(html.includes('function receiptPhysicalPieces(item){return receiptItemUni
 
 assert(html.includes('const target=catalog[key]?.unit||"piece",count=receiptItemUnits(row)'),"receipt price and energy quantity conversion should reuse canonical purchased-unit semantics");
 assert(!html.includes('const target=catalog[key]?.unit||"piece",count=Number(row.count)||1,pack='),"receipt comparison should not maintain a separate count-only quantity interpretation");
+
+assert(html.includes('coveredSpend=Number(rows.reduce((n,x)=>n+x.spend,0).toFixed(2))'),"receipt calorie estimates should track spend covered by nutrition-capable rows");
+assert(html.includes('sourceSpend=receiptRecognizedProductSpend(source)'),"calorie coverage denominator should use recognized product spend only");
+assert(html.includes('coverage=sourceSpend>0?Math.max(0,Math.min(100'),"receipt calorie coverage should be bounded to a readable percentage");
+assert(html.includes('assumedRows=rows.filter(x=>x.estimated).length'),"receipt calorie estimates should track rows that depend on quantity assumptions");
+assert(html.includes('Die kcal-Auswertung deckt ')&&html.includes('der erkannten Produkt-Ausgaben ab'),"receipt calorie UI should disclose monetary coverage of the estimate");
+assert(html.includes('Mengenannahme')&&html.includes('belastbare Menge'),"receipt calorie UI should disclose quantity assumptions and missing reliable quantities");
