@@ -318,9 +318,30 @@ body.subview #planner,body.subview #receipt,body.subview #statsCard{scroll-margi
 #planner .pack-edit small{font-size:7px!important;line-height:1!important;color:#779084!important;font-weight:700!important}
 #planner .qty-buttons{gap:3px!important}
 #planner .qty-stepper .qty-buttons button{width:25px!important;height:25px!important;min-width:25px!important;border-radius:8px!important}
+</style><style>
+/* v5.209 clean list layout reset */
+#planner .item{display:grid!important;grid-template-columns:24px minmax(0,1fr) auto 16px!important;grid-template-areas:"check product controls delete"!important;align-items:center!important;gap:10px!important;padding:11px 0!important;min-height:58px!important}
+#planner [data-check]{grid-area:check!important;width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;border-radius:7px!important;margin:0!important}
+#planner .itemname{grid-area:product!important;display:block!important;min-width:0!important;padding:0!important;margin:0!important}
+#planner .item-title{display:block!important;font-size:14px!important;line-height:1.12!important;font-weight:800!important;margin:0!important;padding:0!important;width:auto!important}
+#planner .item-pack-size{display:block!important;font-size:9px!important;line-height:1.1!important;margin:4px 0 0!important;color:#8b9691!important;opacity:1!important}
+#planner .qty-stepper{grid-area:controls!important;display:grid!important;grid-template-columns:1fr!important;justify-items:end!important;gap:5px!important;min-width:116px!important;margin:0!important}
+#planner .pack-edit{display:block!important;width:auto!important;max-width:150px!important;height:auto!important;min-height:0!important;padding:0!important;margin:0!important;background:transparent!important;border:0!important;box-shadow:none!important;text-align:right!important}
+#planner .pack-edit b{display:block!important;font-size:9.5px!important;line-height:1.1!important;font-weight:750!important;white-space:nowrap!important}
+#planner .pack-edit small{display:none!important}
+#planner .qty-buttons{display:flex!important;gap:5px!important}
+#planner .qty-stepper .qty-buttons button{width:30px!important;height:28px!important;min-width:30px!important;min-height:28px!important;padding:0!important;border-radius:9px!important;font-size:16px!important}
+#planner .x{grid-area:delete!important;width:16px!important;padding:0!important;margin:0!important;font-size:14px!important}
+#planner .item.item-checked{padding-left:5px!important;padding-right:5px!important}
+@media(max-width:390px){
+ #planner .item{gap:7px!important}
+ #planner .qty-stepper{min-width:104px!important}
+ #planner .pack-edit b{font-size:8.8px!important}
+ #planner .item-title{font-size:13.5px!important}
+}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.208.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.209.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
@@ -1112,7 +1133,7 @@ function receiptEnergyEstimate(items){
  const rows=[];for(const item of items||[]){const wish=parseWish(item.name),kcal=kcalPerListUnit[wish.key];if(!kcal)continue;const quantity=receiptComparisonAmount(item,wish.key);if(!quantity||!(quantity.amount>0))continue;rows.push({name:item.name,kcal:Math.round(quantity.amount*kcal),assumption:quantity.assumption||""})}
  return rows.length?{rows,total:rows.reduce((n,x)=>n+x.kcal,0),count:rows.length,items:(items||[]).length}:null;
 }
-function quantityControl(w,i){const shown=w.quantityMode?Number(w.packCount||1):Number(w.amount||1),pack=listPackHint(w),label=w.quantityMode&&pack?shown+" × "+pack:shown+(w.unit==="kg"?" kg":w.unit==="l"?" l":w.unit==="piece"?" Stk.":"");return '<div class="qty-stepper" aria-label="Menge"><button type="button" class="pack-edit" data-pack-edit="'+i+'" aria-label="Packungsgröße ändern"><b aria-live="polite">'+escHtml(String(label))+'</b><small>ändern</small></button><span class="qty-buttons"><button type="button" data-qty="-1" data-qty-index="'+i+'">−</button><button type="button" data-qty="1" data-qty-index="'+i+'">+</button></span></div>'}
+function quantityControl(w,i){const shown=w.quantityMode?Number(w.packCount||1):Number(w.amount||1),pack=listPackHint(w),label=w.quantityMode&&pack?shown+" × "+pack:shown+(w.unit==="kg"?" kg":w.unit==="l"?" l":w.unit==="piece"?" Stk.":"");return '<div class="qty-stepper" aria-label="Menge"><button type="button" class="pack-edit" data-pack-edit="'+i+'" aria-label="Packungsgröße ändern"><b aria-live="polite">'+escHtml(String(label))+'</b></button><span class="qty-buttons"><button type="button" data-qty="-1" data-qty-index="'+i+'">−</button><button type="button" data-qty="1" data-qty-index="'+i+'">+</button></span></div>'}
 function personalPriceMemoryForWish(w){
  if(!w||!w.key)return null;const rows=[];getPersonalReceipts().forEach(r=>(r.items||[]).forEach(i=>{let id=identifyReceiptProduct(i.name||"");if(id.key!==w.key)return;let price=personalComparablePrice(i);if(price>0)rows.push({price,date:r.date||"",store:r.store||"",name:i.name})}));if(!rows.length)return null;
  rows.sort((a,b)=>String(a.date).localeCompare(String(b.date)));const prices=rows.map(x=>x.price).sort((a,b)=>a-b),median=medianNumber(prices),last=rows[rows.length-1],min=rows.reduce((a,b)=>b.price<a.price?b:a),max=rows.reduce((a,b)=>b.price>a.price?b:a);
