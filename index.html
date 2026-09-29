@@ -2027,7 +2027,7 @@ function inferPackFromName(name){
 }
 function receiptMultipackTotal(total,count,unitPrice,isReturn=false){const printed=parseReceiptNumber(total),unit=parseReceiptNumber(unitPrice),n=Math.abs(Number(count)||0),derived=(isReturn?-1:1)*Number((n*unit).toFixed(2));return n>0&&unit>0&&Math.abs(printed-derived)>Math.max(.05,derived*.03)?derived:printed}
 function isReceiptDepositLabel(name){return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z]/g,"").startsWith("pfandwert")}
-function receiptTotalBoundary(line){return /^\s*(?:summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag)\b/i.test(String(line||""))}
+function receiptTotalBoundary(line){return /^\s*(?:summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag|endsumme|rechnungsbetrag)\b/i.test(String(line||""))}
 function receiptFooterNoise(line,store=""){const s=String(line||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");if(!s)return true;const common=/^(?:bar|cash|gegeben|erhalten|ruckgeld|wechselgeld|zuruck|kartenzahlung|girocard|visa|mastercard|maestro|v pay|apple pay|google pay|zahlart|zahlung|terminal|transaktion|trace|beleg(?:nummer| nr)?|bon(?:nummer| nr)?|kasse|bediener|filiale|datum|uhrzeit|mwst|ust|steuer|netto|brutto|summe|gesamt|zu zahlen|zahlbetrag|endbetrag)\b/;if(common.test(s))return true;const chain={Kaufland:/^(?:kaufland card|k-card|treuepunkte|punkte)/,EDEKA:/^(?:deutschlandcard|genusspunkte|edeka app)/,PENNY:/^(?:payback|penny app|oecobon|ecobon)/,ALDI:/^(?:aldi app|aldi talk)/},family=/^ALDI\b/i.test(String(store||""))?"ALDI":store;return !!(chain[family]&&chain[family].test(s))}
 function receiptAdjustmentLine(line){const s=String(line||"").trim(),m=s.match(/^(.{2,64}?)\s+(-\s*\d+[,.]\d{2})\s*(?:€|EUR)?\s*(?:[AB]|[12])?$/i);if(!m)return null;const label=m[1].trim(),norm=label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");if(!/(?:rabatt|coupon|gutschein|aktion|ersparnis|nachlass|discount|sofortbonus|payback)/i.test(norm))return null;const price=-Math.abs(parseReceiptNumber(m[2].replace(/\s+/g,"")));return {name:label,price:String(price),isAdjustment:true,pricingType:"discount",adjustmentType:/coupon|gutschein|payback/i.test(norm)?"coupon":"discount"}}
 function receiptAdjustmentLinkable(adjustment){const s=String(adjustment?.name||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");if(!s||/(?:gutschein|coupon|payback|warenkorb|einkauf|gesamt|bon|treue|punkte|app|\b\d+\s*%)/i.test(s))return false;return /(?:artikelrabatt|aktionsrabatt|sofortrabatt|rabatt|nachlass|ersparnis|discount|aktion)/i.test(s)}
@@ -2101,14 +2101,14 @@ function extractReceiptTotal(text){
   const line=lines[i].replace(/(\d)\s*([,.])\s*(\d{2})/g,"$1$2$3");
   const taxRow=line.match(/^\s*[AB]\s*=?\s*\d{1,2}[,.]\d+\s*%\s*(.*)$/i);
   if(taxRow){const values=taxRow[1].match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[];if(values.length>=3){const gross=parseReceiptNumber(values.at(-1).replace(/\s+/g,""));if(Number.isFinite(gross))taxGross.push(gross)}}
-  if(!/\b(?:summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag)\b/i.test(line))continue;
-  const label=(line.match(/\b(summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag)\b/i)||[])[1]?.toLowerCase(),same=(line.match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[]).pop();let n=same?parseReceiptNumber(same.replace(/\s+/g,"")):null;
+  if(!/\b(?:summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag|endsumme|rechnungsbetrag)\b/i.test(line))continue;
+  const label=(line.match(/\b(summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag|endsumme|rechnungsbetrag)\b/i)||[])[1]?.toLowerCase(),same=(line.match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[]).pop();let n=same?parseReceiptNumber(same.replace(/\s+/g,"")):null;
   const next=String(lines[i+1]||"");
   if(!(Number.isFinite(n)&&n>0)&&!/\b(?:bar|gegeben|rückgeld|karte|cash)\b/i.test(next)){
    const m=next.match(/(?:€|EUR|£)?\s*(\d{1,5}\s*[,.]\s*\d{2})/);if(m)n=parseReceiptNumber(m[1].replace(/\s+/g,""));
   }
   if(!Number.isFinite(n)||n<=0)continue;if(firstLabeled==null)firstLabeled=n;
-  if(label==="summe"||label==="zu zahlen"||label==="zahlbetrag"||label==="endbetrag"){if(primary==null)primary=n}
+  if(label==="summe"||label==="zu zahlen"||label==="zahlbetrag"||label==="endbetrag"||label==="endsumme"||label==="rechnungsbetrag"){if(primary==null)primary=n}
   else summary=n;
  }
  if(primary!=null&&summary!=null&&taxGross.length>=2){const taxTotal=Number(taxGross.reduce((a,b)=>a+b,0).toFixed(2));if(Math.abs(taxTotal-summary)<=.02&&Math.abs(taxTotal-primary)>.01)return summary}
