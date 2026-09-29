@@ -401,3 +401,11 @@ assert(html.includes('discount>Number(previous.price)+.01'),"linked product disc
 assert(html.includes('previous.discountSource="linked-adjustment"'),"products changed by a linked receipt adjustment should retain explicit provenance");
 assert(html.includes('linkReceiptAdjustment(rows,adjustment);rows.push(adjustment)'),"receipt parsing should route discount linking through the guarded helper");
 assert(!html.includes('[...rows].reverse().find(r=>!r.isDeposit&&!r.isAdjustment&&Number(r.price)>0)'),"receipt discount parsing must not search backwards for an arbitrary earlier product");
+
+assert(html.includes('function receiptItemForStorage(x)'),"receipt history should use one canonical item serializer");
+assert(html.includes('linkedToPrevious:!!x?.linkedToPrevious')&&html.includes('discountSource:x?.discountSource||""'),"receipt storage should preserve linked-discount provenance across reloads");
+assert(html.includes('adjustmentType:x?.adjustmentType||""')&&html.includes('pricingType:x?.pricingType||""'),"receipt storage should preserve adjustment classification");
+assert(html.includes('quantitySource:x?.quantitySource||""'),"receipt storage should preserve parsed quantity provenance");
+assert((html.match(/receiptItemsForStorage\(receiptLines\)/g)||[]).length>=2,"new and updated receipts should share canonical item serialization");
+assert(html.includes('i?.discountSource==="linked-adjustment"?0:d'),"discount totals should not count a product discount twice when its adjustment row already represents it");
+assert(!html.includes('const linked=new Set((items||[]).filter(i=>i?.isAdjustment&&i?.linkedToPrevious'),"discount deduplication should no longer depend on fragile product-name and amount set matching");
