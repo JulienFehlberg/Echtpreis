@@ -66,7 +66,7 @@ async function readReceiptWithVision(images, { apiKey = process.env.OPENAI_API_K
   if (!validReceiptImages(images)) throw Object.assign(new Error("Bonfoto ist ungültig oder zu groß."), { status: 400 });
   const content = [{
     type: "input_text",
-    text: "Lies den deutschen Kassenbon aus den Bildern. Mehrere Bilder zeigen denselben Bon in Leserichtung von oben nach unten. Gib ausschließlich sichtbare Informationen zurück. Lies die aufgedruckte Gesamtsumme bei SUMME/GESAMTBETRAG/ZU ZAHLEN unabhängig von den Einzelpositionen. Erfinde keine Artikel oder Preise. Erfasse jede sichtbare Waren-, Pfand-, Rabatt- und Rückgabezeile genau einmal; negative Beträge bleiben negativ. Bei Mehrfachkauf: line_total ist der Zeilenbetrag, count die Stückzahl und unit_price der Stückpreis. Datum als YYYY-MM-DD, wenn lesbar, sonst leer; Händlername nur, wenn lesbar, sonst leer."
+    text: "Lies den deutschen Einkaufsbeleg aus den Bildern. Mehrere Bilder zeigen denselben Beleg in Leserichtung von oben nach unten. Gib ausschließlich sichtbare Informationen zurück. Lies die aufgedruckte Gesamtsumme bei SUMME/GESAMTBETRAG/ZU ZAHLEN unabhängig von den Einzelpositionen. Erfinde keine Artikel oder Preise. Erfasse jede sichtbare Waren-, Pfand-, Rabatt- und Rückgabezeile genau einmal; negative Beträge bleiben negativ. Bei Mehrfachkauf: line_total ist der Zeilenbetrag, count die Stückzahl und unit_price der Stückpreis. Datum als YYYY-MM-DD, wenn lesbar, sonst leer; Händlername nur, wenn lesbar, sonst leer."
   }, ...images.map(image => ({ type: "input_image", image_url: image.dataUrl, detail: "high" }))];
   const response = await fetchImpl("https://api.openai.com/v1/responses", {
     method: "POST",
