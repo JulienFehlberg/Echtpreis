@@ -10,6 +10,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  await new Promise(r=>setTimeout(r,120));
  const w=dom.window,d=w.document;
  assert.strictEqual(errors.length,0,"browser startup errors: "+errors.join(" | "));
+ assert.strictEqual(d.querySelector(".alpha-badge")?.textContent,"ALPHA","the app should clearly label its alpha version");
  assert.strictEqual(d.getElementById("contribute").checked,false,"receipt price sharing must require explicit opt-in");
  assert.strictEqual(d.getElementById("sharingWelcome").style.display,"grid","first use must show a visible receipt-sharing decision");
  d.getElementById("welcomePrivate").click();
