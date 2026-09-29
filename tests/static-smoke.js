@@ -231,3 +231,11 @@ assert(html.includes('v5.190.0'),"expected app version v5.190.0");
 assert(html.includes('Beleg scannen')&&html.includes('Beleg-Analyse')&&html.includes('Meine Belege & Privatsphäre'),"visible receipt product language should consistently use Beleg");
 assert(!html.includes('Bon scannen')&&!html.includes('Bon-Analyse')&&!html.includes('Meine Bons & Privatsphäre'),"legacy Bon terminology must not return in primary UI");
 assert(html.includes('v5.191.0'),"expected app version v5.191.0");
+
+assert(html.includes('v5.192.0'),"expected app version v5.192.0");
+assert(html.includes('premium mobile design system')&&html.includes('clamp(32px,9vw,46px)'),"premium design should use fluid mobile typography");
+assert(html.includes('env(safe-area-inset-top)')&&html.includes('env(safe-area-inset-bottom)'),"mobile shell should respect phone safe areas");
+assert(html.includes('@media(max-width:359px)')&&html.includes('@media(min-width:600px)'),"design system should cover narrow and large phone widths");
+assert(html.includes('min-height:46px')&&html.includes('min-height:52px'),"primary controls should retain comfortable mobile touch targets");
+assert(html.includes('prefers-reduced-motion:reduce'),"premium motion should respect accessibility preferences");
+assert(html.includes('hierarchy + interaction refinement')&&html.includes('#receiptHeroInsight strong'),"receipt result should visually prioritize the strongest insight");
