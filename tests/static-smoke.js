@@ -27,7 +27,7 @@ assert(html.includes('href="privacy.html"'),"privacy entry point missing");
 assert(html.includes('rel="manifest"'),"installable web-app manifest missing");
 assert(html.includes('apple-mobile-web-app-capable'),"iOS home-screen metadata missing");
 assert(html.indexOf('id="homeReceipt"')<html.indexOf('id="homePlan"'),"receipt scan should be the primary home action");
-assert(html.includes("Bon scannen"),"primary receipt action copy missing");
+assert(html.includes("Beleg scannen"),"primary receipt action copy missing");
 assert(html.includes("function buildReceiptInsight"),"personal receipt insight engine missing");
 assert(html.includes("function renderStatsBreakdown"),"monthly spending breakdown missing");
 assert(html.includes("sicher kategorisiert"),"spending breakdown confidence coverage missing");
@@ -69,7 +69,7 @@ assert(html.includes("verifiedBest.total<=win.total*1.12"),"basket ranking must 
 assert(html.includes('type:"first-receipt-fact"'),"first receipt should produce an immediate useful fact");
 assert(html.includes("function receiptMarketComparison")&&html.includes('currentReceiptSavingConfidence="hoch"'),"receipt markets must be compared item by item and savings kept to evidenced prices");
 assert(html.includes("async function finalizeScannedReceipt")&&html.includes("await finalizeScannedReceipt()"),"verified receipt scans must save without a second confirmation tap");
-assert(html.includes("Bon-Gesamtsumme")&&html.includes("analysisPartialRow"),"receipt total and honest partial savings must be visible in the analysis");
+assert(html.includes("Beleg-Gesamtsumme")&&html.includes("analysisPartialRow"),"receipt total and honest partial savings must be visible in the analysis");
 assert(!html.includes('id="contribute"')&&html.includes('id="pointsContribute"'),"sharing preference must stay out of the scan result and remain manageable in settings");
 assert(html.includes(".slice(0,3)")&&html.includes("receipt-top-market"),"receipt results must show no more than the three cheapest lower estimates");
 assert(html.includes("combineReceiptCandidates")&&html.includes(".96,.48")&&html.includes(".96,.30"),"receipt OCR must inspect overlapping bands through the bottom of the receipt");
@@ -91,7 +91,7 @@ assert(!html.includes("anonymisierte Preisbeobachtungen"),"price observations mu
 assert(html.includes("Noch ohne Login oder Synchronisierung zwischen Geräten"),"alpha profile must disclose the lack of accounts and device sync");
 const privacy=fs.readFileSync("privacy.html","utf8");
 assert(!privacy.includes("in der Bon-Analyse"),"privacy settings location must match the current UI");
-assert(privacy.includes("im Profil unter „Meine Bons &amp; Privatsphäre“"),"privacy notice must point to the actual sharing settings");
+assert(privacy.includes("im Profil unter „Meine Belege &amp; Privatsphäre“"),"privacy notice must point to the actual sharing settings");
 assert(html.includes('API_BASE+"/v1/aliases"')&&html.includes("function applyCommunityAliases"),"shared receipt aliases should feed product recognition");
 
 assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"long receipts should accept multiple photos");
@@ -174,16 +174,16 @@ assert(html.includes('v5.183.0'),"expected app version v5.183.0");
 
 assert(html.includes('echtpreis_open_purchase_plan_v1')&&html.includes('saveOpenPurchasePlan'),"price comparison should preserve the planned basket for later receipt reconciliation");
 assert(html.includes('Plan vs. Wirklichkeit')&&html.includes('buildPlanVsReceipt'),"receipt analysis should reconcile planned and actual purchases");
-assert(html.includes('Zusätzlich gekauft')&&html.includes('Nicht auf dem Bon erkannt'),"plan reconciliation should surface extras and missing planned products");
+assert(html.includes('Zusätzlich gekauft')&&html.includes('Nicht auf dem Beleg erkannt'),"plan reconciliation should surface extras and missing planned products");
 assert(html.includes('planComparison:buildPlanVsReceipt'),"new receipts should persist plan comparison evidence");
-assert(html.includes('Wie nah kaufst du an deiner Liste?')&&html.includes('Bon-OCR kann einzelne Positionen übersehen'),"stats should learn plan adherence without overstating OCR evidence");
+assert(html.includes('Wie nah kaufst du an deiner Liste?')&&html.includes('Beleg-OCR kann einzelne Positionen übersehen'),"stats should learn plan adherence without overstating OCR evidence");
 assert(html.includes('clearOpenPurchasePlan()'),"completed purchases should clear the consumed shopping plan snapshot");
 assert(html.includes('v5.184.0'),"expected app version v5.184.0");
 
 assert(html.includes('id="statsImpulseProfile"')&&html.includes('Deine ungeplanten Käufe'),"stats should remember recurring unplanned purchases");
 assert(html.includes('wiederholt ungeplant auf'),"impulse profile should identify repeated extras");
 assert(html.includes('id="statsImpulseMonth"')&&html.includes('Geplant vs. zusätzlich'),"stats should compare monthly recognized extra spending");
-assert(html.includes('Nur Bons mit vorher gespeichertem Einkaufsplan'),"monthly impulse insight must disclose its evidence scope");
+assert(html.includes('Nur Belege mit vorher gespeichertem Einkaufsplan'),"monthly impulse insight must disclose its evidence scope");
 assert(html.includes('id="statsImpulseRoutine"')&&html.includes('Vom Spontankauf zur Routine'),"stats should detect extras that later become planned purchases");
 assert(html.includes('erstmals ungeplant')&&html.includes('in einem geplanten Einkauf wiedergefunden'),"impulse-to-routine explanation should be explicit");
 assert(html.includes('v5.185.0'),"expected app version v5.185.0");
@@ -206,8 +206,8 @@ assert(html.includes('v5.187.0'),"expected app version v5.187.0");
 
 assert(html.includes('Das Wichtigste an diesem Einkauf')&&html.includes('strongestReceiptInsight'),"receipt should lead with one strongest personal aha insight");
 assert(html.includes('score:98')&&html.includes('score:96')&&html.includes('score:94'),"hero insight should prioritize supported savings, personal price anomalies and plan extras");
-assert(html.includes('Bon-Gesamtsumme')&&html.includes('maßgebliche Ausgabe'),"hero fallback must preserve printed receipt total as source of truth");
-assert(html.includes('Dieser Bon hat ECHTPREIS beigebracht'),"saved receipt should explain the value learned from scanning");
+assert(html.includes('Beleg-Gesamtsumme')&&html.includes('maßgebliche Ausgabe'),"hero fallback must preserve printed receipt total as source of truth");
+assert(html.includes('Dieser Beleg hat ECHTPREIS beigebracht'),"saved receipt should explain the value learned from scanning");
 assert(html.includes('history.length?"💡 "+history[0].title'),"home pulse should lead with the latest personal shopping discovery");
 assert(html.includes('v5.188.0'),"expected app version v5.188.0");
 
@@ -227,3 +227,7 @@ assert(html.includes('typisch ')&&html.includes(' · Tief '),"impulse suggestion
 assert(html.includes('planComparison:cached.planComparison||null'),"server sync must preserve plan comparison learning");
 assert(html.includes('itemsComplete:cached.itemsComplete')&&html.includes('unassignedAmount:cached.unassignedAmount'),"server sync must preserve local receipt completeness metadata");
 assert(html.includes('v5.190.0'),"expected app version v5.190.0");
+
+assert(html.includes('Beleg scannen')&&html.includes('Beleg-Analyse')&&html.includes('Meine Belege & Privatsphäre'),"visible receipt product language should consistently use Beleg");
+assert(!html.includes('Bon scannen')&&!html.includes('Bon-Analyse')&&!html.includes('Meine Bons & Privatsphäre'),"legacy Bon terminology must not return in primary UI");
+assert(html.includes('v5.191.0'),"expected app version v5.191.0");
