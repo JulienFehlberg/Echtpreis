@@ -137,3 +137,10 @@ assert(html.includes('coverage>=.7&&currentCoverage>=.8'),"receipt savings claim
 assert(html.includes('Nur ausreichend aktuelle, nicht bloß historische/Richtwert-Preise'),"receipt analysis must explain current-price quality gate");
 assert(html.includes('deshalb zeigt ECHTPREIS noch keine Warenkorb-Ersparnis'),"weak partial comparisons must not claim basket savings");
 assert(html.includes('v5.178.0'),"expected app version v5.178.0");
+
+assert(html.includes('id="statsSavingsEvidence"'),"stats should expose evidence-aware savings section");
+assert(html.includes('currentReceiptSavingMeta={store:best.store'),"receipt savings must persist comparison evidence metadata");
+assert(html.includes('Bonwert vergleichbar')||html.includes('des Bonwerts vergleichbar'),"receipt comparison should visibly disclose basket coverage");
+assert(html.includes('savingConfidence="mittel"'),"qualified partial comparisons should persist medium confidence");
+assert(html.includes('Das ist keine garantierte Ersparnis'),"savings statistics must not present historical comparison totals as guaranteed savings");
+assert(html.includes('v5.179.0'),"expected app version v5.179.0");
