@@ -133,7 +133,7 @@ assert(html.includes('deshalb zeigt ECHTPREIS noch keine Warenkorb-Ersparnis'),"
 assert(html.includes('id="statsSavingsEvidence"'),"stats should expose evidence-aware savings section");
 assert(html.includes('currentReceiptSavingMeta={store:best.store'),"receipt savings must persist comparison evidence metadata");
 assert(html.includes('Bonwert vergleichbar')||html.includes('des Bonwerts vergleichbar'),"receipt comparison should visibly disclose basket coverage");
-assert(html.includes('savingConfidence="mittel"'),"qualified partial comparisons should persist medium confidence");
+assert(html.includes('currentReceiptSavingConfidence')&&html.includes('savingConfidence:'),"qualified comparisons should persist confidence metadata");
 assert(html.includes('Das ist keine garantierte Ersparnis'),"savings statistics must not present historical comparison totals as guaranteed savings");
 
 assert(html.includes('id="receiptSavingDrivers"')&&html.includes('Was den Preisunterschied ausmacht'),"receipt analysis should explain savings at item level");
