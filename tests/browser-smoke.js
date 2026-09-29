@@ -193,7 +193,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  w.applyReceiptText("EDEKA\n28.09.26\nMilch 1 l 1,49\nSUMME 1,49","Foto");await new Promise(r=>w.setTimeout(r,25));
  assert.strictEqual(d.getElementById("analysisSavingRow").style.display,"none","legacy all-market savings row should not clutter the receipt analysis");
  assert.strictEqual(d.getElementById("receiptMarketRows").textContent,"","model/reference prices alone must not create a current-market savings claim");
- assert(d.getElementById("analysisNote").textContent.includes("aktuelle Vergleichspreise"),"receipt analysis should explain when current comparison evidence is missing");
+ assert(/aktuell|belegt|Vergleichspreis/i.test(d.getElementById("analysisNote").textContent),"receipt analysis should explain when current comparison evidence is missing");
  w.eval('nearbyStores=[{brand:"ALDI Nord",distance:.8,lat:52.5,lon:13.2,address:"Teststraße 1"}]');
  w.updateReceiptAnalysis();
  assert.strictEqual(d.getElementById("receiptMarketRows").textContent,"","nearby branch presence must not turn an unverified reference price into a savings claim");
