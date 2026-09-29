@@ -56,6 +56,8 @@ function normalizeReceipt(result) {
     if (!Number.isFinite(count) || count < 1 || count > 1000 || !Number.isFinite(unitPrice) || Math.abs(unitPrice) > 100000) return [];
     const roundedCount=Number(count.toFixed(3));
     if (!item.is_adjustment && !item.is_deposit && roundedCount > 1 && unitPrice > 0 && Math.abs(Math.abs(lineTotal) - roundedCount * Math.abs(unitPrice)) > Math.max(0.08, Math.abs(lineTotal) * 0.05)) return [];
+    if (item.is_adjustment && lineTotal > 0) return [];
+    if (item.is_deposit && lineTotal < 0) return [];
     return [{ name, lineTotal: Number(lineTotal.toFixed(2)), count: roundedCount, unitPrice: Number(unitPrice.toFixed(2)), isDeposit: !!item.is_deposit, isAdjustment: !!item.is_adjustment }];
   });
   if (!Number.isFinite(total) || total <= 0 || total > 100000) throw new Error("KI konnte die aufgedruckte Gesamtsumme nicht sicher lesen.");
