@@ -1165,7 +1165,7 @@ async function attachEANToDraft(rawText){
 const spokenNumberWords={ein:1,eine:1,einen:1,einem:1,einer:1,eins:1,zwei:2,drei:3,vier:4,fuenf:5,sechs:6,sieben:7,acht:8,neun:9,zehn:10,elf:11,zwoelf:12};
 function normalizeSpokenQuantity(raw){
  // v7.237 spoken quantities should work after common shopping filler words too.
- let s=String(raw||"").trim().replace(/^\s*(?:bitte|noch|dazu|und)\s+/i,"");return s.replace(/^\s*(ein|eine|einen|einem|einer|eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|elf|zwölf|zwoelf)\b/i,m=>{const k=normalizeProduct(m.trim());return String(spokenNumberWords[k]||m)});
+ let s=String(raw||"").trim().replace(/^\s*(?:(?:bitte|noch|dazu|und)\s+)+/i,"");return s.replace(/^\s*(ein|eine|einen|einem|einer|eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|elf|zwölf|zwoelf)\b/i,m=>{const k=normalizeProduct(m.trim());return String(spokenNumberWords[k]||m)});
 }
 function splitShoppingSpeech(text){
  let s=String(text||"").trim().replace(/(\d),(\d)/g,"$1§DEC§$2").replace(/[.;]+/g,",").replace(/\s+(?:und dann|danach|außerdem|ausserdem)\s+/gi,",").replace(/\s+und\s+/gi,",");
