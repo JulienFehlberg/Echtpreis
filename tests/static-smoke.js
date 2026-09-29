@@ -154,7 +154,7 @@ assert(html.includes('id="statsMonthStory"')&&html.includes('Dein Monat in einem
 assert(html.includes('id="statsRepeatProfile"')&&html.includes('Routine oder Entdecken?'),"stats should expose repeat versus discovery behavior");
 assert(html.includes('id="statsLikelyNeeds"')&&html.includes('Könnte bald wieder nötig sein'),"stats should cautiously predict recurring purchase needs");
 assert(html.includes('cv>.55||ratio<.8'),"need prediction must reject irregular or premature purchase patterns");
-assert(html.includes('kein automatischer Eintrag auf die Einkaufsliste'),"need predictions must remain suggestions rather than silent list mutations");
+assert(html.includes('Nur eine Prognose aus deinen eigenen Kaufabständen. Du entscheidest selbst, was auf die Liste kommt.'),"need predictions must remain suggestions rather than silent list mutations");
 
 assert(html.includes('data-need-add')&&html.includes('+ Liste'),"recurring need predictions should be explicitly addable to the shopping list");
 assert(html.includes('dein Tiefpreis')&&html.includes('zuletzt '+"'"+'+eur(x.last.price)'),"need suggestions should include personal price memory");
