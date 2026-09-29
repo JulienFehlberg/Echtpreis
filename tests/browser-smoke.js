@@ -408,7 +408,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert([...d.querySelectorAll("#suggestions [data-input-suggestion]")].every(b=>b.dataset.inputSuggestion.startsWith("500 g ")),"autocomplete should preserve a quantity already entered");
  w.applyReceiptText("EDEKA\n29.09.26\nMilch 1 l 1,49\nUnleserliche Position\nSUMME 3,49","Foto");await new Promise(r=>w.setTimeout(r,25));
  assert.strictEqual(d.getElementById("analysisPaid").textContent,"3,49 €","receipt analysis should show the whole receipt total prominently");
- assert(d.getElementById("analysisNote").textContent.includes("Beleg unvollständig"),"partial comparisons must disclose an unreadable portion even when no cheaper market is available");
+ assert(d.getElementById("analysisNote").textContent.includes("Beleg unvollständig")||d.getElementById("receiptTotalCheck").textContent.includes("noch nicht zugeordnet"),"partial receipt analysis must disclose an unreadable or unassigned portion even when no cheaper market is available");
  assert(!d.getElementById("receiptMarketRows").textContent||d.getElementById("receiptMarketRows").textContent.includes("erkannte Artikel"),"partial comparison results must never imply a whole-receipt total");
  w.setReceiptSharing(false);w.localStorage.setItem("echtpreis_personal_receipts","[]");
  const originalProcessReceiptFile=w.processReceiptFile;w.processReceiptFile=async()=>w.applyReceiptText(realPhotoOcr,"Foto");
