@@ -298,3 +298,10 @@ assert(html.includes('Kaufland:/^(?:kaufland card|k-card|treuepunkte|punkte)/'),
 assert(html.includes('EDEKA:/^(?:deutschlandcard|genusspunkte|edeka app)/'),"EDEKA loyalty footer text should not become product rows");
 assert(html.includes('PENNY:/^(?:payback|penny app|oecobon|ecobon)/'),"PENNY loyalty footer text should not become product rows");
 assert(html.includes('ALDI:/^(?:aldi app|aldi talk)/'),"ALDI footer text should not become product rows");
+
+assert(html.includes('function receiptAdjustmentLine(line)'),"receipt parser should classify discounts and coupons separately from products");
+assert(html.includes('rabatt|coupon|gutschein|aktion|ersparnis|nachlass|discount|sofortbonus|payback'),"receipt adjustment parser should cover common German discount labels");
+assert(html.includes('isAdjustment:true')&&html.includes('pricingType:"discount"'),"discount receipt rows should be explicitly marked as adjustments");
+assert(html.includes('adjustmentType:/coupon|gutschein|payback/'),"coupon-like adjustments should be distinguishable from ordinary discounts");
+assert(html.includes('pfand(?:artikel)?|einwegpfand|mehrwegpfand'),"receipt parser should recognize common German deposit labels");
+assert(html.includes('!i.isDeposit&&!i.isAdjustment'),"receipt product analytics should exclude deposits and adjustments");
