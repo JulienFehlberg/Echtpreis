@@ -1244,7 +1244,7 @@ function parseWish(raw){
  if(c&&unit==="piece"&&c.unit==="kg"&&c.unitWeight){calcAmount=amount*c.unitWeight;note="≈ "+calcAmount.toFixed(2).replace(".",",")+" kg für Preisvergleich";}
  else if(c&&unit!==c.unit&&c.unit==="piece"){note="Mengenangabe wird als Stück interpretiert";}
  const exactBrand=exactBrandNames.find(b=>normalized.includes(normalizeProduct(b)))||"";
- let wish=hydrateChoice({raw:original,label:c?(learned?.aliasRaw||c.label):(displayTerm||original),amount,unit,calcAmount,key,matched:!!c,note,explicit,matchMode:learned?"learned":exactBrand?"exact":"comparable",exactBrand,learnedAlias:!!learned,learnedPackage:multiPack||learned?multiPack||(learned?learnedPackSize(learned.quantity,c?.unit):null):null});
+ let wish=hydrateChoice({raw:original,label:c?(learned?.aliasRaw||c.label):(displayTerm||original),amount,unit,calcAmount,key,matched:!!c,note,explicit,matchMode:learned?"learned":exactBrand?"exact":"comparable",exactBrand,learnedAlias:!!learned,learnedPackage:multiPack||(learned?learnedPackSize(learned.quantity,c?.unit):null)});
  if(multiPack){wish.packCount=multiPack.count;wish.packAmount=multiPack.amount;wish.packUnit=multiPack.unit;wish.packLabel=multiPack.label;wish.quantityMode="packages";wish.amount=multiPack.count*multiPack.amount;wish.unit=multiPack.unit;wish.calcAmount=wish.amount;wish.needsQuantity=false}
  if(learned&&c?.unit!=="piece"&&!c?.unitWeight&&!wish.learnedPackage){wish.needsQuantity=true;wish.needsClarification=true}
  return multiPack?wish:initializePackageQuantity(wish);
