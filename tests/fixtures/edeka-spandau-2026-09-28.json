@@ -32,12 +32,19 @@
       }
     ],
     "positionCount": 6,
-    "receiptCodeExpected": true
+    "receiptCodeExpected": true,
+    "payment": {
+      "method": "Bar",
+      "cashGiven": 20,
+      "change": 11.54
+    }
   },
   "notes": [
     "Ground truth transcribed from a real user-supplied receipt photo.",
     "Do not publish personal/payment data from the receipt.",
     "Position count on receipt includes multiplied/deposit positions as printed by merchant."
   ],
-  "ocrText": "EDEKA Fil. 5491\n28.09.26\nG&G Mini-Hörnchen 1,49 A\nOetker Ristorante 3,49 A\nRed Bull 0,25 1,49 € x 2 2,98 B\nPfand 0,25 € x 2 0,50 B\nSUMME 8,46\nBar € 20,00"
+  "ocrText": "EDEKA Fil. 5491\n28.09.26\nG&G Mini-Hörnchen 1,49 A\nOetker Ristorante 3,49 A\nRed Bull 0,25 1,49 € x 2 2,98 B\nPfand 0,25 € x 2 0,50 B\nSUMME 8,46\nBar € 20,00",
+  "schemaVersion": 1,
+  "source": "real-user-receipt"
 }
