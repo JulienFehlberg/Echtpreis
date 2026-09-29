@@ -529,3 +529,5 @@ assert(html.includes("const name=pendingMultiple.name||pendingName"),"pending mu
 assert(html.includes('"Keine belastbare Rangfolge"')&&html.includes('"Referenzwerte werden nicht als Händler-Ranking verwendet"'),"modeled/reference prices must never produce a named retailer winner");
 assert(html.includes('complete.filter(r=>r.referenceCount>0).sort((a,b)=>a.store.localeCompare(b.store,"de"))'),"reference-only retailer orientations must use neutral alphabetical display rather than price ranking");
 assert(html.includes("verifiedComplete=complete.filter(r=>r.referenceCount===0).sort((a,b)=>a.total-b.total)"),"price ranking must be restricted to fully evidenced baskets");
+
+assert(html.includes("Vergleichsmethode & Datenqualität")&&html.includes("Entfernung oder Händlername beeinflussen die Preisrangfolge nicht")&&html.includes("Referenzwerte")&&html.includes("dürfen keinen Händler zum Gewinner oder Verlierer machen"),"ranking parameters and reference-price exclusions must be directly disclosed from comparison results");
