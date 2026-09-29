@@ -95,3 +95,8 @@ assert(privacy.includes("im Profil unter „Meine Bons &amp; Privatsphäre“"),
 assert(html.includes('API_BASE+"/v1/aliases"')&&html.includes("function applyCommunityAliases"),"shared receipt aliases should feed product recognition");
 
 assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"long receipts should accept multiple photos");
+
+assert(html.includes('itemsComplete:!!receiptArithmeticVerified'),"saved receipts must persist whether item arithmetic is complete");
+assert(html.includes('unassignedAmount:receiptArithmeticVerified?0:'),"partial receipts must persist an unassigned amount");
+assert(html.includes('Artikelliste möglicherweise unvollständig'),"AI receipt flow must disclose partial item recognition");
+assert(html.includes('v5.171.0'),"expected app version v5.171.0");
