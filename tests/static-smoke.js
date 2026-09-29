@@ -91,3 +91,5 @@ const privacy=fs.readFileSync("privacy.html","utf8");
 assert(!privacy.includes("in der Bon-Analyse"),"privacy settings location must match the current UI");
 assert(privacy.includes("im Profil unter „Meine Bons &amp; Privatsphäre“"),"privacy notice must point to the actual sharing settings");
 assert(html.includes('API_BASE+"/v1/aliases"')&&html.includes("function applyCommunityAliases"),"shared receipt aliases should feed product recognition");
+
+assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"long receipts should accept multiple photos");
