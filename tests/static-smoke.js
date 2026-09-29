@@ -318,3 +318,10 @@ assert(html.includes('recognized=receiptRecognizedTotal(rows)'),"OCR candidate s
 assert(html.includes('recognized=receiptRecognizedTotal(receiptDraft)'),"receipt verification should use discount-safe receipt arithmetic");
 assert(html.includes('aiRecognized=receiptRecognizedTotal(receiptDraft)'),"AI receipt completeness checks should use the same canonical arithmetic");
 assert(html.includes('total-receiptRecognizedTotal(receiptLines)'),"saved receipt unassigned amount should use canonical receipt arithmetic");
+
+assert(html.includes('function receiptRecognizedProductSpend(rows)'),"receipt math should distinguish real product spend from total receipt arithmetic");
+assert(html.includes('!r?.isDeposit&&!r?.isAdjustment&&Number(r?.price)>0'),"recognized product spend should exclude deposits and adjustments");
+assert(html.includes('function receiptUnassignedAmount(total,rows)'),"unassigned receipt amount should have one canonical calculation");
+assert(html.includes('Math.max(0,Number((Number(total||0)-receiptRecognizedTotal(rows)).toFixed(2)))'),"unassigned receipt amount should never become negative after OCR overreads");
+assert(html.includes('unassignedAmount:receiptArithmeticVerified?0:receiptUnassignedAmount(total,receiptDraft)'),"receipt preview should use canonical unassigned arithmetic");
+assert(html.includes('unassignedAmount=receiptArithmeticVerified?0:receiptUnassignedAmount(total,receiptLines)'),"saved receipts should use canonical unassigned arithmetic");
