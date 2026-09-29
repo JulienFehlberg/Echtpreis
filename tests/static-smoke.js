@@ -171,3 +171,11 @@ assert(html.includes('data-need-add')&&html.includes('+ Liste'),"recurring need 
 assert(html.includes('dein Tiefpreis')&&html.includes('zuletzt '+"'"+'+eur(x.last.price)'),"need suggestions should include personal price memory");
 assert(html.includes('Du entscheidest selbst, was auf die Liste kommt.'),"smart list suggestions must remain user controlled");
 assert(html.includes('v5.183.0'),"expected app version v5.183.0");
+
+assert(html.includes('echtpreis_open_purchase_plan_v1')&&html.includes('saveOpenPurchasePlan'),"price comparison should preserve the planned basket for later receipt reconciliation");
+assert(html.includes('Plan vs. Wirklichkeit')&&html.includes('buildPlanVsReceipt'),"receipt analysis should reconcile planned and actual purchases");
+assert(html.includes('Zusätzlich gekauft')&&html.includes('Nicht auf dem Bon erkannt'),"plan reconciliation should surface extras and missing planned products");
+assert(html.includes('planComparison:buildPlanVsReceipt'),"new receipts should persist plan comparison evidence");
+assert(html.includes('Wie nah kaufst du an deiner Liste?')&&html.includes('Bon-OCR kann einzelne Positionen übersehen'),"stats should learn plan adherence without overstating OCR evidence");
+assert(html.includes('clearOpenPurchasePlan()'),"completed purchases should clear the consumed shopping plan snapshot");
+assert(html.includes('v5.184.0'),"expected app version v5.184.0");
