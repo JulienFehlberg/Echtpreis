@@ -883,7 +883,7 @@ window.compare=async function compare({skipLocation=false,scroll=true,background
   let win=complete[0],verifiedBest=verifiedComplete[0];if(verifiedBest&&verifiedBest.total<=win.total*1.12)win=verifiedBest;let approx=win.referenceCount>0;
   $("winnerLabel").textContent=approx?"Günstigster Richtwert":"Günstigster belegter Preis";
   $("winnerName").textContent=win.store;$("winnerPrice").textContent=(approx?"ca. ":"")+eur(win.total);
-  $("winnerCoverage").textContent="";
+  $("winnerCoverage").textContent="";let unusual=win.sources.map((p,i)=>{let m=personalPriceMemoryForWish(compareBasket[i]);if(!m||m.count<2||p.reference)return null;let d=(Number(p.price)-m.median)/m.median;return Math.abs(d)>=.15?{name:compareBasket[i].label,d}:null}).filter(Boolean);if(unusual.length)$("winnerCoverage").textContent=unusual.slice(0,2).map(x=>x.name+" "+Math.abs(Math.round(x.d*100))+" % "+(x.d>0?"über":"unter")+" deinem typischen Preis").join(" · ");
   $("winnerRoute").innerHTML=win.branch?'<a class="route-link" href="'+routeUrl(win.branch)+'" target="_blank" rel="noopener">Route zu '+escHtml(win.store)+' →</a>':"";
  }else{
   $("winnerLabel").textContent="Noch kein vollständiger Vergleich";$("winnerName").textContent="Für mindestens ein Produkt fehlt ein belastbarer Preis";$("winnerPrice").textContent="—";$("winnerRoute").innerHTML="";
@@ -891,7 +891,9 @@ window.compare=async function compare({skipLocation=false,scroll=true,background
  }
  $("merchantResults").innerHTML=complete.length?complete.map(r=>{
   const q=comparisonQuality(r,compareBasket.length),approx=r.referenceCount>0;
-  const details='<details><summary>Preisdetails</summary><div class="detail" style="margin:7px 0">'+escHtml(q.detail)+(approx?' · Richtwerte bestätigen weder Filialpreis noch Verfügbarkeit.':'')+(r.branch&&r.branch.address?' · '+escHtml(r.branch.address):'')+'</div>'+comparisonSourceDetails(r,compareBasket)+'</details>';
+  const memorySignals=r.sources.map((p,i)=>{let w=compareBasket[i],m=personalPriceMemoryForWish(w);if(!m||m.count<2||p.reference||!(Number(p.price)>0))return null;let current=Number(p.price),delta=(current-m.median)/m.median;if(Math.abs(delta)<.12)return null;return {name:w.label,current,median:m.median,delta}}).filter(Boolean).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+  const memoryHtml=memorySignals.length?'<div style="margin:8px 0;padding:8px;border-radius:10px;background:#f7f9f8"><b>🧠 Gegen dein Preisgedächtnis</b>'+memorySignals.slice(0,3).map(x=>'<div class="detail">'+escHtml(x.name)+': '+eur(x.current)+' · '+Math.abs(Math.round(x.delta*100))+' % '+(x.delta>0?'über':'unter')+' deinem typischen Preis '+eur(x.median)+'</div>').join("")+'</div>':'';
+  const details='<details><summary>Preisdetails</summary><div class="detail" style="margin:7px 0">'+escHtml(q.detail)+(approx?' · Richtwerte bestätigen weder Filialpreis noch Verfügbarkeit.':'')+(r.branch&&r.branch.address?' · '+escHtml(r.branch.address):'')+'</div>'+memoryHtml+comparisonSourceDetails(r,compareBasket)+'</details>';
   return '<div class="merchant"><div style="flex:1;min-width:0"><b>'+escHtml(r.store)+(r.branch?' · '+r.branch.distance.toFixed(1).replace(".",",")+' km':'')+'</b>'+(r.branch?'<br><a class="route-link" href="'+routeUrl(r.branch)+'" target="_blank" rel="noopener">Route →</a>':'')+details+'</div><div class="price">'+(approx?'ca. ':'')+eur(r.total)+'</div></div>';
  }).join(""):'<div class="muted" style="padding:14px 0">Für diese Liste fehlt noch ein vollständiger Richtwert.</div>';
  const verified=[...verifiedComplete].sort((a,b)=>a.total-b.total),difference=verified.length>=2?verified[verified.length-1].total-verified[0].total:0;
