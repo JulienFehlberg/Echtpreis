@@ -70,7 +70,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.139.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.140.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -289,11 +289,13 @@ const referenceBase={
 const referenceStoreFactor={"Lidl":.94,"Kaufland":.96,"REWE":1.06,"EDEKA":1.08,"PENNY":.95,"ALDI Nord":.93,"Netto":.94,"NORMA":.93,"dm":1.02,"Rossmann":1.03};
 const storeAssortment={alcohol:new Set(["Lidl","Kaufland","REWE","EDEKA","PENNY","ALDI Nord","ALDI Süd","Netto","NORMA"]),drugstore:new Set(["haferdrink","nudeln","reis","mehl","zucker","haferflocken","muesli","cornflakes","linsen","bohnen","kichererbsen","couscous","passierte_tomaten","tomatenmark","oel","olivenoel","essig","salz","pfeffer","honig","marmelade","erdnussbutter","schokolade","chips","kekse","gummibaerchen","apfelsaft","multivitaminsaft","tee","kakao","kaffee","toilettenpapier","kuechenrolle","waschmittel","spuelmittel","zahnpasta","shampoo","katzenfutter","hundefutter","spuelmaschinentabs","muellbeutel","alufolie","backpapier","handseife","duschgel","deo","rasierer","windeln","feuchttuecher"])};
 function storeCanCarry(store,wish,key){store=canonicalStoreName(store);const product=wish?.key||key;if(store==="dm"||store==="Rossmann")return storeAssortment.drugstore.has(product);if(product==="wodka"||product==="bier")return storeAssortment.alcohol.has(store);return true;}
+function recentPriceHistory(key,store,days=60){
+ const today=localDateKey(),limit=new Date(today+"T12:00:00");
+ return loadJson(openPricesCacheKey).map(normalizeObservation).filter(x=>x.key===key&&x.store===store&&x.kind==="openprices"&&x.proof&&x.per===(catalog[key]?.unit||"piece")&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0&&plausibleObservationPrice(x)&&((limit-new Date(x.date+"T12:00:00"))/86400000)<=days);
+}
 function referencePrice(key,store,wish=null){
  store=canonicalStoreName(store);if(!storeCanCarry(store,wish,key))return null;
- const today=localDateKey();
- let history=dataEngine()
-  .filter(x=>x.key===key&&x.store===canonicalStoreName(store)&&x.date&&x.date<=today&&Number.isFinite(x.price)&&x.price>0&&((new Date(today+"T12:00:00")-new Date(x.date+"T12:00:00"))/86400000)<=60);
+ let history=recentPriceHistory(key,store);
  if(wish&&wish.choice&&Object.keys(wish.choice).length)history=history.filter(x=>choiceMatchesProductText(wish.choice,x.product||""));
  if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);history=history.filter(x=>normalizeProduct(x.product||"").includes(brand));}
  history.sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0)||a.price-b.price);
@@ -318,7 +320,7 @@ function trustedPrice(key,store,wish=null){
 }
 function exactBrandFallbackPrice(key,store,wish){
  store=canonicalStoreName(store);if(!wish||wish.matchMode!=="exact"||!wish.exactBrand||!storeCanCarry(store,wish,key))return null;
- const today=localDateKey(),brand=normalizeProduct(wish.exactBrand),history=dataEngine().filter(x=>x.key===key&&x.store===canonicalStoreName(store)&&x.date&&x.date<=today&&normalizeProduct(x.product||"").includes(brand)&&(!wish.choice||choiceMatchesProductText(wish.choice,x.product||""))&&Number.isFinite(x.price)&&x.price>0&&plausibleObservationPrice(x)&&((new Date(today+"T12:00:00")-new Date(x.date+"T12:00:00"))/86400000)<=120).sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0));
+ const brand=normalizeProduct(wish.exactBrand),history=recentPriceHistory(key,store).filter(x=>normalizeProduct(x.product||"").includes(brand)&&(!wish.choice||choiceMatchesProductText(wish.choice,x.product||""))).sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0));
  if(history.length){const x=history[0];return {...x,reference:true,referenceType:"historical",confidence:"niedrig",source:"Letzter bekannter Markenpreis · "+(x.source||"ECHTPREIS"),status:"reference"}}
  const generic=referencePrice(key,store,null);if(!generic)return null;return {...generic,reference:true,referenceType:"brand-estimate",confidence:"niedrig",source:"Markenpreis-Orientierung · noch ohne aktuellen Nachweis",product:wish.exactBrand+" · "+(catalog[key]?.label||key),price:Number((generic.price*1.08).toFixed(2)),trust:15,status:"reference"};
 }
@@ -381,7 +383,9 @@ async function ingestOpenPrices(force=false,keys=null){
  });
  const results=await Promise.allSettled(jobs),ok=results.filter(x=>x.status==="fulfilled").length;
  if(ok){
-  const kept=loadJson(openPricesCacheKey).filter(x=>!successfulKeys.has(x.key));saveJson(openPricesCacheKey,[...kept,...fresh].slice(-10000));invalidateDataEngine();
+  const cutoff=new Date(now-60*86400000).toISOString().slice(0,10),previous=loadJson(openPricesCacheKey).filter(x=>x.date&&x.date>=cutoff),combined=[...previous,...fresh],seen=new Set(),kept=[];
+  for(const x of combined.reverse()){const signature=[x.key,x.store,x.product,x.date,x.proof,x.price,x.per].join("|");if(seen.has(signature))continue;seen.add(signature);kept.push(x)}
+  saveJson(openPricesCacheKey,kept.reverse().slice(-10000));invalidateDataEngine();
   successfulKeys.forEach(key=>sync[key]=now);saveJson(syncKey,sync);dataMachineState.openPrices="verbunden · "+ok+"/"+entries.length+" benötigte Kategorien geprüft";
  }else dataMachineState.openPrices="nicht erreichbar · Cache bleibt aktiv";
  dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();
@@ -1180,7 +1184,7 @@ function receiptMarketComparison(store,items){
   if(!price){missing.push(r.name);continue}
   const amount=(wish.unit==="piece"&&catalog[wish.key]?.unit==="kg"?wish.calcAmount:quantity);
   const value=Number((price.price*amount).toFixed(2));total+=value;estimated=estimated||!!price.reference||alternative;
-  lines.push({name:r.name,product:alternative?catalog[wish.key].label:r.name,value,alternative,reference:!!price.reference});
+  lines.push({name:r.name,product:alternative?catalog[wish.key].label:r.name,value,alternative,reference:!!price.reference,source:price.referenceType==="historical"?"letzter Preis vom "+formatReceiptDate(price.date):price.reference?"Richtwert":price.kind==="official"?"Händlerangebot":"Preisbeleg"});
  }
  return {store,total:Number(total.toFixed(2)),deposit,lines,missing,complete:missing.length===0,estimated};
 }
@@ -1216,7 +1220,7 @@ function updateReceiptAnalysis(){
   const title=m.complete?(m.estimated?"ca. ":"")+eur(m.total):m.lines.length+" von "+valid.length+" Artikeln vergleichbar";
   const difference=m.complete?Number((paid-m.total).toFixed(2)):null;
   const hint=difference!=null?(difference>0?" · möglicherweise "+eur(difference)+" günstiger":difference<0?" · "+eur(-difference)+" höher":" · etwa gleich"):"";
-  const details=m.lines.map(x=>'<div>'+escHtml(x.name)+(x.alternative?' → '+escHtml(x.product):'')+' · '+(x.reference||x.alternative?'ca. ':'')+eur(x.value)+'</div>').join("")+(m.deposit?'<div>Pfand · '+eur(m.deposit)+'</div>':"")+(m.missing.length?'<div>Ohne Vergleich: '+escHtml(m.missing.join(", "))+'</div>':"");
+  const details=m.lines.map(x=>'<div>'+escHtml(x.name)+(x.alternative?' → '+escHtml(x.product):'')+' · '+(x.reference||x.alternative?'ca. ':'')+eur(x.value)+' · '+escHtml(x.source)+'</div>').join("")+(m.deposit?'<div>Pfand · '+eur(m.deposit)+'</div>':"")+(m.missing.length?'<div>Ohne Vergleich: '+escHtml(m.missing.join(", "))+'</div>':"");
   return '<details style="border-top:1px solid rgba(255,255,255,.18);padding:10px 0"><summary style="cursor:pointer">'+escHtml(m.store)+(m.branch?' · '+m.branch.distance.toFixed(1).replace('.',',')+' km Luftlinie':'')+' · '+title+hint+'</summary><div class="detail" style="margin-top:8px">'+(m.branch?'<a class="route-link" href="'+routeUrl(m.branch)+'" target="_blank" rel="noopener">Route öffnen →</a>':'')+details+(m.estimated?'<div>Richtwerte/ähnliche Artikel; tatsächlicher Preis und Sortiment nicht bestätigt.</div>':'')+'</div></details>';
  }).join("");
 
