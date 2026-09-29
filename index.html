@@ -519,6 +519,27 @@ body.subview #planner,body.subview #receipt,body.subview #statsCard{scroll-margi
  #planner .basket-summary{font-size:8.5px!important}
 }
 </style><style>
+/* v7.202 supermarket interaction + quantity clarity */
+#planner .item{position:relative!important}
+#planner .item:focus-within{background:#f8fbf9!important;border-radius:10px!important}
+#planner .item-title,#planner .item-pack-size,#planner [data-check],#planner .x,#planner .qty-buttons button{-webkit-tap-highlight-color:transparent}
+#planner .qty-stepper{min-width:0!important}
+#planner .pack-count{display:inline-flex!important;align-items:center!important;justify-content:center!important;height:24px!important;padding:0 3px!important;border-radius:7px!important;background:#f4f7f5!important;color:#365447!important;font-weight:850!important}
+#planner .qty-buttons button{touch-action:manipulation!important}
+#planner .qty-buttons button:focus-visible,#planner [data-check]:focus-visible,#planner .item-title:focus-visible,#planner .item-pack-size:focus-visible,#planner .x:focus-visible{outline:2px solid #15965a!important;outline-offset:2px!important}
+#planner .item-checked .pack-count{background:#e1f2e8!important;color:#24734d!important}
+#planner .item-checked .itemname{opacity:.78!important}
+#planner .item-checked .x{opacity:.42!important}
+@media(max-width:430px){
+ #planner .pack-count{height:22px!important;font-size:9px!important}
+ #planner .qty-stepper{gap:3px!important}
+ #planner .item-pack-size{max-width:min(100%,160px)!important}
+}
+@media(hover:hover){
+ #planner .item:hover{background:#fafcfb!important}
+ #planner .item-checked:hover{background:#edf8f2!important}
+}
+</style><style>
 /* v5.222 BIG repeat-shopping memory */
 #planner .recent-list-items{margin:12px 0 3px;padding-top:11px;border-top:1px solid #edf1ef}
 #planner .recent-list-items .quick-label{margin:0 0 7px!important;font-size:11px!important;color:#71837a!important}
@@ -1405,7 +1426,7 @@ function basketSummary(){syncShoppingSession();const total=basket.length,done=ba
 function openListMenu(){closeSheet(document.getElementById("listActionSheet"));const done=basket.filter(w=>w.checked).length,recent=getRecentListItems(),box=document.createElement("div");box.id="listActionSheet";box.className="list-action-sheet";box.innerHTML='<div class="list-sheet"><div class="pack-grab"></div><b>Liste verwalten</b>'+(recent.length?'<button type="button" data-add-recent-all>↻ Letzte Artikel wieder hinzufügen</button>':'')+(done?'<button type="button" data-remove-done>✓ '+done+' erledigte entfernen</button>':'')+'<button type="button" data-list-check>Listen-Check & Sicherung</button><button type="button" data-clear-list class="danger">Liste leeren</button><button type="button" data-list-cancel>Abbrechen</button></div>';document.body.appendChild(box);normalizeOpenSheet(box,"Liste verwalten");box.onclick=e=>{if(e.target===box||e.target.closest("[data-list-cancel]"))return closeSheet(box);if(e.target.closest("[data-add-recent-all]")){const rows=getRecentListItems();closeSheet(box);const added=addRememberedItems(rows);showListMessage(added?added+" letzte Artikel hinzugefügt":"Alle letzten Artikel sind schon auf der Liste");return}if(e.target.closest("[data-list-check]")){closeSheet(box);openPlannerDiagnostics();return}if(e.target.closest("[data-remove-done]")){const removed=basket.filter(w=>w.checked);if(!removed.length)return closeSheet(box);rememberRecentListItems(removed);basket=basket.filter(w=>!w.checked);saveBasketState();closeSheet(box);drawList();renderQuickSuggestions();basketChanged();showListMessage(removed.length+" erledigte Artikel entfernt");return}if(e.target.closest("[data-clear-list]")){box.querySelector(".list-sheet").innerHTML='<div class="pack-grab"></div><b>Liste wirklich leeren?</b><small>Alle '+basket.length+' Artikel werden entfernt.</small><button type="button" data-clear-confirm class="danger">Ja, Liste leeren</button><button type="button" data-list-cancel>Abbrechen</button>';return}if(e.target.closest("[data-clear-confirm]")){rememberRecentListItems(basket);basket=[];editingItem=null;shoppingSessionStarted=0;localStorage.removeItem("echtpreis_shopping_started");hasCompared=false;compareRunId++;saveBasketState();closeSheet(box);drawList();renderQuickSuggestions();basketChanged();$("results").style.display="none";showListMessage("Einkaufsliste geleert")}}}
 function showListMessage(msg){document.getElementById("listMiniToast")?.remove();const t=document.createElement("div");t.id="listMiniToast";t.className="list-mini-toast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");t.textContent=msg;document.body.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),180)},2200)}
 
-function quantityControl(w,i){const shown=Math.max(1,Number(w.packCount||w.amount||1));return '<div class="qty-stepper" aria-label="Anzahl"><b class="pack-count" aria-live="polite">'+shown+'×</b><span class="qty-buttons"><button type="button" data-qty="-1" data-qty-index="'+i+'" '+(shown<=1?'disabled aria-disabled="true"':'')+'>−</button><button type="button" data-qty="1" data-qty-index="'+i+'">+</button></span></div>'}
+function quantityControl(w,i){const shown=Math.max(1,Number(w.packCount||w.amount||1)),name=escHtml(w.label||w.raw||"Artikel");return '<div class="qty-stepper" aria-label="Anzahl für '+name+'"><b class="pack-count" aria-live="polite" aria-label="'+shown+' Packungen">'+shown+'×</b><span class="qty-buttons"><button type="button" data-qty="-1" data-qty-index="'+i+'" aria-label="Eine Packung '+name+' weniger" '+(shown<=1?'disabled aria-disabled="true"':'')+'>−</button><button type="button" data-qty="1" data-qty-index="'+i+'" aria-label="Eine Packung '+name+' mehr">+</button></span></div>'}
 function personalPriceMemoryForWish(w){
  if(!w||!w.key)return null;const rows=[];getPersonalReceipts().forEach(r=>(r.items||[]).forEach(i=>{let id=identifyReceiptProduct(i.name||"");if(id.key!==w.key)return;let price=personalComparablePrice(i);if(price>0)rows.push({price,date:r.date||"",store:r.store||"",name:i.name})}));if(!rows.length)return null;
  rows.sort((a,b)=>String(a.date).localeCompare(String(b.date)));const prices=rows.map(x=>x.price).sort((a,b)=>a-b),median=medianNumber(prices),last=rows[rows.length-1],min=rows.reduce((a,b)=>b.price<a.price?b:a),max=rows.reduce((a,b)=>b.price>a.price?b:a);
