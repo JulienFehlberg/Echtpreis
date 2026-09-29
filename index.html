@@ -2207,7 +2207,7 @@ function setReceiptStoreValue(store){
  select.value=store;return select.value===store;
 }
 function receiptComparisonAmount(row,key){
- const target=catalog[key]?.unit||"piece",count=Number(row.count)||1,pack=row.packAmount&&row.packUnit?{packAmount:row.packAmount,packUnit:row.packUnit}:inferPackFromName(row.name);
+ const target=catalog[key]?.unit||"piece",count=receiptItemUnits(row),pack=row.packAmount&&row.packUnit?{packAmount:row.packAmount,packUnit:row.packUnit}:inferPackFromName(row.name);
  if(target==="piece")return {amount:pack.packUnit==="piece"&&Number(pack.packAmount)>0?Number(pack.packAmount)*count:count,assumption:""};
  let amount=Number(pack.packAmount),unit=pack.packUnit;
  if(amount>0&&((target==="kg"&&["g","kg"].includes(unit))||(target==="l"&&["ml","l"].includes(unit))))return {amount:amount*(["g","ml"].includes(unit)?.001:1)*count,assumption:""};
