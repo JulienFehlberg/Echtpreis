@@ -72,7 +72,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 <style>.alpha-badge{display:inline-block;vertical-align:middle;margin-left:6px;padding:4px 7px;border-radius:99px;background:#e7f5ed;color:#087443;font-size:9px;letter-spacing:1px;font-weight:900}.qty-stepper{display:flex;align-items:center;gap:5px;margin:0 0 0 7px;flex:0 0 auto}.qty-stepper span{display:none}.qty-stepper button{width:34px;height:34px;padding:0;border:1px solid #d6e3da;border-radius:10px;background:#f3f8f4;color:#075f37;font-size:20px;font-weight:800}.qty-stepper b{min-width:22px;text-align:center;color:#20352a}.itemname{min-width:0}.item-title{display:block;width:100%;padding:0;background:transparent;border-radius:0;text-align:left;color:#102019;font-size:16px;font-weight:850;line-height:1.25;overflow-wrap:anywhere}.itemname .qty{margin-top:3px}</style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Bons. Deine Entscheidung.</h2><p>Du kannst Bons nur für dich speichern oder mit deinen erkannten Bon-Preisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Bon-Summe und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Bons künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Bons & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.166.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.167.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -1198,7 +1198,7 @@ function parseReceiptText(text){
   let mult=line.match(/(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)/i);
   if(mult&&last&&!last.isDeposit){last.count=Number(mult[2]);last.unitLinePrice=parseReceiptNumber(mult[1]);last.quantitySource="receipt-multipack";let lineTotal=Number((last.unitLinePrice*last.count).toFixed(2));last.price=String(lineTotal);last.regularTotal=lineTotal;continue}
   let m=line.match(/^(.{2,48}?)\s+(\d+[,.]\d{2})\s*(?:€|EUR)?\s*[AB]?$/i);
-  if(m&&!/summe|gesamt|bar|cash|karte|kartenzahlung|girocard|visa|mastercard|mwst|pfand(?:artikel|rückgabe)?|gegeben|rückgeld|payback/i.test(m[1])){
+  if(m&&!/\b(?:summe|gesamt(?:betrag)?|bar|cash|karte|kartenzahlung|girocard|visa|mastercard|mwst|pfand(?:artikel|rückgabe)?|gegeben|rückgeld|payback)\b/i.test(m[1])){
    let pack=inferPackFromName(m[1]);last={name:m[1].trim(),price:String(parseReceiptNumber(m[2])),discount:0,regularTotal:parseReceiptNumber(m[2]),...pack};rows.push(last);pendingName="";continue
   }
   if(plausibleReceiptItemName(line)&&!/(?:\d+[,.]\d{2})|(?:\d+\s*[*x×])/.test(line)&&!/^pfand|^leergut/i.test(line))pendingName=line;
@@ -1206,18 +1206,23 @@ function parseReceiptText(text){
  return rows.slice(0,120);
 }
 function extractReceiptTotal(text){
- const lines=String(text||"").split(/\n+/);
+ const lines=String(text||"").split(/\n+/);let primary=null,summary=null,firstLabeled=null,taxGross=[];
  for(let i=0;i<lines.length;i++){
   const line=lines[i].replace(/(\d)\s*([,.])\s*(\d{2})/g,"$1$2$3");
+  const taxRow=line.match(/^\s*[AB]\s*=?\s*\d{1,2}[,.]\d+\s*%\s*(.*)$/i);
+  if(taxRow){const values=taxRow[1].match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[];if(values.length>=3){const gross=parseReceiptNumber(values.at(-1).replace(/\s+/g,""));if(Number.isFinite(gross))taxGross.push(gross)}}
   if(!/\b(?:summe|gesamt(?:betrag)?|zu zahlen)\b/i.test(line))continue;
-  const same=(line.match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[]).pop();
-  if(same){let n=parseReceiptNumber(same.replace(/\s+/g,""));if(Number.isFinite(n)&&n>0)return n}
+  const label=(line.match(/\b(summe|gesamt(?:betrag)?|zu zahlen)\b/i)||[])[1]?.toLowerCase(),same=(line.match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[]).pop();let n=same?parseReceiptNumber(same.replace(/\s+/g,"")):null;
   const next=String(lines[i+1]||"");
-  if(!/\b(?:bar|gegeben|rückgeld|karte|cash)\b/i.test(next)){
-   const m=next.match(/(?:€|EUR|£)?\s*(\d{1,5}\s*[,.]\s*\d{2})/);if(m){let n=parseReceiptNumber(m[1].replace(/\s+/g,""));if(Number.isFinite(n)&&n>0)return n}
+  if(!(Number.isFinite(n)&&n>0)&&!/\b(?:bar|gegeben|rückgeld|karte|cash)\b/i.test(next)){
+   const m=next.match(/(?:€|EUR|£)?\s*(\d{1,5}\s*[,.]\s*\d{2})/);if(m)n=parseReceiptNumber(m[1].replace(/\s+/g,""));
   }
+  if(!Number.isFinite(n)||n<=0)continue;if(firstLabeled==null)firstLabeled=n;
+  if(label==="summe"||label==="zu zahlen"){if(primary==null)primary=n}
+  else summary=n;
  }
- return null;
+ if(primary!=null&&summary!=null&&taxGross.length>=2){const taxTotal=Number(taxGross.reduce((a,b)=>a+b,0).toFixed(2));if(Math.abs(taxTotal-summary)<=.02&&Math.abs(taxTotal-primary)>.01)return summary}
+ return primary??summary??firstLabeled;
 }
 function extractReceiptCash(text){
  const t=String(text||"").replace(/(\d)\s*([,.])\s*(\d{2})/g,"$1$2$3"),out={paid:null,change:null};
@@ -1239,7 +1244,7 @@ function extractReceiptPaymentMethod(text){
  return "";
 }
 function detectReceiptDate(text){
- const s=String(text||"");let m=s.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2}|\d{2})\b/),iso="";
+ const s=String(text||"").replace(/(\d)\s*([.\/-])\s*(\d)/g,"$1$2$3");let m=s.match(/\b(\d{2})[.\/-](\d{2})[.\/-](20\d{2}|\d{2})\b/),iso="";
  if(m){const year=m[3].length===2?"20"+m[3]:m[3];iso=year+"-"+m[2]+"-"+m[1]}
  else{m=s.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);if(m)iso=m[1]+"-"+m[2]+"-"+m[3]}
  if(!iso)return "";const parts=iso.split("-").map(Number),d=new Date(Date.UTC(parts[0],parts[1]-1,parts[2]));
@@ -1253,6 +1258,7 @@ function plausibleReceiptItemName(name){
 }
 function receiptArithmeticTolerance(total){return Math.max(.02,Math.min(.08,Number(total||0)*.002))}
 function receiptArithmeticMatches(total,recognized){return Number(total)>0&&Math.abs(Number(total)-Number(recognized))<=receiptArithmeticTolerance(total)}
+function meaningfulReceiptSaving(m){const paid=Math.max(0,Number(m?.comparedPaid)||0),difference=Number(m?.difference)||0;return difference>=Math.max(.10,paid*.05)}
 function receiptCandidateScore(text){
  const rows=parseReceiptText(text),total=extractReceiptTotal(text),recognized=Number(rows.reduce((n,r)=>n+(Number(String(r.price).replace(",","."))||0),0).toFixed(2)),cash=extractReceiptCash(text),low=String(text||"").toLowerCase();
  let score=0;if(total>0)score+=35;score+=Math.min(rows.length,5)*9;if(total>0&&rows.length&&receiptArithmeticMatches(total,recognized))score+=55;if(detectReceiptStore(text))score+=10;if(detectReceiptDate(text))score+=6;if(cash.paid)score+=3;
@@ -1375,7 +1381,7 @@ function updateReceiptAnalysis(){
   const group=[...groups.values()].sort((a,b)=>b[0].lines.length-a[0].lines.length||b.length-a.length)[0]||[];
   if(group.length){sameItems=group.every(m=>m.lines.length===group[0].lines.length&&m.lines.every((x,i)=>normalizeProduct(x.name)===normalizeProduct(group[0].lines[i].name)));ranked=group.map(m=>{const comparableTotal=Number((m.lines.reduce((n,x)=>n+x.value,0)+m.deposit).toFixed(2));const paidForMatch=Number((m.lines.reduce((n,x)=>n+x.paid,0)+m.deposit).toFixed(2));return {...m,comparedCount:m.lines.length,comparedPaid:paidForMatch,comparedTotal:comparableTotal,difference:Number((paidForMatch-comparableTotal).toFixed(2))}})}
  }
- const cheaper=ranked.filter(m=>m.difference>.01).sort((a,b)=>a.comparedTotal-b.comparedTotal||b.comparedCount-a.comparedCount).slice(0,3);
+ const cheaper=ranked.filter(m=>meaningfulReceiptSaving(m)).sort((a,b)=>a.comparedTotal-b.comparedTotal||b.comparedCount-a.comparedCount).slice(0,3);
  if(cheaper.length){
   const count=cheaper[0].comparedCount,all=valid.length,partial=count<all||!receiptArithmeticVerified;
   $("analysisNote").textContent=(partial?"Bon unvollständig · Vergleich nur für "+count+" erkannte Artikel. Bon-Summe und Artikel sind nicht vollständig abgeglichen.":"Voraussichtlicher Preis für alle gelesenen Bonartikel; Preise und Filialbestand können abweichen.")+(store==="Unbekannter Händler"?" Händler nicht erkannt.":"")+(receiptDateWasEstimated?" Scan-Datum statt Bon-Datum verwendet.":"");
