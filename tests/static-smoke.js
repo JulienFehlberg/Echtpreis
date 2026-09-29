@@ -104,7 +104,7 @@ assert(html.includes('id="receiptCameraFile"'),"camera receipt input missing");
 assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"gallery/PDF receipt input missing");
 assert(html.includes('accordionNavigation:["homeReceipt","homePlan","homeStats"].every'),"runtime health check must verify accordion navigation");
 assert(html.includes("plannerViewport:!!document.querySelector('meta[name=\"viewport\"]')".replaceAll("\\\"","\"")),"runtime health check must verify planner viewport shell");
-assert(html.includes('<span class="version">v7.210.0 RC</span>')&&html.includes('version:"7.210"'),"visible and health-check versions must stay aligned");
+assert(html.includes('<span class="version">v7.211.0 RC</span>')&&html.includes('version:"7.211"'),"visible and health-check versions must stay aligned");
 
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
 
@@ -488,3 +488,7 @@ assert(html.includes('function applyReceiptText(text,label){\n receiptPriceRefre
 // v7.210 OCR candidate quality guard
 assert(html.includes("function receiptCandidateQuality(candidate)")&&html.includes("function betterReceiptCandidate(current,next)"),"OCR fallback passes must rank candidates by receipt quality, not raw OCR score alone");
 assert(html.includes("best=betterReceiptCandidate(best,combined);")&&html.includes("best=betterReceiptCandidate(best,candidate);"),"full-length OCR fallback must use receipt-quality candidate selection");
+
+// v7.211 adaptive OCR depth guard
+assert(html.includes("function receiptNeedsDeepScan(candidate)")&&html.includes("coverage<.92"),"receipt OCR should only run expensive fallback passes when the first read is materially incomplete");
+assert(html.includes("if(receiptNeedsDeepScan(best)){")&&html.includes("if(receiptNeedsDeepScan(best)&&best.total>0"),"long-receipt and deposit fallback scans must share the adaptive deep-scan gate");
