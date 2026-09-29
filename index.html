@@ -219,9 +219,32 @@ body.subview #planner,body.subview #receipt,body.subview #statsCard{scroll-margi
 #planner [data-check]{background:#fff!important;border:2px solid #6f857a!important}
 #planner .quick-chip{border:1px solid #cfe1d7!important;background:#edf7f1!important;color:#075f37!important}
 #planner #compareBtn{background:linear-gradient(135deg,#075f37,#13a15f)!important;color:#fff!important}
+</style><style>
+/* v5.201 mobile shopping list density + legibility */
+#planner .item{display:grid!important;grid-template-columns:38px minmax(92px,1fr) auto 24px!important;align-items:center!important;column-gap:8px!important}
+#planner .itemname{min-width:0!important}
+#planner .item-title{font-size:14px!important;line-height:1.12!important;overflow-wrap:normal!important;word-break:normal!important;hyphens:auto}
+#planner .item-pack-size{font-size:10px!important;line-height:1.15!important}
+#planner .qty-stepper{margin:0!important;gap:4px!important}
+#planner .qty-stepper b{min-width:116px!important;font-size:11px!important;white-space:nowrap!important}
+#planner .qty-stepper button{width:34px!important;height:34px!important}
+#planner .x{width:24px!important;padding:2px!important;text-align:center!important}
+#planner .quick-label{font-size:12px!important}
+#planner .quick-row{max-width:100%!important}
+#planner .quick-chip{font-size:11px!important;min-height:34px!important;padding:7px 10px!important}
+#planner .inputrow{align-items:stretch!important}
+#planner #productInput{min-width:0!important;width:100%!important}
+#planner #addBtn{white-space:nowrap!important}
+@media(max-width:430px){
+ #planner .item{grid-template-columns:36px minmax(82px,1fr) auto 20px!important;column-gap:6px!important}
+ #planner .qty-stepper b{min-width:104px!important;font-size:10px!important}
+ #planner .qty-stepper button{width:32px!important;height:32px!important}
+ #planner .planner-main{padding:14px!important}
+ #planner .planner-main>h2{font-size:26px!important}
+}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.200.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.201.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
