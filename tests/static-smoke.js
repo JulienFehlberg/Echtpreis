@@ -157,3 +157,12 @@ assert(html.includes('Kostentreiber')&&html.includes('Bonwert-Abdeckung'),"shopp
 assert(html.includes('id="statsMonthlyAnomaly"')&&html.includes('Monats-Ausreißer'),"stats should detect meaningful monthly spending anomalies");
 assert(html.includes('delta>=10')&&html.includes('pct>=25'),"category anomaly should require meaningful absolute and relative movement");
 assert(html.includes('v5.181.0'),"expected app version v5.181.0");
+
+assert(html.includes('id="receiptBasketStory"')&&html.includes('Dein Warenkorb'),"receipt should classify the current basket");
+assert(html.includes('bekannte Produkte')&&html.includes('neu in deinem Preisgedächtnis'),"receipt story should distinguish repeat and new products");
+assert(html.includes('id="statsMonthStory"')&&html.includes('Dein Monat in einem Satz'),"stats should summarize the month in plain language");
+assert(html.includes('id="statsRepeatProfile"')&&html.includes('Routine oder Entdecken?'),"stats should expose repeat versus discovery behavior");
+assert(html.includes('id="statsLikelyNeeds"')&&html.includes('Könnte bald wieder nötig sein'),"stats should cautiously predict recurring purchase needs");
+assert(html.includes('cv>.55||ratio<.8'),"need prediction must reject irregular or premature purchase patterns");
+assert(html.includes('kein automatischer Eintrag auf die Einkaufsliste'),"need predictions must remain suggestions rather than silent list mutations");
+assert(html.includes('v5.182.0'),"expected app version v5.182.0");
