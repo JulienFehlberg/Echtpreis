@@ -392,3 +392,12 @@ assert(html.includes('if(r?.energy||!Array.isArray(r?.items)||!r.items.length)co
 assert(html.includes('const energy=receiptEnergySnapshot(r.items);if(energy){r.energy=energy;changed=true}'),"calorie backfill should only persist a snapshot when the existing receipt can actually be evaluated");
 assert(html.includes('persistMigrated=value=>{if(!migrateReceiptEnergySnapshots(value))return;'),"receipt loading should avoid rewriting local storage when no calorie migration occurred");
 assert(html.includes('persistMigrated(backup);return backup'),"backup receipt recovery should receive the same calorie snapshot migration");
+
+assert(html.includes('function receiptAdjustmentLinkable(adjustment)'),"receipt parser should classify whether a discount is safe to attach to a product");
+assert(html.includes('gutschein|coupon|payback|warenkorb|einkauf|gesamt|bon|treue|punkte|app'),"basket-level coupons and loyalty adjustments must not mutate a product price");
+assert(html.includes('const previous=rows?.[rows.length-1]'),"product discounts should only attach to the immediately preceding parsed row");
+assert(html.includes('previous.isDeposit||previous.isAdjustment'),"product discount linking must not jump across deposit or adjustment rows");
+assert(html.includes('discount>Number(previous.price)+.01'),"linked product discounts should never exceed the immediately preceding product price");
+assert(html.includes('previous.discountSource="linked-adjustment"'),"products changed by a linked receipt adjustment should retain explicit provenance");
+assert(html.includes('linkReceiptAdjustment(rows,adjustment);rows.push(adjustment)'),"receipt parsing should route discount linking through the guarded helper");
+assert(!html.includes('[...rows].reverse().find(r=>!r.isDeposit&&!r.isAdjustment&&Number(r.price)>0)'),"receipt discount parsing must not search backwards for an arbitrary earlier product");
