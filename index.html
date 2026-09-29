@@ -2146,7 +2146,7 @@ function detectReceiptDate(text){
 function plausibleReceiptItemName(name){
  const n=normalizeProduct(name),letters=(n.match(/[a-z]/g)||[]).length;
  if(n.length<4||letters<3)return false;
- const noise=/^(?:bar(?: gegeben)?|cash|summe|gesamt|gesamtbetrag|zu zahlen|zahlbetrag|endbetrag|mwst|netto|brutto|umsatz|steuer|rueckgeld|rückgeld|wechselgeld|zurueck|zurück|eur|kasse|terminal|datum|uhrzeit|gegeben|erhalten|zahlung|kartenzahlung|girocard|visa|mastercard|maestro|v pay|apple pay|google pay|payback|punkte|beleg|filiale|bediener|kunde|transaktion|trace|beleg nr|belegnummer)$/;
+ const noise=/^(?:bar(?: gegeben| bezahlt)?|cash|summe|gesamt|gesamtbetrag|zu zahlen|zahlbetrag|endbetrag|endsumme|rechnungsbetrag|betrag fällig|betrag faellig|mwst|netto|brutto|umsatz|steuer|rueckgeld|rückgeld|wechselgeld|zurueck|zurück|herausgegeben|rückgabe|rueckgabe|eur|kasse|terminal|datum|uhrzeit|gegeben|bezahlt|erhalten|betrag erhalten|zahlung|kartenzahlung|girocard|visa|mastercard|maestro|v pay|apple pay|google pay|payback|punkte|beleg|filiale|bediener|kunde|transaktion|trace|beleg nr|belegnummer)$/;
  return !noise.test(n)&&!/^(?:www|tel|telefon|ust id|steuer nr|iban|bic)\b/.test(n);
 }
 function receiptRecognizedTotal(rows){return Number((rows||[]).reduce((n,r)=>n+(r?.isAdjustment&&r?.linkedToPrevious?0:(Number(String(r?.price??0).replace(",", "."))||0)),0).toFixed(2))}
