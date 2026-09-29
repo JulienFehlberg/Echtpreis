@@ -11,7 +11,7 @@
     "test:static": "node tests/static-smoke.js",
     "test:server": "node tests/server-unit.js",
     "test:vision": "node tests/receipt-vision.test.js",
-    "test:browser": "node tests/browser-smoke.js"
+    "test:browser": "node --unhandled-rejections=strict tests/browser-smoke.js"
   },
   "dependencies": {
     "pg": "^8.13.1"
