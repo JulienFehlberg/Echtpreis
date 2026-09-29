@@ -260,6 +260,9 @@ assert(html.includes('multiPack={count,amount:size*factor,unit,label'),"multipac
 assert(html.includes('wish.packCount=multiPack.count')&&html.includes('wish.amount=multiPack.count*multiPack.amount'),"multipacks should calculate total comparison quantity from pack count and pack size");
 assert(html.includes('packungen?|packs?'),"shopping parser should accept natural pack/Packungen wording");
 assert(html.includes('return multiPack?wish:initializePackageQuantity(wish)'),"explicit multipacks should not be overwritten by standard package inference");
+assert(html.includes('natural German multipack phrasing'),"natural German multipack parser regression marker missing");
+assert(html.includes('(?:à|a|je|zu\\s+je)?'),"multipack parser should accept à/je wording before package size");
+assert(html.includes('const natural=rawForAmount.match'),"multipack parser should accept product-before-size phrasing such as 2 Packungen Hackfleisch à 500 g");
 
 assert(html.includes('function receiptItemUnits(item)')&&html.includes('item?.quantity??item?.qty??item?.count??item?.packCount'),"receipt-plan comparison should read explicit receipt quantities");
 assert(html.includes('fulfilledUnits:Math.min(plannedCount,bought)')&&html.includes('shortUnits:Math.max(0,plannedCount-bought)'),"receipt-plan comparison should measure partial fulfillment");
