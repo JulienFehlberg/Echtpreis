@@ -417,3 +417,9 @@ assert(html.includes('"rinderhack","hackfleisch","haehnchenbrust"'),"fresh meat 
 assert(html.includes('"eier","milch","joghurt","quark","skyr","butter","kaese"'),"fresh and chilled staples should be hard-blocked from drugstore comparisons");
 assert(html.includes('if(drugstoreFreshBlocked.has(product))return false;return storeAssortment.drugstore.has(product)'),"dm and Rossmann eligibility should require both not-fresh and explicit assortment approval");
 assert(html.includes('"zahnpasta","shampoo"')&&html.includes('"waschmittel","spuelmittel"'),"core drugstore products should remain eligible for dm and Rossmann");
+
+assert(html.includes('serverItems=Array.isArray(x.items)&&x.items.length?x.items:null')&&html.includes('receiptItemsForStorage(serverItems)'),"server receipt sync should normalize incoming item metadata");
+assert(html.includes('energy=x.energy||cached.energy||receiptEnergySnapshot(items)'),"server receipt sync should preserve or reconstruct calorie snapshots");
+assert(html.includes('savingMeta:x.savingMeta||cached.savingMeta||null')&&html.includes('planComparison:x.planComparison||cached.planComparison||null'),"server receipt sync should preserve rich savings and plan evidence");
+assert(html.includes('itemsComplete:x.itemsComplete!=null?!!x.itemsComplete:cached.itemsComplete')&&html.includes('unassignedAmount:x.unassignedAmount!=null?Number(x.unassignedAmount):cached.unassignedAmount'),"server receipt sync should preserve receipt completeness evidence");
+assert(html.includes('fingerprint:x.fingerprint||cached.fingerprint||""'),"server receipt sync should retain receipt fingerprint provenance");
