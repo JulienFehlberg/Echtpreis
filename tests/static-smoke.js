@@ -318,7 +318,7 @@ assert(html.includes('r?.isAdjustment&&r?.linkedToPrevious?0:'),"product-linked 
 assert(html.includes('recognized=receiptRecognizedTotal(rows)'),"OCR candidate scoring should use discount-safe receipt arithmetic");
 assert(html.includes('recognized=receiptRecognizedTotal(receiptDraft)'),"receipt verification should use discount-safe receipt arithmetic");
 assert(html.includes('aiRecognized=receiptRecognizedTotal(receiptDraft)'),"AI receipt completeness checks should use the same canonical arithmetic");
-assert(html.includes('total-receiptRecognizedTotal(receiptLines)'),"saved receipt unassigned amount should use canonical receipt arithmetic");
+assert(html.includes('function receiptUnassignedAmount(total,rows)')&&html.includes('receiptUnassignedAmount(total,receiptLines)'),"saved receipt unassigned amount should use canonical receipt arithmetic");
 
 assert(html.includes('function receiptRecognizedProductSpend(rows)'),"receipt math should distinguish real product spend from total receipt arithmetic");
 assert(html.includes('!r?.isDeposit&&!r?.isAdjustment&&Number(r?.price)>0'),"recognized product spend should exclude deposits and adjustments");
