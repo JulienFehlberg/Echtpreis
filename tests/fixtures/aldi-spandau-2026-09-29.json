@@ -1,0 +1,62 @@
+{
+  "name": "ALDI Spandau Referenzbon 001",
+  "capturedAt": "2026-09-29",
+  "expected": {
+    "merchant": "ALDI",
+    "date": "2026-09-29",
+    "total": 48.82,
+    "lineItems": [
+      {
+        "rawName": "LEERGUTRÜCKNAHME",
+        "lineTotal": -5.75,
+        "isDeposit": true
+      },
+      {
+        "rawName": "MINERALWASSER STILL",
+        "unitPrice": 0.29,
+        "count": 30,
+        "lineTotal": 8.7
+      },
+      {
+        "rawName": "PFANDWERT",
+        "unitPrice": 0.25,
+        "count": 30,
+        "lineTotal": 7.5,
+        "isDeposit": true
+      },
+      {
+        "rawName": "MI. WASSER KLASSIK",
+        "unitPrice": 0.29,
+        "count": 6,
+        "lineTotal": 1.74
+      },
+      {
+        "rawName": "PFANDWERT",
+        "unitPrice": 0.25,
+        "count": 6,
+        "lineTotal": 1.5,
+        "isDeposit": true
+      },
+      {
+        "rawName": "BRUZZLKRACHER",
+        "unitPrice": 3.69,
+        "count": 2,
+        "lineTotal": 7.38
+      },
+      {
+        "rawName": "H-MILCH",
+        "unitPrice": 0.95,
+        "count": 3,
+        "lineTotal": 2.85
+      }
+    ],
+    "payment": {}
+  },
+  "notes": [
+    "Ground truth transcribed from a real user-supplied ALDI receipt OCR used by the browser regression suite.",
+    "Only stable merchant/date/total and representative line items are asserted because OCR can omit other rows."
+  ],
+  "ocrText": "A L D I\nGalenstr. 35, 13597 Berlin\n29.09.2026\n-23 x 0,25 €\nLEERGUTRÜCKNAHME 19%\n-5,75 € 2\n30 x 0,29 €\nMINERALWASSER STILL 1, 8,70 € 2\n30 x 0,25 €\nPFANDWERT 0,25 7,50 € 2\n6 x 0,29 €\nMI. WASSER KLASSIK 1,5L 1,74 € 2\n6 x 0,25 €\nPFANDWERT 0,25 1,50 € 2\n2 x 3,69 €\nBRUZZLKRACHER - QS 7,38 € 1\nVEGANER AUFSCHNITT 0,95 € 1\nPREMIUM RÄUCHERLACHS 3,79 € 1\n2 x 1,99 €\nGEFL/RINDFL SALAMI-QS 3,98 € 1\n3 x 0,95 €\nH-MILCH 3,5%, 1L 2,85 € 1\nPELLKARTOFFELSALAT XXL 2,69 € 1\nXXL WIKINGER RÖLLCHEN 2,99 € 1\nKAFFEEWEISSER 2,39 € 1\nGRIECHISCHE BEILAGEN X 2,19 € 1\nVEGANER AUFSCHNITT 0,95 € 1\nMY VAY SCHNITTIG/ZERST 0,99 € 1\nZU ZAHLEN 48,82 €\nALDI SE & Co. KG, Großbeeren\nDatum 29.09.26",
+  "schemaVersion": 1,
+  "source": "real-user-receipt"
+}
