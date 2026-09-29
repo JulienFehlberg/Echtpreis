@@ -1236,7 +1236,7 @@ function parseWish(raw){
  if(!multi){const natural=rawForAmount.match(/^(\d+)\s*(?:packungen?|packs?)\s+(.+?)\s+(?:à|a|je|zu\s+je)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)$/i);if(natural)multi=[natural[0],natural[1],natural[3],natural[4],natural[2]]}
  if(multi){const count=Math.max(1,parseInt(multi[1],10)),size=parseFloat(multi[2].replace(",",".")),u=multi[3].toLowerCase(),rest=multi[4];const factor=(u==="g"||u==="ml")?.001:1;unit=(u==="g"||u==="kg")?"kg":"l";amount=count*size*factor;explicit=true;multiPack={count,amount:size*factor,unit,label:size.toLocaleString("de-DE")+" "+u};displayTerm=rest.trim();t=normalizeProduct(rest)}
  else{
-  let m=rawForAmount.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x|packungen?|packs?)?\s+(.+)$/i);
+  let m=rawForAmount.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|pcs?|x|packungen?|packs?)?\s+(.+)$/i);
   if(m){amount=parseFloat(m[1].replace(",","."));let u=(m[2]||"stück").toLowerCase(),rest=m[3];displayTerm=rest.trim();explicit=true;
    if(u==="g"||u==="gramm"){amount/=1000;unit="kg"}else if(u==="ml"){amount/=1000;unit="l"}else if(u==="kg"){unit="kg"}else if(u==="l"||u==="liter"){unit="l"}else unit="piece";t=normalizeProduct(rest);}
  }
