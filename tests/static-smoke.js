@@ -334,6 +334,7 @@ assert(html.includes('rabatt|coupon|gutschein|aktion|ersparnis|nachlass|discount
 assert(html.includes('isAdjustment:true')&&html.includes('pricingType:"discount"'),"discount receipt rows should be explicitly marked as adjustments");
 assert(html.includes('adjustmentType:/coupon|gutschein|payback/'),"coupon-like adjustments should be distinguishable from ordinary discounts");
 assert(html.includes('pfand(?:artikel)?|einwegpfand|mehrwegpfand'),"receipt parser should recognize common German deposit labels");
+assert(html.includes('at=lines.findIndex(x=>receiptTotalBoundary(x))'),"deposit OCR merging should use the same authoritative total boundary as receipt parsing");
 assert(html.includes('!i.isDeposit&&!i.isAdjustment'),"receipt product analytics should exclude deposits and adjustments");
 
 assert(html.includes('adjustment.appliedTo=previous.name')&&html.includes('adjustment.linkedToPrevious=true'),"receipt discounts should link to the preceding purchased product when possible");
