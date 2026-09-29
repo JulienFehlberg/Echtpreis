@@ -2063,6 +2063,8 @@ function parseReceiptText(text){
   if(countStkTotal){const name=(countStkTotal[1]||pendingName||"").trim();if(name&&plausibleReceiptItemName(name)){const count=Number(countStkTotal[2]),total=parseReceiptNumber(countStkTotal[3]),pack=inferPackFromName(name);last={name,price:String(total),count,unitLinePrice:count?Number((total/count).toFixed(2)):null,quantitySource:"receipt-stueck",discount:0,regularTotal:total,...pack};rows.push(last)}pendingName="";continue}
   const countOnly=line.match(/^(\d{1,3})\s*(?:stk\.?|stück|stueck|stuck|pcs?\.?)$/i);
   if(countOnly&&pendingName){pendingMultiple={count:Number(countOnly[1]),unitPrice:0,name:pendingName,quantityOnly:true};continue}
+  const unitPriceAfterCount=line.match(/^(\d+[,.]\d{2})\s*(?:€|EUR)?\s*(?:\/|je|pro)\s*(?:stk\.?|stück|stueck|stuck|pcs?\.?)$/i);
+  if(pendingMultiple?.quantityOnly&&unitPriceAfterCount){pendingMultiple.unitPrice=parseReceiptNumber(unitPriceAfterCount[1]);pendingMultiple.quantityOnly=false;continue}
   let basketAdjustment=line.match(/^(?:coupon(?:[- ]?rabatt)?|payback(?:[- ]?coupon)?|gesamtrabatt|rabatt\s+gesamt|gutscheinrabatt|gesamtvorteil)\s*:?-?\s*(\d+[,.]\d{2})\s*(?:€|EUR)?/i);
   if(basketAdjustment){let d=parseReceiptNumber(basketAdjustment[1]);rows.push({name:"Coupon / Rabatt",price:String(-Math.abs(d)),isAdjustment:true,pricingType:"adjustment",adjustmentType:"coupon"});last=null;continue}
   let discount=line.match(/(?:aktionsrabatt|preisvorteil|artikelrabatt|sofortrabatt)\s*-?\s*(\d+[,.]\d{2})\s*(?:€|EUR)?/i);
