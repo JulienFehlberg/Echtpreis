@@ -1670,8 +1670,7 @@ const receiptCategoryMap={
  toilettenpapier:"Haushalt & Drogerie",kuechenrolle:"Haushalt & Drogerie",waschmittel:"Haushalt & Drogerie",spuelmittel:"Haushalt & Drogerie",zahnpasta:"Haushalt & Drogerie",shampoo:"Haushalt & Drogerie",duschgel:"Haushalt & Drogerie",deo:"Haushalt & Drogerie"
 };
 function receiptDiscountTotal(items){
- const linked=new Set((items||[]).filter(i=>i?.isAdjustment&&i?.linkedToPrevious&&Number(i.price)<0).map(i=>String(i.appliedTo||"")+"|"+Math.abs(Number(i.price)).toFixed(2)));
- return Number((items||[]).reduce((n,i)=>{if(i?.isAdjustment&&Number(i.price)<0)return n+Math.abs(Number(i.price));const d=Math.max(0,Number(i?.discount)||0);if(!d)return n;return n+(linked.has(String(i.name||"")+"|"+d.toFixed(2))?0:d)},0).toFixed(2));
+ return Number((items||[]).reduce((n,i)=>{if(i?.isAdjustment&&Number(i.price)<0)return n+Math.abs(Number(i.price));const d=Math.max(0,Number(i?.discount)||0);if(!d)return n;return n+(i?.discountSource==="linked-adjustment"?0:d)},0).toFixed(2));
 }
 function receiptDiscountStory(items,total){const discount=receiptDiscountTotal(items);if(discount<=0)return null;const paidProducts=receiptRecognizedProductSpend(items),linked=(items||[]).filter(i=>!i.isAdjustment&&Number(i.discount)>0).sort((a,b)=>Number(b.discount)-Number(a.discount)),linkedDiscount=linked.reduce((n,i)=>n+Math.max(0,Number(i.discount)||0),0),unlinkedDiscount=Math.max(0,Number((discount-linkedDiscount).toFixed(2))),regularProducts=Number((paidProducts+linkedDiscount).toFixed(2)),rate=regularProducts>0?Math.round(linkedDiscount/regularProducts*100):0;return {discount,rate,paidProducts,regularProducts,linkedDiscount,unlinkedDiscount,linked,top:linked[0]||null}}
 function receiptItemProfile(item){
