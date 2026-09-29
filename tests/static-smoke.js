@@ -127,3 +127,8 @@ assert(html.includes('type:"personal-high-price"')&&html.includes('Persönlicher
 assert(html.includes('prev.forEach(r=>(r.items||[])'),"current receipt must not be included in its own price history");
 assert(html.includes('beim letzten vergleichbaren Kauf'),"receipt price comparison should use prior comparable purchase");
 assert(html.includes('v5.176.0'),"expected app version v5.176.0");
+
+assert(html.includes('type:"personal-saving"')&&html.includes('Preisunterschied'),"receipt insight should calculate savings from the user own cross-store history");
+assert(html.includes('Das ist dein eigener Preisverlauf, kein aktuelles Marktangebot.'),"historical personal savings must not be presented as current market availability");
+assert(html.includes('x.store&&x.store!==current.store'),"personal savings comparison must use a different prior store");
+assert(html.includes('v5.177.0'),"expected app version v5.177.0");
