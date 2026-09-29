@@ -104,7 +104,7 @@ assert(html.includes('id="receiptCameraFile"'),"camera receipt input missing");
 assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"gallery/PDF receipt input missing");
 assert(html.includes('accordionNavigation:["homeReceipt","homePlan","homeStats"].every'),"runtime health check must verify accordion navigation");
 assert(html.includes("plannerViewport:!!document.querySelector('meta[name=\"viewport\"]')".replaceAll("\\\"","\"")),"runtime health check must verify planner viewport shell");
-assert(html.includes('<span class="version">v7.213.0 RC</span>')&&html.includes('version:"7.213"'),"visible and health-check versions must stay aligned");
+assert(html.includes('<span class="version">v7.214.0 RC</span>')&&html.includes('version:"7.214"'),"visible and health-check versions must stay aligned");
 
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
 
@@ -499,3 +499,7 @@ assert((html.match(/best=betterReceiptCandidate\(best,combined\);/g)||[]).length
 // v7.213 mobile OCR memory guard
 assert(html.includes("function receiptOcrCanvasSize(crop)")&&html.includes("maxPixels=5200000")&&html.includes("maxHeight=4200"),"long receipt OCR crops must cap canvas memory for mobile browsers");
 assert(html.includes("receiptCrop(file,crop,lang,psm,contrast=1.75)"),"receipt crop preprocessing must keep contrast configurable for fallback reads");
+
+// v7.214 adaptive contrast OCR guard
+assert(html.includes('"Kontrastarmer Beleg wird nachgeschärft …"')&&html.includes('receiptCrop(scanFile,fullArea,"deu",6,2.35)'),"weak full-receipt reads must receive one targeted high-contrast OCR fallback");
+assert(html.includes("best=betterReceiptCandidate(best,contrastCandidate);best=betterReceiptCandidate(best,combined)"),"high-contrast OCR must only win through receipt-quality ranking");
