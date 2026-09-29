@@ -1015,7 +1015,7 @@ function clearOpenPurchasePlan(){try{localStorage.removeItem(openPurchasePlanKey
 function receiptPlanMatchKey(x){
  let raw=String(x&&x.name||x&&x.label||x&&x.raw||"");try{let m=identifyReceiptProduct(raw);if(m&&m.key)return "key:"+m.key}catch(e){}return "raw:"+normalizeProduct(raw).replace(/\b\d+(?:[.,]\d+)?\s*(?:g|kg|ml|l|stk|stueck)\b/g,"").trim();
 }
-function receiptItemUnits(item){const direct=Number(item?.quantity||item?.qty||item?.count||item?.packCount);if(Number.isFinite(direct)&&direct>0)return Math.max(1,Math.round(direct));const raw=String(item?.name||item?.raw||"");let m=raw.match(/(?:^|\s)(\d+)\s*[x×]\b/i);return m?Math.max(1,parseInt(m[1],10)):1}
+function receiptItemUnits(item){const direct=Number(item?.quantity||item?.qty||item?.count||item?.packCount);if(Number.isFinite(direct)&&direct>0)return Math.max(1,Math.round(direct));const raw=String(item?.name||item?.raw||"");let m=raw.match(/(?:^|\s)(\d+)\s*(?:[x×]|stk\.?|stück|stueck)\b/i);return m?Math.max(1,parseInt(m[1],10)):1}
 function buildPlanVsReceipt(plan,current){
  if(!plan||!plan.items?.length||!current?.items?.length)return null;
  let planned=plan.items.map(x=>({...x,match:receiptPlanMatchKey(x),plannedUnits:Math.max(1,Number(x.packCount)||1)}));
@@ -2027,6 +2027,10 @@ function parseReceiptText(text){
   if(returnCountUnit){pendingMultiple={count:-Number(returnCountUnit[1]),unitPrice:parseReceiptNumber(returnCountUnit[2]),isReturn:true};pendingName="";continue}
   const countUnitOnly=line.match(/^(\d{1,2})\s*[#*x×]\s*(\d+[,.]\d{2})\s*(?:€|EUR)?$/i);
   if(countUnitOnly){pendingMultiple={count:Number(countUnitOnly[1]),unitPrice:parseReceiptNumber(countUnitOnly[2]),name:pendingName};continue}
+  const countStkTotal=line.match(/^(?:(.{2,64}?)\s+)?(\d{1,2})\s*(?:stk\.?|stück|stueck)\s+(\d+[,.]\d{2})\s*(?:€|EUR)?(?:\s*[AB])?$/i);
+  if(countStkTotal){const name=(countStkTotal[1]||pendingName||"").trim();if(name&&plausibleReceiptItemName(name)){const count=Number(countStkTotal[2]),total=parseReceiptNumber(countStkTotal[3]),pack=inferPackFromName(name);last={name,price:String(total),count,unitLinePrice:count?Number((total/count).toFixed(2)):null,quantitySource:"receipt-stueck",discount:0,regularTotal:total,...pack};rows.push(last)}pendingName="";continue}
+  const countOnly=line.match(/^(\d{1,2})\s*(?:stk\.?|stück|stueck)$/i);
+  if(countOnly&&pendingName){pendingMultiple={count:Number(countOnly[1]),unitPrice:0,name:pendingName,quantityOnly:true};continue}
   let adjustment=line.match(/^(?:coupon(?:[- ]?rabatt)?|payback(?:[- ]?coupon)?|gesamtrabatt|rabatt\s+gesamt|gutscheinrabatt|gesamtvorteil)\s*:?-?\s*(\d+[,.]\d{2})\s*(?:€|EUR)?/i);
   if(adjustment){let d=parseReceiptNumber(adjustment[1]);rows.push({name:"Coupon / Rabatt",price:String(-Math.abs(d)),isAdjustment:true,pricingType:"adjustment"});last=null;continue}
   let discount=line.match(/(?:aktionsrabatt|preisvorteil|artikelrabatt|sofortrabatt)\s*-?\s*(\d+[,.]\d{2})\s*(?:€|EUR)?/i);
