@@ -9,5 +9,15 @@
   "background_color": "#f7f8f6",
   "theme_color": "#087443",
   "orientation": "portrait-primary",
-  "categories": ["shopping", "finance", "lifestyle"]
+  "categories": [
+    "shopping",
+    "finance",
+    "lifestyle"
+  ],
+  "id": "./",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "prefer_related_applications": false
 }
