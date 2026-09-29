@@ -52,6 +52,7 @@ In der Testphase sollen keine zwingenden laufenden Kosten entstehen. Kostenpflic
 - Mobile/PWA-Grundlagen: Manifest, Portrait-Standalone-Modus, iOS-Metadaten, Safe-Area-Viewport und Rückkamera-Input vorhanden
 - Nächster Freigabeschritt: reale End-to-End-Gerätetests mit den vorhandenen Kaufland-, EDEKA-, ALDI- und PENNY-Belegen
 - Testkandidat gilt als technisch freigegeben; verbleibende Freigabe ist bewusst eine reale Geräte-/Belegprüfung, kein weiterer theoretischer Feature-Block
+- Reale Ground-Truth-Fixtures werden vom Browser-Smoke geladen; aktuell liegt der vollständig transkribierte EDEKA-Referenzbon vor. Weitere Händler-Fixtures dürfen erst aus den jeweiligen Originalbelegen ergänzt werden, nicht aus erfundenen Daten.
 
 ## Noch vor einem Store-Release zwingend
 
