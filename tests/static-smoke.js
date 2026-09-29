@@ -68,6 +68,9 @@ assert(html.includes('type:"first-receipt-fact"'),"first receipt should produce 
 assert(html.includes("function receiptMarketComparison")&&html.includes('currentReceiptSavingConfidence="hoch"'),"receipt markets must be compared item by item and savings kept to evidenced prices");
 assert(html.includes("async function finalizeScannedReceipt")&&html.includes("await finalizeScannedReceipt()"),"verified receipt scans must save without a second confirmation tap");
 assert(html.includes("Bon-Gesamtsumme")&&html.includes("analysisPartialRow"),"receipt total and honest partial savings must be visible in the analysis");
+assert(!html.includes('id="contribute"')&&html.includes('id="pointsContribute"'),"sharing preference must stay out of the scan result and remain manageable in settings");
+assert(html.includes(".slice(0,3)")&&html.includes("receipt-top-market"),"receipt results must show no more than the three cheapest lower estimates");
+assert(html.includes("combineReceiptCandidates")&&html.includes(".96,.48")&&html.includes(".96,.30"),"receipt OCR must inspect overlapping bands through the bottom of the receipt");
 assert(html.includes("const pending=Promise.allSettled")&&html.includes("comparisonRefreshPromise=pending")&&html.includes("comparisonRefreshPromise===pending"),"shopping comparison should render cache-first without an older refresh clearing a newer one");
 assert(html.includes("Promise.allSettled([loadNearbyStores(),ingestOpenPrices(false,keys)])"),"location and live price refresh should run in parallel");
 assert(html.includes("comparisonRefreshPromise"),"concurrent background comparison refreshes should be deduplicated");
