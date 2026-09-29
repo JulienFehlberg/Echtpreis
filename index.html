@@ -2134,7 +2134,7 @@ function extractReceiptPaymentMethod(text){
  if(/\bv\s*pay\b/.test(t))return "V PAY";
  if(/kontaktlos|contactless|nfc/.test(t)&&/karte|girocard|visa|mastercard|debit|credit/.test(t))return "Kontaktlos";
  if(/kartenzahlung|zahlung\s+(?:mit\s+)?karte|karten(?:zahlung)?|debit|credit\s*card/.test(t))return "Kartenzahlung";
- if(/(?:^|\n)\s*(?:bar|cash)\b/im.test(String(text||"")))return "Bar";
+ if(/(?:^|\n)\s*(?:bar(?:\s+(?:gegeben|bezahlt))?|cash|gegeben|bezahlt|betrag erhalten|zahlbetrag bar)\b/im.test(String(text||"")))return "Bar";
  return "";
 }
 function detectReceiptDate(text){
