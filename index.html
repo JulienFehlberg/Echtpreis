@@ -72,7 +72,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 <style>.alpha-badge{display:inline-block;vertical-align:middle;margin-left:6px;padding:4px 7px;border-radius:99px;background:#e7f5ed;color:#087443;font-size:9px;letter-spacing:1px;font-weight:900}.qty-stepper{display:flex;align-items:center;gap:5px;margin:0 0 0 7px;flex:0 0 auto}.qty-stepper span{display:none}.qty-stepper button{width:34px;height:34px;padding:0;border:1px solid #d6e3da;border-radius:10px;background:#f3f8f4;color:#075f37;font-size:20px;font-weight:800}.qty-stepper b{min-width:22px;text-align:center;color:#20352a}.itemname{min-width:0}.item-title{display:block;width:100%;padding:0;background:transparent;border-radius:0;text-align:left;color:#102019;font-size:16px;font-weight:850;line-height:1.25;overflow-wrap:anywhere}.itemname .qty{margin-top:3px}</style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Bons. Deine Entscheidung.</h2><p>Du kannst Bons nur für dich speichern oder mit deinen erkannten Bon-Preisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Bon-Summe und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Bons künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Bons & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.158.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.159.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -503,7 +503,7 @@ async function syncSharedData(){
  catch(e){if(request===sharedDataRequest){apiState="offline · lokaler Fallback";drawDataMachine()}}
 }
 async function pushSharedReceipt(proof,items){
- try{let r=await fetch(API_BASE+"/v1/receipt-observations",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({proof,items})});if(!r.ok)throw 0;let d=await r.json();apiState="verbunden · "+d.accepted+" neue Beobachtungen übertragen";await syncSharedData();return d}catch(e){apiState="Upload später erneut nötig · lokal gespeichert";drawDataMachine();return null}
+ try{let r=await fetch(API_BASE+"/v1/receipt-observations",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({proof,items})});if(!r.ok)throw 0;let d=await r.json();apiState="verbunden · "+d.accepted+" neue Beobachtungen übertragen";await syncCommunityAliases();await syncSharedData();return d}catch(e){apiState="Upload später erneut nötig · lokal gespeichert";drawDataMachine();return null}
 }
 const productIndexKey="echtpreis_product_index_v1";
 function loadProductIndex(){return loadJson(productIndexKey,[])}
@@ -528,6 +528,35 @@ function learnedMatch(name){
 }
 const baseIdentifyReceiptProduct=identifyReceiptProduct;
 identifyReceiptProduct=function(name){const learned=learnedMatch(name),base=baseIdentifyReceiptProduct(name);if(learned&&(!base.key||learned.score>=base.score))return learned;return base}
+const communityAliasCacheKey="echtpreis_community_aliases_v1";
+let communityAliasSync=null;
+function applyCommunityAliases(rows){
+ const groups=new Map();
+ for(const row of (Array.isArray(rows)?rows:[]).slice(0,5000)){
+  const key=String(row?.key||"").trim(),alias=normalizeProduct(row?.normalized||row?.raw||"");
+  if(!catalog[key]||alias.length<4||Number(row?.seen||0)<2)continue;
+  if(!groups.has(alias))groups.set(alias,new Set());groups.get(alias).add(key);
+ }
+ let added=0;
+ for(const [alias,keys] of groups){
+  if(keys.size!==1)continue;
+  const key=[...keys][0],known=baseIdentifyReceiptProduct(alias);
+  if(known.key&&known.key!==key)continue;
+  receiptAliasExtras[key]=receiptAliasExtras[key]||[];
+  if(receiptAliasExtras[key].some(x=>normalizeProduct(x)===alias))continue;
+  receiptAliasExtras[key].push(alias);added++;
+ }
+ return added;
+}
+async function syncCommunityAliases(){
+ if(communityAliasSync)return communityAliasSync;
+ communityAliasSync=(async()=>{
+  let cached=null;try{cached=JSON.parse(localStorage.getItem(communityAliasCacheKey)||"null")}catch(e){}
+  if(cached&&Date.now()-Number(cached.savedAt||0)<14*86400000)applyCommunityAliases(cached.items);
+  try{const response=await fetch(API_BASE+"/v1/aliases");if(!response.ok)return;const data=await response.json();if(!Array.isArray(data.items))return;applyCommunityAliases(data.items);saveJson(communityAliasCacheKey,{savedAt:Date.now(),items:data.items.slice(0,5000)})}catch(e){}
+ })().finally(()=>{communityAliasSync=null});
+ return communityAliasSync;
+}
 function learnedPackSize(quantity,targetUnit){let m=String(quantity||"").match(/^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l|stück|stueck|piece)$/i);if(!m)return null;let value=Number(m[1].replace(",",".")),u=m[2].toLowerCase(),unit=(u==="g"||u==="kg")?"kg":(u==="ml"||u==="l")?"l":"piece";if(unit!==targetUnit)return null;if(u==="g"||u==="ml")value/=1000;return{amount:value,unit,label:m[1].replace(".",",")+" "+u}}
 function learnCustomAliasesFromReceipt(items){let learned=0;for(const w of basket.filter(x=>x.customItem)){const alias=normalizeProduct(w.label),matches=(items||[]).filter(r=>!r.isDeposit&&!r.isAdjustment&&r.name&&alias.length>=4&&(" "+normalizeProduct(r.name)+" ").includes(" "+alias+" "));if(matches.length!==1)continue;const line=matches[0],match=identifyReceiptProduct(line.name);if(!match.key)continue;const key=match.key,c=catalog[key],qty=line.packAmount&&line.packUnit?String(line.packAmount)+" "+line.packUnit:"";learnProductAlias(w.label,key,{source:"custom-list-receipt",quantity:qty});w.customItem=false;w.key=key;w.matched=true;w.matchMode="learned";w.learnedAlias=true;w.learnedPackage=learnedPackSize(qty,c?.unit);w.needsQuantity=!w.learnedPackage&&c?.unit!=="piece"&&!c?.unitWeight;w.needsClarification=w.needsQuantity;w.note="";w.unit=w.learnedPackage?.unit||"piece";w.packCount=Math.max(1,Number(w.packCount)||1);if(w.learnedPackage){w.quantityMode="packages";w.packAmount=w.learnedPackage.amount;w.packUnit=w.learnedPackage.unit;w.packLabel=w.learnedPackage.label;w.amount=w.packAmount*w.packCount;w.calcAmount=w.amount}else if(c?.unit==="piece"){w.quantityMode="packages";w.packAmount=1;w.packUnit="piece";w.packLabel="Stück";w.amount=w.packCount;w.calcAmount=w.packCount;w.unit="piece"}else{w.unit="piece";w.amount=w.packCount;w.calcAmount=w.packCount}learned++}if(learned){saveBasketState();drawList();basketChanged()}return learned}
 function extractEAN(text){let m=String(text||"").match(/\b(\d{8}|\d{12,14})\b/);return m?m[1]:null}
@@ -1475,5 +1504,5 @@ async function sendFeedbackPayload(payload){const r=await fetch(API_BASE+"/v1/fe
 async function flushFeedbackQueue(){let q=loadFeedbackQueue();if(!q.length)return 0, sent=0;const keep=[];for(const item of q){try{await sendFeedbackPayload(item);sent++}catch(e){keep.push(item)}}saveFeedbackQueue(keep);return sent}
 const feedbackSend=$("feedbackSend");if(feedbackSend)feedbackSend.onclick=async()=>{const message=$("feedbackText").value.trim(),status=$("feedbackStatus");if(message.length<3){status.textContent="Schreib bitte kurz dazu, was dir aufgefallen ist.";return}feedbackSend.disabled=true;status.textContent="Wird gesendet …";const version=document.querySelector(".version")?.textContent||"",payload={message,appVersion:version,platform:window.EchtpreisRuntime?.platform||"web",page:location.pathname+location.search,userAgent:navigator.userAgent,createdAt:new Date().toISOString()};try{await sendFeedbackPayload(payload);$("feedbackText").value="";status.textContent="✓ Danke – Feedback ist angekommen."}catch(e){let q=loadFeedbackQueue();q.push(payload);saveFeedbackQueue(q);$("feedbackText").value="";status.textContent="✓ Gespeichert – wird automatisch gesendet, sobald der Server erreichbar ist."}finally{feedbackSend.disabled=false}};
 void flushFeedbackQueue();
-refreshPoints();drawSuggestions();drawStores();let savedBasket=loadBasketState();if(savedBasket.length)basket=savedBasket.filter(x=>x&&x.raw).map(restoreBasketItem);drawList();drawDataMachine();renderHouseholdNeeds();syncSharedData();
+refreshPoints();drawSuggestions();drawStores();let savedBasket=loadBasketState();if(savedBasket.length)basket=savedBasket.filter(x=>x&&x.raw).map(restoreBasketItem);drawList();drawDataMachine();renderHouseholdNeeds();void syncCommunityAliases();syncSharedData();
 </script></body></html>
