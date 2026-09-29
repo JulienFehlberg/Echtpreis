@@ -236,3 +236,8 @@ assert(html.includes('#planner #list{max-width:100%!important;overflow:hidden!im
 assert(html.includes('grid-template-columns:22px minmax(0,1fr) auto 16px'),"planner rows should reserve flexible product space instead of oversized fixed controls");
 assert(html.includes('@media(max-width:430px)')&&html.includes('#planner .planner-main{padding:12px!important}'),"planner should become denser on phone widths");
 assert(html.includes('<span class="version">v7.200.0 RC</span>'),"visible app version should be v7.200.0 RC");
+
+assert(html.includes('v7.202 supermarket interaction + quantity clarity'),"planner should include supermarket interaction polish");
+assert(html.includes('aria-label="Eine Packung '+name+' weniger"')&&html.includes('aria-label="Eine Packung '+name+' mehr"'),"quantity controls should expose product-specific accessible labels");
+assert(html.includes('basketItemSignature(w)')&&html.includes('duplicate.packCount=Math.max(1,Number(duplicate.packCount)||1)+1'),"duplicate shopping items should merge into pack quantity instead of creating duplicate rows");
+assert(html.includes('#planner .qty-buttons button{touch-action:manipulation!important}'),"quantity buttons should be optimized for touch shopping");
