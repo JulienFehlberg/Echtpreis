@@ -304,6 +304,7 @@ assert(html.includes('replace(/\\ba\\s+l\\s+d\\s+i\\b/g,"aldi")'),"merchant OCR 
 assert(html.includes('kaufland\\.de|kaufland-card')&&html.includes('edeka\\.de')&&html.includes('penny\\.de'),"merchant detection should use strong chain-specific receipt markers");
 
 assert(html.includes('function receiptTotalBoundary(line)')&&html.includes('zahlbetrag|endbetrag'),"receipt item parsing should stop at authoritative German total labels");
+assert(html.includes('endsumme|rechnungsbetrag'),"receipt total extraction should recognize additional authoritative German total labels");
 assert(html.includes('function receiptFooterNoise(line,store="")'),"receipt parser should explicitly filter footer/payment noise");
 assert(html.includes('const receiptStoreHint=detectReceiptStore(text)'),"receipt parsing should use merchant context for chain-specific noise filtering");
 assert(html.includes('Kaufland:/^(?:kaufland card|k-card|treuepunkte|punkte)/'),"Kaufland loyalty footer text should not become product rows");
