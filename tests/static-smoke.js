@@ -161,7 +161,7 @@ assert(html.includes('dein Tiefpreis')&&html.includes('zuletzt '+"'"+'+eur(x.las
 assert(html.includes('Du entscheidest selbst, was auf die Liste kommt.'),"smart list suggestions must remain user controlled");
 
 assert(html.includes('echtpreis_open_purchase_plan_v1')&&html.includes('saveOpenPurchasePlan'),"price comparison should preserve the planned basket for later receipt reconciliation");
-assert(html.includes('Plan vs. Wirklichkeit')&&html.includes('buildPlanVsReceipt'),"receipt analysis should reconcile planned and actual purchases");
+assert(html.includes('PLAN VS. WIRKLICHKEIT')&&html.includes('buildPlanVsReceipt'),"receipt analysis should reconcile planned and actual purchases");
 assert(html.includes('Zusätzlich gekauft')&&html.includes('Nicht auf dem Beleg erkannt'),"plan reconciliation should surface extras and missing planned products");
 assert(html.includes('planComparison:buildPlanVsReceipt'),"new receipts should persist plan comparison evidence");
 assert(html.includes('Wie nah kaufst du an deiner Liste?')&&html.includes('Beleg-OCR kann einzelne Positionen übersehen'),"stats should learn plan adherence without overstating OCR evidence");
