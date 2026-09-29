@@ -2118,7 +2118,7 @@ function extractReceiptTotal(text){
 }
 function extractReceiptCash(text){
  const t=String(text||"").replace(/(\d)\s*([,.])\s*(\d{2})/g,"$1$2$3"),out={paid:null,change:null};
- let m=t.match(/(?:^|\n)\s*(?:bar(?:\s+gegeben)?|gegeben|cash|erhalten|betrag erhalten|zahlbetrag bar)\s*(?:€|EUR)?\s*:?-?\s*(\d{1,5}[,.]\d{2})/im);if(m)out.paid=parseReceiptNumber(m[1]);
+ let m=t.match(/(?:^|\n)\s*(?:bar(?:\s+(?:gegeben|bezahlt))?|gegeben|cash|erhalten|betrag erhalten|zahlbetrag bar|bezahlt)\s*(?:€|EUR)?\s*:?-?\s*(\d{1,5}[,.]\d{2})/im);if(m)out.paid=parseReceiptNumber(m[1]);
  m=t.match(/(?:rückgeld|rueckgeld|wechselgeld|zurück|zurueck|herausgegeben|rückgabe|rueckgabe)\s*(?:€|EUR)?\s*:?-?\s*(\d{1,5}[,.]\d{2})/i);if(m)out.change=parseReceiptNumber(m[1]);
  return out;
 }
