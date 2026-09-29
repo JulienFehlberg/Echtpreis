@@ -18,6 +18,8 @@ assert.strictEqual(vision.normalizeReceipt({ merchant:"EDEKA", date:"2026-02-31"
 assert.strictEqual(vision.normalizeReceipt({ merchant:"EDEKA", date:"2026-09-29", total:1, items:[] }).date, "2026-09-29", "valid vision receipt dates should be retained");
 const arithmeticGuard=vision.normalizeReceipt({merchant:"PENNY",date:"",total:8.46,items:[{name:"Red Bull",line_total:2.89,count:2,unit_price:2.89,is_deposit:false,is_adjustment:false}]});
 assert.strictEqual(arithmeticGuard.items.length,0,"contradictory vision multipack arithmetic should be rejected instead of contaminating receipt analytics");
+assert.strictEqual(vision.normalizeReceipt({merchant:"EDEKA",date:"",total:5,items:[{name:"Coupon",line_total:1,count:1,unit_price:1,is_deposit:false,is_adjustment:true}]}).items.length,0,"positive vision adjustments must be rejected");
+assert.strictEqual(vision.normalizeReceipt({merchant:"EDEKA",date:"",total:5,items:[{name:"Pfand",line_total:-0.25,count:1,unit_price:0.25,is_deposit:true,is_adjustment:false}]}).items.length,0,"negative vision deposit charges must be rejected");
 const visionSource = require("fs").readFileSync(require.resolve("../receipt-vision"), "utf8");
 assert(visionSource.includes("ENDSUMME/RECHNUNGSBETRAG/BETRAG FÄLLIG"), "vision prompt should recognize expanded authoritative total labels");
 assert(visionSource.includes("Rückgeld oder Kartenbeträge niemals mit der Gesamtsumme"), "vision prompt should keep payment/change amounts separate from printed total");
