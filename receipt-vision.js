@@ -55,6 +55,7 @@ function normalizeReceipt(result) {
     if (!name || !Number.isFinite(lineTotal) || lineTotal === 0 || Math.abs(lineTotal) > 100000) return [];
     if (!Number.isFinite(count) || count < 1 || count > 1000 || !Number.isFinite(unitPrice) || Math.abs(unitPrice) > 100000) return [];
     const roundedCount=Number(count.toFixed(3));
+    if (!item.is_adjustment && !item.is_deposit && roundedCount >= 1 && Math.abs(roundedCount-Math.round(roundedCount)) > 0.001) return [];
     if (!item.is_adjustment && !item.is_deposit && roundedCount > 1 && unitPrice > 0 && Math.abs(Math.abs(lineTotal) - roundedCount * Math.abs(unitPrice)) > Math.max(0.08, Math.abs(lineTotal) * 0.05)) return [];
     if (item.is_adjustment && lineTotal > 0) return [];
     if (item.is_deposit && lineTotal < 0) return [];
