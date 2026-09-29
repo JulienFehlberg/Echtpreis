@@ -1,0 +1,42 @@
+{
+  "name": "Kaufland Teilscan Referenzbon 001",
+  "capturedAt": "2026-09-29",
+  "expected": {
+    "merchant": "Kaufland",
+    "date": "2026-09-29",
+    "total": 150.39,
+    "partial": true,
+    "lineItems": [
+      {
+        "rawName": "KLC Penne Rigate",
+        "unitPrice": 0.49,
+        "count": 2,
+        "lineTotal": 0.98
+      },
+      {
+        "rawName": "KLC Macaroni",
+        "unitPrice": 0.49,
+        "count": 2,
+        "lineTotal": 0.98
+      },
+      {
+        "rawName": "Pfandartikel",
+        "lineTotal": 1.5,
+        "isDeposit": true
+      },
+      {
+        "rawName": "Leergut Getränke",
+        "lineTotal": -8.15,
+        "isDeposit": true
+      }
+    ]
+  },
+  "notes": [
+    "Ground truth transcribed from a real user-supplied Kaufland receipt partial OCR used by the browser regression suite.",
+    "This fixture intentionally represents a partial scan: the printed receipt total is authoritative even though only a small subset of item rows is readable.",
+    "The fixture must remain saveable while clearly disclosing the unassigned amount."
+  ],
+  "ocrText": "Kaufland\n29.09.26\nKLC Penne Rigate\n2 * 0,49 0,98 B\nKLC Macaroni\n2 * 0,49 0,98 B\nPfandartikel 1,50 A\nLeergut Getränke -8,15 A\nSUMME 150,39",
+  "schemaVersion": 1,
+  "source": "real-user-receipt"
+}
