@@ -71,7 +71,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 </head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Bons. Deine Entscheidung.</h2><p>Du kannst Bons nur für dich speichern oder mit deinen erkannten Bon-Preisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Bon-Summe und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Bons künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Bons & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.145.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.146.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -456,7 +456,7 @@ const productAliases={
  tomaten:["tomate","tomaten","cherrytomaten","cocktailtomaten","strauchtomaten"],gurken:["gurke","gurken","salatgurke"],
  aepfel:["apfel","aepfel","äpfel"],kartoffeln:["kartoffel","kartoffeln","speisekartoffeln"],zwiebeln:["zwiebel","zwiebeln"],
  rinderhack:["rinderhack","rinder hack","rinderhackfleisch","rind hack","hackfleisch rind"],hackfleisch:["hackfleisch","gemischtes hack","hack gemischt"],
- haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],energydrink:["energy drink","energydrink","red bull","monster energy"],tiefkuehlpizza:["tiefkühlpizza","tiefkuhlpizza","tk pizza","pizza ristorante","ristorante pizza","dr oetker ristorante"],croissants:["croissant","croissants","französische hörnchen","mini hörnchen","mini hornchen","mini horncher","mini hdrncher","mini hdrnchen"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
+ haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],energydrink:["energy drink","energydrink","red bull","monster energy"],tiefkuehlpizza:["tiefkühlpizza","tiefkuhlpizza","tk pizza","pizza ristorante","ristorante pizza","dr oetker ristorante","oetker ristorante"],croissants:["croissant","croissants","französische hörnchen","mini hörnchen","mini hornchen","mini horncher","mini hdrncher","mini hdrnchen"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
  milch:["milch","vollmilch","frischmilch","haltbare milch","h milch"],kokosmilch:["kokosmilch","kokosnussmilch","kokos milch"],haferdrink:["haferdrink","hafer drink","hafermilch","oat drink","alpro hafer"],
  butter:["butter"],kaese:["käse","kase","kaese","gouda","emmentaler","mozzarella"],streukaese:["streukäse","streukaese","geriebener käse","reibekäse","gratinkäse","pizzakäse"],joghurt:["joghurt","yoghurt"],skyr:["skyr"],quark:["quark","magerquark"],
  nudeln:["nudeln","nudel","pasta","spaghetti","penne","fusilli","hörnchennudeln","hornchennudeln"],reis:["reis","basmatireis","jasminreis"],mehl:["mehl","weizenmehl"],zucker:["zucker"],
@@ -484,7 +484,7 @@ function identifyReceiptProduct(name){
  const n=normalizeProduct(name);let best=null;
  for(const [key,aliases] of Object.entries(productAliases)){for(const alias of aliases){
   const a=normalizeProduct(alias);let score=0,type="none";
-  if(n===a){score=1;type="exact"}else if(n.includes(a)||a.includes(n)){score=.92;type="alias"}else{score=tokenScore(n,a);type="fuzzy"}
+  if(n===a){score=1;type="exact"}else if((" "+n+" ").includes(" "+a+" ")){score=.92;type="alias"}else{score=tokenScore(n,a);type="fuzzy"}
   if(!best||score>best.score)best={key,label:catalog[key]?.label||key,score,type,matched:alias};
  }}
  if(!best||best.score<.58)return {key:null,label:"Nicht sicher erkannt",score:best?.score||0,type:"unknown"};
@@ -548,7 +548,7 @@ function parseWish(raw){
  if(m){amount=parseFloat(m[1].replace(",","."));let u=(m[2]||"stück").toLowerCase(),rest=m[3];explicit=true;
   if(u==="g"||u==="gramm"){amount/=1000;unit="kg"}else if(u==="ml"){amount/=1000;unit="l"}else if(u==="kg"){unit="kg"}else if(u==="l"||u==="liter"){unit="l"}else unit="piece";t=normalizeProduct(rest);}
  t=t.replace(/^(frische|frischer|frisches)\s+/,"").trim();let key=null,best=0;
- for(const [k,aliases] of Object.entries(productAliases)){for(const alias of [k,...aliases]){const a=normalizeProduct(alias);let score=t===a?1:(t.includes(a)||a.includes(t)?0.9:tokenScore(t,a));if(score>best){best=score;key=k}}}
+ for(const [k,aliases] of Object.entries(productAliases)){for(const alias of [k,...aliases]){const a=normalizeProduct(alias);let score=t===a?1:((" "+t+" ").includes(" "+a+" ")?0.9:tokenScore(t,a));if(score>best){best=score;key=k}}}
  if(best<0.72)key=null;const c=key?catalog[key]:null;let calcAmount=amount,note="";
  if(c&&unit==="piece"&&c.unit==="kg"&&c.unitWeight){calcAmount=amount*c.unitWeight;note="≈ "+calcAmount.toFixed(2).replace(".",",")+" kg für Preisvergleich";}
  else if(c&&unit!==c.unit&&c.unit==="piece"){note="Mengenangabe wird als Stück interpretiert";}

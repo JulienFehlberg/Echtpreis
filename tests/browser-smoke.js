@@ -124,6 +124,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  w.applyReceiptText(realPhotoOcr,"Foto");
  assert.strictEqual(w.parseWish("G&G Mini-Hdrnchen").key,"croissants","the EDEKA G&G mini Hörnchen must be treated as filled pastry, not pasta");
  assert.strictEqual(w.parseWish("Kokosmilch").key,"kokosmilch","coconut milk must not become dairy milk");
+ assert.strictEqual(w.parseWish("Mandelmilch").key,null,"an unlisted plant milk must not silently become dairy milk");
+ assert.strictEqual(w.identifyReceiptProduct("Mandelmilch").key,null,"receipt matching must not turn an unlisted plant milk into dairy milk");
  assert.strictEqual(w.parseWish("Streukäse").key,"streukaese","grated cheese must keep its own category");
  assert.strictEqual(w.parseWish("geriebener Käse").key,"streukaese","grated cheese synonyms must map to the same category");
  assert.strictEqual(w.parseWish("Kokosmilch").needsClarification,true,"an unknown coconut milk carton or tin size must not be priced as a full liter");
