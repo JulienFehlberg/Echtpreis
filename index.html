@@ -1991,7 +1991,7 @@ function drawReviewRows(){
  $("reviewRows").innerHTML=receiptDraft.map(r=>{let parts=[];if(r.isAdjustment)parts.push("Belegrabatt");else if(r.isDeposit)parts.push((r.count>1?r.count+" × ":"")+"Pfand");else if(r.count>1)parts.push(r.count+" ×"+(r.unitLinePrice?" "+eur(Number(r.unitLinePrice)):""));return '<div class="reviewrow receipt-item"><div class="receipt-item-name"><b>'+escHtml(r.name||"Unbekannter Artikel")+'</b>'+(parts.length?'<small>'+escHtml(parts.join(" · "))+'</small>':"")+'</div><strong>'+eur(Number(String(r.price||0).replace(",","."))||0)+'</strong></div>'}).join("");
  updateReceiptAnalysis();
 }
-function parseReceiptNumber(v){if(typeof v==="number")return Number.isFinite(v)?v:NaN;return Number(String(v||"").replace(/\./g,"").replace(",","."))}
+function parseReceiptNumber(v){if(typeof v==="number")return Number.isFinite(v)?v:NaN;let s=String(v||"").trim().replace(/[€£]/g,"").replace(/\s+/g,"");if(!s)return NaN;const comma=s.lastIndexOf(","),dot=s.lastIndexOf(".");if(comma>=0&&dot>=0){const decimal=comma>dot?",":".";s=s.replace(decimal===","?/\./g:/,/g,"").replace(decimal,".")}else if(comma>=0)s=s.replace(/\./g,"").replace(",",".");else if(dot>=0){const decimals=s.length-dot-1;if(decimals!==2)s=s.replace(/\./g,"")}return Number(s)}
 function receiptOCRLineTotal(v){const price=parseReceiptNumber(v),raw=String(v||"").trim();return price>=100&&price<10000&&/^-?\d{3,5}(?:[,.]00)?$/.test(raw)?Number((price/100).toFixed(2)):price}
 function inferPackFromName(name){
  let s=String(name||"").toLowerCase().replace(",",".");
@@ -2069,14 +2069,14 @@ function extractReceiptTotal(text){
   const line=lines[i].replace(/(\d)\s*([,.])\s*(\d{2})/g,"$1$2$3");
   const taxRow=line.match(/^\s*[AB]\s*=?\s*\d{1,2}[,.]\d+\s*%\s*(.*)$/i);
   if(taxRow){const values=taxRow[1].match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[];if(values.length>=3){const gross=parseReceiptNumber(values.at(-1).replace(/\s+/g,""));if(Number.isFinite(gross))taxGross.push(gross)}}
-  if(!/\b(?:summe|gesamt(?:betrag)?|zu zahlen)\b/i.test(line))continue;
-  const label=(line.match(/\b(summe|gesamt(?:betrag)?|zu zahlen)\b/i)||[])[1]?.toLowerCase(),same=(line.match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[]).pop();let n=same?parseReceiptNumber(same.replace(/\s+/g,"")):null;
+  if(!/\b(?:summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag)\b/i.test(line))continue;
+  const label=(line.match(/\b(summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag)\b/i)||[])[1]?.toLowerCase(),same=(line.match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[]).pop();let n=same?parseReceiptNumber(same.replace(/\s+/g,"")):null;
   const next=String(lines[i+1]||"");
   if(!(Number.isFinite(n)&&n>0)&&!/\b(?:bar|gegeben|rückgeld|karte|cash)\b/i.test(next)){
    const m=next.match(/(?:€|EUR|£)?\s*(\d{1,5}\s*[,.]\s*\d{2})/);if(m)n=parseReceiptNumber(m[1].replace(/\s+/g,""));
   }
   if(!Number.isFinite(n)||n<=0)continue;if(firstLabeled==null)firstLabeled=n;
-  if(label==="summe"||label==="zu zahlen"){if(primary==null)primary=n}
+  if(label==="summe"||label==="zu zahlen"||label==="zahlbetrag"||label==="endbetrag"){if(primary==null)primary=n}
   else summary=n;
  }
  if(primary!=null&&summary!=null&&taxGross.length>=2){const taxTotal=Number(taxGross.reduce((a,b)=>a+b,0).toFixed(2));if(Math.abs(taxTotal-summary)<=.02&&Math.abs(taxTotal-primary)>.01)return summary}
@@ -2112,7 +2112,7 @@ function detectReceiptDate(text){
 function plausibleReceiptItemName(name){
  const n=normalizeProduct(name),letters=(n.match(/[a-z]/g)||[]).length;
  if(n.length<4||letters<3)return false;
- const noise=/^(?:bar|cash|summe|gesamt|gesamtbetrag|zu zahlen|mwst|netto|brutto|umsatz|steuer|rueckgeld|rückgeld|wechselgeld|eur|kasse|terminal|datum|uhrzeit|gegeben|erhalten|zahlung|kartenzahlung|girocard|visa|mastercard|payback|punkte|beleg|beleg|filiale|bediener|kunde|transaktion|trace|beleg nr|belegnummer)$/;
+ const noise=/^(?:bar(?: gegeben)?|cash|summe|gesamt|gesamtbetrag|zu zahlen|zahlbetrag|endbetrag|mwst|netto|brutto|umsatz|steuer|rueckgeld|rückgeld|wechselgeld|zurueck|zurück|eur|kasse|terminal|datum|uhrzeit|gegeben|erhalten|zahlung|kartenzahlung|girocard|visa|mastercard|maestro|v pay|apple pay|google pay|payback|punkte|beleg|filiale|bediener|kunde|transaktion|trace|beleg nr|belegnummer)$/;
  return !noise.test(n)&&!/^(?:www|tel|telefon|ust id|steuer nr|iban|bic)\b/.test(n);
 }
 function receiptArithmeticTolerance(total){return Math.max(.02,Math.min(.08,Number(total||0)*.002))}
