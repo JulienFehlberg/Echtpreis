@@ -387,7 +387,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  d.querySelector('[data-qty-index="0"][data-qty="1"]').click();
  assert.strictEqual(d.querySelector("#list .qty-stepper b").textContent,"2×","free-text products should still have a pack count");
  const savedCustom=JSON.parse(w.localStorage.getItem("echtpreis_basket_state_v1"))[0];w.replaceEchtpreisList([savedCustom]);
- assert(d.getElementById("list").textContent.includes("Freier Artikel · kein Preisvergleich")&&d.querySelector("#list .qty-stepper b").textContent==="2","free-text item and count should survive a reload");
+ assert(d.getElementById("list").textContent.includes("Eigener Artikel · außerhalb des Preisvergleichs")&&d.querySelector("#list .qty-stepper b").textContent==="2×","free-text item and count should survive a reload");
  assert.strictEqual(await w.compare({skipLocation:true,scroll:false}),false,"a list containing only free-text products must not invent a price comparison");
  assert.strictEqual(w.learnCustomAliasesFromReceipt([{name:"Haribo Schlümpfe",price:1.49,count:1,packAmount:.2,packUnit:"kg"}]),1,"a matching receipt should link a personal nickname to its recognized receipt item");
  const learnedSmurfs=w.parseWish("Schlümpfe");assert.strictEqual(learnedSmurfs.key,"gummibaerchen");assert.strictEqual(learnedSmurfs.label,"Schlümpfe");assert.strictEqual(learnedSmurfs.calcAmount,.2,"learned receipt pack size should inform later estimates");
