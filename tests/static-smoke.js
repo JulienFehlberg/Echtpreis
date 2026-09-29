@@ -331,3 +331,9 @@ assert(html.includes('regularBase=Math.max(0,Number(total||0)+discount)'),"disco
 assert(html.includes('Math.round(discount/regularBase*100)'),"receipt discount insight should calculate a discount rate");
 assert(html.includes('Größter zugeordneter Rabatt:'),"receipt insight should surface the strongest product-linked discount when available");
 assert(html.includes('const linked=new Set')&&html.includes('linked.has(String(i.name||"")+"|"+d.toFixed(2))?0:d'),"receipt discount totals should not double-count linked coupon rows and product discount metadata");
+
+assert(html.includes('paidProducts=receiptRecognizedProductSpend(items)'),"receipt discount insights should base product savings on recognized product spend");
+assert(html.includes('linkedDiscount=linked.reduce'),"receipt discount insights should separate product-linked discounts");
+assert(html.includes('unlinkedDiscount=Math.max(0'),"receipt discount insights should separate general coupons from product-linked savings");
+assert(html.includes('regularProducts=Number((paidProducts+linkedDiscount).toFixed(2))'),"product discount rate should reconstruct regular product spend without deposit contamination");
+assert(html.includes('direkt Produkten zugeordnet')&&html.includes('als allgemeiner Rabatt/Coupon erkannt'),"discount insight copy should distinguish linked and general receipt savings");
