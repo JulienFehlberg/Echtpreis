@@ -90,6 +90,20 @@ const products=(html.match(/label:"/g)||[]).length;assert(products>=30,"primary 
 assert(!html.includes("stableBasket"),"obsolete duplicate basket state must stay removed");
 assert(html.includes("if(dataEngineCache&&dataEngineCacheDay===today)return dataEngineCache"),"normalized observation engine should be cached only for the current day");
 assert(html.includes("priceLookupMemo"),"basket price lookups should be memoized within a comparison");
+
+// v7.204 regression contract: preserve the compact accordion planner the mobile UI now depends on.
+assert(html.includes('body.subview .home-main-actions{display:grid!important}'),"subview must keep the three main accordion actions visible");
+assert(html.includes('.home-main-actions .homeaction[aria-expanded="true"]'),"active accordion action styling missing");
+assert(html.includes('grid-template-columns:22px minmax(0,1fr) auto 16px!important'),"planner row must keep a bounded mobile grid");
+assert(html.includes('#planner .qty-stepper .qty-buttons button{width:27px!important;height:27px!important'),"compact quantity controls regressed");
+assert(html.includes('#planner .pack-count{display:inline-flex!important'),"visible quantity count missing");
+assert(html.includes('#planner #list{contain:layout style!important}'),"long-list layout containment missing");
+assert(html.includes('content-visibility:auto;contain-intrinsic-size:50px'),"long shopping lists should retain viewport rendering optimization");
+assert(html.includes('list-undo-toast'),"destructive list actions must retain undo affordance");
+assert(html.includes('id="receiptCameraFile"'),"camera receipt input missing");
+assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"gallery/PDF receipt input missing");
+assert(html.includes('<span class="version">v7.204.0 RC</span>')&&html.includes('version:"7.204"'),"visible and health-check versions must stay aligned");
+
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
 
 assert(!html.includes("anonymisierte Preisbeobachtungen"),"price observations must not be described as anonymous");
