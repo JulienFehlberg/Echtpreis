@@ -1775,6 +1775,7 @@ function renderStatsTrend(receipts){
 function personalComparablePrice(item){
  const total=Number(item&&item.price)||0,count=Math.max(1,Number(item&&item.count)||1);return total>0?total/count:0;
 }
+function personalRegularComparablePrice(item){const total=Number(item&&item.regularTotal)||Number(item&&item.price)||0,count=Math.max(1,Number(item&&item.count)||1);return total>0?total/count:0}
 function renderStatsCategoryChanges(receipts){
  const box=$("statsCategoryChanges");if(!box)return;const today=new Date(),nowKey=monthKeyOffset(0),prevKey=monthKeyOffset(-1),day=today.getDate(),prevEnd=new Date(today.getFullYear(),today.getMonth(),0).getDate(),cutoff=Math.min(day,prevEnd);
  const rowsFor=(key,maxDay)=>(receipts||[]).filter(r=>{let d=String(r.date||"");return d.startsWith(key)&&Number(d.slice(8,10))<=maxDay});
@@ -2012,7 +2013,7 @@ function parseReceiptText(text){
   if(receiptTotalBoundary(line))break;
   if(receiptFooterNoise(line,receiptStoreHint)){pendingName="";continue}
   if(/\b(?:mwst|netto|umsatz|steuer)\b/i.test(line)||/^\s*[AB]\s*(?:7|19)\s*%/i.test(line))continue;
-  const adjustment=receiptAdjustmentLine(line);if(adjustment){rows.push(adjustment);last=adjustment;pendingName="";pendingMultiple=null;continue}
+  const adjustment=receiptAdjustmentLine(line);if(adjustment){const previous=[...rows].reverse().find(r=>!r.isDeposit&&!r.isAdjustment&&Number(r.price)>0);if(previous){const discount=Math.abs(Number(adjustment.price)||0),paid=Math.max(0,Number((Number(previous.price)-discount).toFixed(2)));previous.regularTotal=Number(previous.regularTotal||previous.price);previous.discount=Number(((Number(previous.discount)||0)+discount).toFixed(2));previous.price=String(paid);adjustment.appliedTo=previous.name;adjustment.linkedToPrevious=true}rows.push(adjustment);last=adjustment;pendingName="";pendingMultiple=null;continue}
   const pendingTotal=line.match(/^(-?\d+[,.]\d{2})\s*(?:€|EUR)?\s*(?:[AB]|[12])?$/i);
   if(pendingMultiple&&pendingTotal){const name=pendingName||pendingMultiple.name;if(name&&plausibleReceiptItemName(name)){let pack=inferPackFromName(name),amount=receiptMultipackTotal(pendingTotal[1],pendingMultiple.count,pendingMultiple.unitPrice,pendingMultiple.isReturn);last=pendingMultiple.isReturn?{name:"Pfand-Rückgabe",price:String(amount),count:Math.abs(pendingMultiple.count),unitLinePrice:pendingMultiple.unitPrice,isDeposit:true,pricingType:"deposit"}:{name:pendingMultiple.isDeposit?"Pfand":name,price:String(amount),count:pendingMultiple.count,unitLinePrice:pendingMultiple.unitPrice,quantitySource:"receipt-multipack",discount:0,regularTotal:amount,...(pendingMultiple.isDeposit?{isDeposit:true,pricingType:"deposit"}:{}),...pack};rows.push(last)}pendingMultiple=null;pendingName="";continue}
   const pendingInline=line.match(/^(.{2,64}?)\s+(-?\d+[,.]\d{2})\s*(?:€|EUR)?\s*(?:[AB]|[12])?$/i);
