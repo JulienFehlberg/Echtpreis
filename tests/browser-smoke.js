@@ -383,7 +383,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  w.replaceEchtpreisList(["Schlümpfe"]);
  assert(d.getElementById("list").textContent.includes("⚠ Artikel nicht erkannt"),"a private nickname should be clearly marked as unknown");
  d.querySelector('[data-custom-index="0"]').click();
- assert(d.getElementById("list").textContent.includes("Freier Artikel · kein Preisvergleich"),"users should be able to keep an unknown product as free text");
+ assert(d.getElementById("list").textContent.includes("Eigener Artikel · außerhalb des Preisvergleichs"),"users should be able to keep an unknown product as free text");
  d.querySelector('[data-qty-index="0"][data-qty="1"]').click();
  assert.strictEqual(d.querySelector("#list .qty-stepper b").textContent,"2×","free-text products should still have a pack count");
  const savedCustom=JSON.parse(w.localStorage.getItem("echtpreis_basket_state_v1"))[0];w.replaceEchtpreisList([savedCustom]);
