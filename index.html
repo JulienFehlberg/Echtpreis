@@ -1168,7 +1168,7 @@ function normalizeSpokenQuantity(raw){
  let s=String(raw||"").trim().replace(/^\s*(?:bitte|noch|dazu|und)\s+/i,"");return s.replace(/^\s*(ein|eine|einen|einem|einer|eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|elf|zwölf|zwoelf)\b/i,m=>{const k=normalizeProduct(m.trim());return String(spokenNumberWords[k]||m)});
 }
 function splitShoppingSpeech(text){
- let s=String(text||"").trim().replace(/[.;]+/g,",").replace(/(\d),(\d)/g,"$1§DEC§$2").replace(/\s+(?:und dann|danach|außerdem|ausserdem)\s+/gi,",").replace(/\s+und\s+/gi,",");
+ let s=String(text||"").trim().replace(/(\d),(\d)/g,"$1§DEC§$2").replace(/[.;]+/g,",").replace(/\s+(?:und dann|danach|außerdem|ausserdem)\s+/gi,",").replace(/\s+und\s+/gi,",");
  const aliases=[...new Set(Object.entries(productAliases).flatMap(([key,rows])=>[catalog[key]?.label,key.replace(/_/g," "),...rows]).filter(Boolean).map(x=>normalizeProduct(x)).filter(Boolean))].map(x=>x.split(" ")).sort((a,b)=>b.length-a.length);
  const splitPart=part=>{
   let source=part.trim();if(!source)return[];
