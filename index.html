@@ -2188,7 +2188,9 @@ function receiptNeedsDeepScan(candidate){
  const products=(candidate.rows||[]).filter(r=>!r.isDeposit&&!r.isAdjustment&&plausibleReceiptItemName(r.name));
  if(!products.length)return true;
  const total=Math.max(0,Number(candidate.total)||0),recognized=Math.max(0,Number(candidate.recognized)||0),coverage=total>0?Math.min(1,recognized/total):0;
- return products.length<3||coverage<.92
+ const unexplained=Math.max(0,total-recognized);
+ const possibleDepositGap=unexplained>=.08&&unexplained<=2&&!candidate.rows.some(r=>r.isDeposit);
+ return products.length<3||coverage<.92||possibleDepositGap
 }
 function combineReceiptCandidates(candidates,metadata){
  const rows=[],seen=new Set();
