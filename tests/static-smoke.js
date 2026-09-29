@@ -259,3 +259,10 @@ assert(html.includes('multiPack={count,amount:size*factor,unit,label'),"multipac
 assert(html.includes('wish.packCount=multiPack.count')&&html.includes('wish.amount=multiPack.count*multiPack.amount'),"multipacks should calculate total comparison quantity from pack count and pack size");
 assert(html.includes('packungen?|packs?'),"shopping parser should accept natural pack/Packungen wording");
 assert(html.includes('return multiPack?wish:initializePackageQuantity(wish)'),"explicit multipacks should not be overwritten by standard package inference");
+
+assert(html.includes('function receiptItemUnits(item)')&&html.includes('item?.quantity||item?.qty||item?.count||item?.packCount'),"receipt-plan comparison should read explicit receipt quantities");
+assert(html.includes('fulfilledUnits:Math.min(plannedCount,bought)')&&html.includes('shortUnits:Math.max(0,plannedCount-bought)'),"receipt-plan comparison should measure partial fulfillment");
+assert(html.includes('extraUnits:Math.max(0,bought-plannedCount)'),"receipt-plan comparison should detect buying more packs than planned");
+assert(html.includes('Math.round(fulfilledUnits/plannedUnits*100)'),"plan adherence percentage should be based on fulfilled units, not merely matching product rows");
+assert(html.includes('Nur teilweise gekauft')&&html.includes('Mehr als geplant'),"plan-vs-receipt UI should explain under- and over-buying");
+assert(html.includes('von "+x.plannedUnits+" Pack."'),"partial purchases should show bought versus planned pack counts");
