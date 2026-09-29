@@ -48,7 +48,7 @@ function responseText(response) {
 function normalizeReceipt(result) {
   const total = Number(result.total);
   const items = (Array.isArray(result.items) ? result.items : []).slice(0, 250).flatMap(item => {
-    const name = String(item.name || "").trim().slice(0, 120);
+    const name = String(item.name || "").replace(/\s+/g," ").trim().slice(0, 120);
     const lineTotal = Number(item.line_total);
     const count = Number(item.count);
     const unitPrice = Number(item.unit_price);
@@ -62,7 +62,7 @@ function normalizeReceipt(result) {
   });
   if (!Number.isFinite(total) || total <= 0 || total > 100000) throw new Error("KI konnte die aufgedruckte Gesamtsumme nicht sicher lesen.");
   const rawDate=String(result.date||"");let date="";if(/^20\d\d-\d\d-\d\d$/.test(rawDate)){const p=rawDate.split("-").map(Number),d=new Date(Date.UTC(p[0],p[1]-1,p[2]));if(d.getUTCFullYear()===p[0]&&d.getUTCMonth()===p[1]-1&&d.getUTCDate()===p[2])date=rawDate}
-  return { merchant: String(result.merchant || "").trim().slice(0, 80), date, total: Number(total.toFixed(2)), items };
+  return { merchant: String(result.merchant || "").replace(/\s+/g," ").trim().slice(0, 80), date, total: Number(total.toFixed(2)), items };
 }
 
 async function readReceiptWithVision(images, { apiKey = process.env.OPENAI_API_KEY, model = process.env.OPENAI_RECEIPT_MODEL || "gpt-5-mini", fetchImpl = fetch } = {}) {
