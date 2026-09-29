@@ -241,3 +241,9 @@ assert(html.includes('v7.202 supermarket interaction + quantity clarity'),"plann
 assert(html.includes('aria-label="Eine Packung '+name+' weniger"')&&html.includes('aria-label="Eine Packung '+name+' mehr"'),"quantity controls should expose product-specific accessible labels");
 assert(html.includes('basketItemSignature(w)')&&html.includes('duplicate.packCount=Math.max(1,Number(duplicate.packCount)||1)+1'),"duplicate shopping items should merge into pack quantity instead of creating duplicate rows");
 assert(html.includes('#planner .qty-buttons button{touch-action:manipulation!important}'),"quantity buttons should be optimized for touch shopping");
+
+assert(html.includes('v7.203 long-list stability + undo safety'),"planner should include long-list rendering and undo safety");
+assert(html.includes('function clearUndoState()')&&html.includes('Math.min(Math.max(0,restoreIndex),basket.length)'),"undo should restore safely even after list positions change");
+assert(html.includes('if(!Number.isInteger(i)||i<0||i>=basket.length)return'),"delete handler should reject stale or invalid list indices");
+assert(html.includes('content-visibility:auto')&&html.includes('contain-intrinsic-size:50px'),"long shopping lists should avoid unnecessary offscreen rendering work");
+assert(html.includes('@media(prefers-reduced-motion:reduce)')&&html.includes('.list-undo-toast{transition:none!important}'),"planner motion should respect reduced-motion preferences");
