@@ -231,4 +231,8 @@ assert(!html.includes('<span>ðŸ§¾</span>Beleg scannen')&&!html.includes('<span>ð
 assert(html.includes('home action collision fix')&&html.includes('.homeaction .homeaction-copy{width:auto!important;height:auto!important'),"nested home action copy must override legacy span sizing");
 assert(html.includes('.homeaction>.ep-icon'),"icon sizing must target only the direct icon child");
 
-assert(html.includes('<span class="version">v5.198.0</span>'),"visible app version should be v5.198.0");
+assert(html.includes('v7.201 planner viewport + compact quantity pass'),"planner should include the compact viewport regression guard");
+assert(html.includes('#planner #list{max-width:100%!important;overflow:hidden!important}'),"shopping list must not overflow the phone viewport");
+assert(html.includes('grid-template-columns:22px minmax(0,1fr) auto 16px'),"planner rows should reserve flexible product space instead of oversized fixed controls");
+assert(html.includes('@media(max-width:430px)')&&html.includes('#planner .planner-main{padding:12px!important}'),"planner should become denser on phone widths");
+assert(html.includes('<span class="version">v7.200.0 RC</span>'),"visible app version should be v7.200.0 RC");
