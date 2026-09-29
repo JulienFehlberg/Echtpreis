@@ -290,3 +290,11 @@ assert(html.includes('replace(/\\be\\s*d\\s*e\\s*k\\s*a\\b/g,"edeka")'),"merchan
 assert(html.includes('replace(/\\bp\\s*e\\s*n\\s*n\\s*y\\b/g,"penny")'),"merchant OCR should recover spaced PENNY logos");
 assert(html.includes('replace(/\\ba\\s+l\\s+d\\s+i\\b/g,"aldi")'),"merchant OCR should recover spaced ALDI logos");
 assert(html.includes('kaufland\\.de|kaufland-card')&&html.includes('edeka\\.de')&&html.includes('penny\\.de'),"merchant detection should use strong chain-specific receipt markers");
+
+assert(html.includes('function receiptTotalBoundary(line)')&&html.includes('zahlbetrag|endbetrag'),"receipt item parsing should stop at authoritative German total labels");
+assert(html.includes('function receiptFooterNoise(line,store="")'),"receipt parser should explicitly filter footer/payment noise");
+assert(html.includes('const receiptStoreHint=detectReceiptStore(text)'),"receipt parsing should use merchant context for chain-specific noise filtering");
+assert(html.includes('Kaufland:/^(?:kaufland card|k-card|treuepunkte|punkte)/'),"Kaufland loyalty footer text should not become product rows");
+assert(html.includes('EDEKA:/^(?:deutschlandcard|genusspunkte|edeka app)/'),"EDEKA loyalty footer text should not become product rows");
+assert(html.includes('PENNY:/^(?:payback|penny app|oecobon|ecobon)/'),"PENNY loyalty footer text should not become product rows");
+assert(html.includes('ALDI:/^(?:aldi app|aldi talk)/'),"ALDI footer text should not become product rows");
