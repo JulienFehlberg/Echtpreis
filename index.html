@@ -1216,11 +1216,15 @@ function groceryMatchIsSafe(term,key,score){
  return tokens.length>1&&score>=.84;
 }
 function parseWish(raw){
- const original=normalizeSpokenQuantity(String(raw||"").trim()),normalized=normalizeProduct(original);let amount=1,unit="piece",explicit=false,t=normalized,displayTerm=original; if(isClearlyNonGrocery(original)){let w={raw:original,label:original,amount:1,unit:"piece",calcAmount:1,key:null,matched:false,note:"",explicit:false,matchMode:"custom",customItem:true,needsClarification:false,needsQuantity:false,resolvedKey:null,choice:{}};return keepCustomItem(w,1)}
+ const original=normalizeSpokenQuantity(String(raw||"").trim()),normalized=normalizeProduct(original);let amount=1,unit="piece",explicit=false,t=normalized,displayTerm=original,multiPack=null;if(isClearlyNonGrocery(original)){let w={raw:original,label:original,amount:1,unit:"piece",calcAmount:1,key:null,matched:false,note:"",explicit:false,matchMode:"custom",customItem:true,needsClarification:false,needsQuantity:false,resolvedKey:null,choice:{}};return keepCustomItem(w,1)}
  const rawForAmount=original.toLowerCase().replace(/ß/g,"ss").trim();
- let m=rawForAmount.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x)?\s+(.+)$/i);
- if(m){amount=parseFloat(m[1].replace(",","."));let u=(m[2]||"stück").toLowerCase(),rest=m[3];displayTerm=(original.match(/^\d+(?:[.,]\d+)?\s*(?:kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x)?\s+(.+)$/i)||[])[1]?.trim()||rest.trim();explicit=true;
-  if(u==="g"||u==="gramm"){amount/=1000;unit="kg"}else if(u==="ml"){amount/=1000;unit="l"}else if(u==="kg"){unit="kg"}else if(u==="l"||u==="liter"){unit="l"}else unit="piece";t=normalizeProduct(rest);}
+ let multi=rawForAmount.match(/^(\d+)\s*(?:x|×|packungen?|packs?)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)\s+(.+)$/i);
+ if(multi){const count=Math.max(1,parseInt(multi[1],10)),size=parseFloat(multi[2].replace(",",".")),u=multi[3].toLowerCase(),rest=multi[4];const factor=(u==="g"||u==="ml")?.001:1;unit=(u==="g"||u==="kg")?"kg":"l";amount=count*size*factor;explicit=true;multiPack={count,amount:size*factor,unit,label:size.toLocaleString("de-DE")+" "+u};displayTerm=rest.trim();t=normalizeProduct(rest)}
+ else{
+  let m=rawForAmount.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x|packungen?|packs?)?\s+(.+)$/i);
+  if(m){amount=parseFloat(m[1].replace(",","."));let u=(m[2]||"stück").toLowerCase(),rest=m[3];displayTerm=rest.trim();explicit=true;
+   if(u==="g"||u==="gramm"){amount/=1000;unit="kg"}else if(u==="ml"){amount/=1000;unit="l"}else if(u==="kg"){unit="kg"}else if(u==="l"||u==="liter"){unit="l"}else unit="piece";t=normalizeProduct(rest);}
+ }
  t=t.replace(/^(frische|frischer|frisches)\s+/,"").trim();let key=null,best=0;
  for(const [k,aliases] of Object.entries(productAliases)){for(const alias of [k,...aliases]){const a=normalizeProduct(alias);let score=t===a?1:((" "+t+" ").includes(" "+a+" ")?0.9:tokenScore(t,a));if(score>best){best=score;key=k}}}
  const learned=learnedMatch(t);if(learned&&(!key||learned.score>=best)){key=learned.key;best=learned.score}
@@ -1228,7 +1232,10 @@ function parseWish(raw){
  if(c&&unit==="piece"&&c.unit==="kg"&&c.unitWeight){calcAmount=amount*c.unitWeight;note="≈ "+calcAmount.toFixed(2).replace(".",",")+" kg für Preisvergleich";}
  else if(c&&unit!==c.unit&&c.unit==="piece"){note="Mengenangabe wird als Stück interpretiert";}
  const exactBrand=exactBrandNames.find(b=>normalized.includes(normalizeProduct(b)))||"";
- let wish=hydrateChoice({raw:original,label:c?(learned?.aliasRaw||c.label):(displayTerm||original),amount,unit,calcAmount,key,matched:!!c,note,explicit,matchMode:learned?"learned":exactBrand?"exact":"comparable",exactBrand,learnedAlias:!!learned,learnedPackage:learned?learnedPackSize(learned.quantity,c?.unit):null});if(learned&&c?.unit!=="piece"&&!c?.unitWeight&&!wish.learnedPackage){wish.needsQuantity=true;wish.needsClarification=true}return initializePackageQuantity(wish);
+ let wish=hydrateChoice({raw:original,label:c?(learned?.aliasRaw||c.label):(displayTerm||original),amount,unit,calcAmount,key,matched:!!c,note,explicit,matchMode:learned?"learned":exactBrand?"exact":"comparable",exactBrand,learnedAlias:!!learned,learnedPackage:multiPack||learned?multiPack||(learned?learnedPackSize(learned.quantity,c?.unit):null):null});
+ if(multiPack){wish.packCount=multiPack.count;wish.packAmount=multiPack.amount;wish.packUnit=multiPack.unit;wish.packLabel=multiPack.label;wish.quantityMode="packages";wish.amount=multiPack.count*multiPack.amount;wish.unit=multiPack.unit;wish.calcAmount=wish.amount;wish.needsQuantity=false}
+ if(learned&&c?.unit!=="piece"&&!c?.unitWeight&&!wish.learnedPackage){wish.needsQuantity=true;wish.needsClarification=true}
+ return multiPack?wish:initializePackageQuantity(wish);
 }
 function shoppingProductTerm(raw){return normalizeProduct(normalizeSpokenQuantity(raw)).replace(/^\d+(?:[.,]\d+)?\s*(?:kg|g|gramm|l|liter|ml|stuck|stueck|stk|x)?\s+/,"").trim()}
 function productCandidates(raw){
