@@ -319,6 +319,7 @@ assert(html.includes('replace(/\\bl\\s*i\\s*d\\s*l\\b/g,"lidl")'),"merchant OCR 
 assert(html.includes('replace(/\\bn\\s*e\\s*t\\s*t\\s*o\\b/g,"netto")'),"merchant OCR should recover spaced Netto logos");
 assert(html.includes('replace(/\\br\\s*o\\s*s\\s*m\\s*a\\s*n\\s*n\\b/g,"rossmann")'),"merchant OCR should recover spaced Rossmann logos");
 assert(html.includes('replace(/\\bn\\s*o\\s*r\\s*m\\s*a\\b/g,"norma")'),"merchant OCR should recover spaced NORMA logos");
+assert(html.includes('replace(/\\bm\\s*a\\s*r\\s*k\\s*t\\s*k\\s*a\\s*u\\s*f\\b/g,"marktkauf")')&&html.includes('replace(/\\bg\\s*l\\s*o\\s*b\\s*u\\s*s\\b/g,"globus")')&&html.includes('replace(/\\bt\\s*e\\s*g\\s*u\\s*t\\b/g,"tegut")'),"merchant OCR should recover spaced Marktkauf, Globus and tegut logos");
 assert(html.includes('kaufland\\.de|kaufland-card')&&html.includes('edeka\\.de')&&html.includes('penny\\.de'),"merchant detection should use strong chain-specific receipt markers");
 
 assert(html.includes('function receiptTotalBoundary(line)')&&html.includes('zahlbetrag|endbetrag'),"receipt item parsing should stop at authoritative German total labels");
