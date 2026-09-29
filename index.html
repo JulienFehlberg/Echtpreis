@@ -70,7 +70,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 </head>
 <body><main class="app">
-<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.138.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS</div><span class="version">v5.139.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -352,17 +352,30 @@ function retailerFromLocation(x){
  for(const [name,needle] of chains)if(t.includes(needle))return name;return null;
 }
 function normalizePer(p){p=String(p||"").toUpperCase();if(["KG","KILOGRAM"].includes(p))return"kg";if(["L","LITER"].includes(p))return"l";if(["UNIT","PIECE"].includes(p))return"piece";return null}
+function openPriceComparable(x,item){
+ const per=normalizePer(x.price_per),price=Number(x.price);
+ if(!(price>0))return null;
+ if(per===item.unit)return {price,per};
+ if(per!=="piece"||item.unit==="piece")return null;
+ const product=x.product||{},value=Number(product.product_quantity),unit=String(product.product_quantity_unit||"").toLowerCase();
+ let amount=value,quantityUnit=unit;
+ if(!(amount>0)||!quantityUnit){const m=String(product.quantity||"").match(/(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)\b/i);if(!m)return null;amount=Number(m[1].replace(",","."));quantityUnit=m[2].toLowerCase()}
+ if(item.unit==="kg"&&quantityUnit==="g"||item.unit==="l"&&quantityUnit==="ml")amount/=1000;
+ else if(quantityUnit!==item.unit)return null;
+ if(!(amount>0))return null;
+ return {price:Number((price/amount).toFixed(4)),per:item.unit};
+}
 async function ingestOpenPrices(force=false,keys=null){
- const syncKey="echtpreis_openprices_sync_by_key_v1",sync=loadJson(syncKey,{}),now=Date.now(),wanted=keys?new Set(keys.filter(Boolean)):null;
+ const syncKey="echtpreis_openprices_sync_by_key_v2",sync=loadJson(syncKey,{}),now=Date.now(),wanted=keys?new Set(keys.filter(Boolean)):null;
  const entries=Object.entries(catalog).filter(([key,item])=>item.openPricesCategory&&(!wanted||wanted.has(key))).filter(([key])=>force||!sync[key]||now-Number(sync[key])>=6*60*60*1000);
  if(!entries.length){dataMachineState.openPrices="Cache aktuell";dataMachineState.lastSync=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});drawDataMachine();return}
  const fresh=[],successfulKeys=new Set();dataMachineState.loaded=0;dataMachineState.rejected=0;
  const jobs=entries.map(async([key,item])=>{
-  const url="https://prices.openfoodfacts.org/api/v1/prices?category_tag="+encodeURIComponent(item.openPricesCategory)+"&currency=EUR&size=50&order_by=-date";
-  const r=await fetch(url);if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json(),items=d.items||d.results||[];successfulKeys.add(key);
-  items.forEach(x=>{const store=retailerFromLocation(x),per=normalizePer(x.price_per),country=(x.location?.osm_address_country_code||"").toLowerCase();
-   if(!store||per!==item.unit||(country&&country!=="de")||!x.proof_id){dataMachineState.rejected++;return}
-   const o=normalizeObservation({key,store,price:+x.price,per,date:String(x.date||"").slice(0,10),region:x.location?.osm_address_city||"Deutschland",kind:"openprices",source:"Open Prices",product:x.product?.product_name||x.product_name||item.label,proof:"op:"+x.proof_id,locationId:x.location_id,trust:75});
+  const category=encodeURIComponent(item.openPricesCategory),queries=["category_tag=","product__categories_tags__contains="],answers=await Promise.allSettled(queries.map(async filter=>{const r=await fetch("https://prices.openfoodfacts.org/api/v1/prices?"+filter+category+"&currency=EUR&size=100&order_by=-date");if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json();return d.items||d.results||[]}));
+  if(!answers.some(a=>a.status==="fulfilled"))throw new Error("Kategorie nicht erreichbar");successfulKeys.add(key);
+  answers.filter(a=>a.status==="fulfilled").flatMap(a=>a.value).forEach(x=>{const store=retailerFromLocation(x),comparable=openPriceComparable(x,item),country=(x.location?.osm_address_country_code||"").toLowerCase();
+   if(!store||!comparable||country!=="de"||!x.proof_id){dataMachineState.rejected++;return}
+   const o=normalizeObservation({key,store,price:comparable.price,per:comparable.per,date:String(x.date||"").slice(0,10),region:x.location?.osm_address_city||"Deutschland",kind:"openprices",source:"Open Prices",product:x.product?.product_name||x.product_name||item.label,proof:"op:"+x.proof_id,locationId:x.location_id,trust:75});
    if(usableObservation(o)){fresh.push(o);dataMachineState.loaded++}else dataMachineState.rejected++;
   });
  });
