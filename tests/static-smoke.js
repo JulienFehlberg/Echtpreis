@@ -251,3 +251,7 @@ assert(html.includes('class="ep-icon"')&&html.includes('<svg viewBox="0 0 24 24"
 assert(html.includes('Einkauf in Sekunden verstehen')&&html.includes('Preise vergleichen &amp; sparen')&&html.includes('Einkaufsverhalten verstehen'),"home action copy should be concise and benefit-led");
 assert(html.includes('grid-template-columns:48px minmax(0,1fr) 18px'),"home actions should use compact single-row mobile hierarchy");
 assert(!html.includes('<span>🧾</span>Beleg scannen')&&!html.includes('<span>🛒</span>Einkaufsliste')&&!html.includes('<span>📊</span>Meine Statistik'),"legacy emoji home navigation must not return");
+
+assert(html.includes('v5.194.1'),"expected app version v5.194.1");
+assert(html.includes('home action collision fix')&&html.includes('.homeaction .homeaction-copy{width:auto!important;height:auto!important'),"nested home action copy must override legacy span sizing");
+assert(html.includes('.homeaction>.ep-icon'),"icon sizing must target only the direct icon child");
