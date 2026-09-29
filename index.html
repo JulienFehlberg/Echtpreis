@@ -1168,7 +1168,7 @@ function normalizeSpokenQuantity(raw){
  let s=String(raw||"").trim().replace(/^\s*(?:bitte|noch|dazu|und)\s+/i,"");return s.replace(/^\s*(ein|eine|einen|einem|einer|eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|elf|zwölf|zwoelf)\b/i,m=>{const k=normalizeProduct(m.trim());return String(spokenNumberWords[k]||m)});
 }
 function splitShoppingSpeech(text){
- let s=String(text||"").trim().replace(/[.;]+/g,",").replace(/\s+(?:und dann|danach|außerdem|ausserdem)\s+/gi,",").replace(/\s+und\s+/gi,",");
+ let s=String(text||"").trim().replace(/[.;]+/g,",").replace(/(\d),(\d)/g,"$1§DEC§$2").replace(/\s+(?:und dann|danach|außerdem|ausserdem)\s+/gi,",").replace(/\s+und\s+/gi,",");
  const aliases=[...new Set(Object.entries(productAliases).flatMap(([key,rows])=>[catalog[key]?.label,key.replace(/_/g," "),...rows]).filter(Boolean).map(x=>normalizeProduct(x)).filter(Boolean))].map(x=>x.split(" ")).sort((a,b)=>b.length-a.length);
  const splitPart=part=>{
   let source=part.trim();if(!source)return[];
@@ -1185,7 +1185,7 @@ function splitShoppingSpeech(text){
   for(const match of matches){let words=tokens.slice(previousEnd,match.end).map(x=>x.raw);if(words.length)rows.push(normalizeSpokenQuantity(words.join(" ")));previousEnd=match.end}
   return rows;
  };
- return s.split(/\s*,\s*/).flatMap(splitPart).map(x=>x.trim()).filter(Boolean);
+ return s.split(/\s*,\s*/).flatMap(splitPart).map(x=>x.replace(/§DEC§/g,",").trim()).filter(Boolean);
 }
 const standardPackSizes={
  milch:{amount:1,unit:"l",label:"1 l"},haferdrink:{amount:1,unit:"l",label:"1 l"},kokosmilch:{amount:.4,unit:"l",label:"400 ml"},wasser:{amount:1.5,unit:"l",label:"1,5 l"},cola:{amount:1.5,unit:"l",label:"1,5 l"},orangensaft:{amount:1,unit:"l",label:"1 l"},apfelsaft:{amount:1,unit:"l",label:"1 l"},multivitaminsaft:{amount:1,unit:"l",label:"1 l"},limonade:{amount:1.5,unit:"l",label:"1,5 l"},eistee:{amount:1.5,unit:"l",label:"1,5 l"},sahne:{amount:.2,unit:"l",label:"200 ml"},kefir:{amount:.5,unit:"l",label:"500 ml"},eis:{amount:.5,unit:"l",label:"500 ml"},oel:{amount:1,unit:"l",label:"1 l"},olivenoel:{amount:.5,unit:"l",label:"500 ml"},essig:{amount:.5,unit:"l",label:"500 ml"},wodka:{amount:.7,unit:"l",label:"700 ml"},bier:{amount:.5,unit:"l",label:"500 ml"},energydrink:{amount:.25,unit:"l",label:"250 ml"},
