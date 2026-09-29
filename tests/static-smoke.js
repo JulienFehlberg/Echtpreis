@@ -187,3 +187,11 @@ assert(html.includes('Nur Bons mit vorher gespeichertem Einkaufsplan'),"monthly 
 assert(html.includes('id="statsImpulseRoutine"')&&html.includes('Vom Spontankauf zur Routine'),"stats should detect extras that later become planned purchases");
 assert(html.includes('erstmals ungeplant')&&html.includes('in einem geplanten Einkauf wiedergefunden'),"impulse-to-routine explanation should be explicit");
 assert(html.includes('v5.185.0'),"expected app version v5.185.0");
+
+assert(html.includes('personalPriceMemoryForWish')&&html.includes('dein typischer Preis'),"shopping list should surface personal price memory");
+assert(html.includes('Gegen dein Preisgedächtnis'),"market comparison should explain unusual prices against personal history");
+assert(html.includes('m.count<2||p.reference'),"personal unusual-price claims must require repeated purchases and non-reference prices");
+assert(html.includes('Math.abs(delta)<.12'),"market detail should ignore small personal price deviations");
+assert(html.includes('id="statsPriceVolatility"')&&html.includes('Wo deine Preise stark schwanken'),"stats should identify products with meaningful personal price volatility");
+assert(html.includes('x.prices.length>=3')&&html.includes('x.spread>=.15'),"price volatility should require at least three purchases and meaningful spread");
+assert(html.includes('v5.186.0'),"expected app version v5.186.0");
