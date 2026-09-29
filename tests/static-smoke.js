@@ -325,3 +325,9 @@ assert(html.includes('function receiptUnassignedAmount(total,rows)'),"unassigned
 assert(html.includes('Math.max(0,Number((Number(total||0)-receiptRecognizedTotal(rows)).toFixed(2)))'),"unassigned receipt amount should never become negative after OCR overreads");
 assert(html.includes('unassignedAmount:receiptArithmeticVerified?0:receiptUnassignedAmount(total,receiptDraft)'),"receipt preview should use canonical unassigned arithmetic");
 assert(html.includes('unassignedAmount=receiptArithmeticVerified?0:receiptUnassignedAmount(total,receiptLines)'),"saved receipts should use canonical unassigned arithmetic");
+
+assert(html.includes('function receiptDiscountStory(items,total)'),"receipt insights should derive a structured discount story");
+assert(html.includes('regularBase=Math.max(0,Number(total||0)+discount)'),"discount story should estimate the pre-discount receipt basis");
+assert(html.includes('Math.round(discount/regularBase*100)'),"receipt discount insight should calculate a discount rate");
+assert(html.includes('Größter zugeordneter Rabatt:'),"receipt insight should surface the strongest product-linked discount when available");
+assert(html.includes('const linked=new Set')&&html.includes('linked.has(String(i.name||"")+"|"+d.toFixed(2))?0:d'),"receipt discount totals should not double-count linked coupon rows and product discount metadata");
