@@ -291,7 +291,7 @@ body.subview #planner,body.subview #receipt,body.subview #statsCard{scroll-margi
 #planner .item .qty[role="status"]{line-height:1.25!important}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.204.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.205.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
@@ -854,13 +854,24 @@ function updatePackageChoice(w){if(!w?.quantityMode)return initializePackageQuan
 function isClearlyNonGrocery(raw){
  const n=normalizeProduct(String(raw||""));
  const blocked=[
-  /\b(fahrrad|bike|e bike|ebike|roller|scooter|auto|reifen|felge)\b/,
-  /\b(jogginghose|hose|jeans|shirt|t shirt|pullover|hoodie|jacke|schuhe|socken|unterhose|kleid|mütze|cap)\b/,
-  /\b(fernseher|tv|laptop|computer|monitor|tablet|handy|smartphone|kopfhörer|lautsprecher|playstation|xbox)\b/,
-  /\b(bohrmaschine|akkuschrauber|hammer|säge|werkzeug|schraubenzieher|bohrer)\b/,
-  /\b(sofa|couch|schrank|tisch|stuhl|bett|matratze|lampe|teppich)\b/
+  /\b(fahrrad|bike|e bike|ebike|roller|scooter|auto|reifen|felge|helm)\b/,
+  /\b(jogginghose|hose|jeans|shirt|t shirt|pullover|hoodie|jacke|schuhe|socken|unterhose|kleid|mütze|cap|gürtel|rucksack|handtasche)\b/,
+  /\b(fernseher|tv|laptop|computer|monitor|tablet|handy|smartphone|kopfhörer|lautsprecher|playstation|xbox|drucker|kamera)\b/,
+  /\b(bohrmaschine|akkuschrauber|hammer|säge|werkzeug|schraubenzieher|bohrer|schrauben|nägel)\b/,
+  /\b(sofa|couch|schrank|tisch|stuhl|bett|matratze|lampe|teppich|regal|kommode)\b/,
+  /\b(fußball|fussball|basketball|hantel|kurzhantel|yogamatte|tennisschläger|tennisschlaeger)\b/,
+  /\b(buch|roman|zeitschrift|spielzeug|lego|puzzle|brettspiel)\b/
  ];
  return blocked.some(r=>r.test(n));
+}
+function groceryMatchIsSafe(term,key,score){
+ if(!key||!catalog[key])return false;
+ const q=normalizeProduct(term),tokens=q.split(/\s+/).filter(Boolean);
+ if(score>=.90)return true;
+ const aliases=[key,catalog[key].label,...(productAliases[key]||[])].map(normalizeProduct);
+ if(aliases.some(a=>q===a))return true;
+ if(score>=.80&&aliases.some(a=>a.length>=4&&((" "+q+" ").includes(" "+a+" ")||(" "+a+" ").includes(" "+q+" "))))return true;
+ return tokens.length>1&&score>=.84;
 }
 function parseWish(raw){
  const original=normalizeSpokenQuantity(String(raw||"").trim()),normalized=normalizeProduct(original);let amount=1,unit="piece",explicit=false,t=normalized,displayTerm=original; if(isClearlyNonGrocery(original)){let w={raw:original,label:original,amount:1,unit:"piece",calcAmount:1,key:null,matched:false,note:"",explicit:false,matchMode:"custom",customItem:true,needsClarification:false,needsQuantity:false,resolvedKey:null,choice:{}};return keepCustomItem(w,1)}
@@ -871,7 +882,7 @@ function parseWish(raw){
  t=t.replace(/^(frische|frischer|frisches)\s+/,"").trim();let key=null,best=0;
  for(const [k,aliases] of Object.entries(productAliases)){for(const alias of [k,...aliases]){const a=normalizeProduct(alias);let score=t===a?1:((" "+t+" ").includes(" "+a+" ")?0.9:tokenScore(t,a));if(score>best){best=score;key=k}}}
  const learned=learnedMatch(t);if(learned&&(!key||learned.score>=best)){key=learned.key;best=learned.score}
- if(best<0.72)key=null;const c=key?catalog[key]:null;let calcAmount=amount,note="";
+ if(best<0.72||!groceryMatchIsSafe(t,key,best))key=null;const c=key?catalog[key]:null;let calcAmount=amount,note="";
  if(c&&unit==="piece"&&c.unit==="kg"&&c.unitWeight){calcAmount=amount*c.unitWeight;note="≈ "+calcAmount.toFixed(2).replace(".",",")+" kg für Preisvergleich";}
  else if(c&&unit!==c.unit&&c.unit==="piece"){note="Mengenangabe wird als Stück interpretiert";}
  const exactBrand=exactBrandNames.find(b=>normalized.includes(normalizeProduct(b)))||"";
