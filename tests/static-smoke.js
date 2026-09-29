@@ -210,3 +210,11 @@ assert(html.includes('Bon-Gesamtsumme')&&html.includes('maßgebliche Ausgabe'),"
 assert(html.includes('Dieser Bon hat ECHTPREIS beigebracht'),"saved receipt should explain the value learned from scanning");
 assert(html.includes('history.length?"💡 "+history[0].title'),"home pulse should lead with the latest personal shopping discovery");
 assert(html.includes('v5.188.0'),"expected app version v5.188.0");
+
+assert(html.includes('Beim nächsten Einkauf')&&html.includes('receiptNextMove'),"receipt analysis should turn insight into a concrete next-shopping action");
+assert(html.includes('außerhalb deiner Liste dazu')&&html.includes('gehören sie vielleicht künftig bewusst auf die Liste'),"next move should learn from unplanned extras without auto-adding them");
+assert(html.includes('Behalte ')&&html.includes('besonders im Blick'),"next move should flag personally expensive repeat products");
+assert(html.includes('id="shoppingMemory"')&&html.includes('Dein Preisgedächtnis'),"home should visualize real knowledge accumulated from receipts");
+assert(html.includes('wiederkehrende Produkte')&&html.includes('mit eigener Preishistorie'),"shopping memory should use evidence-based progress metrics");
+assert(html.includes('Keine Punkte – nur Wissen aus deinen eigenen Einkäufen'),"shopping memory should not invent a gamified quality score");
+assert(html.includes('v5.189.0'),"expected app version v5.189.0");
