@@ -104,7 +104,7 @@ assert(html.includes('id="receiptCameraFile"'),"camera receipt input missing");
 assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"gallery/PDF receipt input missing");
 assert(html.includes('accordionNavigation:["homeReceipt","homePlan","homeStats"].every'),"runtime health check must verify accordion navigation");
 assert(html.includes("plannerViewport:!!document.querySelector('meta[name=\"viewport\"]')".replaceAll("\\\"","\"")),"runtime health check must verify planner viewport shell");
-assert(html.includes('<span class="version">v7.214.0 RC</span>')&&html.includes('version:"7.214"'),"visible and health-check versions must stay aligned");
+assert(html.includes('<span class="version">v7.215.0 RC</span>')&&html.includes('version:"7.215"'),"visible and health-check versions must stay aligned");
 
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
 
@@ -503,3 +503,8 @@ assert(html.includes("receiptCrop(file,crop,lang,psm,contrast=1.75)"),"receipt c
 // v7.214 adaptive contrast OCR guard
 assert(html.includes('"Kontrastarmer Beleg wird nachgeschärft …"')&&html.includes('receiptCrop(scanFile,fullArea,"deu",6,2.35)'),"weak full-receipt reads must receive one targeted high-contrast OCR fallback");
 assert(html.includes("best=betterReceiptCandidate(best,contrastCandidate);best=betterReceiptCandidate(best,combined)"),"high-contrast OCR must only win through receipt-quality ranking");
+
+// v7.215 scan race guard
+assert(html.includes("let receiptScanRevision=0;")&&html.includes("function receiptScanCurrent(revision)"),"receipt scanning must maintain a revision token so stale OCR cannot overwrite a newer scan");
+assert(html.includes("async function runImageReceiptOCR(file,scanRevision=++receiptScanRevision)")&&html.includes("if(!receiptScanCurrent(scanRevision))return;"),"OCR stages must stop when their scan revision is stale");
+assert(html.includes("const scanRevision=++receiptScanRevision;"),"every processReceiptFile invocation must invalidate older scan work immediately");
