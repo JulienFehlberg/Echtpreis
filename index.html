@@ -356,9 +356,16 @@ body.subview #planner,body.subview #receipt,body.subview #statsCard{scroll-margi
  #planner .qty-stepper,#planner .pack-edit{width:116px!important;min-width:116px!important;max-width:116px!important}
  #planner .pack-edit b{font-size:8.8px!important}
 }
+</style><style>
+/* v5.211 */
+#planner .item{grid-template-columns:24px minmax(0,1fr) 70px 16px!important;gap:10px!important}
+#planner .qty-stepper{width:70px!important;min-width:70px!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:5px!important}
+#planner .pack-count{font-size:12px!important;line-height:1!important;font-weight:850!important;min-width:0!important}
+#planner .qty-buttons{width:auto!important;display:flex!important;gap:4px!important}
+#planner .qty-stepper .qty-buttons button{width:29px!important;height:27px!important;min-width:29px!important;min-height:27px!important}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.210.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.211.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
@@ -1150,7 +1157,7 @@ function receiptEnergyEstimate(items){
  const rows=[];for(const item of items||[]){const wish=parseWish(item.name),kcal=kcalPerListUnit[wish.key];if(!kcal)continue;const quantity=receiptComparisonAmount(item,wish.key);if(!quantity||!(quantity.amount>0))continue;rows.push({name:item.name,kcal:Math.round(quantity.amount*kcal),assumption:quantity.assumption||""})}
  return rows.length?{rows,total:rows.reduce((n,x)=>n+x.kcal,0),count:rows.length,items:(items||[]).length}:null;
 }
-function quantityControl(w,i){const shown=w.quantityMode?Number(w.packCount||1):Number(w.amount||1),pack=listPackHint(w),label=w.quantityMode&&pack?shown+" × "+pack:shown+(w.unit==="kg"?" kg":w.unit==="l"?" l":w.unit==="piece"?" Stk.":"");return '<div class="qty-stepper" aria-label="Menge"><button type="button" class="pack-edit" data-pack-edit="'+i+'" aria-label="Packungsgröße ändern"><b aria-live="polite">'+escHtml(String(label))+'</b></button><span class="qty-buttons"><button type="button" data-qty="-1" data-qty-index="'+i+'">−</button><button type="button" data-qty="1" data-qty-index="'+i+'">+</button></span></div>'}
+function quantityControl(w,i){const shown=Math.max(1,Number(w.packCount||w.amount||1));return '<div class="qty-stepper" aria-label="Anzahl"><b class="pack-count" aria-live="polite">'+shown+'×</b><span class="qty-buttons"><button type="button" data-qty="-1" data-qty-index="'+i+'">−</button><button type="button" data-qty="1" data-qty-index="'+i+'">+</button></span></div>'}
 function personalPriceMemoryForWish(w){
  if(!w||!w.key)return null;const rows=[];getPersonalReceipts().forEach(r=>(r.items||[]).forEach(i=>{let id=identifyReceiptProduct(i.name||"");if(id.key!==w.key)return;let price=personalComparablePrice(i);if(price>0)rows.push({price,date:r.date||"",store:r.store||"",name:i.name})}));if(!rows.length)return null;
  rows.sort((a,b)=>String(a.date).localeCompare(String(b.date)));const prices=rows.map(x=>x.price).sort((a,b)=>a-b),median=medianNumber(prices),last=rows[rows.length-1],min=rows.reduce((a,b)=>b.price<a.price?b:a),max=rows.reduce((a,b)=>b.price>a.price?b:a);
