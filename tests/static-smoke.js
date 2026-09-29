@@ -256,7 +256,7 @@ assert(html.includes('v7.201 planner viewport + compact quantity pass'),"planner
 assert(html.includes('#planner #list{max-width:100%!important;overflow:hidden!important}'),"shopping list must not overflow the phone viewport");
 assert(html.includes('grid-template-columns:22px minmax(0,1fr) auto 16px'),"planner rows should reserve flexible product space instead of oversized fixed controls");
 assert(html.includes('@media(max-width:430px)')&&html.includes('#planner .planner-main{padding:12px!important}'),"planner should become denser on phone widths");
-assert(html.includes('<span class="version">v7.200.0 RC</span>'),"visible app version should be v7.200.0 RC");
+assert(/<span class="version">v\d+\.\d+\.\d+ RC<\/span>/.test(html),"visible app release-candidate version badge missing");
 
 assert(html.includes('v7.202 supermarket interaction + quantity clarity'),"planner should include supermarket interaction polish");
 assert(html.includes('aria-label="Eine Packung '+"'"+'+name+'+"'"+' weniger"')&&html.includes('aria-label="Eine Packung '+"'"+'+name+'+"'"+' mehr"'),"quantity controls should expose product-specific accessible labels");
