@@ -378,6 +378,7 @@ assert(html.includes('(?:stk\\.?|stueck|stuck|pack(?:ung)?(?:en)?|pcs?)\\s+'),"f
 
 assert(html.includes('item?.quantity??item?.qty??item?.count??item?.packCount'),"receipt unit extraction should use one explicit quantity source without multiplying duplicate representations");
 assert(html.includes('function receiptPackPieces(item)'),"receipt quantity model should distinguish pieces contained in a pack");
+assert(html.includes('stk\\.?|stück|stueck|stuck|pcs?\\.?'),"receipt pack-size inference should accept common OCR piece variants");
 assert(html.includes('item?.packUnit==="piece"'),"piece multipacks should only affect physical piece count when pack metadata explicitly says piece");
 assert(html.includes('function receiptPhysicalPieces(item){return receiptItemUnits(item)*receiptPackPieces(item)}'),"physical piece count should be derived separately from purchased-unit count");
 
