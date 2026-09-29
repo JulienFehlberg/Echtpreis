@@ -203,3 +203,10 @@ assert(html.includes('id="personalBasketVerdict"')&&html.includes('Gegen dein Pr
 assert(html.includes('Richtwerte zählen nicht'),"personal basket verdict must exclude reference prices");
 assert(html.includes('cheap.length')&&html.includes('expensive.length'),"personal basket verdict should distinguish cheaper, normal and expensive items");
 assert(html.includes('v5.187.0'),"expected app version v5.187.0");
+
+assert(html.includes('Das Wichtigste an diesem Einkauf')&&html.includes('strongestReceiptInsight'),"receipt should lead with one strongest personal aha insight");
+assert(html.includes('score:98')&&html.includes('score:96')&&html.includes('score:94'),"hero insight should prioritize supported savings, personal price anomalies and plan extras");
+assert(html.includes('Bon-Gesamtsumme')&&html.includes('maßgebliche Ausgabe'),"hero fallback must preserve printed receipt total as source of truth");
+assert(html.includes('Dieser Bon hat ECHTPREIS beigebracht'),"saved receipt should explain the value learned from scanning");
+assert(html.includes('history.length?"💡 "+history[0].title'),"home pulse should lead with the latest personal shopping discovery");
+assert(html.includes('v5.188.0'),"expected app version v5.188.0");
