@@ -14,6 +14,9 @@ assert.strictEqual(normalized.total, 48.82, "printed total must be independent o
 assert.strictEqual(normalized.items[0].lineTotal, 2.85);
 assert.strictEqual(normalized.items[0].count, 3);
 assert.strictEqual(normalized.items[1].isDeposit, true);
+const whitespaceNormalized=vision.normalizeReceipt({merchant:"  PENNY   Markt  ",date:"",total:1,items:[{name:"  RED   BULL  ",line_total:1,count:1,unit_price:1,is_deposit:false,is_adjustment:false}]});
+assert.strictEqual(whitespaceNormalized.merchant,"PENNY Markt");
+assert.strictEqual(whitespaceNormalized.items[0].name,"RED BULL");
 assert.strictEqual(vision.normalizeReceipt({ merchant:"EDEKA", date:"2026-02-31", total:1, items:[] }).date, "", "impossible vision receipt dates must be rejected");
 assert.strictEqual(vision.normalizeReceipt({ merchant:"EDEKA", date:"2026-09-29", total:1, items:[] }).date, "2026-09-29", "valid vision receipt dates should be retained");
 const arithmeticGuard=vision.normalizeReceipt({merchant:"PENNY",date:"",total:8.46,items:[{name:"Red Bull",line_total:2.89,count:2,unit_price:2.89,is_deposit:false,is_adjustment:false}]});
