@@ -7,11 +7,6 @@
     "total": 48.82,
     "lineItems": [
       {
-        "rawName": "LEERGUTRÜCKNAHME",
-        "lineTotal": -5.75,
-        "isDeposit": true
-      },
-      {
         "rawName": "MINERALWASSER STILL",
         "unitPrice": 0.29,
         "count": 30,
