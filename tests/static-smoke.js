@@ -99,64 +99,53 @@ assert(html.includes('id="receiptFile" type="file" accept="image/*,application/p
 assert(html.includes('itemsComplete:!!receiptArithmeticVerified'),"saved receipts must persist whether item arithmetic is complete");
 assert(html.includes('unassignedAmount:receiptArithmeticVerified?0:'),"partial receipts must persist an unassigned amount");
 assert(html.includes('Artikelliste möglicherweise unvollständig'),"AI receipt flow must disclose partial item recognition");
-assert(html.includes('v5.171.0'),"expected app version v5.171.0");
 
 assert(html.includes('erkannten Artikel-Ausgaben'),"category insights must be based on recognized item spend");
 assert(html.includes('die kcal-Zahl beschreibt deshalb ausdrücklich nur den erkannten Teil des Einkaufs'),"calorie insight must disclose partial receipt coverage");
 assert(html.includes('itemsComplete:!!receiptArithmeticVerified')&&html.includes('id:"preview"'),"receipt preview must carry completeness metadata");
-assert(html.includes('v5.172.0'),"expected app version v5.172.0");
 
 assert(html.includes('type:"receipt-coverage"')&&html.includes('noch nicht einzelnen Artikeln zugeordnet'),"partial receipts should generate a transparent coverage insight");
 assert(html.includes('type:"cost-concentration"'),"receipt insights should detect concentrated spending");
 assert(html.includes('im Schnitt "+eur(avg)+" pro Einkauf'),"monthly receipt insight should include average basket value");
-assert(html.includes('v5.173.0'),"expected app version v5.173.0");
 
 assert(html.includes('type:"favorite-store"')&&html.includes('type:"favorite-product"'),"stats profile should learn recurring stores and products");
 assert(html.includes('type:"personal-price-move"')&&html.includes('keine allgemeine Marktpreisaussage'),"personal price movement insight must stay scoped to user receipts");
 assert(html.includes('type:"shopping-day"')&&html.includes('type:"category-spend"'),"stats profile should learn shopping day and category patterns");
 assert(html.includes('echtpreis_recent_stats_insights_v1'),"stats insights should rotate instead of showing the same fact every time");
-assert(html.includes('v5.174.0'),"expected app version v5.174.0");
 
 assert(html.includes('Datenabdeckung')&&html.includes('deiner Monatsausgaben sind Einzelpositionen zugeordnet'),"monthly breakdown must disclose receipt item coverage");
 assert(html.includes('Gesamtausgaben')&&html.includes('noch nicht einzelnen Artikeln zugeordnet'),"monthly breakdown must separate total spend from recognized item spend");
 assert(html.includes('Kategorie-Prozente beziehen sich auf'),"category percentages must disclose their recognized-spend denominator");
-assert(html.includes('v5.175.0'),"expected app version v5.175.0");
 
 assert(html.includes('type:"personal-low-price"')&&html.includes('Persönlicher Tiefpreis'),"receipt insights should flag a new personal low price");
 assert(html.includes('type:"personal-high-price"')&&html.includes('Persönlicher Höchstpreis'),"receipt insights should flag a new personal high price");
 assert(html.includes('prev.forEach(r=>(r.items||[])'),"current receipt must not be included in its own price history");
 assert(html.includes('beim letzten vergleichbaren Kauf'),"receipt price comparison should use prior comparable purchase");
-assert(html.includes('v5.176.0'),"expected app version v5.176.0");
 
 assert(html.includes('type:"personal-saving"')&&html.includes('Preisunterschied'),"receipt insight should calculate savings from the user own cross-store history");
 assert(html.includes('Das ist dein eigener Preisverlauf, kein aktuelles Marktangebot.'),"historical personal savings must not be presented as current market availability");
 assert(html.includes('x.store&&x.store!==current.store'),"personal savings comparison must use a different prior store");
-assert(html.includes('v5.177.0'),"expected app version v5.177.0");
 
 assert(html.includes('coverage>=.7&&currentCoverage>=.8'),"receipt savings claim must require at least 70% basket-value and 80% current-price coverage");
 assert(html.includes('Nur ausreichend aktuelle, nicht bloß historische/Richtwert-Preise'),"receipt analysis must explain current-price quality gate");
 assert(html.includes('deshalb zeigt ECHTPREIS noch keine Warenkorb-Ersparnis'),"weak partial comparisons must not claim basket savings");
-assert(html.includes('v5.178.0'),"expected app version v5.178.0");
 
 assert(html.includes('id="statsSavingsEvidence"'),"stats should expose evidence-aware savings section");
 assert(html.includes('currentReceiptSavingMeta={store:best.store'),"receipt savings must persist comparison evidence metadata");
 assert(html.includes('Bonwert vergleichbar')||html.includes('des Bonwerts vergleichbar'),"receipt comparison should visibly disclose basket coverage");
 assert(html.includes('savingConfidence="mittel"'),"qualified partial comparisons should persist medium confidence");
 assert(html.includes('Das ist keine garantierte Ersparnis'),"savings statistics must not present historical comparison totals as guaranteed savings");
-assert(html.includes('v5.179.0'),"expected app version v5.179.0");
 
 assert(html.includes('id="receiptSavingDrivers"')&&html.includes('Was den Preisunterschied ausmacht'),"receipt analysis should explain savings at item level");
 assert(html.includes('drivers:drivers.slice(0,8)'),"receipt savings evidence should persist item-level drivers");
 assert(html.includes('id="statsSavingDrivers"')&&html.includes('Welche Produkte treiben deine Preisunterschiede?'),"stats should aggregate recurring savings drivers");
 assert(html.includes('historische Vergleichsunterschiede, keine garantierte künftige Ersparnis'),"driver statistics must disclose historical scope");
-assert(html.includes('v5.180.0'),"expected app version v5.180.0");
 
 assert(html.includes('id="receiptDiagnosis"')&&html.includes('Einkaufsdiagnose'),"receipt should show a unified shopping diagnosis");
 assert(html.includes('function renderReceiptDiagnosis(current)'),"shopping diagnosis renderer must exist");
 assert(html.includes('Kostentreiber')&&html.includes('Bonwert-Abdeckung'),"shopping diagnosis must explain cost driver and comparison coverage");
 assert(html.includes('id="statsMonthlyAnomaly"')&&html.includes('Monats-Ausreißer'),"stats should detect meaningful monthly spending anomalies");
 assert(html.includes('delta>=10')&&html.includes('pct>=25'),"category anomaly should require meaningful absolute and relative movement");
-assert(html.includes('v5.181.0'),"expected app version v5.181.0");
 
 assert(html.includes('id="receiptBasketStory"')&&html.includes('Dein Warenkorb'),"receipt should classify the current basket");
 assert(html.includes('bekannte Produkte')&&html.includes('neu in deinem Preisgedächtnis'),"receipt story should distinguish repeat and new products");
@@ -165,12 +154,10 @@ assert(html.includes('id="statsRepeatProfile"')&&html.includes('Routine oder Ent
 assert(html.includes('id="statsLikelyNeeds"')&&html.includes('Könnte bald wieder nötig sein'),"stats should cautiously predict recurring purchase needs");
 assert(html.includes('cv>.55||ratio<.8'),"need prediction must reject irregular or premature purchase patterns");
 assert(html.includes('kein automatischer Eintrag auf die Einkaufsliste'),"need predictions must remain suggestions rather than silent list mutations");
-assert(html.includes('v5.182.0'),"expected app version v5.182.0");
 
 assert(html.includes('data-need-add')&&html.includes('+ Liste'),"recurring need predictions should be explicitly addable to the shopping list");
 assert(html.includes('dein Tiefpreis')&&html.includes('zuletzt '+"'"+'+eur(x.last.price)'),"need suggestions should include personal price memory");
 assert(html.includes('Du entscheidest selbst, was auf die Liste kommt.'),"smart list suggestions must remain user controlled");
-assert(html.includes('v5.183.0'),"expected app version v5.183.0");
 
 assert(html.includes('echtpreis_open_purchase_plan_v1')&&html.includes('saveOpenPurchasePlan'),"price comparison should preserve the planned basket for later receipt reconciliation");
 assert(html.includes('Plan vs. Wirklichkeit')&&html.includes('buildPlanVsReceipt'),"receipt analysis should reconcile planned and actual purchases");
@@ -178,7 +165,6 @@ assert(html.includes('Zusätzlich gekauft')&&html.includes('Nicht auf dem Beleg 
 assert(html.includes('planComparison:buildPlanVsReceipt'),"new receipts should persist plan comparison evidence");
 assert(html.includes('Wie nah kaufst du an deiner Liste?')&&html.includes('Beleg-OCR kann einzelne Positionen übersehen'),"stats should learn plan adherence without overstating OCR evidence");
 assert(html.includes('clearOpenPurchasePlan()'),"completed purchases should clear the consumed shopping plan snapshot");
-assert(html.includes('v5.184.0'),"expected app version v5.184.0");
 
 assert(html.includes('id="statsImpulseProfile"')&&html.includes('Deine ungeplanten Käufe'),"stats should remember recurring unplanned purchases");
 assert(html.includes('wiederholt ungeplant auf'),"impulse profile should identify repeated extras");
@@ -186,7 +172,6 @@ assert(html.includes('id="statsImpulseMonth"')&&html.includes('Geplant vs. zusä
 assert(html.includes('Nur Belege mit vorher gespeichertem Einkaufsplan'),"monthly impulse insight must disclose its evidence scope");
 assert(html.includes('id="statsImpulseRoutine"')&&html.includes('Vom Spontankauf zur Routine'),"stats should detect extras that later become planned purchases");
 assert(html.includes('erstmals ungeplant')&&html.includes('in einem geplanten Einkauf wiedergefunden'),"impulse-to-routine explanation should be explicit");
-assert(html.includes('v5.185.0'),"expected app version v5.185.0");
 
 assert(html.includes('personalPriceMemoryForWish')&&html.includes('dein typischer Preis'),"shopping list should surface personal price memory");
 assert(html.includes('Gegen dein Preisgedächtnis'),"market comparison should explain unusual prices against personal history");
@@ -194,7 +179,6 @@ assert(html.includes('m.count<2||p.reference'),"personal unusual-price claims mu
 assert(html.includes('Math.abs(delta)<.12'),"market detail should ignore small personal price deviations");
 assert(html.includes('id="statsPriceVolatility"')&&html.includes('Wo deine Preise stark schwanken'),"stats should identify products with meaningful personal price volatility");
 assert(html.includes('x.prices.length>=3')&&html.includes('x.spread>=.15'),"price volatility should require at least three purchases and meaningful spread");
-assert(html.includes('v5.186.0'),"expected app version v5.186.0");
 
 assert(html.includes('id="savingFocus"')&&html.includes('Dein Sparfokus'),"shopping list should prioritize products where comparison matters personally");
 assert(html.includes('Stabile Preise werden bewusst nicht hervorgehoben'),"savings focus should avoid warning spam for stable products");
@@ -202,14 +186,12 @@ assert(html.includes('spread>=.15')&&html.includes('signal.regular'),"savings fo
 assert(html.includes('id="personalBasketVerdict"')&&html.includes('Gegen dein Preisgedächtnis'),"market result should include a personal basket price verdict");
 assert(html.includes('Richtwerte zählen nicht'),"personal basket verdict must exclude reference prices");
 assert(html.includes('cheap.length')&&html.includes('expensive.length'),"personal basket verdict should distinguish cheaper, normal and expensive items");
-assert(html.includes('v5.187.0'),"expected app version v5.187.0");
 
 assert(html.includes('Das Wichtigste an diesem Einkauf')&&html.includes('strongestReceiptInsight'),"receipt should lead with one strongest personal aha insight");
 assert(html.includes('score:98')&&html.includes('score:96')&&html.includes('score:94'),"hero insight should prioritize supported savings, personal price anomalies and plan extras");
 assert(html.includes('Beleg-Gesamtsumme')&&html.includes('maßgebliche Ausgabe'),"hero fallback must preserve printed receipt total as source of truth");
 assert(html.includes('Dieser Beleg hat ECHTPREIS beigebracht'),"saved receipt should explain the value learned from scanning");
 assert(html.includes('history.length?"💡 "+history[0].title'),"home pulse should lead with the latest personal shopping discovery");
-assert(html.includes('v5.188.0'),"expected app version v5.188.0");
 
 assert(html.includes('Beim nächsten Einkauf')&&html.includes('receiptNextMove'),"receipt analysis should turn insight into a concrete next-shopping action");
 assert(html.includes('außerhalb deiner Liste dazu')&&html.includes('gehören sie vielleicht künftig bewusst auf die Liste'),"next move should learn from unplanned extras without auto-adding them");
@@ -217,7 +199,6 @@ assert(html.includes('Behalte ')&&html.includes('besonders im Blick'),"next move
 assert(html.includes('id="shoppingMemory"')&&html.includes('Dein Preisgedächtnis'),"home should visualize real knowledge accumulated from receipts");
 assert(html.includes('wiederkehrende Produkte')&&html.includes('mit eigener Preishistorie'),"shopping memory should use evidence-based progress metrics");
 assert(html.includes('Keine Punkte – nur Wissen aus deinen eigenen Einkäufen'),"shopping memory should not invent a gamified quality score");
-assert(html.includes('v5.189.0'),"expected app version v5.189.0");
 
 assert(html.includes('id="impulseSuggestions"')&&html.includes('Du kaufst das sowieso öfter'),"planner should surface recurring unplanned purchases before shopping");
 assert(html.includes('x.count>=2')&&html.includes('cutoff.setDate(cutoff.getDate()-90)'),"impulse suggestions should require repeated and recent evidence");
@@ -226,13 +207,10 @@ assert(html.includes('data-impulse-add')&&html.includes('+ Liste'),"recurring im
 assert(html.includes('typisch ')&&html.includes(' · Tief '),"impulse suggestions should reuse personal price memory when available");
 assert(html.includes('planComparison:cached.planComparison||null'),"server sync must preserve plan comparison learning");
 assert(html.includes('itemsComplete:cached.itemsComplete')&&html.includes('unassignedAmount:cached.unassignedAmount'),"server sync must preserve local receipt completeness metadata");
-assert(html.includes('v5.190.0'),"expected app version v5.190.0");
 
 assert(html.includes('Beleg scannen')&&html.includes('Beleg-Analyse')&&html.includes('Meine Belege & Privatsphäre'),"visible receipt product language should consistently use Beleg");
 assert(!html.includes('Bon scannen')&&!html.includes('Bon-Analyse')&&!html.includes('Meine Bons & Privatsphäre'),"legacy Bon terminology must not return in primary UI");
-assert(html.includes('v5.191.0'),"expected app version v5.191.0");
 
-assert(html.includes('v5.192.0'),"expected app version v5.192.0");
 assert(html.includes('premium mobile design system')&&html.includes('clamp(32px,9vw,46px)'),"premium design should use fluid mobile typography");
 assert(html.includes('env(safe-area-inset-top)')&&html.includes('env(safe-area-inset-bottom)'),"mobile shell should respect phone safe areas");
 assert(html.includes('@media(max-width:359px)')&&html.includes('@media(min-width:600px)'),"design system should cover narrow and large phone widths");
@@ -240,18 +218,17 @@ assert(html.includes('min-height:46px')&&html.includes('min-height:52px'),"prima
 assert(html.includes('prefers-reduced-motion:reduce'),"premium motion should respect accessibility preferences");
 assert(html.includes('hierarchy + interaction refinement')&&html.includes('#receiptHeroInsight strong'),"receipt result should visually prioritize the strongest insight");
 
-assert(html.includes('v5.193.0'),"expected app version v5.193.0");
 assert(html.includes('memory-ring')&&html.includes('conic-gradient'),"personal price memory should use a responsive visual progress graphic");
 assert(html.includes('Die Anzeige beschreibt nur, wie viel eigene Vergleichshistorie bereits vorhanden ist'),"price memory graphic must not imply a quality score");
 assert(html.includes('memory-metrics')&&html.includes('Preishistorien'),"price memory should surface evidence-based metrics visually");
 assert(html.includes('stat-bar-track')&&html.includes('stat-bar-fill'),"monthly category changes should use responsive data bars");
 
-assert(html.includes('v5.194.0'),"expected app version v5.194.0");
 assert(html.includes('class="ep-icon"')&&html.includes('<svg viewBox="0 0 24 24">'),"home actions should use the native premium line icon system");
 assert(html.includes('Einkauf in Sekunden verstehen')&&html.includes('Preise vergleichen &amp; sparen')&&html.includes('Einkaufsverhalten verstehen'),"home action copy should be concise and benefit-led");
 assert(html.includes('grid-template-columns:48px minmax(0,1fr) 18px'),"home actions should use compact single-row mobile hierarchy");
 assert(!html.includes('<span>🧾</span>Beleg scannen')&&!html.includes('<span>🛒</span>Einkaufsliste')&&!html.includes('<span>📊</span>Meine Statistik'),"legacy emoji home navigation must not return");
 
-assert(html.includes('v5.194.1'),"expected app version v5.194.1");
 assert(html.includes('home action collision fix')&&html.includes('.homeaction .homeaction-copy{width:auto!important;height:auto!important'),"nested home action copy must override legacy span sizing");
 assert(html.includes('.homeaction>.ep-icon'),"icon sizing must target only the direct icon child");
+
+assert(html.includes('<span class="version">v5.196.1</span>'),"visible app version should be v5.196.1");
