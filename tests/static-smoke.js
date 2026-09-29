@@ -373,3 +373,10 @@ assert(html.includes('coverage=sourceSpend>0?Math.max(0,Math.min(100'),"receipt 
 assert(html.includes('assumedRows=rows.filter(x=>x.estimated).length'),"receipt calorie estimates should track rows that depend on quantity assumptions");
 assert(html.includes('Die kcal-Auswertung deckt ')&&html.includes('der erkannten Produkt-Ausgaben ab'),"receipt calorie UI should disclose monetary coverage of the estimate");
 assert(html.includes('Mengenannahme')&&html.includes('belastbare Menge'),"receipt calorie UI should disclose quantity assumptions and missing reliable quantities");
+
+assert(html.includes('function receiptEnergySnapshot(items)'),"saved receipts should support compact persisted calorie summaries");
+assert(html.includes('kcal:e.total')&&html.includes('coverage:e.coverage')&&html.includes('assumedRows:e.assumedRows'),"persisted calorie summaries should retain value, coverage, and assumption quality");
+assert(html.includes('existing.energy=receiptEnergySnapshot(receiptLines)'),"updated receipts should refresh their persisted calorie summary");
+assert(html.includes('energy:receiptEnergySnapshot(receiptLines),itemsComplete:'),"new receipts should persist their calorie summary");
+assert(html.includes('function aggregateReceiptEnergy(receipts)'),"receipt calorie snapshots should support cross-receipt aggregation");
+assert(html.includes('coverage:sourceSpend>0?Math.max(0,Math.min(100'),"aggregate calorie coverage should remain bounded and spend-weighted");
