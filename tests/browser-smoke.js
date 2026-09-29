@@ -9,6 +9,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  }});
  await new Promise(r=>setTimeout(r,120));
  const w=dom.window,d=w.document;
+ if(errors.length)console.error("BROWSER_STARTUP_ERRORS:",errors.join(" | "));
  assert.strictEqual(errors.length,0,"browser startup errors: "+errors.join(" | "));
  assert.strictEqual(d.querySelector(".alpha-badge")?.textContent,"ALPHA","the app should clearly label its alpha version");
  assert(d.getElementById("profileCard").textContent.includes("Noch ohne Login oder Synchronisierung zwischen Geräten"),"profile should explain alpha account and sync limitations");
