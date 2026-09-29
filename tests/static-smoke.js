@@ -241,6 +241,8 @@ assert(html.includes('<span class="version">v7.200.0 RC</span>'),"visible app ve
 assert(html.includes('v7.202 supermarket interaction + quantity clarity'),"planner should include supermarket interaction polish");
 assert(html.includes('aria-label="Eine Packung '+"'"+'+name+'+"'"+' weniger"')&&html.includes('aria-label="Eine Packung '+"'"+'+name+'+"'"+' mehr"'),"quantity controls should expose product-specific accessible labels");
 assert(html.includes('basketItemSignature(w)')&&html.includes('mergeBasketQuantity(duplicate,w)')&&html.includes('target.packCount=currentCount+incomingCount'),"duplicate shopping items should merge into pack quantity instead of creating duplicate rows");
+assert(html.includes('Object.entries(w.choice).filter(([k])=>k!=="Größe")'),"basket identity should preserve meaningful product variants instead of merging them");
+assert(html.includes('map(([k,v])=>k+"="+v).join("&")'),"basket variant identity should be deterministic across choice field order");
 assert(html.includes('#planner .qty-buttons button{touch-action:manipulation!important}'),"quantity buttons should be optimized for touch shopping");
 
 assert(html.includes('v7.203 long-list stability + undo safety'),"planner should include long-list rendering and undo safety");
