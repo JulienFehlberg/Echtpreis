@@ -553,6 +553,10 @@ body.subview #planner,body.subview #receipt,body.subview #statsCard{scroll-margi
  #planner .shopping-done{animation:none!important}
 }
 </style><style>
+/* v7.204 quantity-aware add/merge */
+#planner .pack-count{font-variant-numeric:tabular-nums}
+#planner .qty-stepper[data-busy="1"]{pointer-events:none;opacity:.7}
+</style><style>
 /* v5.222 BIG repeat-shopping memory */
 #planner .recent-list-items{margin:12px 0 3px;padding-top:11px;border-top:1px solid #edf1ef}
 #planner .recent-list-items .quick-label{margin:0 0 7px!important;font-size:11px!important;color:#71837a!important}
@@ -1368,7 +1372,8 @@ function renderQuickSuggestions(){
  box.querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>add(b.dataset.quick));
 }
 function basketItemSignature(w){if(!w)return"";const product=w.key||normalizeProduct(w.label||w.raw||""),unit=w.packUnit||w.unit||"",base=Number(w.packAmount)>0?Number(w.packAmount):0,label=normalizeProduct(w.packLabel||"");return [product,unit,base||label].join("|")}
-function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return false;$("suggestions").style.display="none";let w=parseWish(raw);if(w.key&&!w.needsClarification)learnProductPreference(w);let signature=basketItemSignature(w),duplicate=basket.find(x=>basketItemSignature(x)===signature);if(duplicate){duplicate.packCount=Math.max(1,Number(duplicate.packCount)||1)+1;if(Number(duplicate.packAmount)>0){duplicate.amount=duplicate.packAmount*duplicate.packCount;duplicate.calcAmount=duplicate.amount}duplicate.checked=false;$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();appNotice((duplicate.label||duplicate.raw)+" · "+duplicate.packCount+"×");return true}w.checked=false;basket.push(w);learnFrequentProduct(raw);$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();return true}
+function mergeBasketQuantity(target,incoming){if(!target||!incoming)return false;const incomingCount=Math.max(1,Number(incoming.packCount)||1),currentCount=Math.max(1,Number(target.packCount)||1);target.packCount=currentCount+incomingCount;if(Number(target.packAmount)>0){target.amount=Number(target.packAmount)*target.packCount;target.calcAmount=target.amount;target.unit=target.packUnit||target.unit}target.checked=false;return true}
+function add(raw){raw=(raw||$("productInput").value).trim();if(!raw)return false;$("suggestions").style.display="none";let w=parseWish(raw);if(w.key&&!w.needsClarification)learnProductPreference(w);let signature=basketItemSignature(w),duplicate=basket.find(x=>basketItemSignature(x)===signature);if(duplicate){mergeBasketQuantity(duplicate,w);$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();appNotice((duplicate.label||duplicate.raw)+" · "+duplicate.packCount+"×");return true}w.checked=false;basket.push(w);learnFrequentProduct(raw);$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();return true}
 renderQuickSuggestions();
 function addShoppingSpeech(text){const rows=splitShoppingSpeech(text).slice(0,100);let added=0;rows.forEach(raw=>{if(basket.length<200&&add(raw))added++});if(rows.length>1)showListMessage(added+" Artikel verarbeitet");return {rows,added}}
 function addShoppingInput(){const value=$("productInput").value.trim();if(!value)return;const rows=splitShoppingSpeech(value);if(rows.length>1)addShoppingSpeech(value);else add(value);window.echtpreisVoiceCommitted?.()}
