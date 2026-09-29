@@ -242,9 +242,47 @@ body.subview #planner,body.subview #receipt,body.subview #statsCard{scroll-margi
  #planner .planner-main{padding:14px!important}
  #planner .planner-main>h2{font-size:26px!important}
 }
+</style><style>
+/* v5.202 BIG mobile planner pass */
+#planner .planner-main{padding:14px!important}
+#planner .planner-main>h2{font-size:clamp(24px,7vw,30px)!important;margin-bottom:10px!important}
+#planner .planner-tools{display:grid!important;grid-template-columns:auto auto 1fr!important;gap:6px!important}
+#planner .planner-tools button{min-height:38px!important;padding:8px 11px!important}
+#planner .item{min-height:58px!important;padding:8px 0!important;border-bottom:1px solid #e7ece9!important}
+#planner [data-check]{width:32px!important;height:32px!important;border-radius:10px!important}
+#planner .item-title{font-weight:850!important;letter-spacing:-.01em!important}
+#planner .qty-stepper{justify-self:end!important}
+#planner .qty-stepper b{font-variant-numeric:tabular-nums!important;text-align:center!important;color:#20352a!important}
+#planner .quick-suggestions{margin-top:11px!important;padding-top:2px!important}
+#planner .quick-row{mask-image:linear-gradient(to right,#000 0,#000 92%,transparent 100%);-webkit-mask-image:linear-gradient(to right,#000 0,#000 92%,transparent 100%)}
+#planner .inputrow{grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;margin-top:11px!important}
+#planner #productInput{height:46px!important;min-height:46px!important;font-size:15px!important;padding:10px 12px!important}
+#planner #addBtn{height:46px!important;min-height:46px!important;padding:8px 14px!important;border-radius:13px!important}
+#planner #voiceListBtn,#planner #barcodeBtn{height:42px!important;min-height:42px!important;border-radius:12px!important}
+#planner .planner-main>.detail{margin-top:7px!important;font-size:10px!important}
+#planner #voiceListStatus:empty,#planner #barcodeStatus:empty,#planner #compareStatus:empty{display:none!important}
+#planner>.card:last-of-type{padding:12px 14px!important}
+#planner #compareBtn{min-height:50px!important;margin:0!important;font-size:15px!important}
+#planner #stores:empty,#planner #dataMachineStatus:empty{display:none!important}
+#planner details>summary{font-size:11px!important;min-height:34px!important;justify-content:center!important}
+#planner .results{margin-top:10px!important}
+@media(max-width:430px){
+ #planner .planner-tools{grid-template-columns:auto auto!important}
+ #planner .item{grid-template-columns:32px minmax(74px,1fr) auto 18px!important}
+ #planner .qty-stepper{gap:2px!important}
+ #planner .qty-stepper b{min-width:92px!important;font-size:9.5px!important}
+ #planner .qty-stepper button{width:30px!important;height:30px!important;font-size:16px!important}
+ #planner .item-title{font-size:13.5px!important}
+ #planner .item-pack-size{font-size:9.5px!important}
+}
+@media(max-width:370px){
+ #planner .item{grid-template-columns:30px minmax(68px,1fr) auto 16px!important;gap:4px!important}
+ #planner .qty-stepper b{min-width:80px!important;font-size:9px!important}
+ #planner .qty-stepper button{width:28px!important;height:28px!important}
+}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.201.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.202.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
