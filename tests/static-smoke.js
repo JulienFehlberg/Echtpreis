@@ -409,3 +409,10 @@ assert(html.includes('quantitySource:x?.quantitySource||""'),"receipt storage sh
 assert((html.match(/receiptItemsForStorage\(receiptLines\)/g)||[]).length>=2,"new and updated receipts should share canonical item serialization");
 assert(html.includes('i?.discountSource==="linked-adjustment"?0:d'),"discount totals should not count a product discount twice when its adjustment row already represents it");
 assert(!html.includes('const linked=new Set((items||[]).filter(i=>i?.isAdjustment&&i?.linkedToPrevious'),"discount deduplication should no longer depend on fragile product-name and amount set matching");
+
+assert(html.includes('family=/^ALDI\\b/i.test(String(store||""))?"ALDI":store'),"ALDI Nord and Süd receipts should share ALDI-specific footer filtering");
+assert(html.includes('const drugstoreFreshBlocked=new Set(['),"drugstore comparisons should maintain an explicit fresh-food denylist");
+assert(html.includes('"rinderhack","hackfleisch","haehnchenbrust"'),"fresh meat must be hard-blocked from dm and Rossmann comparisons");
+assert(html.includes('"eier","milch","joghurt","quark","skyr","butter","kaese"'),"fresh and chilled staples should be hard-blocked from drugstore comparisons");
+assert(html.includes('if(drugstoreFreshBlocked.has(product))return false;return storeAssortment.drugstore.has(product)'),"dm and Rossmann eligibility should require both not-fresh and explicit assortment approval");
+assert(html.includes('"zahnpasta","shampoo"')&&html.includes('"waschmittel","spuelmittel"'),"core drugstore products should remain eligible for dm and Rossmann");
