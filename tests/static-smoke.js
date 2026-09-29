@@ -247,3 +247,9 @@ assert(html.includes('function clearUndoState()')&&html.includes('Math.min(Math.
 assert(html.includes('if(!Number.isInteger(i)||i<0||i>=basket.length)return'),"delete handler should reject stale or invalid list indices");
 assert(html.includes('content-visibility:auto')&&html.includes('contain-intrinsic-size:50px'),"long shopping lists should avoid unnecessary offscreen rendering work");
 assert(html.includes('@media(prefers-reduced-motion:reduce)')&&html.includes('.list-undo-toast{transition:none!important}'),"planner motion should respect reduced-motion preferences");
+
+assert(html.includes('v7.204 quantity-aware add/merge'),"planner should include quantity-aware duplicate merging");
+assert(html.includes('function mergeBasketQuantity(target,incoming)')&&html.includes('currentCount+incomingCount'),"duplicate items should add the incoming pack count, not merely increment by one");
+assert(html.includes('const incomingCount=Math.max(1,Number(incoming.packCount)||1)'),"explicit quantities should survive duplicate merging");
+assert(html.includes('normalizeSpokenQuantity')&&html.includes('spokenNumberWords'),"shopping input should normalize spoken German quantity words");
+assert(html.includes('kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x'),"shopping parser should accept explicit unit and x-style quantity input");
