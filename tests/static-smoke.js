@@ -104,7 +104,7 @@ assert(html.includes('id="receiptCameraFile"'),"camera receipt input missing");
 assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"gallery/PDF receipt input missing");
 assert(html.includes('accordionNavigation:["homeReceipt","homePlan","homeStats"].every'),"runtime health check must verify accordion navigation");
 assert(html.includes("plannerViewport:!!document.querySelector('meta[name=\"viewport\"]')".replaceAll("\\\"","\"")),"runtime health check must verify planner viewport shell");
-assert(html.includes('<span class="version">v7.216.0 RC</span>')&&html.includes('version:"7.216"'),"visible and health-check versions must stay aligned");
+assert(html.includes('<span class="version">v7.217.0 RC</span>')&&html.includes('version:"7.217"'),"visible and health-check versions must stay aligned");
 
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
 
@@ -512,3 +512,7 @@ assert(html.includes("const scanRevision=++receiptScanRevision;"),"every process
 // v7.216 contextual OCR money normalization guard
 assert(html.includes("function normalizeReceiptMoneyOCR(v)")&&html.includes('.replace(/[oO]/g,"0").replace(/[iIlL|]/g,"1")'),"receipt money parsing must repair common OCR digit confusions without rewriting product names");
 assert(html.includes("out.paid=parseReceiptNumber(normalizeReceiptMoneyOCR(m[1]))")&&html.includes("out.change=parseReceiptNumber(normalizeReceiptMoneyOCR(m[1]))"),"cash tender and change must share contextual OCR money normalization");
+
+// v7.217 German quantity row guards
+assert(html.includes("const countUnitEquals=line.match")&&html.includes("const quantityPrefix=line.match"),"receipt parser must retain common split German quantity/price row formats");
+assert(html.includes('quantitySource:"receipt-stueck"')&&html.includes('quantitySource:"receipt-multipack"'),"split quantity rows must preserve quantity provenance");
