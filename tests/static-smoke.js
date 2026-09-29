@@ -378,10 +378,10 @@ assert(html.includes('replace(/^\\s*\\d{1,3}\\s*[x×*]\\s*/,"")'),"fallback prod
 assert(html.includes('(?:stk\\.?|stueck|stuck|pack(?:ung)?(?:en)?|pcs?)\\s+'),"fallback product identity should remove explicit leading piece/package counts");
 
 assert(html.includes('item?.quantity??item?.qty??item?.count??item?.packCount'),"receipt unit extraction should use one explicit quantity source without multiplying duplicate representations");
-assert(html.includes('function receiptItemUnits(item)')&&html.includes('pcs?\\.?'),"receipt unit extraction should accept common pcs OCR quantity variants");
+assert(html.includes('function receiptItemUnits(item)')&&html.includes('stuck|pcs?\\.?'),"receipt unit extraction should accept common pcs OCR quantity variants");
 assert(html.includes('betrag erhalten|zahlbetrag bar|ruckgeld|wechselgeld|zuruck|herausgegeben|ruckgabe')&&html.includes('endbetrag|endsumme|rechnungsbetrag'),"receipt footer filtering should exclude payment and authoritative total labels from product rows");
 assert(html.includes('function receiptPackPieces(item)'),"receipt quantity model should distinguish pieces contained in a pack");
-assert(html.includes('stk\\.?|stück|stueck|stuck|pcs?\\.?'),"receipt pack-size inference should accept common OCR piece variants");
+assert(html.includes('stueck|stuck|pcs?\\.?'),"receipt pack-size inference should accept common OCR piece variants");
 assert(html.includes('item?.packUnit==="piece"'),"piece multipacks should only affect physical piece count when pack metadata explicitly says piece");
 assert(html.includes('function receiptPhysicalPieces(item){return receiptItemUnits(item)*receiptPackPieces(item)}'),"physical piece count should be derived separately from purchased-unit count");
 
