@@ -110,3 +110,9 @@ assert(html.includes('type:"receipt-coverage"')&&html.includes('noch nicht einze
 assert(html.includes('type:"cost-concentration"'),"receipt insights should detect concentrated spending");
 assert(html.includes('im Schnitt "+eur(avg)+" pro Einkauf'),"monthly receipt insight should include average basket value");
 assert(html.includes('v5.173.0'),"expected app version v5.173.0");
+
+assert(html.includes('type:"favorite-store"')&&html.includes('type:"favorite-product"'),"stats profile should learn recurring stores and products");
+assert(html.includes('type:"personal-price-move"')&&html.includes('keine allgemeine Marktpreisaussage'),"personal price movement insight must stay scoped to user receipts");
+assert(html.includes('type:"shopping-day"')&&html.includes('type:"category-spend"'),"stats profile should learn shopping day and category patterns");
+assert(html.includes('echtpreis_recent_stats_insights_v1'),"stats insights should rotate instead of showing the same fact every time");
+assert(html.includes('v5.174.0'),"expected app version v5.174.0");
