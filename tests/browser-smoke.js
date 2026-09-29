@@ -14,6 +14,14 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(errors.length,0,"browser startup errors: "+errors.join(" | "));
  const fixtureMerchants=new Set(receiptFixtures.map(x=>x.expected?.merchant));
  assert(fixtureMerchants.has("EDEKA"),"real receipt fixture suite must retain EDEKA ground truth");
+ for(const fixture of receiptFixtures){
+  if(!fixture.ocrText)continue;
+  assert.strictEqual(w.detectReceiptStore(fixture.ocrText),fixture.expected.merchant,fixture.name+": merchant ground truth regressed");
+  assert.strictEqual(w.detectReceiptDate(fixture.ocrText),fixture.expected.date,fixture.name+": date ground truth regressed");
+  assert.strictEqual(w.extractReceiptTotal(fixture.ocrText),fixture.expected.total,fixture.name+": printed total ground truth regressed");
+  const rows=w.parseReceiptText(fixture.ocrText);
+  for(const expected of fixture.expected.lineItems||[]){const hit=rows.find(row=>String(row.name).toLowerCase().includes(String(expected.rawName).toLowerCase().replace("hörnchen","hdrnchen"))||String(expected.rawName).toLowerCase().includes(String(row.name).toLowerCase()));assert(hit,fixture.name+": missing expected receipt line "+expected.rawName);assert(Math.abs(Number(hit.price)-Number(expected.lineTotal))<.011,fixture.name+": wrong line total for "+expected.rawName);if(expected.count)assert.strictEqual(Number(hit.count),Number(expected.count),fixture.name+": wrong count for "+expected.rawName);if(expected.isDeposit)assert.strictEqual(!!hit.isDeposit,true,fixture.name+": deposit classification regressed for "+expected.rawName)}
+ }
  assert.strictEqual(d.querySelector(".alpha-badge")?.textContent,"ALPHA","the app should clearly label its alpha version");
  assert(d.getElementById("profileCard").textContent.includes("Noch ohne Login oder Synchronisierung zwischen Geräten"),"profile should explain alpha account and sync limitations");
  assert.strictEqual(w.applyCommunityAliases([{normalized:"Jules Fruchtbärchen",key:"gummibaerchen",seen:3},{normalized:"Einmal Unscharf",key:"chips",seen:1},{normalized:"milch",key:"chips",seen:9},{normalized:"Doppeldeutig",key:"chips",seen:3},{normalized:"doppeldeutig",key:"tee",seen:4}]),1,"only repeated, unambiguous community aliases should be adopted");
