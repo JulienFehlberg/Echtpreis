@@ -11,6 +11,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  const w=dom.window,d=w.document;
  assert.strictEqual(errors.length,0,"browser startup errors: "+errors.join(" | "));
  assert.strictEqual(d.querySelector(".alpha-badge")?.textContent,"ALPHA","the app should clearly label its alpha version");
+ assert(d.getElementById("profileCard").textContent.includes("Noch ohne Login oder Synchronisierung zwischen Geräten"),"profile should explain alpha account and sync limitations");
  assert.strictEqual(d.getElementById("contribute"),null,"receipt screen should not show a sharing checkbox");
  assert.strictEqual(d.getElementById("pointsContribute").checked,false,"receipt price sharing must require explicit opt-in");
  assert.strictEqual(d.getElementById("sharingWelcome").style.display,"grid","first use must show a visible receipt-sharing decision");
