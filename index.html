@@ -2132,7 +2132,8 @@ function extractReceiptPaymentMethod(text){
  if(/\bgirocard\b|ec[- ]?karte|electronic cash/.test(t))return "Girocard";
  if(/\bmaestro\b/.test(t))return "Maestro";
  if(/\bv\s*pay\b/.test(t))return "V PAY";
- if(/kartenzahlung|zahlung\s+karte|debit/.test(t))return "Kartenzahlung";
+ if(/kontaktlos|contactless|nfc/.test(t)&&/karte|girocard|visa|mastercard|debit|credit/.test(t))return "Kontaktlos";
+ if(/kartenzahlung|zahlung\s+(?:mit\s+)?karte|karten(?:zahlung)?|debit|credit\s*card/.test(t))return "Kartenzahlung";
  if(/(?:^|\n)\s*(?:bar|cash)\b/im.test(String(text||"")))return "Bar";
  return "";
 }
