@@ -278,3 +278,8 @@ assert(html.includes('score+=cashCheck.ok?28:-18'),"OCR candidate scoring should
 assert(html.includes('if(receiptCash.change==null){receiptCash.change=expected'),"printed receipt change must not be overwritten by a calculated value");
 assert(html.includes('passt nicht zur Belegsumme'),"receipt UI should visibly flag contradictory printed change");
 assert(html.includes('stimmt zur Belegsumme'),"receipt UI should confirm when printed cash/change arithmetic agrees with the receipt total");
+
+assert(html.includes('const comma=s.lastIndexOf(",")')&&html.includes('const decimal=comma>dot?",":"."'),"receipt money parser should distinguish German and international decimal formats");
+assert(html.includes('replace(/[€£]/g,"")')&&html.includes('replace(/\\s+/g,"")'),"receipt money parser should tolerate currency signs and OCR whitespace");
+assert(html.includes('zu zahlen|zahlbetrag|endbetrag'),"receipt total parser should recognize common German total labels");
+assert(html.includes('bar(?: gegeben)?')&&html.includes('apple pay|google pay'),"payment labels should be rejected as product names");
