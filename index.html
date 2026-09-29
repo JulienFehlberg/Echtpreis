@@ -72,7 +72,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 <style>.alpha-badge{display:inline-block;vertical-align:middle;margin-left:6px;padding:4px 7px;border-radius:99px;background:#e7f5ed;color:#087443;font-size:9px;letter-spacing:1px;font-weight:900}.qty-stepper{display:flex;align-items:center;gap:5px;margin:0 0 0 7px;flex:0 0 auto}.qty-stepper span{display:none}.qty-stepper button{width:34px;height:34px;padding:0;border:1px solid #d6e3da;border-radius:10px;background:#f3f8f4;color:#075f37;font-size:20px;font-weight:800}.qty-stepper b{min-width:22px;text-align:center;color:#20352a}.itemname{min-width:0}.item-title{display:block;width:100%;padding:0;background:transparent;border-radius:0;text-align:left;color:#102019;font-size:16px;font-weight:850;line-height:1.25;overflow-wrap:anywhere}.itemname .qty{margin-top:3px}</style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Bons. Deine Entscheidung.</h2><p>Du kannst Bons nur für dich speichern oder mit deinen erkannten Bon-Preisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Bon-Summe und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Bons künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Bons & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.167.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.168.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -1162,8 +1162,13 @@ function parseReceiptText(text){
   const line=lines[i].replace(/(\d)\s*([,.])\s*(\d{2})/g,"$1$2$3").replace(/\bxX\b/g,"x");
   if(/^\s*(?:summe|gesamt(?:betrag)?|zu zahlen)\b/i.test(line))break;
   if(/\b(?:mwst|netto|umsatz|steuer)\b/i.test(line)||/^\s*[AB]\s*(?:7|19)\s*%/i.test(line))continue;
-  const pendingTotal=line.match(/^(\d+[,.]\d{2})\s*(?:€|EUR)?\s*[AB]?$/i);
-  if(pendingMultiple&&pendingTotal){const name=pendingName||pendingMultiple.name;if(name&&plausibleReceiptItemName(name)){let pack=inferPackFromName(name);last={name,price:String(parseReceiptNumber(pendingTotal[1])),count:pendingMultiple.count,unitLinePrice:pendingMultiple.unitPrice,quantitySource:"receipt-multipack",discount:0,regularTotal:parseReceiptNumber(pendingTotal[1]),...pack};rows.push(last)}pendingMultiple=null;pendingName="";continue}pendingMultiple=null;
+  const pendingTotal=line.match(/^(-?\d+[,.]\d{2})\s*(?:€|EUR)?\s*(?:[AB]|[12])?$/i);
+  if(pendingMultiple&&pendingTotal){const name=pendingName||pendingMultiple.name;if(name&&plausibleReceiptItemName(name)){let pack=inferPackFromName(name);last=pendingMultiple.isReturn?{name:"Pfand-Rückgabe",price:String(parseReceiptNumber(pendingTotal[1])),count:Math.abs(pendingMultiple.count),unitLinePrice:pendingMultiple.unitPrice,isDeposit:true,pricingType:"deposit"}:{name:pendingMultiple.isDeposit?"Pfand":name,price:String(parseReceiptNumber(pendingTotal[1])),count:pendingMultiple.count,unitLinePrice:pendingMultiple.unitPrice,quantitySource:"receipt-multipack",discount:0,regularTotal:parseReceiptNumber(pendingTotal[1]),...(pendingMultiple.isDeposit?{isDeposit:true,pricingType:"deposit"}:{}),...pack};rows.push(last)}pendingMultiple=null;pendingName="";continue}
+  const pendingInline=line.match(/^(.{2,64}?)\s+(-?\d+[,.]\d{2})\s*(?:€|EUR)?\s*(?:[AB]|[12])?$/i);
+  if(pendingMultiple&&pendingInline){const name=/^pfandwert\b/i.test(pendingInline[1])?"Pfand":pendingInline[1].trim();if(plausibleReceiptItemName(name)){let pack=inferPackFromName(name);last=pendingMultiple.isReturn?{name:"Pfand-Rückgabe",price:String(parseReceiptNumber(pendingInline[2])),count:Math.abs(pendingMultiple.count),unitLinePrice:pendingMultiple.unitPrice,isDeposit:true,pricingType:"deposit"}:{name,price:String(parseReceiptNumber(pendingInline[2])),count:pendingMultiple.count,unitLinePrice:pendingMultiple.unitPrice,quantitySource:"receipt-multipack",discount:0,regularTotal:parseReceiptNumber(pendingInline[2]),...(pendingMultiple.isDeposit||name==="Pfand"?{isDeposit:true,pricingType:"deposit"}:{}),...pack};rows.push(last)}pendingMultiple=null;pendingName="";continue}
+  if(!pendingMultiple&&pendingName&&pendingTotal){if(plausibleReceiptItemName(pendingName)){let pack=inferPackFromName(pendingName);last={name:pendingName,price:String(parseReceiptNumber(pendingTotal[1])),discount:0,regularTotal:parseReceiptNumber(pendingTotal[1]),...pack};rows.push(last)}pendingName="";continue}
+  if(pendingMultiple&&plausibleReceiptItemName(line)&&!/(?:\d+[,.]\d{2})|(?:\d+\s*[*x×])/.test(line)){pendingName=/^pfandwert\b/i.test(line)?"Pfand":line;pendingMultiple.isDeposit=/^pfandwert\b/i.test(line);pendingMultiple.isReturn=/^leergut(?:rücknahme|ruecknahme)\b|^pfandrückgabe\b|^pfandrueckgabe\b/i.test(line);continue}
+  pendingMultiple=null;
   const refund=line.match(/^(?:leergut|pfandrückgabe|pfandrueckgabe)(?:\s+.*)?\s+(-\d+[,.]\d{2})\s*(?:€|EUR)?\s*[AB]?$/i);
   if(refund){last={name:"Pfand-Rückgabe",price:String(parseReceiptNumber(refund[1])),isDeposit:true,pricingType:"deposit"};rows.push(last);pendingName="";continue}
   const deposit=line.match(/^pfand(?:artikel)?\s+(\d+[,.]\d{2})\s*(?:€|EUR)?\s*[AB]?$/i);
@@ -1172,6 +1177,8 @@ function parseReceiptText(text){
   if(countFirst){const name=(countFirst[1]||pendingName||"").trim();if(name&&plausibleReceiptItemName(name)){let pack=inferPackFromName(name);last={name,price:String(parseReceiptNumber(countFirst[4])),count:Number(countFirst[2]),unitLinePrice:parseReceiptNumber(countFirst[3]),quantitySource:"receipt-multipack",discount:0,regularTotal:parseReceiptNumber(countFirst[4]),...pack};rows.push(last)}pendingName="";continue}
   const namedCountUnitOnly=line.match(/^(.{2,64}?)\s+(\d{1,2})\s*[#*x×]\s*(\d+[,.]\d{2})\s*(?:€|EUR)?(?:\s*[AB])?$/i);
   if(namedCountUnitOnly){pendingMultiple={count:Number(namedCountUnitOnly[2]),unitPrice:parseReceiptNumber(namedCountUnitOnly[3]),name:namedCountUnitOnly[1].trim()};pendingName="";continue}
+  const returnCountUnit=line.match(/^[-−]\s*(\d{1,2})\s*[#*x×]\s*(\d+[,.]\d{2})\s*(?:€|EUR)?$/i);
+  if(returnCountUnit){pendingMultiple={count:-Number(returnCountUnit[1]),unitPrice:parseReceiptNumber(returnCountUnit[2]),isReturn:true};pendingName="";continue}
   const countUnitOnly=line.match(/^(\d{1,2})\s*[#*x×]\s*(\d+[,.]\d{2})\s*(?:€|EUR)?$/i);
   if(countUnitOnly){pendingMultiple={count:Number(countUnitOnly[1]),unitPrice:parseReceiptNumber(countUnitOnly[2]),name:pendingName};continue}
   let adjustment=line.match(/^(?:coupon(?:[- ]?rabatt)?|payback(?:[- ]?coupon)?|gesamtrabatt|rabatt\s+gesamt|gutscheinrabatt|gesamtvorteil)\s*:?-?\s*(\d+[,.]\d{2})\s*(?:€|EUR)?/i);
@@ -1197,7 +1204,7 @@ function parseReceiptText(text){
   if(weighted&&last){last.packAmount=parseReceiptNumber(weighted[1]);last.packUnit="kg";last.detectedUnitPrice=parseReceiptNumber(weighted[2]);last.quantitySource="receipt-weight";continue}
   let mult=line.match(/(\d+[,.]\d{2})\s*(?:€)?\s*[x×]\s*(\d+)/i);
   if(mult&&last&&!last.isDeposit){last.count=Number(mult[2]);last.unitLinePrice=parseReceiptNumber(mult[1]);last.quantitySource="receipt-multipack";let lineTotal=Number((last.unitLinePrice*last.count).toFixed(2));last.price=String(lineTotal);last.regularTotal=lineTotal;continue}
-  let m=line.match(/^(.{2,48}?)\s+(\d+[,.]\d{2})\s*(?:€|EUR)?\s*[AB]?$/i);
+  let m=line.match(/^(.{2,48}?)\s+(\d+[,.]\d{2})\s*(?:€|EUR)?\s*(?:[AB]|[12])?$/i);
   if(m&&!/\b(?:summe|gesamt(?:betrag)?|bar|cash|karte|kartenzahlung|girocard|visa|mastercard|mwst|pfand(?:artikel|rückgabe)?|gegeben|rückgeld|payback)\b/i.test(m[1])){
    let pack=inferPackFromName(m[1]);last={name:m[1].trim(),price:String(parseReceiptNumber(m[2])),discount:0,regularTotal:parseReceiptNumber(m[2]),...pack};rows.push(last);pendingName="";continue
   }
@@ -1305,7 +1312,8 @@ async function renderPdfFirstPage(file){
  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,page=await pdf.getPage(1),vp=page.getViewport({scale:2}),canvas=document.createElement("canvas");canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:canvas.getContext("2d"),viewport:vp}).promise;return new Promise(r=>canvas.toBlob(r,"image/jpeg",.92));
 }
 function detectReceiptStore(text){
- const lines=String(text||"").split(/\n+/).map(x=>x.trim()).filter(Boolean),head=lines.slice(0,18).join(" ").toLowerCase();
+ const full=String(text||""),lines=full.split(/\n+/).map(x=>x.trim()).filter(Boolean),head=lines.slice(0,18).join(" ").toLowerCase().replace(/\ba\s+l\s+d\s+i\b/g,"aldi");
+ if(/aldi\s+se\s*(?:&|und)\s*co\.?\s*kg/i.test(full))return "ALDI";
  const rules=[
   [/\blidl\b/,"Lidl"],[/\bkaufland\b/,"Kaufland"],[/\brewe\b/,"REWE"],[/\bedeka\b/,"EDEKA"],[/\bpenny\b/,"PENNY"],
   [/aldi\s+s(?:ü|u|ue)d|aldi süd|aldi sued/,"ALDI Süd"],[/\baldi\s+nord\b/,"ALDI Nord"],[/\baldi\b/,"ALDI"],
