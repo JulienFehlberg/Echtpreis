@@ -337,3 +337,10 @@ assert(html.includes('linkedDiscount=linked.reduce'),"receipt discount insights 
 assert(html.includes('unlinkedDiscount=Math.max(0'),"receipt discount insights should separate general coupons from product-linked savings");
 assert(html.includes('regularProducts=Number((paidProducts+linkedDiscount).toFixed(2))'),"product discount rate should reconstruct regular product spend without deposit contamination");
 assert(html.includes('direkt Produkten zugeordnet')&&html.includes('als allgemeiner Rabatt/Coupon erkannt'),"discount insight copy should distinguish linked and general receipt savings");
+
+assert(html.includes('function aggregateReceiptPlanItems(items)'),"plan-vs-receipt comparison should aggregate duplicate product rows first");
+assert(html.includes('g.actualUnits+=units'),"duplicate receipt rows should contribute all purchased units");
+assert(html.includes('g.price=Number((g.price+price).toFixed(2))'),"duplicate receipt rows should combine spend for extra-purchase analysis");
+assert(html.includes('g.sourceRows.push(index)')&&html.includes('g.sourceCount++'),"aggregated receipt products should retain source-row traceability");
+assert(html.includes('let actual=aggregateReceiptPlanItems(current.items)'),"plan comparison should consume aggregated receipt products");
+assert(html.includes('actualReceiptRows:current.items.filter'),"plan comparison should preserve raw receipt-row count separately from aggregated products");
