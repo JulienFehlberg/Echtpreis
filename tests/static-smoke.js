@@ -245,3 +245,9 @@ assert(html.includes('memory-ring')&&html.includes('conic-gradient'),"personal p
 assert(html.includes('Die Anzeige beschreibt nur, wie viel eigene Vergleichshistorie bereits vorhanden ist'),"price memory graphic must not imply a quality score");
 assert(html.includes('memory-metrics')&&html.includes('Preishistorien'),"price memory should surface evidence-based metrics visually");
 assert(html.includes('stat-bar-track')&&html.includes('stat-bar-fill'),"monthly category changes should use responsive data bars");
+
+assert(html.includes('v5.194.0'),"expected app version v5.194.0");
+assert(html.includes('class="ep-icon"')&&html.includes('<svg viewBox="0 0 24 24">'),"home actions should use the native premium line icon system");
+assert(html.includes('Einkauf in Sekunden verstehen')&&html.includes('Preise vergleichen &amp; sparen')&&html.includes('Einkaufsverhalten verstehen'),"home action copy should be concise and benefit-led");
+assert(html.includes('grid-template-columns:48px minmax(0,1fr) 18px'),"home actions should use compact single-row mobile hierarchy");
+assert(!html.includes('<span>🧾</span>Beleg scannen')&&!html.includes('<span>🛒</span>Einkaufsliste')&&!html.includes('<span>📊</span>Meine Statistik'),"legacy emoji home navigation must not return");
