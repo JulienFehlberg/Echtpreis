@@ -311,3 +311,10 @@ assert(html.includes('previous.regularTotal=Number(previous.regularTotal||previo
 assert(html.includes('previous.discount=Number(((Number(previous.discount)||0)+discount).toFixed(2))'),"multiple linked discounts should accumulate on the product");
 assert(html.includes('previous.price=String(paid)'),"linked discounts should reduce the actual paid product price");
 assert(html.includes('function personalRegularComparablePrice(item)'),"receipt history should retain access to regular comparable prices separately from paid prices");
+
+assert(html.includes('function receiptRecognizedTotal(rows)'),"receipt arithmetic should use one canonical recognized-total calculation");
+assert(html.includes('r?.isAdjustment&&r?.linkedToPrevious?0:'),"product-linked discounts must not be subtracted twice from recognized receipt totals");
+assert(html.includes('recognized=receiptRecognizedTotal(rows)'),"OCR candidate scoring should use discount-safe receipt arithmetic");
+assert(html.includes('recognized=receiptRecognizedTotal(receiptDraft)'),"receipt verification should use discount-safe receipt arithmetic");
+assert(html.includes('aiRecognized=receiptRecognizedTotal(receiptDraft)'),"AI receipt completeness checks should use the same canonical arithmetic");
+assert(html.includes('total-receiptRecognizedTotal(receiptLines)'),"saved receipt unassigned amount should use canonical receipt arithmetic");
