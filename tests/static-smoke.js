@@ -305,3 +305,9 @@ assert(html.includes('isAdjustment:true')&&html.includes('pricingType:"discount"
 assert(html.includes('adjustmentType:/coupon|gutschein|payback/'),"coupon-like adjustments should be distinguishable from ordinary discounts");
 assert(html.includes('pfand(?:artikel)?|einwegpfand|mehrwegpfand'),"receipt parser should recognize common German deposit labels");
 assert(html.includes('!i.isDeposit&&!i.isAdjustment'),"receipt product analytics should exclude deposits and adjustments");
+
+assert(html.includes('adjustment.appliedTo=previous.name')&&html.includes('adjustment.linkedToPrevious=true'),"receipt discounts should link to the preceding purchased product when possible");
+assert(html.includes('previous.regularTotal=Number(previous.regularTotal||previous.price)'),"linked discounts should preserve the product regular price");
+assert(html.includes('previous.discount=Number(((Number(previous.discount)||0)+discount).toFixed(2))'),"multiple linked discounts should accumulate on the product");
+assert(html.includes('previous.price=String(paid)'),"linked discounts should reduce the actual paid product price");
+assert(html.includes('function personalRegularComparablePrice(item)'),"receipt history should retain access to regular comparable prices separately from paid prices");
