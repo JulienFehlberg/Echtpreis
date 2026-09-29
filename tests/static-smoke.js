@@ -206,8 +206,8 @@ assert(html.includes('x.count>=2')&&html.includes('cutoff.setDate(cutoff.getDate
 assert(html.includes('Nichts wird automatisch hinzugefügt'),"impulse learning must preserve explicit user control");
 assert(html.includes('data-impulse-add')&&html.includes('+ Liste'),"recurring impulse suggestions should be explicitly addable to the real shopping list");
 assert(html.includes('typisch ')&&html.includes(' · Tief '),"impulse suggestions should reuse personal price memory when available");
-assert(html.includes('planComparison:cached.planComparison||null'),"server sync must preserve plan comparison learning");
-assert(html.includes('itemsComplete:cached.itemsComplete')&&html.includes('unassignedAmount:cached.unassignedAmount'),"server sync must preserve local receipt completeness metadata");
+assert(html.includes('planComparison:x.planComparison||cached.planComparison||null'),"server sync must preserve plan comparison learning");
+assert(html.includes('itemsComplete:x.itemsComplete!=null?!!x.itemsComplete:cached.itemsComplete')&&html.includes('unassignedAmount:x.unassignedAmount!=null?Number(x.unassignedAmount):cached.unassignedAmount'),"server sync must preserve local receipt completeness metadata while accepting richer server evidence");
 
 assert(html.includes('Beleg scannen')&&html.includes('Beleg-Analyse')&&html.includes('Meine Belege & Privatsphäre'),"visible receipt product language should consistently use Beleg");
 assert(!html.includes('Bon scannen')&&!html.includes('Bon-Analyse')&&!html.includes('Meine Bons & Privatsphäre'),"legacy Bon terminology must not return in primary UI");
