@@ -116,3 +116,8 @@ assert(html.includes('type:"personal-price-move"')&&html.includes('keine allgeme
 assert(html.includes('type:"shopping-day"')&&html.includes('type:"category-spend"'),"stats profile should learn shopping day and category patterns");
 assert(html.includes('echtpreis_recent_stats_insights_v1'),"stats insights should rotate instead of showing the same fact every time");
 assert(html.includes('v5.174.0'),"expected app version v5.174.0");
+
+assert(html.includes('Datenabdeckung')&&html.includes('deiner Monatsausgaben sind Einzelpositionen zugeordnet'),"monthly breakdown must disclose receipt item coverage");
+assert(html.includes('Gesamtausgaben')&&html.includes('noch nicht einzelnen Artikeln zugeordnet'),"monthly breakdown must separate total spend from recognized item spend");
+assert(html.includes('Kategorie-Prozente beziehen sich auf'),"category percentages must disclose their recognized-spend denominator");
+assert(html.includes('v5.175.0'),"expected app version v5.175.0");
