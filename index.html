@@ -1162,9 +1162,10 @@ async function enrichByEAN(ean){
 async function attachEANToDraft(rawText){
  const ean=extractEAN(rawText);if(!ean)return null;return await enrichByEAN(ean);
 }
-const spokenNumberWords={ein:1,eine:1,einen:1,einem:1,einer:1,eins:1,zwei:2,drei:3,vier:4,fuenf:5,sechs:6,sieben:7,acht:8,neun:9,zehn:10,zwoelf:12};
+const spokenNumberWords={ein:1,eine:1,einen:1,einem:1,einer:1,eins:1,zwei:2,drei:3,vier:4,fuenf:5,sechs:6,sieben:7,acht:8,neun:9,zehn:10,elf:11,zwoelf:12};
 function normalizeSpokenQuantity(raw){
- let s=String(raw||"").trim();return s.replace(/^\s*(ein|eine|einen|einem|einer|eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|zwölf|zwoelf)\b/i,m=>{const k=normalizeProduct(m.trim());return String(spokenNumberWords[k]||m)});
+ // v7.237 spoken quantities should work after common shopping filler words too.
+ let s=String(raw||"").trim().replace(/^\s*(?:bitte|noch|dazu|und)\s+/i,"");return s.replace(/^\s*(ein|eine|einen|einem|einer|eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|elf|zwölf|zwoelf)\b/i,m=>{const k=normalizeProduct(m.trim());return String(spokenNumberWords[k]||m)});
 }
 function splitShoppingSpeech(text){
  let s=String(text||"").trim().replace(/[.;]+/g,",").replace(/\s+(?:und dann|danach|außerdem|ausserdem)\s+/gi,",").replace(/\s+und\s+/gi,",");
@@ -1251,7 +1252,7 @@ function parseWish(raw){
  if(learned&&c?.unit!=="piece"&&!c?.unitWeight&&!wish.learnedPackage){wish.needsQuantity=true;wish.needsClarification=true}
  return multiPack?wish:initializePackageQuantity(wish);
 }
-function shoppingProductTerm(raw){return normalizeProduct(normalizeSpokenQuantity(raw)).replace(/^\d+(?:[.,]\d+)?\s*(?:kg|g|gramm|l|liter|ml|stuck|stueck|stk|x)?\s+/,"").trim()}
+function shoppingProductTerm(raw){let q=normalizeProduct(normalizeSpokenQuantity(raw));q=q.replace(/^\d+\s*(?:x|packungen?|packs?)\s*(?:a|je|zu je)?\s*\d+(?:[.,]\d+)?\s*(?:kg|g|gramm|l|liter|ml)\s+/,"");q=q.replace(/^\d+\s*(?:packungen?|packs?)\s+/,"");return q.replace(/^\d+(?:[.,]\d+)?\s*(?:kg|g|gramm|l|liter|ml|stuck|stueck|stk|x)?\s+/,"").replace(/\s+(?:a|je|zu je)\s*\d+(?:[.,]\d+)?\s*(?:kg|g|gramm|l|liter|ml)$/,"").trim()}
 function productCandidates(raw){
  const q=shoppingProductTerm(raw);if(q.length<4)return[];
  const related={rumpsteak:"rindfleisch",rumpsteaks:"rindfleisch",entrecote:"rindfleisch",hueftsteak:"rindfleisch",hüftsteak:"rindfleisch",rinderfilet:"rindfleisch"};
