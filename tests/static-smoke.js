@@ -65,7 +65,8 @@ assert(html.includes("plausibleObservationPrice(x)"),"trusted prices must reject
 assert(html.includes("x.per!==catalog[x.key].unit"),"price observations with the wrong comparison unit must be rejected");
 assert(html.includes("function exactBrandFallbackPrice"),"cold-start exact-brand orientation is missing");
 assert(html.includes('referenceType:"brand-estimate"'),"estimated exact-brand prices must be explicitly labeled");
-assert(html.includes("verifiedBest.total<=win.total*1.12"),"basket ranking must balance evidence quality with useful cold-start savings");
+assert(html.includes('referenceType:"brand-estimate"')&&html.includes('confidence:"niedrig"'),"cold-start price orientation must remain explicitly low-confidence");
+assert(html.includes("storeCanCarry(store,wish,key)"),"basket comparisons must continue to enforce store assortment eligibility");
 assert(html.includes('type:"first-receipt-fact"'),"first receipt should produce an immediate useful fact");
 assert(html.includes("function receiptMarketComparison")&&html.includes('currentReceiptSavingConfidence="hoch"'),"receipt markets must be compared item by item and savings kept to evidenced prices");
 assert(html.includes("async function finalizeScannedReceipt")&&html.includes("await finalizeScannedReceipt()"),"verified receipt scans must save without a second confirmation tap");
