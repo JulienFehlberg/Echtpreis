@@ -195,3 +195,11 @@ assert(html.includes('Math.abs(delta)<.12'),"market detail should ignore small p
 assert(html.includes('id="statsPriceVolatility"')&&html.includes('Wo deine Preise stark schwanken'),"stats should identify products with meaningful personal price volatility");
 assert(html.includes('x.prices.length>=3')&&html.includes('x.spread>=.15'),"price volatility should require at least three purchases and meaningful spread");
 assert(html.includes('v5.186.0'),"expected app version v5.186.0");
+
+assert(html.includes('id="savingFocus"')&&html.includes('Dein Sparfokus'),"shopping list should prioritize products where comparison matters personally");
+assert(html.includes('Stabile Preise werden bewusst nicht hervorgehoben'),"savings focus should avoid warning spam for stable products");
+assert(html.includes('spread>=.15')&&html.includes('signal.regular'),"savings focus should use personal volatility and repeat-purchase evidence");
+assert(html.includes('id="personalBasketVerdict"')&&html.includes('Gegen dein Preisgedächtnis'),"market result should include a personal basket price verdict");
+assert(html.includes('Richtwerte zählen nicht'),"personal basket verdict must exclude reference prices");
+assert(html.includes('cheap.length')&&html.includes('expensive.length'),"personal basket verdict should distinguish cheaper, normal and expensive items");
+assert(html.includes('v5.187.0'),"expected app version v5.187.0");
