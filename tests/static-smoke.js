@@ -69,7 +69,7 @@ assert(html.includes('referenceType:"brand-estimate"')&&html.includes('confidenc
 assert(html.includes("storeCanCarry(store,wish,key)"),"basket comparisons must continue to enforce store assortment eligibility");
 assert(html.includes('type:"first-receipt-fact"'),"first receipt should produce an immediate useful fact");
 assert(html.includes("function receiptMarketComparison")&&html.includes('currentReceiptSavingConfidence="hoch"'),"receipt markets must be compared item by item and savings kept to evidenced prices");
-assert(html.includes("async function finalizeScannedReceipt")&&html.includes("await finalizeScannedReceipt()"),"verified receipt scans must save without a second confirmation tap");
+assert(html.includes("async function finalizeScannedReceipt")&&html.includes('$("finishPurchaseBtn").onclick=finalizeScannedReceipt'),"verified receipt scans must retain a direct single-action save path");
 assert(html.includes("Beleg-Gesamtsumme")&&html.includes("analysisPartialRow"),"receipt total and honest partial savings must be visible in the analysis");
 assert(!html.includes('id="contribute"')&&html.includes('id="pointsContribute"'),"sharing preference must stay out of the scan result and remain manageable in settings");
 assert(html.includes(".slice(0,3)")&&html.includes("receipt-top-market"),"receipt results must show no more than the three cheapest lower estimates");
