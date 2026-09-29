@@ -190,7 +190,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert(d.getElementById("receiptTotalCheck").textContent.startsWith("✓"),"items from multiple photos should reconcile against the full receipt total");
  w.Tesseract=originalTesseract;
  w.applyReceiptText(realPhotoOcr,"Foto");
- w.applyReceiptText("EDEKA\n28.09.26\nMilch 1 l 1,49\nSUMME 1,49","Foto");
+ w.applyReceiptText("EDEKA\n28.09.26\nMilch 1 l 1,49\nSUMME 1,49","Foto");await new Promise(r=>w.setTimeout(r,25));
  assert.strictEqual(d.getElementById("analysisSavingRow").style.display,"none","legacy all-market savings row should not clutter the receipt analysis");
  assert(d.getElementById("receiptMarketRows").textContent.includes("ALDI Nord"),"a single milk receipt should compare ALDI individually");
  assert(d.getElementById("receiptMarketRows").textContent.includes("günstiger"),"estimated lower market prices must be phrased as possible savings");
