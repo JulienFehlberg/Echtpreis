@@ -370,9 +370,15 @@ body.subview #planner,body.subview #receipt,body.subview #statsCard{scroll-margi
 #planner .qty-stepper{width:auto!important;min-width:0!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important}
 #planner .pack-count{min-width:22px!important;font-size:11px!important;text-align:right!important}
 #planner .qty-buttons{display:flex!important;gap:4px!important;width:auto!important}
+</style><style>
+/* v5.213 vertical alignment + pack-size affordance */
+#planner .itemname{align-self:stretch!important;display:flex!important;flex-direction:column!important;justify-content:center!important;padding-top:0!important;padding-bottom:0!important}
+#planner .item-title{margin:0!important}
+#planner .item-pack-size{margin-top:5px!important}
+#planner .item-pack-size{cursor:pointer!important;text-decoration:underline!important;text-decoration-style:dotted!important;text-underline-offset:3px!important;text-decoration-color:#b8c5be!important}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.212.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.213.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
