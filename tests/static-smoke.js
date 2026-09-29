@@ -144,3 +144,9 @@ assert(html.includes('Bonwert vergleichbar')||html.includes('des Bonwerts vergle
 assert(html.includes('savingConfidence="mittel"'),"qualified partial comparisons should persist medium confidence");
 assert(html.includes('Das ist keine garantierte Ersparnis'),"savings statistics must not present historical comparison totals as guaranteed savings");
 assert(html.includes('v5.179.0'),"expected app version v5.179.0");
+
+assert(html.includes('id="receiptSavingDrivers"')&&html.includes('Was den Preisunterschied ausmacht'),"receipt analysis should explain savings at item level");
+assert(html.includes('drivers:drivers.slice(0,8)'),"receipt savings evidence should persist item-level drivers");
+assert(html.includes('id="statsSavingDrivers"')&&html.includes('Welche Produkte treiben deine Preisunterschiede?'),"stats should aggregate recurring savings drivers");
+assert(html.includes('historische Vergleichsunterschiede, keine garantierte künftige Ersparnis'),"driver statistics must disclose historical scope");
+assert(html.includes('v5.180.0'),"expected app version v5.180.0");
