@@ -2110,7 +2110,7 @@ function extractReceiptTotal(text){
    const m=next.match(/(?:€|EUR|£)?\s*(\d{1,5}\s*[,.]\s*\d{2})/);if(m)n=parseReceiptNumber(m[1].replace(/\s+/g,""));
   }
   if(!Number.isFinite(n)||n<=0)continue;if(firstLabeled==null)firstLabeled=n;
-  if(label==="summe"||label==="zu zahlen"||label==="zahlbetrag"||label==="endbetrag"||label==="endsumme"||label==="rechnungsbetrag"){if(primary==null)primary=n}
+  if(label==="summe"||label==="zu zahlen"||label==="zahlbetrag"||label==="endbetrag"||label==="endsumme"||label==="rechnungsbetrag"||label==="betrag fällig"||label==="betrag faellig"){if(primary==null)primary=n}
   else summary=n;
  }
  if(primary!=null&&summary!=null&&taxGross.length>=2){const taxTotal=Number(taxGross.reduce((a,b)=>a+b,0).toFixed(2));if(Math.abs(taxTotal-summary)<=.02&&Math.abs(taxTotal-primary)>.01)return summary}
