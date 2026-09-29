@@ -344,3 +344,9 @@ assert(html.includes('g.price=Number((g.price+price).toFixed(2))'),"duplicate re
 assert(html.includes('g.sourceRows.push(index)')&&html.includes('g.sourceCount++'),"aggregated receipt products should retain source-row traceability");
 assert(html.includes('let actual=aggregateReceiptPlanItems(current.items)'),"plan comparison should consume aggregated receipt products");
 assert(html.includes('actualReceiptRows:current.items.filter'),"plan comparison should preserve raw receipt-row count separately from aggregated products");
+
+assert(html.includes('function aggregatePlannedItems(items)'),"plan comparison should aggregate duplicate planned products before matching");
+assert(html.includes('g.plannedUnits+=units'),"duplicate planned rows should combine their requested quantities");
+assert(html.includes('g.sourcePlanRows.push(index)')&&html.includes('g.sourcePlanCount++'),"aggregated planned products should retain source-row traceability");
+assert(html.includes('let planned=aggregatePlannedItems(plan.items)'),"plan-vs-receipt matching should consume aggregated planned products");
+assert(html.includes('plannedSourceRows:plan.items.length'),"plan comparison should preserve original planned-row count separately from unique products");
