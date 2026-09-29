@@ -305,6 +305,7 @@ assert(html.includes('const comma=s.lastIndexOf(",")')&&html.includes('const dec
 assert(html.includes('replace(/[€£]/g,"")')&&html.includes('replace(/\\s+/g,"")'),"receipt money parser should tolerate currency signs and OCR whitespace");
 assert(html.includes('zu zahlen|zahlbetrag|endbetrag'),"receipt total parser should recognize common German total labels");
 assert(html.includes('bar(?: gegeben)?')&&html.includes('apple pay|google pay'),"payment labels should be rejected as product names");
+assert(html.includes('kontaktlos|contactless|nfc')&&html.includes('zahlung\\s+(?:mit\\s+)?karte'),"receipt payment method parsing should recognize contactless and Zahlung mit Karte variants");
 
 assert(html.includes('function receiptStoreSearchText(text)'),"receipt merchant detection should normalize OCR header text");
 assert(html.includes('replace(/\\bk\\s*a\\s*u\\s*f\\s*l\\s*a\\s*n\\s*d\\b/g,"kaufland")'),"merchant OCR should recover spaced Kaufland logos");
