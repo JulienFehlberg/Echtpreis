@@ -1,0 +1,36 @@
+{
+  "name": "PENNY Referenzbon 001",
+  "capturedAt": "2026-09-29",
+  "expected": {
+    "merchant": "PENNY",
+    "date": "2026-09-29",
+    "total": 6.48,
+    "lineItems": [
+      {
+        "rawName": "Hörnchen Nougat",
+        "lineTotal": 1.49
+      },
+      {
+        "rawName": "Cashewkerne",
+        "lineTotal": 2.89
+      },
+      {
+        "rawName": "Red Bull 0,33L",
+        "lineTotal": 1.85
+      },
+      {
+        "rawName": "PFAND",
+        "lineTotal": 0.25,
+        "isDeposit": true
+      }
+    ],
+    "payment": {}
+  },
+  "notes": [
+    "Ground truth transcribed from a real user-supplied PENNY receipt OCR used by the browser regression suite.",
+    "The OCR reads the prominent SUMME as 6,46; the repeated gross/tax summary resolves the printed total to 6,48."
+  ],
+  "ocrText": "PENNY-MARKT GMBH\n29.09.2026\nHörnchen Nougat 1,49 B\nCashewkerne 2,89 B\nRed Bull 0,33L 1,85 A\nPFAND 0,25 EURO 0,25 A\nSUMME EUR 6,46\nSteuer % Netto Steuer Brutto\nA= 19,0% 1,76 0,34 2,10\nB= 7,0% 4,09 0,29 4,38\nGesamtbetrag 5,85 0,63 6,48",
+  "schemaVersion": 1,
+  "source": "real-user-receipt"
+}
