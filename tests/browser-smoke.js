@@ -383,7 +383,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  d.querySelector('#list [data-resolve-key="rindfleisch"]').click();
  assert(!d.getElementById("list").textContent.includes("Welche Menge ungefähr?"),"an accepted substitute should start with its standard pack size");
  assert.strictEqual(await w.compare({skipLocation:true,scroll:false}),true,"standard pack size should enable an approximate substitute comparison");
- assert(d.getElementById("winnerPrice").textContent.startsWith("ca. "),"substitute should remain an approximate comparison");
+ assert.strictEqual(d.getElementById("winnerPrice").textContent,"—","substitute based only on reference prices must not create a retailer winner");assert.strictEqual(d.getElementById("winnerLabel").textContent,"Keine belastbare Rangfolge","approximate substitute comparisons must remain unranked until evidenced");
  assert(d.getElementById("merchantResults").textContent.includes("verglichen als Rindfleisch"),"price details must disclose the substitute category");
  const savedUnknown=JSON.parse(w.localStorage.getItem("echtpreis_basket_state_v1"));w.replaceEchtpreisList(savedUnknown);
  assert(d.getElementById("list").textContent.includes("≈ Rindfleisch"),"confirmed substitute should survive list reload and stay clearly labeled");
