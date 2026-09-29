@@ -173,7 +173,7 @@ body.subview .top{min-height:40px;margin-bottom:8px}.receipt-simple{padding-top:
 @media(max-width:430px){#planner .inputrow{grid-template-columns:minmax(0,1fr) auto!important}#planner #voiceListBtn,#planner #barcodeBtn{grid-row:2;width:auto!important}#planner #voiceListBtn{grid-column:1}#planner #barcodeBtn{grid-column:2}}
 </style><style>
 /* v5.196 compact active planner + explicit quantities */
-body.subview .home-main-actions{display:none!important}body.subview .hero{display:none!important}body.subview .top{margin-bottom:8px!important;min-height:38px!important}body.subview .version{display:none!important}
+body.subview .home-main-actions{display:grid!important}body.subview .hero{display:none!important}body.subview .top{margin-bottom:8px!important;min-height:38px!important}body.subview .version{display:none!important}
 body.subview #planner{margin-top:0!important}body.subview #planner .planner-main{margin-top:0!important}
 #planner .item{gap:7px!important;padding:6px 0!important;min-height:54px!important}#planner .item>[data-check]{width:27px!important;height:27px!important;flex-basis:27px!important;border-radius:8px!important}
 #planner .item-title{font-size:14px!important;line-height:1.15!important}#planner .item-pack-size{font-size:10px!important;margin-top:2px!important}
@@ -272,7 +272,7 @@ body.subview .hero{margin-bottom:10px}.home-main-actions{gap:9px!important}.home
     if(p)p.style.display=which==="plan"?"block":"none";
     if(r)r.style.display=which==="receipt"?"block":"none";
     if(pts)pts.style.display=which==="points"?"block":"none";
-    if(pro)pro.style.display=which==="profile"?"block":"none";if(st)st.style.display=which==="stats"?"block":"none";document.body.classList.toggle("subview",which!=="home");
+    if(pro)pro.style.display=which==="profile"?"block":"none";if(st)st.style.display=which==="stats"?"block":"none";document.body.classList.toggle("subview",which!=="home");var actions=byId("homePlan")&&byId("homePlan").parentElement;if(actions)actions.style.display="grid";
     [["homePlan","plan"],["homeReceipt","receipt"],["homeStats","stats"]].forEach(function(entry){var button=byId(entry[0]);if(button)button.setAttribute("aria-expanded",String(which===entry[1]))});
   }
   document.addEventListener("DOMContentLoaded",function(){
