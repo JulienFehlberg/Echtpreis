@@ -2088,6 +2088,7 @@ function extractReceiptCash(text){
  m=t.match(/(?:rückgeld|rueckgeld|wechselgeld|zurück|zurueck)\s*(?:€|EUR)?\s*:?-?\s*(\d{1,5}[,.]\d{2})/i);if(m)out.change=parseReceiptNumber(m[1]);
  return out;
 }
+function receiptCashConsistency(total,cash){const t=Number(total),paid=Number(cash?.paid),change=Number(cash?.change);if(!(t>0)||!(paid>=t)||!Number.isFinite(change)||change<0)return {available:false,ok:false,expected:null,difference:null};const expected=Number((paid-t).toFixed(2)),difference=Number(Math.abs(change-expected).toFixed(2));return {available:true,ok:difference<=.02,expected,difference}}
 function extractReceiptPaymentMethod(text){
  const t=String(text||"").toLowerCase();
  if(/apple\s*pay/.test(t))return "Apple Pay";
@@ -2119,9 +2120,9 @@ function receiptArithmeticMatches(total,recognized){return Number(total)>0&&Math
 function meaningfulReceiptSaving(m){const paid=Math.max(0,Number(m?.comparedPaid)||0),difference=Number(m?.difference)||0;return difference>=Math.max(.10,paid*.05)}
 function receiptCandidateScore(text){
  const rows=parseReceiptText(text),total=extractReceiptTotal(text),recognized=Number(rows.reduce((n,r)=>n+(Number(String(r.price).replace(",","."))||0),0).toFixed(2)),cash=extractReceiptCash(text),low=String(text||"").toLowerCase();
- let score=0;if(total>0)score+=35;score+=Math.min(rows.length,5)*9;if(total>0&&rows.length&&receiptArithmeticMatches(total,recognized))score+=55;if(detectReceiptStore(text))score+=10;if(detectReceiptDate(text))score+=6;if(cash.paid)score+=3;
+ const cashCheck=receiptCashConsistency(total,cash);let score=0;if(total>0)score+=35;score+=Math.min(rows.length,5)*9;if(total>0&&rows.length&&receiptArithmeticMatches(total,recognized))score+=55;if(detectReceiptStore(text))score+=10;if(detectReceiptDate(text))score+=6;if(cash.paid)score+=3;if(cashCheck.available)score+=cashCheck.ok?28:-18;
  rows.forEach(r=>{if(r.isDeposit||r.isAdjustment)return;let n=(r.name||"").trim();if(!plausibleReceiptItemName(n))score-=35;else if(identifyReceiptProduct(n).key)score+=8});
- return {score,rows,total,recognized,cash,text};
+ return {score,rows,total,recognized,cash,cashCheck,text};
 }
 function receiptCandidateVerified(candidate){return !!(candidate&&Number(candidate.total)>0)}
 function receiptCandidateComplete(candidate){const products=(candidate?.rows||[]).filter(r=>!r.isDeposit&&!r.isAdjustment);return receiptCandidateVerified(candidate)&&products.length>=1&&products.every(r=>plausibleReceiptItemName(r.name))&&receiptArithmeticMatches(candidate.total,candidate.recognized)}
@@ -2148,7 +2149,7 @@ function checkReceiptTotal(){
  const usableRows=receiptDraft.filter(r=>!r.isDeposit&&!r.isAdjustment&&plausibleReceiptItemName(r.name));receiptTotalVerified=total>0&&!!$("receiptStore").value&&!!$("receiptDate").value;
  const missing=Number((total-recognized).toFixed(2)),overread=missing<-.02;
  $("receiptTotalCheck").textContent=total>0?(receiptTotalVerified?(usableRows.length?(arithmeticMatch?"✓ Beleg erkannt · "+usableRows.length+" Positionen gelesen · Summe stimmt.":"✓ Beleg erkannt · Beleg-Gesamtsumme "+eur(total)+" · "+usableRows.length+" Positionen gelesen; "+(overread?"erkannte Positionen überschreiten die Belegsumme um "+eur(Math.abs(missing)):eur(Math.abs(missing))+" noch nicht zugeordnet.")):"✓ Beleg erkannt · Beleg-Gesamtsumme "+eur(total)+" · Einzelpositionen nicht sicher lesbar."):"Belegsumme nicht erkannt."):"Belegsumme nicht erkannt.";
- const pay=$("receiptPaymentDetail");if(pay){let bits=[];if(receiptPaymentMethod)bits.push("Zahlung: "+receiptPaymentMethod);if(receiptCash&&receiptCash.paid){bits.push("Bar gegeben: "+eur(receiptCash.paid));if(total>0&&receiptCash.paid>=total){let expected=Number((receiptCash.paid-total).toFixed(2));if(receiptCash.change==null||Math.abs(Number(receiptCash.change)-expected)>.02){receiptCash.change=expected;receiptCash.changeCalculated=true}}}if(receiptCash&&receiptCash.change!=null)bits.push("Rückgeld: "+eur(receiptCash.change)+(receiptCash.changeCalculated?" · geprüft":""));pay.textContent=bits.join(" · ")}
+ const pay=$("receiptPaymentDetail");if(pay){let bits=[];if(receiptPaymentMethod)bits.push("Zahlung: "+receiptPaymentMethod);if(receiptCash&&receiptCash.paid){bits.push("Bar gegeben: "+eur(receiptCash.paid));if(total>0&&receiptCash.paid>=total){let expected=Number((receiptCash.paid-total).toFixed(2));if(receiptCash.change==null){receiptCash.change=expected;receiptCash.changeCalculated=true}}}if(receiptCash&&receiptCash.change!=null){const cashCheck=receiptCashConsistency(total,receiptCash);bits.push("Rückgeld: "+eur(receiptCash.change)+(receiptCash.changeCalculated?" · berechnet":cashCheck.available&&cashCheck.ok?" · stimmt zur Belegsumme":cashCheck.available?" · passt nicht zur Belegsumme":""))}pay.textContent=bits.join(" · ")}
  const btn=$("finishPurchaseBtn");if(btn){btn.disabled=!receiptTotalVerified;btn.style.display=receiptTotalVerified?"block":"none";btn.textContent=receiptSaveRunning?"Beleg wird gespeichert …":"Beleg prüfen & speichern"}
  updateReceiptAnalysis();
 }
