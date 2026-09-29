@@ -102,7 +102,7 @@ assert(html.includes('unassignedAmount:receiptArithmeticVerified?0:'),"partial r
 assert(html.includes('Artikelliste möglicherweise unvollständig'),"AI receipt flow must disclose partial item recognition");
 
 assert(html.includes('erkannten Artikel-Ausgaben'),"category insights must be based on recognized item spend");
-assert(html.includes('die kcal-Zahl beschreibt deshalb ausdrücklich nur den erkannten Teil des Einkaufs'),"calorie insight must disclose partial receipt coverage");
+assert(html.includes('die kcal-Zahl beschreibt ausdrücklich nur den erkannten Teil des Einkaufs'),"calorie insight must disclose partial receipt coverage");
 assert(html.includes('itemsComplete:!!receiptArithmeticVerified')&&html.includes('id:"preview"'),"receipt preview must carry completeness metadata");
 
 assert(html.includes('type:"receipt-coverage"')&&html.includes('noch nicht einzelnen Artikeln zugeordnet'),"partial receipts should generate a transparent coverage insight");
