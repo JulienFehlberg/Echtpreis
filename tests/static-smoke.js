@@ -17,7 +17,7 @@ assert(html.includes("plausibleReceiptItemName"),"receipt item plausibility guar
 assert(html.includes("comparisonQuality"),"comparison confidence labelling missing");
 assert(!html.includes("compareStable"),"obsolete duplicate comparison engine must stay removed");
 assert(html.includes('history.sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0)||a.price-b.price)'),"historical fallback must prioritize freshness and trust");
-assert(html.includes("echtpreis_openprices_sync_by_key_v2"),"Open Prices should be cached per product key");
+assert(html.includes("echtpreis_openprices_sync_by_key_v3"),"Open Prices should be cached per product and location scope");
 assert(html.includes("const keys=[...new Set(basket.map(w=>w.key).filter(Boolean))]"),"manual compare should derive and deduplicate basket price categories");
 assert(!html.includes("syncSharedData();ingestOpenPrices();"),"startup must not fetch the full Open Prices catalog");
 assert(html.includes('<script src="app/config.js"></script>'),"store-ready config layer missing");
