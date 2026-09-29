@@ -368,7 +368,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(w.detectReceiptDate("Datum 31.02.2026"),"","impossible receipt dates must be rejected");
  w.localStorage.removeItem("echtpreis_open_purchase");assert.strictEqual(w.localStorage.getItem("echtpreis_open_purchase"),null,"test environment should start without an open purchase");
  w.replaceEchtpreisList(["1 kg Kartoffeln"]);await w.compare({skipLocation:true,scroll:false});
- assert(d.getElementById("winnerPrice").textContent.startsWith("ca. "),"unverified basket totals must be visibly approximate");
+ assert.strictEqual(d.getElementById("winnerPrice").textContent,"—","reference-only baskets must not publish a retailer winner price");assert.strictEqual(d.getElementById("winnerLabel").textContent,"Keine belastbare Rangfolge","reference-only baskets must not create a retailer ranking");assert(d.getElementById("winnerName").textContent.includes("Referenzwerte"),"reference-only comparison must explain why no winner is named");
  assert.strictEqual(d.getElementById("winnerCoverage").textContent,"","source coverage must not clutter the main price card");
  assert.strictEqual(d.getElementById("verifiedSavings").style.display,"none","model-only market differences must not be sold as savings");
  const visibleMarkets=d.getElementById("merchantResults").cloneNode(true);visibleMarkets.querySelectorAll("details").forEach(x=>x.remove());
