@@ -205,9 +205,23 @@ body.subview .home-main-actions .homeaction{grid-template-columns:40px minmax(0,
 body.subview .home-main-actions .homeaction b{font-size:16px!important}
 body.subview .home-main-actions .homeaction small{font-size:10px!important;margin-top:2px!important}
 body.subview #planner,body.subview #receipt,body.subview #statsCard{scroll-margin-top:12px}
+</style><style>
+/* v5.200 restore shopping action affordances */
+#planner .planner-tools button{color:#40534a!important;background:#edf2ef!important;border:1px solid #dfe7e2!important}
+#planner #addBtn{background:#102019!important;color:#fff!important;min-width:92px!important}
+#planner #voiceListBtn,#planner #barcodeBtn{background:#edf2ef!important;color:#075f37!important;border:1px solid #d8e4dc!important;font-size:0!important;position:relative}
+#planner #voiceListBtn:after{content:"🎙";font-size:19px!important;line-height:1}
+#planner #barcodeBtn:after{content:"▣";font-size:22px!important;line-height:1;font-weight:900}
+#planner #productInput{background:#fff!important;color:#102019!important;border:1.5px solid #ccd7d1!important}
+#planner #productInput::placeholder{color:#9aa39e!important;opacity:1}
+#planner .qty-stepper button{color:#076c3d!important;background:#f0f7f3!important;border:1.5px solid #cfe0d6!important}
+#planner .x{color:#6f7d76!important;font-size:18px!important;font-weight:500!important}
+#planner [data-check]{background:#fff!important;border:2px solid #6f857a!important}
+#planner .quick-chip{border:1px solid #cfe1d7!important;background:#edf7f1!important;color:#075f37!important}
+#planner #compareBtn{background:linear-gradient(135deg,#075f37,#13a15f)!important;color:#fff!important}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.199.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.200.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
