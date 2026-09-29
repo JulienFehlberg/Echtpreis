@@ -288,6 +288,7 @@ assert((html.match(/\\d\{1,3\}\\s\*\[#\*x×\]/g)||[]).length>=4,"receipt multipa
 assert(html.includes('unitLinePrice:count?Number((total/count).toFixed(2)):null'),"Stück receipt lines should derive a useful per-item price");
 assert(html.includes('(?:[x×*]|stk\\.?|stück|stueck|stuck|pcs?\\.?)'),"receipt quantity fallback should recognize x, multiplication signs and common Stück/pcs abbreviations");
 assert(html.includes('const countOnly=line.match')&&html.includes('quantityOnly:true'),"receipt parser should retain standalone Stück counts for adjacent receipt lines");
+assert(html.includes('unitPriceAfterCount=line.match')&&html.includes('(?:\\/|je|pro)\\s*(?:stk\\.?|stück|stueck|stuck|pcs?\\.?)'),"receipt parser should accept a per-piece price on the line after a quantity-only row");
 
 assert(html.includes('betrag erhalten|zahlbetrag bar')&&html.includes('herausgegeben|rückgabe|rueckgabe'),"receipt cash extraction should accept common German paid/change labels");
 assert(html.includes('function receiptCashConsistency(total,cash)'),"receipt parser should independently validate cash/change arithmetic");
