@@ -273,6 +273,7 @@ assert(html.includes('@media(prefers-reduced-motion:reduce)')&&html.includes('.l
 
 assert(html.includes('v7.204 quantity-aware add/merge'),"planner should include quantity-aware duplicate merging");
 assert(html.includes('energy:receiptEnergySnapshot(receiptDraft)'),"live receipt preview must use the in-scope receipt draft for energy analysis");
+assert(html.includes('await finalizeScannedReceipt()'),"fully verified receipt scans must auto-save without a second confirmation click");
 assert(html.includes('$("analysisSaving").textContent="–"'),"receipt reanalysis must clear stale savings before evaluating the new scan");
 assert(html.includes('receiptCash.changeCorrected=true')&&html.includes('aus Barzahlung und Belegsumme geprüft'),"implausible OCR change must be corrected from cash minus authoritative total");
 assert(html.includes('function mergeBasketQuantity(target,incoming)')&&html.includes('currentCount+incomingCount'),"duplicate items should add the incoming pack count, not merely increment by one");
