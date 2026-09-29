@@ -41,6 +41,15 @@ Platform Runtime
 
 In der Testphase sollen keine zwingenden laufenden Kosten entstehen. Kostenpflichtige Infrastruktur wird erst eingeführt, wenn ein konkreter Nutzen besteht, z. B. bessere OCR, mehr API-Kapazität oder größere Nutzerzahlen.
 
+## Status Testphase (29.09.2026)
+
+- GitHub-Pages-Testversion: aktiv
+- Release-Checks: statische App-Guards, API-Smoke und Receipt-Vision-Tests verpflichtend
+- Bon-Gesamtsumme: gedruckte autoritative Summe hat Vorrang vor Einzelpositionsarithmetik
+- Bon-Zahlungsdaten: Bar/Karte/Rückgeld werden getrennt von Warenpositionen behandelt
+- Receipt-Vision: strukturierte Ausgabe, Plausibilitätsprüfungen und Datenschutzmodus `store: false`
+- Nächster Freigabeschritt: reale End-to-End-Gerätetests mit den vorhandenen Kaufland-, EDEKA-, ALDI- und PENNY-Belegen
+
 ## Noch vor einem Store-Release zwingend
 
 - App-Icons und Splash Screens
