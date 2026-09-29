@@ -363,3 +363,6 @@ assert(html.includes('item?.quantity??item?.qty??item?.count??item?.packCount'),
 assert(html.includes('function receiptPackPieces(item)'),"receipt quantity model should distinguish pieces contained in a pack");
 assert(html.includes('item?.packUnit==="piece"'),"piece multipacks should only affect physical piece count when pack metadata explicitly says piece");
 assert(html.includes('function receiptPhysicalPieces(item){return receiptItemUnits(item)*receiptPackPieces(item)}'),"physical piece count should be derived separately from purchased-unit count");
+
+assert(html.includes('const target=catalog[key]?.unit||"piece",count=receiptItemUnits(row)'),"receipt price and energy quantity conversion should reuse canonical purchased-unit semantics");
+assert(!html.includes('const target=catalog[key]?.unit||"piece",count=Number(row.count)||1,pack='),"receipt comparison should not maintain a separate count-only quantity interpretation");
