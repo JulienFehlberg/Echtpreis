@@ -2106,7 +2106,7 @@ function extractReceiptTotal(text){
   if(!/\b(?:summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag|endsumme|rechnungsbetrag|betrag fällig|betrag faellig)\b/i.test(line))continue;
   const label=(line.match(/\b(summe|gesamt(?:betrag)?|zu zahlen|zahlbetrag|endbetrag|endsumme|rechnungsbetrag|betrag fällig|betrag faellig)\b/i)||[])[1]?.toLowerCase(),same=(line.match(/\d{1,5}\s*[,.]\s*\d{2}/g)||[]).pop();let n=same?parseReceiptNumber(same.replace(/\s+/g,"")):null;
   const next=String(lines[i+1]||"");
-  if(!(Number.isFinite(n)&&n>0)&&!/\b(?:bar|gegeben|rückgeld|karte|cash)\b/i.test(next)){
+  if(!(Number.isFinite(n)&&n>0)&&!/\b(?:bar|gegeben|bezahlt|erhalten|betrag erhalten|rückgeld|rueckgeld|wechselgeld|zurück|zurueck|herausgegeben|karte|kartenzahlung|kontaktlos|cash)\b/i.test(next)){
    const m=next.match(/(?:€|EUR|£)?\s*(\d{1,5}\s*[,.]\s*\d{2})/);if(m)n=parseReceiptNumber(m[1].replace(/\s+/g,""));
   }
   if(!Number.isFinite(n)||n<=0)continue;if(firstLabeled==null)firstLabeled=n;
