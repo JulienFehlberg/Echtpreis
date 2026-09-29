@@ -121,3 +121,9 @@ assert(html.includes('Datenabdeckung')&&html.includes('deiner Monatsausgaben sin
 assert(html.includes('Gesamtausgaben')&&html.includes('noch nicht einzelnen Artikeln zugeordnet'),"monthly breakdown must separate total spend from recognized item spend");
 assert(html.includes('Kategorie-Prozente beziehen sich auf'),"category percentages must disclose their recognized-spend denominator");
 assert(html.includes('v5.175.0'),"expected app version v5.175.0");
+
+assert(html.includes('type:"personal-low-price"')&&html.includes('Persönlicher Tiefpreis'),"receipt insights should flag a new personal low price");
+assert(html.includes('type:"personal-high-price"')&&html.includes('Persönlicher Höchstpreis'),"receipt insights should flag a new personal high price");
+assert(html.includes('prev.forEach(r=>(r.items||[])'),"current receipt must not be included in its own price history");
+assert(html.includes('beim letzten vergleichbaren Kauf'),"receipt price comparison should use prior comparable purchase");
+assert(html.includes('v5.176.0'),"expected app version v5.176.0");
