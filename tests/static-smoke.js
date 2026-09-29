@@ -12,6 +12,7 @@ assert(html.includes("window.replaceEchtpreisList"),"saved-list bridge missing")
 assert(html.includes("rawForAmount"),"decimal-comma quantity parser missing");
 assert(html.includes('|stk|pcs?|x|packungen?|packs?'),"shopping quantity parser should accept pc/pcs piece notation");
 assert(html.includes("receiptCandidateScore"),"multi-pass receipt scoring missing");
+assert(html.includes('\\b(\\d{2})\\s+(\\d{2})\\s+(20\\d{2}|\\d{2})\\b'),"receipt date parser should recover dates when OCR drops separators");
 assert(!html.includes('label for="receiptTotalInput"'),"manual receipt-total editor must stay hidden");
 assert.strictEqual((html.match(/function importRecipeIngredients\s*\(/g)||[]).length,1,"recipe import must have one implementation");
 assert(html.includes("plausibleReceiptItemName"),"receipt item plausibility guard missing");
