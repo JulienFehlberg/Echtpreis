@@ -331,7 +331,7 @@ assert(html.includes('function receiptDiscountStory(items,total)'),"receipt insi
 assert(html.includes('regularProducts=Number((paidProducts+linkedDiscount).toFixed(2))'),"discount story should estimate the pre-discount basis from recognized products and linked discounts");
 assert(html.includes('Math.round(linkedDiscount/regularProducts*100)'),"receipt discount insight should calculate a product-linked discount rate without mixing basket coupons into product pricing");
 assert(html.includes('Größter zugeordneter Rabatt:'),"receipt insight should surface the strongest product-linked discount when available");
-assert(html.includes('const linked=new Set')&&html.includes('linked.has(String(i.name||"")+"|"+d.toFixed(2))?0:d'),"receipt discount totals should not double-count linked coupon rows and product discount metadata");
+assert(html.includes('i?.discountSource==="linked-adjustment"?0:d'),"receipt discount totals should not double-count linked adjustment rows and product discount metadata");
 
 assert(html.includes('paidProducts=receiptRecognizedProductSpend(items)'),"receipt discount insights should base product savings on recognized product spend");
 assert(html.includes('linkedDiscount=linked.reduce'),"receipt discount insights should separate product-linked discounts");
