@@ -2198,7 +2198,7 @@ async function extractPdfText(file){
  return text;
 }
 async function renderPdfFirstPage(file){const pdfjsLib=await ensurePdfJs();const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,page=await pdf.getPage(1),vp=page.getViewport({scale:2}),canvas=document.createElement("canvas");canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:canvas.getContext("2d"),viewport:vp}).promise;return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("PDF-Seite konnte nicht als Bild vorbereitet werden")),"image/jpeg",.92))}
-function receiptStoreSearchText(text){const lines=String(text||"").split(/\n+/).map(x=>x.trim()).filter(Boolean),head=lines.slice(0,24).join(" ").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\ba\s+l\s+d\s+i\b/g,"aldi").replace(/\bk\s*a\s*u\s*f\s*l\s*a\s*n\s*d\b/g,"kaufland").replace(/\be\s*d\s*e\s*k\s*a\b/g,"edeka").replace(/\bp\s*e\s*n\s*n\s*y\b/g,"penny");return {lines,head}}
+function receiptStoreSearchText(text){const lines=String(text||"").split(/\n+/).map(x=>x.trim()).filter(Boolean),head=lines.slice(0,24).join(" ").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\ba\s+l\s+d\s+i\b/g,"aldi").replace(/\bk\s*a\s*u\s*f\s*l\s*a\s*n\s*d\b/g,"kaufland").replace(/\be\s*d\s*e\s*k\s*a\b/g,"edeka").replace(/\bp\s*e\s*n\s*n\s*y\b/g,"penny").replace(/\br\s*e\s*w\s*e\b/g,"rewe").replace(/\bl\s*i\s*d\s*l\b/g,"lidl").replace(/\bn\s*e\s*t\s*t\s*o\b/g,"netto");return {lines,head}}
 function detectReceiptStore(text){
  const full=String(text||""),{lines,head}=receiptStoreSearchText(full);
  const strong=[
