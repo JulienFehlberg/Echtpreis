@@ -10,6 +10,7 @@ assert(!html.includes('var demo=byId("demoListBtn")'),"obsolete demo handler is 
 assert(html.includes("window.addEchtpreisItem"),"single-basket bridge missing");
 assert(html.includes("window.replaceEchtpreisList"),"saved-list bridge missing");
 assert(html.includes("rawForAmount"),"decimal-comma quantity parser missing");
+assert(html.includes('|stk|pcs?|x|packungen?|packs?'),"shopping quantity parser should accept pc/pcs piece notation");
 assert(html.includes("receiptCandidateScore"),"multi-pass receipt scoring missing");
 assert(!html.includes('label for="receiptTotalInput"'),"manual receipt-total editor must stay hidden");
 assert.strictEqual((html.match(/function importRecipeIngredients\s*\(/g)||[]).length,1,"recipe import must have one implementation");
