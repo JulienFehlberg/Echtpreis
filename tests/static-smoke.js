@@ -253,3 +253,9 @@ assert(html.includes('function mergeBasketQuantity(target,incoming)')&&html.incl
 assert(html.includes('const incomingCount=Math.max(1,Number(incoming.packCount)||1)'),"explicit quantities should survive duplicate merging");
 assert(html.includes('normalizeSpokenQuantity')&&html.includes('spokenNumberWords'),"shopping input should normalize spoken German quantity words");
 assert(html.includes('kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x'),"shopping parser should accept explicit unit and x-style quantity input");
+
+assert(html.includes('let multi=rawForAmount.match(/^(\\d+)\\s*(?:x|×|packungen?|packs?)'),"shopping parser should recognize multipack quantity syntax");
+assert(html.includes('multiPack={count,amount:size*factor,unit,label'),"multipack parser should retain count and per-pack size separately");
+assert(html.includes('wish.packCount=multiPack.count')&&html.includes('wish.amount=multiPack.count*multiPack.amount'),"multipacks should calculate total comparison quantity from pack count and pack size");
+assert(html.includes('packungen?|packs?'),"shopping parser should accept natural pack/Packungen wording");
+assert(html.includes('return multiPack?wish:initializePackageQuantity(wish)'),"explicit multipacks should not be overwritten by standard package inference");
