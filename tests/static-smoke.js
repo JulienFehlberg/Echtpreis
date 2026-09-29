@@ -104,7 +104,7 @@ assert(html.includes('id="receiptCameraFile"'),"camera receipt input missing");
 assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"gallery/PDF receipt input missing");
 assert(html.includes('accordionNavigation:["homeReceipt","homePlan","homeStats"].every'),"runtime health check must verify accordion navigation");
 assert(html.includes("plannerViewport:!!document.querySelector('meta[name=\"viewport\"]')".replaceAll("\\\"","\"")),"runtime health check must verify planner viewport shell");
-assert(html.includes('<span class="version">v7.217.0 RC</span>')&&html.includes('version:"7.217"'),"visible and health-check versions must stay aligned");
+assert(html.includes('<span class="version">v7.218.0 RC</span>')&&html.includes('version:"7.218"'),"visible and health-check versions must stay aligned");
 
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
 
@@ -516,3 +516,7 @@ assert(html.includes("out.paid=parseReceiptNumber(normalizeReceiptMoneyOCR(m[1])
 // v7.217 German quantity row guards
 assert(html.includes("const countUnitEquals=line.match")&&html.includes("const quantityPrefix=line.match"),"receipt parser must retain common split German quantity/price row formats");
 assert(html.includes('quantitySource:"receipt-stueck"')&&html.includes('quantitySource:"receipt-multipack"'),"split quantity rows must preserve quantity provenance");
+
+// v7.218 product/deposit relationship guard
+assert(html.includes("function receiptProductDepositLinks(rows)")&&html.includes("depositRows.push(j)"),"receipt analysis must derive adjacent product-to-deposit relationships with source-row provenance");
+assert(html.includes("combinedTotal:Number(((Number(product.price)||0)+deposit).toFixed(2))"),"product/deposit relationships must expose the combined paid amount without mutating product price");
