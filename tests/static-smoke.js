@@ -259,6 +259,8 @@ assert(html.includes('elf:11'),"spoken German quantity normalization should incl
 assert(html.includes('spoken quantities should work after common shopping filler words too'),"spoken quantity filler-word regression marker missing");
 assert(html.includes('q=q.replace(/^\\d+\\s*(?:x|packungen?|packs?)'),"shopping suggestions should strip multipack prefixes before matching products");
 assert(html.includes('kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x'),"shopping parser should accept explicit unit and x-style quantity input");
+assert(html.includes('protectedDecimal=source.replace(/(\\d),(\\d)/g,"$1§DEC§$2")'),"pasted shopping lists must preserve German decimal commas");
+assert(html.includes('replace(/§DEC§/g,",")'),"pasted list decimal protection must restore the original German quantity");
 
 assert(html.includes('let multi=rawForAmount.match(/^(\\d+)\\s*(?:x|×|packungen?|packs?)'),"shopping parser should recognize multipack quantity syntax");
 assert(html.includes('multiPack={count,amount:size*factor,unit,label'),"multipack parser should retain count and per-pack size separately");
