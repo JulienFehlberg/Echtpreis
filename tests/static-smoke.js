@@ -258,6 +258,7 @@ assert(html.includes('const incomingCount=Math.max(1,Number(incoming.packCount)|
 assert(html.includes('normalizeSpokenQuantity')&&html.includes('spokenNumberWords'),"shopping input should normalize spoken German quantity words");
 assert(html.includes('elf:11'),"spoken German quantity normalization should include eleven");
 assert(html.includes('spoken quantities should work after common shopping filler words too'),"spoken quantity filler-word regression marker missing");
+assert(html.includes('(?:(?:bitte|noch|dazu|und)\\s+)+'),"spoken quantity normalization should strip repeated shopping filler words");
 assert(html.includes('q=q.replace(/^\\d+\\s*(?:x|packungen?|packs?)'),"shopping suggestions should strip multipack prefixes before matching products");
 assert(html.includes('kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x'),"shopping parser should accept explicit unit and x-style quantity input");
 assert(html.includes('protectedDecimal=source.replace(/(\\d),(\\d)/g,"$1§DEC§$2")'),"pasted shopping lists must preserve German decimal commas");
