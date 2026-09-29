@@ -304,7 +304,7 @@ assert(html.includes('stimmt zur Belegsumme'),"receipt UI should confirm when pr
 assert(html.includes('const comma=s.lastIndexOf(",")')&&html.includes('const decimal=comma>dot?",":"."'),"receipt money parser should distinguish German and international decimal formats");
 assert(html.includes('replace(/[€£]/g,"")')&&html.includes('replace(/\\s+/g,"")'),"receipt money parser should tolerate currency signs and OCR whitespace");
 assert(html.includes('zu zahlen|zahlbetrag|endbetrag'),"receipt total parser should recognize common German total labels");
-assert(html.includes('bar(?: gegeben)?')&&html.includes('apple pay|google pay'),"payment labels should be rejected as product names");
+assert(html.includes('bar(?: gegeben| bezahlt)?')&&html.includes('apple pay|google pay'),"payment labels should be rejected as product names");
 assert(html.includes('kontaktlos|contactless|nfc')&&html.includes('zahlung\\s+(?:mit\\s+)?karte'),"receipt payment method parsing should recognize contactless and Zahlung mit Karte variants");
 
 assert(html.includes('function receiptStoreSearchText(text)'),"receipt merchant detection should normalize OCR header text");
