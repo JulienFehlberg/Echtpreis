@@ -380,3 +380,9 @@ assert(html.includes('existing.energy=receiptEnergySnapshot(receiptLines)'),"upd
 assert(html.includes('energy:receiptEnergySnapshot(receiptLines),itemsComplete:'),"new receipts should persist their calorie summary");
 assert(html.includes('function aggregateReceiptEnergy(receipts)'),"receipt calorie snapshots should support cross-receipt aggregation");
 assert(html.includes('coverage:sourceSpend>0?Math.max(0,Math.min(100'),"aggregate calorie coverage should remain bounded and spend-weighted");
+
+assert(html.includes('id="statsEnergyMonth"')&&html.includes('id="statsEnergyMonthTitle"')&&html.includes('id="statsEnergyMonthDetail"'),"stats should include a dedicated monthly receipt-energy insight surface");
+assert(html.includes('function renderStatsEnergyMonth(receipts)'),"stats should render monthly calorie history from persisted receipt energy snapshots");
+assert(html.includes('if(summary.receipts<2||summary.coverage<50||quality<50)'),"monthly calorie insight should require multiple receipts and meaningful coverage before display");
+assert(html.includes('keine Aussage darüber, wie viel davon tatsächlich gegessen wurde'),"monthly calorie insight should distinguish purchased energy from consumed calories");
+assert(html.includes('renderStatsMonthStory(receipts);renderStatsEnergyMonth(receipts);'),"stats refresh should include monthly calorie insight rendering");
