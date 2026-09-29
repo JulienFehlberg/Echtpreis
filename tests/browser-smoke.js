@@ -19,6 +19,9 @@ const {JSDOM,VirtualConsole}=require("jsdom");
   assert.strictEqual(w.detectReceiptStore(fixture.ocrText),fixture.expected.merchant,fixture.name+": merchant ground truth regressed");
   assert.strictEqual(w.detectReceiptDate(fixture.ocrText),fixture.expected.date,fixture.name+": date ground truth regressed");
   assert.strictEqual(w.extractReceiptTotal(fixture.ocrText),fixture.expected.total,fixture.name+": printed total ground truth regressed");
+  assert.strictEqual(fixture.schemaVersion,1,fixture.name+": unsupported fixture schema");
+  if(fixture.expected.payment?.method)assert.strictEqual(w.extractReceiptPaymentMethod(fixture.ocrText),fixture.expected.payment.method,fixture.name+": payment method ground truth regressed");
+  if(Number.isFinite(fixture.expected.payment?.cashGiven)){assert.strictEqual(w.extractReceiptCash(fixture.ocrText),fixture.expected.payment.cashGiven,fixture.name+": cash tender ground truth regressed");assert.strictEqual(Number((fixture.expected.payment.cashGiven-fixture.expected.total).toFixed(2)),fixture.expected.payment.change,fixture.name+": expected change fixture is internally inconsistent")};
   const rows=w.parseReceiptText(fixture.ocrText);
   for(const expected of fixture.expected.lineItems||[]){const hit=rows.find(row=>String(row.name).toLowerCase().includes(String(expected.rawName).toLowerCase())||String(expected.rawName).toLowerCase().includes(String(row.name).toLowerCase()));assert(hit,fixture.name+": missing expected receipt line "+expected.rawName);assert(Math.abs(Number(hit.price)-Number(expected.lineTotal))<.011,fixture.name+": wrong line total for "+expected.rawName);if(expected.count)assert.strictEqual(Number(hit.count),Number(expected.count),fixture.name+": wrong count for "+expected.rawName);if(expected.isDeposit)assert.strictEqual(!!hit.isDeposit,true,fixture.name+": deposit classification regressed for "+expected.rawName)}
  }
