@@ -355,3 +355,6 @@ assert(html.includes('function receiptPlanFallbackName(raw)'),"receipt-plan matc
 assert(html.includes('kg|g|ml|cl|l|stk|stueck|stuck|pack'),"fallback receipt-plan identity should ignore common quantity and package tokens");
 assert(html.includes('if(m&&m.key)return "key:"+m.key'),"known catalog products should still prefer stable product keys over fuzzy fallback names");
 assert(html.includes('const fallback=receiptPlanFallbackName(raw);return fallback?"raw:"+fallback:""'),"unknown products should use normalized fallback identities without creating empty match keys");
+
+assert(html.includes('replace(/^\\s*\\d{1,3}\\s*[x×*]\\s*/,"")'),"fallback product identity should remove explicit leading multipack quantities");
+assert(html.includes('(?:stk\\.?|stueck|stuck|pack(?:ung)?(?:en)?|pcs?)\\s+'),"fallback product identity should remove explicit leading piece/package counts");
