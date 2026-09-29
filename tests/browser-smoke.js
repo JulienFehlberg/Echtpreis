@@ -397,4 +397,4 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  w.processReceiptFile=originalProcessReceiptFile;
  console.log("browser smoke OK · single basket · quantity parser · receipt parser");
  dom.window.close();
-})().catch(e=>{console.error(e);process.exit(1)});
+})().catch(e=>{console.error("BROWSER_SMOKE_FAILURE:",e&&e.stack?e.stack:e);process.exit(1)});
