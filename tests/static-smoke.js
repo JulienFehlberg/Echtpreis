@@ -284,6 +284,7 @@ assert(html.includes('unitLinePrice:count?Number((total/count).toFixed(2)):null'
 assert(html.includes('(?:[x×*]|stk\\.?|stück|stueck|stuck)'),"receipt quantity fallback should recognize x, multiplication signs and German Stück abbreviations");
 assert(html.includes('const countOnly=line.match')&&html.includes('quantityOnly:true'),"receipt parser should retain standalone Stück counts for adjacent receipt lines");
 
+assert(html.includes('betrag erhalten|zahlbetrag bar')&&html.includes('herausgegeben|rückgabe|rueckgabe'),"receipt cash extraction should accept common German paid/change labels");
 assert(html.includes('function receiptCashConsistency(total,cash)'),"receipt parser should independently validate cash/change arithmetic");
 assert(html.includes('difference<=.02'),"cash/change validation should allow only cent-level OCR tolerance");
 assert(html.includes('score+=cashCheck.ok?28:-18'),"OCR candidate scoring should reward consistent cash arithmetic and penalize contradictions");
