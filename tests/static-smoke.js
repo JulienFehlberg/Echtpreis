@@ -218,3 +218,12 @@ assert(html.includes('id="shoppingMemory"')&&html.includes('Dein Preisgedächtni
 assert(html.includes('wiederkehrende Produkte')&&html.includes('mit eigener Preishistorie'),"shopping memory should use evidence-based progress metrics");
 assert(html.includes('Keine Punkte – nur Wissen aus deinen eigenen Einkäufen'),"shopping memory should not invent a gamified quality score");
 assert(html.includes('v5.189.0'),"expected app version v5.189.0");
+
+assert(html.includes('id="impulseSuggestions"')&&html.includes('Du kaufst das sowieso öfter'),"planner should surface recurring unplanned purchases before shopping");
+assert(html.includes('x.count>=2')&&html.includes('cutoff.setDate(cutoff.getDate()-90)'),"impulse suggestions should require repeated and recent evidence");
+assert(html.includes('Nichts wird automatisch hinzugefügt'),"impulse learning must preserve explicit user control");
+assert(html.includes('data-impulse-add')&&html.includes('+ Liste'),"recurring impulse suggestions should be explicitly addable to the real shopping list");
+assert(html.includes('typisch ')&&html.includes(' · Tief '),"impulse suggestions should reuse personal price memory when available");
+assert(html.includes('planComparison:cached.planComparison||null'),"server sync must preserve plan comparison learning");
+assert(html.includes('itemsComplete:cached.itemsComplete')&&html.includes('unassignedAmount:cached.unassignedAmount'),"server sync must preserve local receipt completeness metadata");
+assert(html.includes('v5.190.0'),"expected app version v5.190.0");
