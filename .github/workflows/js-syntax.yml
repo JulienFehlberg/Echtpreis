@@ -22,7 +22,7 @@ jobs:
       - name: API unit smoke
         run: npm run test:server
       - name: Receipt vision unit tests
-        run: node tests/receipt-vision.test.js
+        run: npm run test:vision
       - name: Browser smoke (legacy jsdom diagnostic)
         run: npm run test:browser
         continue-on-error: true
