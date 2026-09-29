@@ -150,3 +150,10 @@ assert(html.includes('drivers:drivers.slice(0,8)'),"receipt savings evidence sho
 assert(html.includes('id="statsSavingDrivers"')&&html.includes('Welche Produkte treiben deine Preisunterschiede?'),"stats should aggregate recurring savings drivers");
 assert(html.includes('historische Vergleichsunterschiede, keine garantierte künftige Ersparnis'),"driver statistics must disclose historical scope");
 assert(html.includes('v5.180.0'),"expected app version v5.180.0");
+
+assert(html.includes('id="receiptDiagnosis"')&&html.includes('Einkaufsdiagnose'),"receipt should show a unified shopping diagnosis");
+assert(html.includes('function renderReceiptDiagnosis(current)'),"shopping diagnosis renderer must exist");
+assert(html.includes('Kostentreiber')&&html.includes('Bonwert-Abdeckung'),"shopping diagnosis must explain cost driver and comparison coverage");
+assert(html.includes('id="statsMonthlyAnomaly"')&&html.includes('Monats-Ausreißer'),"stats should detect meaningful monthly spending anomalies");
+assert(html.includes('delta>=10')&&html.includes('pct>=25'),"category anomaly should require meaningful absolute and relative movement");
+assert(html.includes('v5.181.0'),"expected app version v5.181.0");
