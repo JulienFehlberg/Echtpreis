@@ -1,4 +1,5 @@
 const fs=require("fs"),assert=require("assert");
+const receiptFixtures=fs.readdirSync("tests/fixtures").filter(x=>x.endsWith(".json")).map(x=>JSON.parse(fs.readFileSync("tests/fixtures/"+x,"utf8")));
 const {JSDOM,VirtualConsole}=require("jsdom");
 (async()=>{
  const html=fs.readFileSync("index.html","utf8"),errors=[],vc=new VirtualConsole();
@@ -11,6 +12,8 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  const w=dom.window,d=w.document;
  if(errors.length)console.error("BROWSER_STARTUP_ERRORS:",errors.join(" | "));
  assert.strictEqual(errors.length,0,"browser startup errors: "+errors.join(" | "));
+ const fixtureMerchants=new Set(receiptFixtures.map(x=>x.expected?.merchant));
+ assert(fixtureMerchants.has("EDEKA"),"real receipt fixture suite must retain EDEKA ground truth");
  assert.strictEqual(d.querySelector(".alpha-badge")?.textContent,"ALPHA","the app should clearly label its alpha version");
  assert(d.getElementById("profileCard").textContent.includes("Noch ohne Login oder Synchronisierung zwischen Geräten"),"profile should explain alpha account and sync limitations");
  assert.strictEqual(w.applyCommunityAliases([{normalized:"Jules Fruchtbärchen",key:"gummibaerchen",seen:3},{normalized:"Einmal Unscharf",key:"chips",seen:1},{normalized:"milch",key:"chips",seen:9},{normalized:"Doppeldeutig",key:"chips",seen:3},{normalized:"doppeldeutig",key:"tee",seen:4}]),1,"only repeated, unambiguous community aliases should be adopted");
