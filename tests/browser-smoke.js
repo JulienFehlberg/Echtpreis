@@ -33,7 +33,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  assert.strictEqual(d.getElementById("statsCard").style.display,"none","tapping the expanded accordion action again must collapse it");
  assert(["homeReceipt","homePlan","homeStats"].every(id=>d.getElementById(id).getAttribute("aria-expanded")==="false"),"collapsed home accordion must reset all expanded states");
  const fixtureMerchants=new Set(receiptFixtures.map(x=>x.expected?.merchant));
- assert(fixtureMerchants.has("EDEKA"),"real receipt fixture suite must retain EDEKA ground truth");
+ assert(["EDEKA","ALDI","PENNY","Kaufland"].every(merchant=>fixtureMerchants.has(merchant)),"real receipt fixture suite must retain EDEKA, ALDI, PENNY and Kaufland ground truth");
  const fixtureNames=new Set();
  for(const fixture of receiptFixtures){
   assert.strictEqual(fixture.schemaVersion,1,(fixture.name||"unnamed fixture")+": unsupported fixture schema");
@@ -51,6 +51,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
   const expectedLineTotal=fixture.expected.lineItems.reduce((sum,item)=>sum+Number(item.lineTotal||0),0);
   assert(expectedLineTotal<=fixture.expected.total+0.011||fixture.expected.lineItems.some(item=>Number(item.lineTotal)<0),fixture.name+": positive line-item ground truth exceeds printed total");
   for(const expected of fixture.expected.lineItems||[]){const hit=rows.find(row=>String(row.name).toLowerCase().includes(String(expected.rawName).toLowerCase())||String(expected.rawName).toLowerCase().includes(String(row.name).toLowerCase()));assert(hit,fixture.name+": missing expected receipt line "+expected.rawName);assert(Math.abs(Number(hit.price)-Number(expected.lineTotal))<.011,fixture.name+": wrong line total for "+expected.rawName);if(expected.count)assert.strictEqual(Number(hit.count),Number(expected.count),fixture.name+": wrong count for "+expected.rawName);if(expected.isDeposit)assert.strictEqual(!!hit.isDeposit,true,fixture.name+": deposit classification regressed for "+expected.rawName)}
+  if(fixture.expected.partial){w.applyReceiptText(fixture.ocrText,"Fixture");assert.strictEqual(d.getElementById("analysisPaid").textContent,w.eur(fixture.expected.total),fixture.name+": partial scan must display the authoritative printed total");assert.strictEqual(d.getElementById("finishPurchaseBtn").disabled,false,fixture.name+": partial but readable receipt must remain saveable");assert(d.getElementById("receiptTotalCheck").textContent.includes("noch nicht zugeordnet"),fixture.name+": partial scan must disclose the unassigned amount")}
  }
  assert.strictEqual(d.querySelector(".alpha-badge")?.textContent,"ALPHA","the app should clearly label its alpha version");
  assert(d.getElementById("profileCard").textContent.includes("Noch ohne Login oder Synchronisierung zwischen Geräten"),"profile should explain alpha account and sync limitations");
