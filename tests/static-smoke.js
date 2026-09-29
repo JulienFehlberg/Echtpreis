@@ -271,3 +271,10 @@ assert(html.includes('const countStkTotal=line.match')&&html.includes('receipt-s
 assert(html.includes('unitLinePrice:count?Number((total/count).toFixed(2)):null'),"Stück receipt lines should derive a useful per-item price");
 assert(html.includes('(?:[x×]|stk\\.?|stück|stueck)'),"receipt quantity fallback should recognize x, multiplication sign and German Stück abbreviations");
 assert(html.includes('const countOnly=line.match')&&html.includes('quantityOnly:true'),"receipt parser should retain standalone Stück counts for adjacent receipt lines");
+
+assert(html.includes('function receiptCashConsistency(total,cash)'),"receipt parser should independently validate cash/change arithmetic");
+assert(html.includes('difference<=.02'),"cash/change validation should allow only cent-level OCR tolerance");
+assert(html.includes('score+=cashCheck.ok?28:-18'),"OCR candidate scoring should reward consistent cash arithmetic and penalize contradictions");
+assert(html.includes('if(receiptCash.change==null){receiptCash.change=expected'),"printed receipt change must not be overwritten by a calculated value");
+assert(html.includes('passt nicht zur Belegsumme'),"receipt UI should visibly flag contradictory printed change");
+assert(html.includes('stimmt zur Belegsumme'),"receipt UI should confirm when printed cash/change arithmetic agrees with the receipt total");
