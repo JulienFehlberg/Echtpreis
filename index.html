@@ -1230,7 +1230,9 @@ function groceryMatchIsSafe(term,key,score){
 function parseWish(raw){
  const original=normalizeSpokenQuantity(String(raw||"").trim()),normalized=normalizeProduct(original);let amount=1,unit="piece",explicit=false,t=normalized,displayTerm=original,multiPack=null;if(isClearlyNonGrocery(original)){let w={raw:original,label:original,amount:1,unit:"piece",calcAmount:1,key:null,matched:false,note:"",explicit:false,matchMode:"custom",customItem:true,needsClarification:false,needsQuantity:false,resolvedKey:null,choice:{}};return keepCustomItem(w,1)}
  const rawForAmount=original.toLowerCase().replace(/ß/g,"ss").trim();
- let multi=rawForAmount.match(/^(\d+)\s*(?:x|×|packungen?|packs?)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)\s+(.+)$/i);
+ // v7.236 natural German multipack phrasing: "2 Packungen à 500 g Hackfleisch" / "2 Packs je 1 l Milch"
+ let multi=rawForAmount.match(/^(\d+)\s*(?:x|×|packungen?|packs?)\s*(?:à|a|je|zu\s+je)?\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)\s+(.+)$/i);
+ if(!multi){const natural=rawForAmount.match(/^(\d+)\s*(?:packungen?|packs?)\s+(.+?)\s+(?:à|a|je|zu\s+je)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)$/i);if(natural)multi=[natural[0],natural[1],natural[3],natural[4],natural[2]]}
  if(multi){const count=Math.max(1,parseInt(multi[1],10)),size=parseFloat(multi[2].replace(",",".")),u=multi[3].toLowerCase(),rest=multi[4];const factor=(u==="g"||u==="ml")?.001:1;unit=(u==="g"||u==="kg")?"kg":"l";amount=count*size*factor;explicit=true;multiPack={count,amount:size*factor,unit,label:size.toLocaleString("de-DE")+" "+u};displayTerm=rest.trim();t=normalizeProduct(rest)}
  else{
   let m=rawForAmount.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x|packungen?|packs?)?\s+(.+)$/i);
