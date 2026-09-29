@@ -104,7 +104,7 @@ assert(html.includes('id="receiptCameraFile"'),"camera receipt input missing");
 assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"gallery/PDF receipt input missing");
 assert(html.includes('accordionNavigation:["homeReceipt","homePlan","homeStats"].every'),"runtime health check must verify accordion navigation");
 assert(html.includes("plannerViewport:!!document.querySelector('meta[name=\"viewport\"]')".replaceAll("\\\"","\"")),"runtime health check must verify planner viewport shell");
-assert(html.includes('<span class="version">v7.219.0 RC</span>')&&html.includes('version:"7.219"'),"visible and health-check versions must stay aligned");
+assert(html.includes('<span class="version">v7.220.0 RC</span>')&&html.includes('version:"7.220"'),"visible and health-check versions must stay aligned");
 
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
 
@@ -524,3 +524,8 @@ assert(html.includes("combinedTotal:Number(((Number(product.price)||0)+deposit).
 // v7.219 three-line receipt quantity guard
 assert(html.includes("const countUnitThenTotal=line.match")&&html.includes("awaitingPrintedTotal:true"),"receipt parser must retain product + count/unit + printed-total sequences");
 assert(html.includes("const name=pendingMultiple.name||pendingName"),"pending multipack identity must win over transient following text when its printed total arrives");
+
+// v7.220 legal comparison guard
+assert(html.includes('"Keine belastbare Rangfolge"')&&html.includes('"Referenzwerte werden nicht als Händler-Ranking verwendet"'),"modeled/reference prices must never produce a named retailer winner");
+assert(html.includes('complete.filter(r=>r.referenceCount>0).sort((a,b)=>a.store.localeCompare(b.store,"de"))'),"reference-only retailer orientations must use neutral alphabetical display rather than price ranking");
+assert(html.includes("verifiedComplete=complete.filter(r=>r.referenceCount===0).sort((a,b)=>a.total-b.total)"),"price ranking must be restricted to fully evidenced baskets");
