@@ -2177,7 +2177,7 @@ function mergeExplicitDeposit(base,detailText){
  const gap=Number((base.total-base.recognized).toFixed(2));if(gap<=0||gap>2)return base;
  const deposit=parseReceiptText(detailText).find(r=>r.isDeposit&&Math.abs(Number(r.price)-gap)<.011);if(!deposit)return base;
  const money=n=>Number(n).toFixed(2).replace(".",","),line=deposit.count>1&&deposit.unitLinePrice?"Pfand "+money(deposit.unitLinePrice)+" x "+deposit.count:"Pfand "+money(deposit.price);
- const lines=base.text.split("\n"),at=lines.findIndex(x=>/^\s*(?:summe|gesamt(?:betrag)?|zu zahlen)\b/i.test(x));lines.splice(at<0?lines.length:at,0,line);
+ const lines=base.text.split("\n"),at=lines.findIndex(x=>receiptTotalBoundary(x));lines.splice(at<0?lines.length:at,0,line);
  const merged=receiptCandidateScore(lines.join("\n"));return receiptCandidateVerified(merged)?merged:base;
 }
 
