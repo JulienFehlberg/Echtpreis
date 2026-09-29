@@ -198,8 +198,8 @@ assert(html.includes('BEIM NÄCHSTEN EINKAUF')&&html.includes('receiptNextMove')
 assert(html.includes('außerhalb deiner Liste dazu')&&html.includes('gehören sie vielleicht künftig bewusst auf die Liste'),"next move should learn from unplanned extras without auto-adding them");
 assert(html.includes('Behalte ')&&html.includes('besonders im Blick'),"next move should flag personally expensive repeat products");
 assert(html.includes('id="shoppingMemory"')&&html.includes('Dein Preisgedächtnis'),"home should visualize real knowledge accumulated from receipts");
-assert(html.includes('wiederkehrende Produkte')&&html.includes('mit eigener Preishistorie'),"shopping memory should use evidence-based progress metrics");
-assert(html.includes('Keine Punkte – nur Wissen aus deinen eigenen Einkäufen'),"shopping memory should not invent a gamified quality score");
+assert(html.includes('<span>wiederkehrend</span>')&&html.includes('<span>Preishistorien</span>')&&html.includes('eigene Vergleichshistorie'),"shopping memory should use evidence-based progress metrics");
+assert(html.includes('Die Anzeige beschreibt nur, wie viel eigene Vergleichshistorie bereits vorhanden ist.'),"shopping memory should explain that its progress reflects accumulated comparison history");
 
 assert(html.includes('id="impulseSuggestions"')&&html.includes('Du kaufst das sowieso öfter'),"planner should surface recurring unplanned purchases before shopping");
 assert(html.includes('x.count>=2')&&html.includes('cutoff.setDate(cutoff.getDate()-90)'),"impulse suggestions should require repeated and recent evidence");
