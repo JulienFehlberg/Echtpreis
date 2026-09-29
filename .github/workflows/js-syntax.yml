@@ -24,4 +24,10 @@ jobs:
       - name: Receipt vision unit tests
         run: npm run test:vision
       - name: Browser smoke
-        run: npm run test:browser
+        run: npm run test:browser 2>&1 | tee browser-smoke.log
+      - name: Upload browser smoke diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-smoke-diagnostics
+          path: browser-smoke.log
