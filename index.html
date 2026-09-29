@@ -179,9 +179,19 @@ body.subview #planner{margin-top:0!important}body.subview #planner .planner-main
 #planner .item-title{font-size:14px!important;line-height:1.15!important}#planner .item-pack-size{font-size:10px!important;margin-top:2px!important}
 #planner .qty-stepper{gap:3px!important;margin-left:4px!important}#planner .qty-stepper button{width:31px!important;height:31px!important;border-radius:9px!important;font-size:17px!important}#planner .qty-stepper b{min-width:58px!important;font-size:11px!important;white-space:nowrap!important}#planner .x{font-size:13px!important;padding:4px!important}
 #planner #list>.muted{padding-top:6px!important;font-size:11px!important}
+</style><style>
+/* v5.197 unified accordion screen system */
+body.subview .hero{margin-bottom:10px}.home-main-actions{gap:9px!important}.home-main-actions .homeaction[aria-expanded="true"]{border-color:rgba(7,108,61,.24)!important;background:linear-gradient(145deg,#f3faf6,#fff)!important;box-shadow:0 10px 30px rgba(7,108,61,.08)!important}.home-main-actions .homeaction[aria-expanded="true"] .ep-icon{background:#dff2e7!important;border-color:rgba(7,108,61,.15)!important}.home-main-actions .homeaction[aria-expanded="true"] .ep-chevron{transform:rotate(90deg)}
+#planner,#receipt,#statsCard{border-radius:24px!important;border:1px solid rgba(11,23,17,.06)!important;box-shadow:0 12px 34px rgba(8,32,20,.055)!important;overflow:hidden}
+#planner{padding:0!important;background:#fff!important}#planner>.planner-main{border:0!important;box-shadow:none!important;margin:0!important;border-radius:0!important}
+#statsCard{margin-top:0!important}#receipt{margin-top:0!important}
+#planner .itemname .qty{font-size:10px!important;line-height:1.25!important}#planner .itemname .qty[role="status"]{margin-top:2px!important}
+#planner .quick-row{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:3px!important}#planner .quick-row::-webkit-scrollbar{display:none}#planner .quick-chip{flex:0 0 auto!important}
+#statsCard .insight-card{margin:10px 0!important;padding:14px!important;border-radius:17px!important}#statsCard h3{font-size:18px;line-height:1.2;margin-top:20px;margin-bottom:8px}#statsCard p{line-height:1.45}
+.receipt-simple .receipt-main-action,.receipt-simple .receipt-file-action{min-height:48px!important;border-radius:15px!important}.receipt-simple hr{margin:16px 0!important}
 </style></style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.196.1</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.197.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
