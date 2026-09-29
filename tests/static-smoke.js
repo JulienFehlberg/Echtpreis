@@ -284,6 +284,7 @@ assert(html.includes('von "+x.plannedUnits+" Pack."'),"partial purchases should 
 
 assert(html.includes('const countStkTotal=line.match')&&html.includes('receipt-stueck'),"receipt parser should recognize German Stk/Stück quantity lines");
 assert(html.includes('(\\d{1,3})\\s*(?:stk\\.?|stück|stueck|stuck|pcs?\\.?)'),"receipt piece-count OCR should accept three-digit counts and common Stück/pcs variants");
+assert((html.match(/\\\\d\\{1,3\\}\\\\s\\*\\[#\\*x×\\]/g)||[]).length>=4,"receipt multipack OCR should accept three-digit counts across inline, pending and return formats");
 assert(html.includes('unitLinePrice:count?Number((total/count).toFixed(2)):null'),"Stück receipt lines should derive a useful per-item price");
 assert(html.includes('(?:[x×*]|stk\\.?|stück|stueck|stuck|pcs?\\.?)'),"receipt quantity fallback should recognize x, multiplication signs and common Stück/pcs abbreviations");
 assert(html.includes('const countOnly=line.match')&&html.includes('quantityOnly:true'),"receipt parser should retain standalone Stück counts for adjacent receipt lines");
