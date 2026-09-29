@@ -15,6 +15,7 @@ assert(html.includes("receiptCandidateScore"),"multi-pass receipt scoring missin
 assert(!html.includes('label for="receiptTotalInput"'),"manual receipt-total editor must stay hidden");
 assert.strictEqual((html.match(/function importRecipeIngredients\s*\(/g)||[]).length,1,"recipe import must have one implementation");
 assert(html.includes("plausibleReceiptItemName"),"receipt item plausibility guard missing");
+assert(html.includes('endsumme|rechnungsbetrag|betrag fällig|betrag faellig')&&html.includes('gegeben|bezahlt|erhalten|betrag erhalten'),"receipt item-name filter should reject expanded total and payment labels");
 assert(html.includes("comparisonQuality"),"comparison confidence labelling missing");
 assert(!html.includes("compareStable"),"obsolete duplicate comparison engine must stay removed");
 assert(html.includes('history.sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0)||a.price-b.price)'),"historical fallback must prioritize freshness and trust");
