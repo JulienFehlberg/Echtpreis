@@ -48,6 +48,8 @@ In der Testphase sollen keine zwingenden laufenden Kosten entstehen. Kostenpflic
 - Bon-Gesamtsumme: gedruckte autoritative Summe hat Vorrang vor Einzelpositionsarithmetik
 - Bon-Zahlungsdaten: Bar/Karte/Rückgeld werden getrennt von Warenpositionen behandelt
 - Receipt-Vision: strukturierte Ausgabe, Plausibilitätsprüfungen und Datenschutzmodus `store: false`
+- Automatisierte Testfreigabe: bestanden (Static Guards, API, Receipt Vision und verpflichtender Browser-End-to-End-Smoke)
+- Mobile/PWA-Grundlagen: Manifest, Portrait-Standalone-Modus, iOS-Metadaten, Safe-Area-Viewport und Rückkamera-Input vorhanden
 - Nächster Freigabeschritt: reale End-to-End-Gerätetests mit den vorhandenen Kaufland-, EDEKA-, ALDI- und PENNY-Belegen
 
 ## Noch vor einem Store-Release zwingend
