@@ -231,4 +231,4 @@ assert(!html.includes('<span>ðŸ§¾</span>Beleg scannen')&&!html.includes('<span>ð
 assert(html.includes('home action collision fix')&&html.includes('.homeaction .homeaction-copy{width:auto!important;height:auto!important'),"nested home action copy must override legacy span sizing");
 assert(html.includes('.homeaction>.ep-icon'),"icon sizing must target only the direct icon child");
 
-assert(html.includes('<span class="version">v5.196.1</span>'),"visible app version should be v5.196.1");
+assert(html.includes('<span class="version">v5.197.0</span>'),"visible app version should be v5.197.0");
