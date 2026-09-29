@@ -194,7 +194,7 @@ assert(html.includes('Beleg-Gesamtsumme')&&html.includes('maßgebliche Ausgabe')
 assert(html.includes('Dieser Beleg hat ECHTPREIS beigebracht'),"saved receipt should explain the value learned from scanning");
 assert(html.includes('history.length?"💡 "+history[0].title'),"home pulse should lead with the latest personal shopping discovery");
 
-assert(html.includes('Beim nächsten Einkauf')&&html.includes('receiptNextMove'),"receipt analysis should turn insight into a concrete next-shopping action");
+assert(html.includes('BEIM NÄCHSTEN EINKAUF')&&html.includes('receiptNextMove'),"receipt analysis should turn insight into a concrete next-shopping action");
 assert(html.includes('außerhalb deiner Liste dazu')&&html.includes('gehören sie vielleicht künftig bewusst auf die Liste'),"next move should learn from unplanned extras without auto-adding them");
 assert(html.includes('Behalte ')&&html.includes('besonders im Blick'),"next move should flag personally expensive repeat products");
 assert(html.includes('id="shoppingMemory"')&&html.includes('Dein Preisgedächtnis'),"home should visualize real knowledge accumulated from receipts");
