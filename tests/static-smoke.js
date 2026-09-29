@@ -386,3 +386,9 @@ assert(html.includes('function renderStatsEnergyMonth(receipts)'),"stats should 
 assert(html.includes('if(summary.receipts<2||summary.coverage<50||quality<50)'),"monthly calorie insight should require multiple receipts and meaningful coverage before display");
 assert(html.includes('keine Aussage darüber, wie viel davon tatsächlich gegessen wurde'),"monthly calorie insight should distinguish purchased energy from consumed calories");
 assert(html.includes('renderStatsMonthStory(receipts);renderStatsEnergyMonth(receipts);'),"stats refresh should include monthly calorie insight rendering");
+
+assert(html.includes('function migrateReceiptEnergySnapshots(receipts)'),"existing saved receipts should support one-time local calorie snapshot backfill");
+assert(html.includes('if(r?.energy||!Array.isArray(r?.items)||!r.items.length)continue'),"calorie backfill should skip already-migrated receipts and receipts without source items");
+assert(html.includes('const energy=receiptEnergySnapshot(r.items);if(energy){r.energy=energy;changed=true}'),"calorie backfill should only persist a snapshot when the existing receipt can actually be evaluated");
+assert(html.includes('persistMigrated=value=>{if(!migrateReceiptEnergySnapshots(value))return;'),"receipt loading should avoid rewriting local storage when no calorie migration occurred");
+assert(html.includes('persistMigrated(backup);return backup'),"backup receipt recovery should receive the same calorie snapshot migration");
