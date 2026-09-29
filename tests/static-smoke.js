@@ -132,3 +132,8 @@ assert(html.includes('type:"personal-saving"')&&html.includes('Preisunterschied'
 assert(html.includes('Das ist dein eigener Preisverlauf, kein aktuelles Marktangebot.'),"historical personal savings must not be presented as current market availability");
 assert(html.includes('x.store&&x.store!==current.store'),"personal savings comparison must use a different prior store");
 assert(html.includes('v5.177.0'),"expected app version v5.177.0");
+
+assert(html.includes('coverage>=.7&&currentCoverage>=.8'),"receipt savings claim must require at least 70% basket-value and 80% current-price coverage");
+assert(html.includes('Nur ausreichend aktuelle, nicht bloß historische/Richtwert-Preise'),"receipt analysis must explain current-price quality gate");
+assert(html.includes('deshalb zeigt ECHTPREIS noch keine Warenkorb-Ersparnis'),"weak partial comparisons must not claim basket savings");
+assert(html.includes('v5.178.0'),"expected app version v5.178.0");
