@@ -71,7 +71,7 @@ body{background:linear-gradient(160deg,#f8faf8 0%,#eef5f0 52%,#f8f7f2 100%);min-
 <style>.merchant .route-link{min-height:34px;padding:7px 10px;font-size:13px}.merchant details summary{cursor:pointer;color:#64756a;font-size:13px;margin-top:7px}#finishPurchaseBtn:disabled{opacity:.48;filter:grayscale(.45);cursor:not-allowed}</style>
 <style>.alpha-badge{display:inline-block;vertical-align:middle;margin-left:6px;padding:4px 7px;border-radius:99px;background:#e7f5ed;color:#087443;font-size:9px;letter-spacing:1px;font-weight:900}.qty-stepper{display:flex;align-items:center;gap:5px;margin:0 0 0 7px;flex:0 0 auto}.qty-stepper span{display:none}.qty-stepper button{width:34px;height:34px;padding:0;border:1px solid #d6e3da;border-radius:10px;background:#f3f8f4;color:#075f37;font-size:20px;font-weight:800}.qty-stepper b{min-width:22px;text-align:center;color:#20352a}.itemname{min-width:0}.item-title{display:block;width:100%;padding:0;background:transparent;border-radius:0;text-align:left;color:#102019;font-size:16px;font-weight:850;line-height:1.25;overflow-wrap:anywhere}.itemname .qty{margin-top:3px}</style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">ECHTPREIS</div><h2 id="sharingWelcomeTitle">Deine Bons. Deine Entscheidung.</h2><p>Du kannst Bons nur für dich speichern oder mit deinen erkannten Bon-Preisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Bon-Summe und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Bons künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Bons & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.154.0</span></div>
+<div class="top"><div class="brand">ECHTPREIS <span class="alpha-badge">ALPHA</span></div><span class="version">v5.155.0</span></div>
 <section class="hero"><h1>Dein Einkauf.<br>Dein Preis.</h1></section>
 <div class="homeactions coreactions home-main-actions" style="grid-template-columns:1fr 1fr">
 <button class="homeaction" id="homeReceipt" type="button"><span>🧾</span>Bon scannen<small>Dein Einkauf im Check</small></button>
@@ -541,8 +541,24 @@ function normalizeSpokenQuantity(raw){
  let s=String(raw||"").trim();return s.replace(/^\s*(ein|eine|einen|einem|einer|eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|zwölf|zwoelf)\b/i,m=>{const k=normalizeProduct(m.trim());return String(spokenNumberWords[k]||m)});
 }
 function splitShoppingSpeech(text){
- let s=String(text||"").trim().replace(/[.;]+/g,",").replace(/\s+(?:und dann|danach|außerdem|ausserdem)\s+/gi,",").replace(/\s+und\s+(?=(?:ein(?:e|en)?|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|zwölf|zwoelf|\d)\b)/gi,",");
- return s.split(/\s*,\s*/).map(x=>x.trim()).filter(Boolean).map(normalizeSpokenQuantity);
+ let s=String(text||"").trim().replace(/[.;]+/g,",").replace(/\s+(?:und dann|danach|außerdem|ausserdem)\s+/gi,",").replace(/\s+und\s+/gi,",");
+ const aliases=[...new Set(Object.entries(productAliases).flatMap(([key,rows])=>[catalog[key]?.label,key.replace(/_/g," "),...rows]).filter(Boolean).map(x=>normalizeProduct(x)).filter(Boolean))].map(x=>x.split(" ")).sort((a,b)=>b.length-a.length);
+ const splitPart=part=>{
+  let source=part.trim();if(!source)return[];
+  source=source.replace(/^.*?\b(?:nehme|brauche|möchte|moechte|kaufe|packe|nimm|nehmen)\b\s*(?:bitte\s*)?/i,"");
+  const tokens=[...source.matchAll(/[a-zA-ZäöüÄÖÜß]+|\d+(?:[,.]\d+)?/g)].map(m=>({raw:m[0],norm:normalizeProduct(m[0])}));if(!tokens.length)return[];
+  const matches=[];let cursor=0;
+  for(let i=0;i<tokens.length;i++){
+   if(i<cursor)continue;
+   const alias=aliases.find(parts=>parts.every((word,j)=>tokens[i+j]?.norm===word));
+   if(alias){matches.push({start:i,end:i+alias.length});cursor=i+alias.length}
+  }
+  if(matches.length<2)return[normalizeSpokenQuantity(source)];
+  const rows=[];let previousEnd=0;
+  for(const match of matches){let words=tokens.slice(previousEnd,match.end).map(x=>x.raw);if(words.length)rows.push(normalizeSpokenQuantity(words.join(" ")));previousEnd=match.end}
+  return rows;
+ };
+ return s.split(/\s*,\s*/).flatMap(splitPart).map(x=>x.trim()).filter(Boolean);
 }
 const standardPackSizes={milch:{amount:1,unit:"l",label:"1 l"},haferdrink:{amount:1,unit:"l",label:"1 l"},kokosmilch:{amount:.4,unit:"l",label:"ca. 400 ml"},blaubeeren:{amount:.25,unit:"kg",label:"ca. 250 g"},erdbeeren:{amount:.25,unit:"kg",label:"ca. 250 g"},haferflocken:{amount:.5,unit:"kg",label:"ca. 500 g"},joghurt:{amount:.5,unit:"kg",label:"ca. 500 g"}};
 function packageChoiceSize(w){let value=w.choice?.Größe;if(!value)return null;let multi=String(value).match(/^(\d+)x(\d+(?:[.,]\d+)?)(g|ml|kg|l)$/i);if(multi){let n=Number(multi[1]),size=Number(multi[2].replace(",",".")),u=multi[3].toLowerCase();return{amount:n*size*((u==="g"||u==="ml")?.001:1),unit:u==="g"||u==="kg"?"kg":"l",label:n+" × "+multi[2].replace(".",",")+" "+u}}let m=String(value).match(/^(\d+(?:[.,]\d+)?)(g|ml|kg|l)$/i);if(!m)return null;let u=m[2].toLowerCase();return{amount:Number(m[1].replace(",","."))*((u==="g"||u==="ml")?.001:1),unit:u==="g"||u==="kg"?"kg":"l",label:m[1].replace(".",",")+" "+u}}
