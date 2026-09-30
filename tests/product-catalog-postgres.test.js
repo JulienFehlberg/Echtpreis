@@ -13,7 +13,7 @@ function testGtin(index){
  return base+((10-sum%10)%10);
 }
 function fixture(index,patch={}){
- return{code:testGtin(index),product_name:"POSTGRES TEST catalog item "+index,product_name_de:"POSTGRES TEST Katalogartikel "+index,brands:"ECHTPREIS PostgreSQL TEST",quantity:index%2?"1000 ml":"250 g",countries_tags:["en:germany"],...patch};
+ return{code:testGtin(index),product_name:"POSTGRES TEST catalog item "+index,product_name_de:"POSTGRES TEST Katalogartikel "+index,brands:"SPARKORB PostgreSQL TEST",quantity:index%2?"1000 ml":"250 g",countries_tags:["en:germany"],...patch};
 }
 async function main(){
  const connectionString=process.env.DATABASE_URL;
