@@ -37,6 +37,7 @@ function location(r,ctx={}){
  }
  return{score:.55,level:"unspecified"};
 }
+function identityKey(r){if(r.productId)return"pid:"+r.productId;if(r.gtin)return"gtin:"+String(r.gtin).replace(/\D/g,"");const p=Identity.parsePack(r.pack||r.product||r.productName),pack=p&&p.total?p.total.amount+":"+p.total.unit:"";return"raw:"+norm(r.brand||"")+"|"+norm(r.product||r.productName)+"|"+pack}
 function resolveMerchant(query,merchant,rows=[],ctx={}){
  const today=ctx.today||new Date().toISOString().slice(0,10),maxAge=ctx.maxAgeDays??7,candidates=[];
  for(const r of rows){if(!sameMerchant(merchant,r.merchant||r.store))continue;if(!(Number(r.price)>0)||!active(r,today)||r.sourceHealthState==="quarantine"||r.isOutlier)continue;
@@ -49,7 +50,7 @@ function resolveMerchant(query,merchant,rows=[],ctx={}){
  if(!candidates.length)return{merchant,state:"unknown",price:null,reason:"no-current-evidence"};
  candidates.forEach(x=>{const cp=UnitPrice.unitPrice(x.price,x.pack||x.packageSize||x.product||x.productName);x._unitPrice=cp?.price??null;x._unit=cp?.per??null;x._packParsed=cp?.pack??null});
  const best=candidates[0],runner=candidates[1];
- const peers=candidates.filter(x=>(x.priceType||"regular")===(best.priceType||"regular")&&x._identity.class===best._identity.class&&x._location.level===best._location.level&&x._age<=Math.max(1,best._age+1)&&(best.productId&&x.productId?String(x.productId)===String(best.productId):(best.gtin&&x.gtin?String(x.gtin)===String(best.gtin):norm(x.product||x.productName)===norm(best.product||best.productName))));
+ const peers=candidates.filter(x=>(x.priceType||"regular")===(best.priceType||"regular")&&x._identity.class===best._identity.class&&x._location.level===best._location.level&&x._age<=Math.max(1,best._age+1)&&identityKey(x)===identityKey(best));
  const truth=CurrentTruth.fuse(peers);if(truth.state==="conflict")return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",truth};
  const peerPrices=peers.map(x=>Number(x.price)).filter(x=>x>0),lo=peerPrices.length?Math.min(...peerPrices):best.price,hi=peerPrices.length?Math.max(...peerPrices):best.price;
  const spread=lo>0?(hi-lo)/lo:0,independent=new Set(peers.map(x=>x.proof||[x.source,x.observedAt,x.price].join("|"))).size;
@@ -61,4 +62,4 @@ function resolveMerchant(query,merchant,rows=[],ctx={}){
 }
 function compare(query,merchants,rows,ctx={}){return(merchants||[]).map(m=>resolveMerchant(query,m,rows,ctx))}
 function leaders(results=[]){const known=results.filter(x=>x&&x.price>0),cash=known.slice().sort((a,b)=>a.price-b.price)[0]||null,unitCandidates=known.filter(x=>x.unitPrice>0&&x.unit),families=new Set(unitCandidates.map(x=>x.unit)),unit=families.size===1?unitCandidates.sort((a,b)=>a.unitPrice-b.unitPrice)[0]||null:null;return{lowestCheckout:cash,lowestUnitPrice:unit,unitComparisonAvailable:families.size===1,unitFamilies:[...families]}}
-module.exports={PUBLIC_TYPES,CONDITIONAL_TYPES,eligible,queryMode,merchantKey,sameMerchant,active,freshnessDays,identity,location,resolveMerchant,compare,leaders};
+module.exports={PUBLIC_TYPES,CONDITIONAL_TYPES,eligible,queryMode,merchantKey,sameMerchant,active,freshnessDays,identity,identityKey,location,resolveMerchant,compare,leaders};
