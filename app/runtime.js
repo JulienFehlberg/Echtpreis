@@ -1,5 +1,5 @@
 (function(){
-  const config=window.ECHTPREIS_CONFIG||{};
+  const config=window.SPARKORB_CONFIG||{};
   const capacitor=window.Capacitor||null;
   const isNative=!!(capacitor&&typeof capacitor.isNativePlatform==="function"&&capacitor.isNativePlatform());
 
@@ -26,7 +26,7 @@
     };
   }
 
-  window.EchtpreisRuntime=Object.freeze({
+  window.SparkorbRuntime=Object.freeze({
     platform:isNative?"native":"web",
     isNative,
     config,
