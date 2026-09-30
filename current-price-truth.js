@@ -6,7 +6,8 @@ function actor(r={}){return String(r.proofActor||r.contributorId||r.sourceId||r.
 function scope(r={}){return String(r.storeId||r.externalLocationId||r.region||"unknown-location")}
 function productScope(r={}){return String(r.productId||r.gtin||r.externalProductId||r.key||r.product||"unknown-product").toLowerCase()}
 function base(r={}){const t=sourceType(r),n=Number(r.registryTrust);return Number.isFinite(n)&&n>0?n/100:TYPE[t]||TYPE.unknown}
-function fingerprint(r={}){const proof=String(r.proof||"");if(proof)return[sourceType(r),actor(r),proof,scope(r),productScope(r)].join("|");return[sourceType(r),actor(r),scope(r),productScope(r),r.validFrom||"",r.validTo||"",r.observedAt||r.date||"",r.price||""].join("|")}
+function proofKey(r={}){return String(r.proofHash||r.mediaHash||r.contentHash||r.proof||"")}
+function fingerprint(r={}){const proof=proofKey(r);if(proof)return[sourceType(r),proof,scope(r),productScope(r)].join("|");return[sourceType(r),actor(r),scope(r),productScope(r),r.validFrom||"",r.validTo||"",r.observedAt||r.date||"",r.price||""].join("|")}
 function dedupe(rows=[]){const m=new Map();for(const r of rows){const k=fingerprint(r),old=m.get(k);if(!old||base(r)>base(old))m.set(k,r)}return[...m.values()]}
 function independent(rows=[]){return dedupe(rows).length}
 function median(a){const x=a.slice().sort((p,q)=>p-q),n=x.length;if(!n)return null;return n%2?x[(n-1)/2]:(x[n/2-1]+x[n/2])/2}
@@ -19,4 +20,4 @@ function fuse(rows=[],opts={}){
  const authoritativeSingle=best.independent===1&&best.rows.some(r=>["official_retailer","retailer_feed"].includes(sourceType(r)))&&base(best.rows[0])>=.94;
  return{state:best.independent>=2||authoritativeSingle?"supported":"observed",reason:best.independent>=2?"independent-consensus":authoritativeSingle?"authoritative-source":"strongest-evidence",price:best.center,evidence:best.rows,independentEvidence:best.independent,sourceTypes:best.sourceTypes,strength:best.strength};
 }
-module.exports={TYPE,ALIAS,sourceType,actor,scope,productScope,base,fingerprint,dedupe,independent,median,fuse};
+module.exports={TYPE,ALIAS,sourceType,actor,scope,productScope,proofKey,base,fingerprint,dedupe,independent,median,fuse};
