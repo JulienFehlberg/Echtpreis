@@ -14,6 +14,7 @@ function verify(s={},v={}){
  if(v.storeMatch!==true)return{ok:false,state:"review",reason:"store-not-verified"};
  if(v.productMatch!==true)return{ok:false,state:"review",reason:"product-not-verified"};
  if(v.proofValid!==true)return{ok:false,state:"review",reason:"proof-not-verified"};
+ if(v.replayDetected===true)return{ok:false,state:"rejected",reason:"replayed-evidence"};
  if(!(Number(s.price)>0))return{ok:false,state:"review",reason:"price-not-extracted"};
  return{ok:true,state:"verified",confidence:Math.min(1,Number(v.confidence||.8)),verifiedAt:new Date().toISOString()};
 }
