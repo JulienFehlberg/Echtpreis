@@ -3,8 +3,10 @@ const TYPE={official_retailer:.96,retailer_feed:.94,receipt:.90,shelf:.90,open_d
 const ALIAS={first_party_receipt:"receipt",first_party_shelf:"shelf",retailer:"official_retailer",official:"official_retailer"};
 function sourceType(r={}){const t=String(r.sourceType||r.kind||"unknown").toLowerCase();return ALIAS[t]||t}
 function actor(r={}){return String(r.proofActor||r.contributorId||r.sourceId||r.source||"unknown")}
+function scope(r={}){return String(r.storeId||r.externalLocationId||r.region||"unknown-location")}
+function productScope(r={}){return String(r.productId||r.gtin||r.externalProductId||r.key||r.product||"unknown-product").toLowerCase()}
 function base(r={}){const t=sourceType(r),n=Number(r.registryTrust);return Number.isFinite(n)&&n>0?n/100:TYPE[t]||TYPE.unknown}
-function fingerprint(r={}){const proof=String(r.proof||"");if(proof)return[sourceType(r),proof].join("|");return[sourceType(r),actor(r),r.storeId||r.region||"",r.validFrom||"",r.validTo||"",r.observedAt||r.date||"",r.price||""].join("|")}
+function fingerprint(r={}){const proof=String(r.proof||"");if(proof)return[sourceType(r),actor(r),proof,scope(r),productScope(r)].join("|");return[sourceType(r),actor(r),scope(r),productScope(r),r.validFrom||"",r.validTo||"",r.observedAt||r.date||"",r.price||""].join("|")}
 function dedupe(rows=[]){const m=new Map();for(const r of rows){const k=fingerprint(r),old=m.get(k);if(!old||base(r)>base(old))m.set(k,r)}return[...m.values()]}
 function independent(rows=[]){return dedupe(rows).length}
 function median(a){const x=a.slice().sort((p,q)=>p-q),n=x.length;if(!n)return null;return n%2?x[(n-1)/2]:(x[n/2-1]+x[n/2])/2}
@@ -16,4 +18,4 @@ function fuse(rows=[],opts={}){
  const best=scored[0],runner=scored[1];if(runner&&runner.strength>=best.strength*.82&&Math.abs(best.center-runner.center)/best.center>.04)return{state:"conflict",reason:"competing-evidence-clusters",price:null,clusters:scored.slice(0,3)};
  return{state:best.independent>=2||best.strength>=.94?"supported":"observed",reason:best.independent>=2?"independent-consensus":"strongest-evidence",price:best.center,evidence:best.rows,independentEvidence:best.independent,sourceTypes:best.sourceTypes,strength:best.strength};
 }
-module.exports={TYPE,ALIAS,sourceType,actor,base,fingerprint,dedupe,independent,median,fuse};
+module.exports={TYPE,ALIAS,sourceType,actor,scope,productScope,base,fingerprint,dedupe,independent,median,fuse};
