@@ -3,4 +3,5 @@ let x=C.ingest(R.contracts.receipt,[{merchant:"EDEKA",product:"Milch 1L",price:"
 let blocked=C.ingest(R.contracts.rewe,[{product:"Milch",price:1.09,proof:"x"}]);assert.strictEqual(blocked.accepted.length,0);assert.strictEqual(blocked.rejected[0].reasons[0],"connector-not-approved");
 let m=B.matrix([{product:"Hackfleisch",merchant:"EDEKA",price:3.99,state:"observed"}],["Hackfleisch"],["EDEKA","Lidl"]);assert.strictEqual(m.totalCells,2);assert.strictEqual(m.knownCells,1);assert.strictEqual(m.currentCoverage,.5);assert.strictEqual(m.missing[0].merchant,"Lidl");
 assert.strictEqual(R.contracts.openPrices.allowed,true);assert.strictEqual(R.contracts.openFoodFacts.allowed,false);assert.strictEqual(R.contracts.openFoodFacts.termsStatus,"identity-only");assert.strictEqual(R.contracts.germanSupermarketDataset.allowed,false);
+const radar=R.status();for(const k of ["preiszeiger","gkl","aggregatorAktionspreis","globus","hit","tegut","famila","combi","norma","dm","rossmann","mueller","alnatura","bioCompany","budni","denns","getraenkeHoffmann"])assert(radar.some(x=>x.key===k),k+" missing from source radar");
 console.log("current-price-connectors-benchmark: ok");
