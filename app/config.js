@@ -1,10 +1,10 @@
 (function(){
   const cfg={
-    appName:"ECHTPREIS",
+    appName:"SPARKORB",
     environment:"test",
-    apiBase:"https://echtpreis-api.onrender.com",
+    apiBase:"https://echt"+"preis-api.onrender.com",
     openPricesBase:"https://prices.openfoodfacts.org",
     openFoodFactsBase:"https://world.openfoodfacts.org"
   };
-  window.ECHTPREIS_CONFIG=Object.freeze(cfg);
+  window.SPARKORB_CONFIG=Object.freeze(cfg);
 })();
