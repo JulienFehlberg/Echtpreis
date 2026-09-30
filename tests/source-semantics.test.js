@@ -1,0 +1,11 @@
+const assert=require("assert"),S=require("../source-semantics");
+let p=S.policy({source:"Open Prices"});assert.strictEqual(p.currentPrice,true);assert(p.purposes.includes("current-price"));
+p=S.policy({source:"Open Food Facts"});assert.strictEqual(p.currentPrice,false);assert.strictEqual(p.identity,true);
+p=S.policy({source:"Open Prices locations"});assert.strictEqual(p.currentPrice,false);assert.strictEqual(p.discovery,true);
+p=S.policy({source:"REWE daily open dataset"});assert.strictEqual(p.currentPrice,false);assert.strictEqual(p.corroboration,true);
+p=S.policy({source:"ECHTPREIS POS feed"});assert.strictEqual(p.currentPrice,false);
+assert.strictEqual(S.truthEligible({sourceType:"official_retailer",sourceId:"licensed-feed"}),true);
+assert.strictEqual(S.truthEligible({sourceType:"product_catalog",sourceId:"catalog"}),false);
+assert.strictEqual(S.truthEligible({sourceType:"store_catalog",sourceId:"locations"}),false);
+assert.strictEqual(S.truthEligible({sourceType:"open_data",truthEligible:false}),false);
+console.log("source-semantics: ok");
