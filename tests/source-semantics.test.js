@@ -8,4 +8,5 @@ assert.strictEqual(S.truthEligible({sourceType:"official_retailer",sourceId:"lic
 assert.strictEqual(S.truthEligible({sourceType:"product_catalog",sourceId:"catalog"}),false);
 assert.strictEqual(S.truthEligible({sourceType:"store_catalog",sourceId:"locations"}),false);
 assert.strictEqual(S.truthEligible({sourceType:"open_data",truthEligible:false}),false);
+assert.strictEqual(S.sourceName({source:"external",sourceId:"Open Food Facts"}),"Open Food Facts");assert.strictEqual(S.truthEligible({source:"external",sourceId:"Open Food Facts",sourceType:"open_data"}),false);
 console.log("source-semantics: ok");
