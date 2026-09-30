@@ -730,6 +730,25 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
  .compare-market-price{font-size:18px!important}
 }
 </style>
+<style>
+/* v7.232 layout-only comparison polish */
+#results>.card:has(#merchantResults)>h2{margin-bottom:14px!important}
+.compare-quality-summary{padding:9px 11px!important;margin-bottom:12px!important;line-height:1.35!important}
+.compare-market.first{background:linear-gradient(90deg,#f4faf6 0%,rgba(244,250,246,0) 88%);margin:0 -8px;padding-left:8px!important;padding-right:8px!important;border-radius:14px}
+.compare-market-main{gap:8px!important}
+.compare-market-actions{gap:10px!important}
+.compare-market-actions .route-link{padding:6px 9px!important;border-radius:9px!important}
+@media(max-width:430px){
+ .compare-market{padding:9px 0!important}
+ .compare-market.first{padding-top:10px!important;padding-bottom:10px!important}
+ .compare-market-copy>b{font-size:14px!important}
+ .compare-market-price{font-size:17px!important}
+ .compare-quality-line{font-size:8.5px!important}
+ .compare-market-actions{margin-top:4px!important}
+ .compare-market-actions .route-link{padding:5px 8px!important;font-size:10px!important}
+ .compare-details>summary{font-size:10px!important}
+}
+</style>
 </head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand">SPARKORB <span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
