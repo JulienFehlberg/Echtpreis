@@ -18,7 +18,7 @@ function conflicts(query,candidate){
 }
 function compatible(query,candidate,opts={}){
  const hard=conflicts(query,candidate);if(hard.length)return{ok:false,score:0,conflicts:hard,reasons:["hard-feature-conflict"]};
- const q=extract(query),c=extract(candidate);let score=1,reasons=[];for(const k of Object.keys(RULES)){if(q[k]&&!c[k]){score-=opts.missingFeaturePenalty??.08;reasons.push("candidate-"+k+"-unknown")}}
+ const q=extract(query),c=extract(candidate),required=new Set(["lactose","sugar","fat"]);let score=1,reasons=[];for(const k of Object.keys(RULES)){if(q[k]&&!c[k]){if(required.has(k))return{ok:false,score:0,conflicts:[],reasons:["required-feature-missing:"+k],queryFeatures:q,candidateFeatures:c};score-=opts.missingFeaturePenalty??.08;reasons.push("candidate-"+k+"-unknown")}}
  return{ok:score>=(opts.minScore??.75),score:Math.max(0,score),conflicts:[],reasons,queryFeatures:q,candidateFeatures:c};
 }
 module.exports={RULES,norm,feature,extract,conflicts,compatible};
