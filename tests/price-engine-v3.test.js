@@ -46,6 +46,7 @@ const ctx={today,lat:52.54,lon:13.20,distanceKm:(a,b,c,d)=>Math.hypot((a-c)*70,(
  assert(Math.abs(q.coverage-2/3)<.001);
  assert.strictEqual(q.verifiedCoverage,0);
 }
+assert.strictEqual(E.temporalState({validFrom:"bad"},"2026-09-30"),"invalid");assert.strictEqual(E.temporalState({validFrom:"2026-10-05",validTo:"2026-10-01"},"2026-09-30"),"invalid");assert(E.freshnessScore({date:"2026-10-01"},"2026-09-30")<.2);
 console.log("price-engine-v3: ok");
 {
  const xs=[{price:10,kind:"official",confidenceScore:94},{price:5,kind:"receipt",confidenceScore:88},{price:3,kind:"reference",confidenceScore:50},null];
