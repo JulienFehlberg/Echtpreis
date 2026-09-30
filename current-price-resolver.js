@@ -41,7 +41,7 @@ function resolveMerchant(query,merchant,rows=[],ctx={}){
  const today=ctx.today||new Date().toISOString().slice(0,10),maxAge=ctx.maxAgeDays??7,candidates=[];
  for(const r of rows){if(!sameMerchant(merchant,r.merchant||r.store))continue;if(!(Number(r.price)>0)||!active(r,today)||r.sourceHealthState==="quarantine"||r.isOutlier)continue;
   const type=r.priceType||"regular",elig=eligible(r,ctx);if(!elig.ok)continue;
-  const id=identity(query,r);if(!id.usable)continue;const loc=location(r,ctx);if(loc.score===0)continue;const age=freshnessDays(r,today);if(age>maxAge&&!r.validTo)continue;
+  const id=identity(query,r);if(!id.usable)continue;const loc=location(r,ctx);if(loc.score===0)continue;const age=freshnessDays(r,today);const sourceAgeLimit=r.sourceType==="open_data"?Math.min(Number(maxAge),7):Number(maxAge);if(age>sourceAgeLimit)continue;
   const health=Number(r.sourceHealthScore??85),proof=!!r.proof,score=id.score*.52+loc.score*.20+Math.max(0,1-age/Math.max(1,maxAge))*.13+Math.min(1,health/100)*.10+(proof?.05:0);
   candidates.push({...r,_score:score,_identity:id,_location:loc,_age:age,_eligibility:elig});
  }
@@ -50,7 +50,8 @@ function resolveMerchant(query,merchant,rows=[],ctx={}){
  candidates.forEach(x=>{const cp=UnitPrice.unitPrice(x.price,x.pack||x.packageSize||x.product||x.productName);x._unitPrice=cp?.price??null;x._unit=cp?.per??null;x._packParsed=cp?.pack??null});
  const best=candidates[0],runner=candidates[1];
  const peers=candidates.filter(x=>(x.priceType||"regular")===(best.priceType||"regular")&&x._identity.class===best._identity.class&&x._location.level===best._location.level&&x._age<=Math.max(1,best._age+1)&&(best.productId&&x.productId?String(x.productId)===String(best.productId):(best.gtin&&x.gtin?String(x.gtin)===String(best.gtin):norm(x.product||x.productName)===norm(best.product||best.productName))));
- const truth=CurrentTruth.fuse(peers);if(truth.state==="conflict")return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",truth};\n const peerPrices=peers.map(x=>Number(x.price)).filter(x=>x>0),lo=peerPrices.length?Math.min(...peerPrices):best.price,hi=peerPrices.length?Math.max(...peerPrices):best.price;
+ const truth=CurrentTruth.fuse(peers);if(truth.state==="conflict")return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",truth};
+ const peerPrices=peers.map(x=>Number(x.price)).filter(x=>x>0),lo=peerPrices.length?Math.min(...peerPrices):best.price,hi=peerPrices.length?Math.max(...peerPrices):best.price;
  const spread=lo>0?(hi-lo)/lo:0,independent=new Set(peers.map(x=>x.proof||[x.source,x.observedAt,x.price].join("|"))).size;
  const ambiguous=(runner&&best._score-runner._score<.035&&Math.abs(best.price-runner.price)/best.price>.08)||(independent>=2&&spread>.12);
  if(ambiguous)return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",conflict:{independentEvidence:independent,spread},candidates:candidates.slice(0,3)};
