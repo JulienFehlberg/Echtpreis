@@ -1,7 +1,7 @@
 "use strict";
 const assert=require("assert"),Client=require("../app/current-price-client");
 const today="2026-09-30",ctx={today,storeId:"store-1",region:"Berlin"},query={product:"Butter",brand:"Testbrand",pack:"250 g",gtin:"4008400401627",merchants:["REWE"]};
-const base={merchant:"REWE",state:"verified",kind:"receipt",status:"verified",identityVerified:true,proofVerified:true,sourceEligibility:{receiptReview:true},price:1.99,payablePrice:1.99,currency:"EUR",priceType:"regular",product:"Testbrand Butter 250 g",productId:"butter-1",brand:"Testbrand",pack:"250 g",gtin:query.gtin,storeId:"store-1",region:"Berlin",locationLevel:"store",observedAt:today,confidence:92,queryMode:"exact",match:"ground-truth",proof:"receipt-1",proofHash:"file-hash",proofActor:"actor-1",source:"ECHTPREIS receipt",sourceType:"receipt",per:"piece",unit:"kg",unitPrice:7.96,packParsed:{amount:250,unit:"g",base:"kg",factor:1000},publicReferencePrice:2.49,truth:{state:"supported",independentEvidence:2,verifiedEvidence:2,sourceTypes:["receipt"],strength:.92}};
+const base={merchant:"REWE",state:"verified",kind:"receipt",status:"verified",identityVerified:true,proofVerified:true,sourceEligibility:{receiptReview:true},price:1.99,payablePrice:1.99,currency:"EUR",priceType:"regular",product:"Testbrand Butter 250 g",productId:"butter-1",brand:"Testbrand",pack:"250 g",gtin:query.gtin,storeId:"store-1",region:"Berlin",locationLevel:"store",observedAt:today,confidence:92,queryMode:"exact",match:"ground-truth",proof:"receipt-1",proofHash:"file-hash",proofActor:"actor-1",source:"SPARKORB receipt",sourceType:"receipt",per:"piece",unit:"kg",unitPrice:7.96,packParsed:{amount:250,unit:"g",base:"kg",factor:1000},publicReferencePrice:2.49,truth:{state:"supported",independentEvidence:2,verifiedEvidence:2,sourceTypes:["receipt"],strength:.92}};
 const answer=(rows=[base])=>({ok:true,today,results:rows});
 const response=(value=answer())=>({ok:true,json:async()=>value});
 const normalize=raw=>Client.normalizeDecision(raw,{...ctx,query});
@@ -62,8 +62,8 @@ function checkUnknown(value,message){assert.strictEqual(value.state,"unknown",me
 
 (async()=>{
  let calls=0,time=Date.parse(today+"T12:00:00Z"),captured;
- const client=Client.create({apiBase:"https://echtpreis.example/",now:()=>time,fetchImpl:async(url,options)=>{calls++;captured={url,options};return response()}});
- const first=await client.compare(query,ctx);assert.strictEqual(first.results[0].price,1.99);assert.strictEqual(captured.url,"https://echtpreis.example/v1/current-prices");assert.strictEqual(captured.options.method,"POST");
+ const client=Client.create({apiBase:"https://sparkorb.example/",now:()=>time,fetchImpl:async(url,options)=>{calls++;captured={url,options};return response()}});
+ const first=await client.compare(query,ctx);assert.strictEqual(first.results[0].price,1.99);assert.strictEqual(captured.url,"https://sparkorb.example/v1/current-prices");assert.strictEqual(captured.options.method,"POST");
  const sent=JSON.parse(captured.options.body);for(const key of ["product","brand","pack","gtin"])assert.strictEqual(sent[key],query[key]);assert.strictEqual(sent.storeId,"store-1");assert.strictEqual(sent.region,"Berlin");assert.strictEqual(sent.quantity,1);assert.strictEqual(sent.maxAgeDays,7);
  await client.compare({...query,merchants:["REWE","PENNY"]},{today,storeIds:{REWE:"store-1",PENNY:"store-2"},regions:{REWE:"Berlin",PENNY:"Potsdam"}});const mapped=JSON.parse(captured.options.body);assert.deepStrictEqual(mapped.storeIds,{REWE:"store-1",PENNY:"store-2"});assert.deepStrictEqual(mapped.regions,{REWE:"Berlin",PENNY:"Potsdam"});calls=1;
  first.results[0].price=99;const second=await client.compare({...query},ctx);assert.strictEqual(second.results[0].price,1.99,"cached decisions are isolated from caller mutation");assert.strictEqual(calls,1,"a recent identical query reuses its canonical response");
