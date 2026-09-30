@@ -3,6 +3,8 @@ const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u03
 const RULES={
  meat:{beef:["rind","rinder","beef"],pork:["schwein","schweine","pork"],mixed:["gemischt","halb halb","halb/halb"],poultry:["hahnchen","haehnchen","huhn","pute","geflugel"]},
  production:{organic:["bio","bioland","demeter","naturland"],conventional:[]},
+ diet:{vegan:["vegan","veggie","pflanzlich","plant based","plant-based"],meat:["rind","rinder","schwein","schweine","hahnchen","haehnchen","huhn","pute","geflugel","hackfleisch"]},
+ lactose:{free:["laktosefrei","lactosefrei","ohne laktose"],regular:[]},
  state:{frozen:["tiefkuhl","tiefgek","tk ","gefroren"],fresh:["frisch"]},
  sugar:{zero:["zero","zuckerfrei","ohne zucker"],regular:["original","classic","klassik"]},
  fat:{lowfat:["fettarm","light","1,5%","1.5%"],fullfat:["3,5%","3.5%","vollmilch"]}
