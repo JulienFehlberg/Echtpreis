@@ -4,6 +4,7 @@ const Graph=require("./product-graph");
 const Health=require("./source-health");
 const Compatibility=require("./product-compatibility");
 const UnitPrice=require("./unit-price");
+const CurrentTruth=require("./current-price-truth");
 const PUBLIC_TYPES=new Set(["regular","promotion"]);\nconst CONDITIONAL_TYPES=new Set(["loyalty","app","coupon","multi_buy","personalized"]);
 const norm=s=>Identity.norm(s||"");
 function active(r,today){const t=String(today||new Date().toISOString()).slice(0,10),f=r.validFrom&&String(r.validFrom).slice(0,10),to=r.validTo&&String(r.validTo).slice(0,10);return(!f||t>=f)&&(!to||t<=to)}
