@@ -14,4 +14,21 @@ function reliability(s){
  let a=0;if(s.medianApe<=2)a+=4;else if(s.medianApe>=8)a-=8;if(s.within5pct>=.9)a+=3;else if(s.within5pct<.65)a-=5;if(Math.abs(s.bias)>5)a-=5;if(s.rangeHitRate!=null&&s.rangeHitRate<.75)a-=4;
  return{grade:a>=5?"excellent":a>=1?"good":a>=-3?"watch":"poor",adjustment:Math.max(-15,Math.min(5,a))};
 }
-module.exports={pctError,signedBias,median,summarize,reliability};
+
+function drift(current,baseline){
+ if(!current||!baseline||current.sampleCount<10||baseline.sampleCount<20)return{detected:false,severity:"unknown",reasons:[]};
+ const reasons=[];if(current.medianApe>baseline.medianApe*1.5&&current.medianApe-baseline.medianApe>=2)reasons.push("median_error_up");
+ if(current.within5pct<baseline.within5pct-.15)reasons.push("within_5pct_down");
+ if(Math.abs(current.bias)>Math.max(5,Math.abs(baseline.bias)+3))reasons.push("bias_shift");
+ return{detected:reasons.length>0,severity:reasons.length>=2?"high":"medium",reasons};
+}
+function learningActions(s,baseline){
+ const rel=reliability(s),d=drift(s,baseline),actions=[];
+ if(s.sampleCount<10)actions.push("collect_more_evidence");
+ if(rel.grade==="poor")actions.push("reduce_confidence");
+ if(Math.abs(s.bias||0)>5)actions.push("inspect_systematic_bias");
+ if(s.rangeHitRate!=null&&s.rangeHitRate<.75)actions.push("widen_or_recalibrate_range");
+ if(d.detected)actions.push("source_drift_review");
+ return{reliability:rel,drift:d,actions};
+}
+module.exports={pctError,signedBias,median,summarize,reliability,drift,learningActions};
