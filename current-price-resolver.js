@@ -49,7 +49,7 @@ function resolveMerchant(query,merchant,rows=[],ctx={}){
  candidates.sort((a,b)=>{if(queryMode(query)==="category"){const ua=UnitPrice.unitPrice(a.price,a.pack||a.packageSize||a.product||a.productName),ub=UnitPrice.unitPrice(b.price,b.pack||b.packageSize||b.product||b.productName);if(ua&&ub&&ua.per===ub.per&&Math.abs(a._score-b._score)<.08)return ua.price-ub.price}return b._score-a._score||a.price-b.price});
  if(!candidates.length)return{merchant,state:"unknown",price:null,reason:"no-current-evidence"};
  candidates.forEach(x=>{const cp=UnitPrice.unitPrice(x.price,x.pack||x.packageSize||x.product||x.productName);x._unitPrice=cp?.price??null;x._unit=cp?.per??null;x._packParsed=cp?.pack??null});
- const best=candidates[0],runner=candidates[1];
+ const best=candidates[0],runner=candidates.find((x,i)=>i>0&&identityKey(x)===identityKey(best)&&(x.priceType||"regular")===(best.priceType||"regular"));
  const peers=candidates.filter(x=>(x.priceType||"regular")===(best.priceType||"regular")&&x._identity.class===best._identity.class&&x._location.level===best._location.level&&x._age<=Math.max(1,best._age+1)&&identityKey(x)===identityKey(best));
  const truth=CurrentTruth.fuse(peers);if(truth.state==="conflict")return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",truth};
  const peerPrices=peers.map(x=>Number(x.price)).filter(x=>x>0),lo=peerPrices.length?Math.min(...peerPrices):best.price,hi=peerPrices.length?Math.max(...peerPrices):best.price;
