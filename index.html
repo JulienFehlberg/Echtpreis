@@ -645,6 +645,19 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
 #receipt .receipt-main-action{display:flex!important;align-items:center!important;justify-content:center!important;background:#087443!important;color:#fff!important;font-weight:900!important;min-height:54px!important}
 #receipt .receipt-main-action:before{content:"📷";margin-right:8px;font-size:18px}
 </style>
+<style>
+/* v7.222 ultra-compact single-line product + pack control */
+@media(max-width:430px){
+ #planner .item{grid-template-columns:18px minmax(0,1fr) auto 13px!important;gap:5px!important;padding:3px 0!important;min-height:39px!important}
+ #planner [data-check]{width:17px!important;height:17px!important;min-width:17px!important;min-height:17px!important;border-width:1.5px!important;border-radius:5px!important}
+ #planner .itemname{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:7px!important;min-width:0!important;white-space:nowrap!important}
+ #planner .item-title{width:auto!important;min-width:0!important;flex:0 1 auto!important;font-size:12px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+ #planner .item-pack-size{flex:0 0 auto!important;margin:0!important;min-height:22px!important;padding:3px 6px!important;font-size:8px!important;white-space:nowrap!important}
+ #planner .qty-stepper{gap:2px!important}
+ #planner .qty-stepper b{font-size:8.5px!important}
+ #planner .qty-stepper .qty-buttons button{width:24px!important;height:24px!important;min-width:24px!important}
+}
+</style>
 </head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand">SPARKORB <span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
