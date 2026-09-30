@@ -1,0 +1,3 @@
+"use strict";
+async function view(pool,stream="Open Prices targets",limit=100){const q=await pool.query(`SELECT target_key AS "targetKey",consecutive_failures AS "consecutiveFailures",total_failures AS "totalFailures",last_error AS "lastError",last_failed_at AS "lastFailedAt",cooldown_until AS "cooldownUntil",last_success_at AS "lastSuccessAt" FROM price_refresh_target_failures WHERE stream_name=$1 AND (consecutive_failures>0 OR cooldown_until>now()) ORDER BY consecutive_failures DESC,last_failed_at DESC LIMIT $2`,[stream,Math.max(1,Math.min(1000,Number(limit)||100))]);return q.rows}
+module.exports={view};
