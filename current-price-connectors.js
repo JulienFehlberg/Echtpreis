@@ -1,6 +1,7 @@
 "use strict";
 const C=require("./current-price-connector");
 const contracts={
+ posFeed:C.contract({id:"ECHTPREIS POS feed",merchant:"*",sourceType:"pos_feed",allowed:false,requiresStore:true,requiresRegion:false,registryTrust:99.5,termsStatus:"partner-contract"}),
  receipt:C.contract({id:"ECHTPREIS receipt",merchant:"*",sourceType:"first_party_receipt",allowed:true,requiresStore:false,requiresRegion:false,registryTrust:92,termsStatus:"first-party"}),
  shelf:C.contract({id:"ECHTPREIS shelf",merchant:"*",sourceType:"first_party_shelf",allowed:true,requiresStore:true,registryTrust:90,termsStatus:"first-party"}),
  openPrices:C.contract({id:"Open Prices",merchant:"*",sourceType:"open_data",allowed:true,requiresStore:false,requiresRegion:false,registryTrust:78,termsStatus:"approved-open-data",license:"ODbL-1.0"}),
