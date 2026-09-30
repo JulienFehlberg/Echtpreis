@@ -47,5 +47,5 @@ jobs:
         run: node tests/product-catalog-postgres.test.js
       - name: Run PostgreSQL price coverage integration test
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/echtpreis_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
         run: node tests/price-coverage-postgres.test.js
