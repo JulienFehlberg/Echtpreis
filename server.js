@@ -34,6 +34,9 @@ const GeoCoverage=require("./geo-coverage");
 const SchedulerResearchPlan=require("./scheduler-research-plan");
 const ResearchPlanStatus=require("./research-plan-status");
 const ProductIdentityEnrichment=require("./product-identity-enrichment");
+const CanonicalStoreCoverage=require("./canonical-store-coverage");
+const CanonicalStoreGapTargets=require("./canonical-store-gap-targets");
+const StoreUniverse=require("./store-universe");
 const pool=process.env.DATABASE_URL?new Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DATABASE_URL.includes("localhost")?false:{rejectUnauthorized:false}}):null;
 const refreshStates={};let latestResearchPlan={};let refreshTimer=null;
 const PORT=process.env.PORT||10000,DB_FILE=process.env.ECHTPREIS_DB_FILE||path.join("/tmp","echtpreis-db.json");
@@ -99,6 +102,8 @@ async function handle(req,res){
  if(req.method==="GET"&&req.url==="/v1/admin/price-sources/status"){if(!pool)return send(res,503,{error:"database-unavailable"});try{const states=await RefreshStateStore.loadAll(pool);return send(res,200,{sources:PriceSourceStatus.view(states)})}catch(e){return send(res,500,{error:"source-status-failed"})}}
  if(req.method==="GET"&&req.url==="/v1/admin/price-geo/coverage"){if(!pool)return send(res,503,{error:"database-unavailable"});try{return send(res,200,await GeoCoverage.summarize(pool))}catch(e){return send(res,500,{error:"geo-coverage-failed"})}}
  if(req.method==="GET"&&req.url==="/v1/admin/price-research/plan")return send(res,200,{budget:Number(process.env.PRICE_RESEARCH_BUDGET||500),sources:ResearchPlanStatus.view(latestResearchPlan)});
+ if(req.method==="GET"&&req.url==="/v1/admin/store-universe/coverage"){if(!pool)return send(res,503,{error:"database-unavailable"});try{return send(res,200,await StoreUniverse.coverage(pool))}catch(e){return send(res,500,{error:"store-universe-coverage-failed"})}}
+ if(req.method==="POST"&&req.url==="/v1/admin/product-store-coverage")return body(req,async(err,b)=>{if(err||!pool)return send(res,pool?400:503,{error:pool?"invalid-request":"database-unavailable"});try{const coverage=await CanonicalStoreCoverage.product(pool,{productId:b.productId,gtin:b.gtin,freshHours:b.freshHours||24,merchant:b.merchant||null});return send(res,200,{...coverage,targets:CanonicalStoreGapTargets.rank(coverage,{productPriority:b.productPriority||50}).slice(0,Number(b.limit||100))})}catch(e){return send(res,400,{error:String(e.message||"coverage-failed")})}});
  if(req.method==="GET"&&req.url==="/v1/receipt-vision/status")return send(res,200,{enabled:!!process.env.OPENAI_API_KEY});
  if(req.method==="POST"&&req.url==="/v1/receipt-vision")return body(req,async(err,b)=>{
   if(err||!b||!validReceiptImages(b.images))return send(res,400,{error:"Bonfoto ist ungültig oder zu groß."});
