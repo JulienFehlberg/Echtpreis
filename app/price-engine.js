@@ -1,6 +1,6 @@
 (function(){
 "use strict";
-const VERSION="3.0.0";
+const VERSION="3.1.0";
 const DAY=86400000;
 const SOURCE_BASE={official:96,receipt:92,shelf:90,openprices:78,community:64,reference:20};
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -68,5 +68,44 @@ function basketQuality(items){
   const avg=known.length?known.reduce((s,x)=>s+Number(x.confidenceScore||0),0)/known.length:0;
   return {coverage,verifiedCoverage,confidenceScore:Math.round(avg),known:known.length,total:xs.length};
 }
-window.EchtpreisPriceEngine={VERSION,rankObservations,scoreObservation,basketQuality,freshnessScore,locationScore,sourceScore};
+
+/* Canonical observation contract: every source adapter must emit this shape. */
+function normalizeObservation(raw={}){
+ const price=Number(raw.price),regularPrice=raw.regularPrice==null?null:Number(raw.regularPrice);
+ const observedAt=raw.observedAt||raw.date||new Date().toISOString().slice(0,10);
+ return {
+  observationId:raw.observationId||null, productId:raw.productId||null, gtin:raw.gtin||raw.ean||null,
+  product:String(raw.product||raw.productName||"").trim(), key:raw.key||null,
+  store:raw.store||null, locationId:raw.locationId||null, region:raw.region||null,
+  lat:Number.isFinite(Number(raw.lat))?Number(raw.lat):null, lon:Number.isFinite(Number(raw.lon))?Number(raw.lon):null,
+  price:Number.isFinite(price)?price:null, regularPrice:Number.isFinite(regularPrice)?regularPrice:null,
+  currency:raw.currency||"EUR", per:raw.per||"piece", quantity:raw.quantity??null, unit:raw.unit||null,
+  priceType:raw.priceType||"regular", validFrom:raw.validFrom||null, validTo:raw.validTo||null,
+  date:String(observedAt).slice(0,10), observedAt,
+  kind:raw.kind||"reference", source:raw.source||"unknown", sourceUrl:raw.sourceUrl||null,
+  proof:raw.proof||raw.proofId||null, proofType:raw.proofType||null, trust:Number(raw.trust||0),
+  importedAt:raw.importedAt||new Date().toISOString(), rawRef:raw.rawRef||null
+ };
+}
+function validateObservation(raw){
+ const x=normalizeObservation(raw),errors=[];
+ if(!(x.price>0))errors.push("price"); if(!x.store)errors.push("store"); if(!x.date)errors.push("date");
+ if(!x.product&&!x.key&&!x.gtin)errors.push("product_identity");
+ if(x.priceType!=="regular"&&x.validTo&&x.validFrom&&x.validTo<x.validFrom)errors.push("validity");
+ return {ok:errors.length===0,errors,observation:x};
+}
+function dedupeObservations(rows=[]){
+ const map=new Map();
+ for(const raw of rows){const v=validateObservation(raw);if(!v.ok)continue;const x=v.observation;
+  const k=[x.gtin||x.key||x.product,x.store,x.locationId||x.region||"",x.price,x.currency,x.per,x.priceType,x.date,x.proof||x.source].join("|");
+  const old=map.get(k);if(!old||sourceScore(x)>sourceScore(old))map.set(k,x);
+ }
+ return [...map.values()];
+}
+function sourceAudit(rows=[]){
+ const clean=dedupeObservations(rows),bySource={};
+ for(const x of clean){const k=x.source||x.kind||"unknown";const s=bySource[k]??={observations:0,withProof:0,withGtin:0,withLocation:0,latest:null};s.observations++;if(x.proof)s.withProof++;if(x.gtin)s.withGtin++;if(x.locationId||(x.lat!=null&&x.lon!=null))s.withLocation++;if(!s.latest||x.date>s.latest)s.latest=x.date;}
+ return {observations:clean.length,sources:Object.entries(bySource).map(([source,s])=>({source,...s,proofRate:s.observations?s.withProof/s.observations:0,gtinRate:s.observations?s.withGtin/s.observations:0,locationRate:s.observations?s.withLocation/s.observations:0}))};
+}
+\nwindow.EchtpreisPriceEngine={VERSION,rankObservations,scoreObservation,basketQuality,freshnessScore,locationScore,sourceScore,normalizeObservation,validateObservation,dedupeObservations,sourceAudit};
 })();
