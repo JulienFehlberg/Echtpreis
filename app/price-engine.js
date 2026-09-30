@@ -1,6 +1,6 @@
 (function(){
 "use strict";
-const VERSION="3.4.0";
+const VERSION="3.5.0";
 const DAY=86400000;
 const SOURCE_BASE={official:96,receipt:92,shelf:90,openprices:78,community:64,reference:20};
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -29,7 +29,12 @@ function locationScore(row,ctx){
   }
   return .68;
 }
-function sourceScore(row){\n  const base=SOURCE_BASE[row.kind]??50;\n  const governed=Number(row.registryTrust);\n  return clamp(Number.isFinite(governed)&&governed>0?(base*.55+governed*.45):base,0,100);\n}
+function sourceScore(row){
+  const base=SOURCE_BASE[row.kind]??50,governed=Number(row.registryTrust),health=Number(row.sourceHealthScore);
+  let score=Number.isFinite(governed)&&governed>0?(base*.55+governed*.45):base;
+  if(Number.isFinite(health)){if(health<40)score-=35;else if(health<65)score-=15;else if(health<85)score-=5;else score+=Math.min(3,(health-85)/5)}
+  return clamp(score,0,100);
+}
 function independentProofs(rows){
   return new Set(rows.map(r=>r.proof||((r.kind||"unknown")+":"+(r.source||""))).filter(Boolean)).size;
 }
