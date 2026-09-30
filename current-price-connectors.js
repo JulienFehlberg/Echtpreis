@@ -1,15 +1,15 @@
 "use strict";
 const C=require("./current-price-connector");
 const contracts={
- posFeed:C.contract({id:"ECHTPREIS POS feed",merchant:"*",sourceType:"pos_feed",allowed:false,requiresStore:true,requiresRegion:false,registryTrust:99.5,termsStatus:"partner-contract"}),
+ posFeed:C.contract({id:"SPARKORB POS feed",merchant:"*",sourceType:"pos_feed",allowed:false,requiresStore:true,requiresRegion:false,registryTrust:99.5,termsStatus:"partner-contract"}),
  aggregatorAktionspreis:C.contract({id:"Aktionspreis",merchant:"*",sourceType:"third_party",allowed:false,requiresRegion:true,registryTrust:72,termsStatus:"review"}),
  aggregatorMarktguru:C.contract({id:"Marktguru",merchant:"*",sourceType:"third_party",allowed:false,requiresRegion:true,registryTrust:72,termsStatus:"review"}),
  aggregatorKaufda:C.contract({id:"kaufDA",merchant:"*",sourceType:"third_party",allowed:false,requiresRegion:true,registryTrust:70,termsStatus:"review"}),
  preiszeiger:C.contract({id:"Preiszeiger",merchant:"*",sourceType:"retailer_feed",allowed:false,requiresRegion:true,registryTrust:94,termsStatus:"license-required"}),
  gkl:C.contract({id:"GKL",merchant:"*",sourceType:"retailer_feed",allowed:false,requiresRegion:true,registryTrust:93,termsStatus:"license-required"}),
  redprice:C.contract({id:"redprice",merchant:"*",sourceType:"third_party",allowed:false,requiresRegion:true,registryTrust:86,termsStatus:"license-required"}),
- receipt:C.contract({id:"ECHTPREIS receipt",merchant:"*",sourceType:"first_party_receipt",allowed:true,requiresStore:false,requiresRegion:false,registryTrust:92,termsStatus:"first-party"}),
- shelf:C.contract({id:"ECHTPREIS shelf",merchant:"*",sourceType:"first_party_shelf",allowed:true,requiresStore:true,registryTrust:90,termsStatus:"first-party"}),
+ receipt:C.contract({id:"SPARKORB receipt",merchant:"*",sourceType:"first_party_receipt",allowed:true,requiresStore:false,requiresRegion:false,registryTrust:92,termsStatus:"first-party"}),
+ shelf:C.contract({id:"SPARKORB shelf",merchant:"*",sourceType:"first_party_shelf",allowed:true,requiresStore:true,registryTrust:90,termsStatus:"first-party"}),
  reweDailyDataset:C.contract({id:"REWE daily open dataset",merchant:"REWE",sourceType:"aggregated_open_data",allowed:true,requiresStore:true,registryTrust:76,termsStatus:"approved-open-data",license:"Apache-2.0"}),
  govdataProduce:C.contract({id:"GovData BLE produce prices",merchant:"*",sourceType:"public_market_data",allowed:false,requiresStore:false,requiresRegion:false,registryTrust:88,termsStatus:"context-only"}),
  poiDataStores:C.contract({id:"POIData supermarket locations",merchant:"*",sourceType:"store_catalog",allowed:false,requiresStore:false,requiresRegion:false,registryTrust:84,termsStatus:"license-required"}),
