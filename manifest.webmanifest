@@ -1,6 +1,6 @@
 {
-  "name": "ECHTPREIS",
-  "short_name": "ECHTPREIS",
+  "name": "SPARKORB",
+  "short_name": "SPARKORB",
   "description": "Versteh, was du bezahlst. Bons analysieren, Einkaufsverhalten verstehen und Preise vergleichen.",
   "lang": "de-DE",
   "start_url": "./",
