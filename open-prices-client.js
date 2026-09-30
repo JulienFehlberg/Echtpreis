@@ -14,7 +14,7 @@ function params(input={}){
 function nextPage(result={}){const page=Number(result.page||1),pages=Number(result.pages||1);return page<pages?page+1:null}
 async function fetchPage(input={},fetchImpl=fetch){
  const url=BASE+"?"+params(input).toString(),started=Date.now();
- const res=await Net.request(url,{headers:{"Accept":"application/json","User-Agent":"ECHTPREIS/1.0 price-research"}},{fetchImpl,timeoutMs:input.timeoutMs||12000,retries:input.retries??2,baseDelayMs:input.baseDelayMs||400});
+ const res=await Net.request(url,{headers:{"Accept":"application/json","User-Agent":"SPARKORB/1.0 price-research"}},{fetchImpl,timeoutMs:input.timeoutMs||12000,retries:input.retries??2,baseDelayMs:input.baseDelayMs||400});
  if(!res.ok)throw new Error("open-prices-http-"+res.status);
  const payload=await res.json(),adapted=Provider.adapt(payload,{fetchedAt:new Date().toISOString(),sourceUrl:url});
  return{url,httpStatus:res.status,durationMs:Date.now()-started,page:Number(payload.page||input.page||1),pages:Number(payload.pages||1),size:Number(payload.size||0),total:Number(payload.total||0),...adapted};
