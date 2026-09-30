@@ -40,9 +40,11 @@ const ctx={today,lat:52.54,lon:13.20,distanceKm:(a,b,c,d)=>Math.hypot((a-c)*70,(
 }
 {
  const q=E.basketQuality([{price:1,confidenceScore:90},{price:2,confidenceScore:70},null]);
- assert.strictEqual(q.total,2);
+ assert.strictEqual(q.total,3);
  assert.strictEqual(q.known,2);
- assert.strictEqual(q.verifiedCoverage,.5);
+ assert.strictEqual(q.unknown,1);
+ assert(Math.abs(q.coverage-2/3)<.001);
+ assert.strictEqual(q.verifiedCoverage,0);
 }
 console.log("price-engine-v3: ok");
 {
