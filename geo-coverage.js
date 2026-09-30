@@ -1,0 +1,3 @@
+"use strict";
+async function summarize(pool,source="Open Prices"){if(!pool)throw new Error("database-required");const q=await pool.query(`SELECT COUNT(*)::int total,COUNT(*) FILTER(WHERE scan_count>0)::int scanned,COUNT(*) FILTER(WHERE parent_key IS NOT NULL)::int adaptive,COUNT(*) FILTER(WHERE last_received>0)::int productive,COALESCE(SUM(last_received),0)::int received,COALESCE(SUM(last_accepted),0)::int accepted,MIN(last_scanned_at) FILTER(WHERE scan_count>0) AS "oldestScan",MAX(last_scanned_at) AS "newestScan" FROM price_geo_discovery_cells WHERE source_id=$1`,[source]);const x=q.rows[0]||{};return{...x,coverage:x.total?x.scanned/x.total:0,productiveRate:x.scanned?x.productive/x.scanned:0}}
+module.exports={summarize};
