@@ -9,6 +9,10 @@ function challenge({missionId,productId,storeId,ttlSeconds=180}={}){
 function eligible(c={},now=Date.now()){
  if(!ALLOWED_CAPTURE.has(c.captureMode))return{ok:false,reason:"live-camera-required"};
  if(!c.challengeId||!c.challengeNonce)return{ok:false,reason:"capture-challenge-required"};
+ if(c.expectedChallengeId&&String(c.challengeId)!==String(c.expectedChallengeId))return{ok:false,reason:"capture-challenge-mismatch"};
+ if(c.expectedChallengeNonce&&String(c.challengeNonce)!==String(c.expectedChallengeNonce))return{ok:false,reason:"capture-nonce-mismatch"};
+ if(c.expectedProductId&&String(c.productId||"")!==String(c.expectedProductId))return{ok:false,reason:"capture-product-mismatch"};
+ if(c.expectedStoreId&&String(c.storeId||"")!==String(c.expectedStoreId))return{ok:false,reason:"capture-store-mismatch"};
  if(!c.challengeExpiresAt||new Date(c.challengeExpiresAt).getTime()<now)return{ok:false,reason:"capture-challenge-expired"};
  if(c.challengeUsed===true)return{ok:false,reason:"capture-challenge-used"};
  return{ok:true};
