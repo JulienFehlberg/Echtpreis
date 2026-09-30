@@ -31,4 +31,14 @@ function learningActions(s,baseline){
  if(d.detected)actions.push("source_drift_review");
  return{reliability:rel,drift:d,actions};
 }
-module.exports={pctError,signedBias,median,summarize,reliability,drift,learningActions};
+
+function confidenceCalibration(rows=[]){
+ const bins=[{min:0,max:59},{min:60,max:69},{min:70,max:79},{min:80,max:89},{min:90,max:100}];
+ return bins.map(b=>{const xs=rows.filter(x=>Number(x.confidence)>=b.min&&Number(x.confidence)<=b.max&&Number(x.actual)>0&&Number(x.predicted)>0);if(!xs.length)return{...b,samples:0,medianApe:null,within5pct:null,rangeHitRate:null};
+ const s=summarize(xs);return{...b,samples:s.sampleCount,medianApe:s.medianApe,within5pct:s.within5pct,rangeHitRate:s.rangeHitRate}})
+}
+function calibrationHealth(rows=[]){const bs=confidenceCalibration(rows).filter(x=>x.samples>=10);if(bs.length<2)return{status:"insufficient-data",bins:bs};
+ let violations=0;for(let i=1;i<bs.length;i++){if(bs[i].medianApe>bs[i-1].medianApe+1)violations++;if(bs[i].within5pct<bs[i-1].within5pct-.08)violations++}
+ return{status:violations===0?"healthy":violations<=1?"watch":"miscalibrated",violations,bins:bs};
+}
+module.exports={pctError,signedBias,median,summarize,reliability,drift,learningActions,confidenceCalibration,calibrationHealth};
