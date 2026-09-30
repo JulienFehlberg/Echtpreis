@@ -1,0 +1,5 @@
+const assert=require("assert"),C=require("../current-price-connector"),R=require("../current-price-connectors"),B=require("../current-price-benchmark");
+let x=C.ingest(R.contracts.receipt,[{merchant:"EDEKA",product:"Milch 1L",price:"1,19",observedAt:"2026-09-30",proof:"receipt:1"}]);assert.strictEqual(x.accepted.length,1);assert.strictEqual(x.accepted[0].price,1.19);
+let blocked=C.ingest(R.contracts.rewe,[{product:"Milch",price:1.09,proof:"x"}]);assert.strictEqual(blocked.accepted.length,0);assert.strictEqual(blocked.rejected[0].reasons[0],"connector-not-approved");
+let m=B.matrix([{product:"Hackfleisch",merchant:"EDEKA",price:3.99,state:"observed"}],["Hackfleisch"],["EDEKA","Lidl"]);assert.strictEqual(m.totalCells,2);assert.strictEqual(m.knownCells,1);assert.strictEqual(m.currentCoverage,.5);assert.strictEqual(m.missing[0].merchant,"Lidl");
+console.log("current-price-connectors-benchmark: ok");
