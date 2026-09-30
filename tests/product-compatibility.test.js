@@ -1,5 +1,8 @@
 const assert=require("assert"),C=require("../product-compatibility"),U=require("../unit-price"),R=require("../current-price-resolver");
 assert.strictEqual(C.compatible("Rinderhack 500 g","Schweinehack 500 g").ok,false);
+assert.strictEqual(C.compatible("Rinderhack 500 g","Veganes Hack 500 g").ok,false);
+assert.strictEqual(C.compatible("Veganes Hack 500 g","Rinderhack 500 g").ok,false);
+assert.strictEqual(C.compatible("Laktosefreie Milch 1L","Milch 1L").ok,false);
 assert.strictEqual(C.compatible("Coca Cola Zero 1,5 L","Coca Cola Original 1,5 L").ok,true===false?true:false);
 assert.strictEqual(C.compatible("Milch 1,5% 1L","Vollmilch 3,5% 1L").ok,false);
 let p=U.parse("6 x 1,5 L");assert.strictEqual(p.amount,9000);assert.strictEqual(p.unit,"ml");
