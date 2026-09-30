@@ -1,6 +1,6 @@
 (function(){
 "use strict";
-const VERSION="3.3.0";
+const VERSION="3.4.0";
 const DAY=86400000;
 const SOURCE_BASE={official:96,receipt:92,shelf:90,openprices:78,community:64,reference:20};
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -29,11 +29,7 @@ function locationScore(row,ctx){
   }
   return .68;
 }
-function sourceScore(row){
-  const base=SOURCE_BASE[row.kind]??50;
-  const declared=Number(row.trust);
-  return clamp(Number.isFinite(declared)&&declared>0?(base*.65+declared*.35):base,0,100);
-}
+function sourceScore(row){\n  const base=SOURCE_BASE[row.kind]??50;\n  const governed=Number(row.registryTrust);\n  return clamp(Number.isFinite(governed)&&governed>0?(base*.55+governed*.45):base,0,100);\n}
 function independentProofs(rows){
   return new Set(rows.map(r=>r.proof||((r.kind||"unknown")+":"+(r.source||""))).filter(Boolean)).size;
 }
@@ -66,7 +62,7 @@ function rankObservations(rows,ctx={}){
 }
 function classifyPrice(x){if(!x||!(Number(x.price)>0))return "unknown";const s=Number(x.confidenceScore||0);if((x.kind==="official"||x.kind==="receipt"||x.kind==="shelf")&&s>=78)return "verified";if(s>=62)return "observed";return "estimated"}
 function basketQuality(items){
- const xs=(items||[]).filter(Boolean),states=xs.map(x=>classifyPrice(x)),known=xs.filter((x,i)=>states[i]!=="unknown"),verified=xs.filter((x,i)=>states[i]==="verified"),estimated=xs.filter((x,i)=>states[i]==="estimated");
+ const xs=Array.isArray(items)?items:[],states=xs.map(x=>classifyPrice(x)),known=xs.filter((x,i)=>states[i]!=="unknown"),verified=xs.filter((x,i)=>states[i]==="verified"),estimated=xs.filter((x,i)=>states[i]==="estimated");
  const coverage=xs.length?known.length/xs.length:0,verifiedCoverage=xs.length?verified.length/xs.length:0,estimatedShare=xs.length?estimated.length/xs.length:0;
  const avg=known.length?known.reduce((s,x)=>s+Number(x.confidenceScore||0),0)/known.length:0;
  const label=coverage>=.95&&verifiedCoverage>=.8&&avg>=80?"sehr hoch":coverage>=.85&&verifiedCoverage>=.6?"hoch":coverage>=.65?"mittel":"niedrig";
