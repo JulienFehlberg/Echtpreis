@@ -6,7 +6,7 @@ assert.strictEqual(R.contracts.openPrices.allowed,true);assert.strictEqual(R.con
 const radar=R.status();for(const k of ["preiszeiger","gkl","aggregatorAktionspreis","globus","hit","tegut","famila","combi","norma","dm","rossmann","mueller","alnatura","bioCompany","budni","denns","getraenkeHoffmann"])assert(radar.some(x=>x.key===k),k+" missing from source radar");
 const row={merchant:"EDEKA",product:"Nutella",gtin:"3017620422003",storeId:"s1",price:3.99,observedAt:"2026-09-30",proof:"receipt:multi",priceType:"multi_buy",minQuantity:"3"};
 const multi=C.ingest(R.contracts.receipt,[row]);assert.strictEqual(multi.accepted.length,1);assert.strictEqual(multi.accepted[0].minQuantity,3);
-const observation=I.observation(multi.accepted[0],"batch",{source:"ECHTPREIS receipt"}),ctx={today:"2026-09-30",storeId:"s1"},query={name:"Nutella",gtin:row.gtin};
+const observation=I.observation(multi.accepted[0],"batch",{source:"SPARKORB receipt"}),ctx={today:"2026-09-30",storeId:"s1"},query={name:"Nutella",gtin:row.gtin};
 assert.strictEqual(observation.minQuantity,3);
 assert.strictEqual(Resolver.resolveMerchant(query,"EDEKA",[observation],{...ctx,quantity:2}).state,"unknown");
 assert.strictEqual(Resolver.resolveMerchant(query,"EDEKA",[observation],{...ctx,quantity:3}).price,3.99);
