@@ -1,0 +1,4 @@
+"use strict";
+function summarize(results=[]){const total=results.length,known=results.filter(x=>x&&x.price>0),verified=known.filter(x=>x.state==="verified"),unknown=results.filter(x=>!x||x.state==="unknown"),fresh=known.filter(x=>{if(!x.observedAt)return false;return (Date.now()-new Date(x.observedAt).getTime())/864e5<=1});return{total,known:known.length,unknown:unknown.length,verified:verified.length,currentCoverage:total?known.length/total:0,verifiedCoverage:total?verified.length/total:0,fresh24hCoverage:total?fresh.length/total:0,missingMerchants:unknown.map(x=>x?.merchant).filter(Boolean)}}
+function ready(s,gate={}){const min=gate.minCurrentCoverage??.8,minVerified=gate.minVerifiedCoverage??.4;const reasons=[];if(s.currentCoverage<min)reasons.push("current-coverage");if(s.verifiedCoverage<minVerified)reasons.push("verified-coverage");return{ready:!reasons.length,reasons}}
+module.exports={summarize,ready};
