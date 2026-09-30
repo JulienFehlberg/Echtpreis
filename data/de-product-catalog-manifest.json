@@ -1,0 +1,336 @@
+{
+  "version": 1,
+  "country": "DE",
+  "purpose": "identity",
+  "truthEligible": false,
+  "generatedAt": "2026-09-30T17:14:17.637Z",
+  "source": {
+    "name": "Open Food Facts",
+    "url": "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz",
+    "etag": "\"8d6629ac4d18f33e1ddec4cd9856f19d-77\"",
+    "lastModified": "Wed, 30 Sep 2026 12:09:18 GMT",
+    "license": "ODbL-1.0",
+    "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+    "productUrlPrefix": "https://world.openfoodfacts.org/product/"
+  },
+  "snapshot": {
+    "file": "de-product-catalog.json.gz.base64",
+    "encoding": "base64",
+    "compression": "gzip",
+    "products": 6400,
+    "jsonBytes": 7310571,
+    "gzipBytes": 650012,
+    "base64Bytes": 866684,
+    "sha256": "6940f2b4b6298784098e4b5a40c43f91c742daac8ede779ae1d225ea8c7ebdbc",
+    "gzipSha256": "49cb671f8a2d62d0146b7f0c90732842c51127cb2f3ff8e9b1b3fe4ac6f5cac6"
+  },
+  "selection": {
+    "target": 6400,
+    "minPerFamily": 60,
+    "includeOther": false,
+    "taxonomySource": "https://static.openfoodfacts.org/data/taxonomies/categories.full.json",
+    "scannedEligible": 31524,
+    "scannedClassified": 6499
+  },
+  "coverage": {
+    "total": 6400,
+    "eligible": 6400,
+    "excluded": 0,
+    "classified": 6400,
+    "unclassified": 0,
+    "representedFamilies": 38,
+    "familyCount": 38,
+    "missingFamilies": [],
+    "counts": {
+      "milk_fresh": 27,
+      "milk_uht": 44,
+      "milk": 61,
+      "butter": 74,
+      "eggs": 66,
+      "rolls": 45,
+      "bread": 373,
+      "quark": 76,
+      "yogurt": 259,
+      "cheese": 1241,
+      "pasta": 487,
+      "rice": 154,
+      "flour": 113,
+      "sugar": 70,
+      "cooking_oil": 206,
+      "oats": 37,
+      "muesli": 183,
+      "water": 26,
+      "coffee": 108,
+      "tea": 138,
+      "juice": 109,
+      "potatoes": 46,
+      "onions": 26,
+      "tomato_products": 187,
+      "tomatoes": 95,
+      "cucumbers": 14,
+      "apples": 79,
+      "bananas": 50,
+      "tofu": 23,
+      "meat": 1312,
+      "frozen_vegetables": 54,
+      "frozen_fish": 22,
+      "frozen_meals": 128,
+      "legumes": 229,
+      "plant_drinks": 66,
+      "cream": 100,
+      "salt": 55,
+      "household": 17
+    },
+    "families": [
+      {
+        "id": "milk_fresh",
+        "label": "Frischmilch",
+        "count": 27
+      },
+      {
+        "id": "milk_uht",
+        "label": "Haltbare Milch",
+        "count": 44
+      },
+      {
+        "id": "milk",
+        "label": "Milch",
+        "count": 61
+      },
+      {
+        "id": "butter",
+        "label": "Butter",
+        "count": 74
+      },
+      {
+        "id": "eggs",
+        "label": "Eier",
+        "count": 66
+      },
+      {
+        "id": "rolls",
+        "label": "Brötchen",
+        "count": 45
+      },
+      {
+        "id": "bread",
+        "label": "Brot",
+        "count": 373
+      },
+      {
+        "id": "quark",
+        "label": "Quark",
+        "count": 76
+      },
+      {
+        "id": "yogurt",
+        "label": "Joghurt",
+        "count": 259
+      },
+      {
+        "id": "cheese",
+        "label": "Käse",
+        "count": 1241
+      },
+      {
+        "id": "pasta",
+        "label": "Nudeln",
+        "count": 487
+      },
+      {
+        "id": "rice",
+        "label": "Reis",
+        "count": 154
+      },
+      {
+        "id": "flour",
+        "label": "Mehl",
+        "count": 113
+      },
+      {
+        "id": "sugar",
+        "label": "Zucker",
+        "count": 70
+      },
+      {
+        "id": "cooking_oil",
+        "label": "Speiseöl",
+        "count": 206
+      },
+      {
+        "id": "oats",
+        "label": "Haferflocken",
+        "count": 37
+      },
+      {
+        "id": "muesli",
+        "label": "Müsli und Frühstücksflocken",
+        "count": 183
+      },
+      {
+        "id": "water",
+        "label": "Wasser",
+        "count": 26
+      },
+      {
+        "id": "coffee",
+        "label": "Kaffee",
+        "count": 108
+      },
+      {
+        "id": "tea",
+        "label": "Tee",
+        "count": 138
+      },
+      {
+        "id": "juice",
+        "label": "Saft",
+        "count": 109
+      },
+      {
+        "id": "potatoes",
+        "label": "Kartoffeln",
+        "count": 46
+      },
+      {
+        "id": "onions",
+        "label": "Zwiebeln",
+        "count": 26
+      },
+      {
+        "id": "tomato_products",
+        "label": "Tomaten zum Kochen",
+        "count": 187
+      },
+      {
+        "id": "tomatoes",
+        "label": "Tomaten",
+        "count": 95
+      },
+      {
+        "id": "cucumbers",
+        "label": "Gurken",
+        "count": 14
+      },
+      {
+        "id": "apples",
+        "label": "Äpfel",
+        "count": 79
+      },
+      {
+        "id": "bananas",
+        "label": "Bananen",
+        "count": 50
+      },
+      {
+        "id": "tofu",
+        "label": "Tofu",
+        "count": 23
+      },
+      {
+        "id": "meat",
+        "label": "Fleisch",
+        "count": 1312
+      },
+      {
+        "id": "frozen_vegetables",
+        "label": "Tiefkühlgemüse",
+        "count": 54
+      },
+      {
+        "id": "frozen_fish",
+        "label": "Tiefkühlfisch",
+        "count": 22
+      },
+      {
+        "id": "frozen_meals",
+        "label": "Tiefkühlgerichte",
+        "count": 128
+      },
+      {
+        "id": "legumes",
+        "label": "Hülsenfrüchte",
+        "count": 229
+      },
+      {
+        "id": "plant_drinks",
+        "label": "Pflanzendrinks",
+        "count": 66
+      },
+      {
+        "id": "cream",
+        "label": "Sahne",
+        "count": 100
+      },
+      {
+        "id": "salt",
+        "label": "Salz",
+        "count": 55
+      },
+      {
+        "id": "household",
+        "label": "Grundhaushalt",
+        "count": 17
+      }
+    ]
+  },
+  "scans": [
+    {
+      "rowsRead": 1269024,
+      "bytesRead": 314606607,
+      "durationMs": 115759,
+      "reason": "byte-budget",
+      "sourceETag": "\"8d6629ac4d18f33e1ddec4cd9856f19d-77\"",
+      "sourceDate": "Wed, 30 Sep 2026 12:09:18 GMT"
+    },
+    {
+      "startRows": 1269024,
+      "rowsRead": 1573166,
+      "bytesRead": 387313303,
+      "durationMs": 150529,
+      "reason": "selection-goal",
+      "sourceETag": "\"8d6629ac4d18f33e1ddec4cd9856f19d-77\"",
+      "sourceDate": "Wed, 30 Sep 2026 12:09:18 GMT",
+      "rejected": {
+        "outside-germany-market": 272156,
+        "product-known-pack-required": 11060,
+        "product-name-required": 1479,
+        "product-valid-gtin-required": 311,
+        "catalog-readable-product-name-required": 3
+      },
+      "error": null
+    },
+    {
+      "startRows": 1573166,
+      "rowsRead": 1581661,
+      "bytesRead": 389844591,
+      "durationMs": 137102,
+      "reason": "selection-goal",
+      "sourceETag": "\"8d6629ac4d18f33e1ddec4cd9856f19d-77\"",
+      "sourceDate": "Wed, 30 Sep 2026 12:09:18 GMT",
+      "rejected": {
+        "outside-germany-market": 7192,
+        "product-valid-gtin-required": 19,
+        "product-known-pack-required": 675,
+        "product-name-required": 63
+      },
+      "error": null
+    },
+    {
+      "startRows": 1581661,
+      "rowsRead": 1615127,
+      "bytesRead": 396611471,
+      "durationMs": 139451,
+      "reason": "selection-goal",
+      "sourceETag": "\"8d6629ac4d18f33e1ddec4cd9856f19d-77\"",
+      "sourceDate": "Wed, 30 Sep 2026 12:09:18 GMT",
+      "rejected": {
+        "outside-germany-market": 28030,
+        "product-known-pack-required": 2649,
+        "product-name-required": 275,
+        "product-valid-gtin-required": 21
+      },
+      "error": null
+    }
+  ]
+}

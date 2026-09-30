@@ -1,0 +1,36 @@
+"use strict";
+const fs=require("fs"),path=require("path"),crypto=require("crypto"),{gzipSync}=require("zlib");
+const Client=require("../open-food-facts-catalog-client"),Catalog=require("../canonical-product-catalog-import"),Basket=require("../german-basket-priorities");
+function argumentsFor(argv){const opts={target:6000,budgetMiB:700,maxDurationMs:450000,maxSegments:5,resumeFile:null,workDir:path.resolve(__dirname,"..","..","catalog-build")};for(let i=0;i<argv.length;i+=2){const key=argv[i],value=argv[i+1];if(value==null)throw new Error("Missing value for "+key);if(key==="--resume-file")opts.resumeFile=path.resolve(value);else if(key==="--work-dir")opts.workDir=path.resolve(value);else if(key==="--target")opts.target=Number(value);else if(key==="--budget-mib")opts.budgetMiB=Number(value);else if(key==="--max-duration-ms")opts.maxDurationMs=Number(value);else if(key==="--max-segments")opts.maxSegments=Number(value);else throw new Error("Unknown option "+key)}if(!Number.isSafeInteger(opts.target)||opts.target<5000||opts.target>10000)throw new Error("Target must be between 5000 and 10000");if(!Number.isSafeInteger(opts.budgetMiB)||opts.budgetMiB<1||opts.budgetMiB>1536)throw new Error("Compressed byte budget must be between 1 and 1536 MiB");if(!Number.isSafeInteger(opts.maxDurationMs)||opts.maxDurationMs<1000||opts.maxDurationMs>900000)throw new Error("Duration budget must be between 1000 and 900000 ms");if(!Number.isSafeInteger(opts.maxSegments)||opts.maxSegments<1||opts.maxSegments>10)throw new Error("Segment count must be between 1 and 10");return opts;}
+function hash(bytes){return crypto.createHash("sha256").update(bytes).digest("hex")}
+function obviousPlaceholder(row={}){
+ const code=String(row.code||"").trim(),name=String(row.product_name_de||row.product_name||"").normalize("NFKC").trim();
+ // These are recognizable demonstration barcodes, rather than all retailer-local EANs.
+ const dummyCode=/^0*(\d)\1{6,12}\d$/.test(code)||["12345670","123456789012","1234567890128","0123456789012"].includes(code);
+ const dummyName=/^(?:unknown|unbekannt|n\/a|null|undefined|produkt|product|produit)$/iu.test(name)||/(?:^|[\s:;,.!?()\[\]{}_/–—-])(?:test|testprodukt|testproduct|dummy|fake|example|exemple|beispielprodukt|platzhalter)(?=$|[\s:;,.!?()\[\]{}_/–—-])/iu.test(name);
+ return dummyCode||dummyName;
+}
+function usable(row){return Catalog.productCandidate(row).ok&&Basket.eligible(row)&&!obviousPlaceholder(row)}
+async function main(){
+ const opts=argumentsFor(process.argv.slice(2)),all=new Map(),scans=[];let cursor=null,sourceETag=null,sourceDate=null,classified=0;
+ fs.mkdirSync(opts.workDir,{recursive:true});
+ if(opts.resumeFile){const prior=JSON.parse(fs.readFileSync(opts.resumeFile,"utf8"));if(prior.sourceUrl!==Client.SOURCE_URL)throw new Error("Resume file is not the official Open Food Facts export");cursor=prior.cursor||null;sourceETag=prior.sourceETag||null;sourceDate=prior.sourceDate||null;for(const row of prior.products||[])if(usable(row)&&!all.has(String(row.code))){all.set(String(row.code),row);if(Basket.family(row))classified++}if(Array.isArray(prior.scans))scans.push(...prior.scans);else scans.push({rowsRead:prior.rowsRead,bytesRead:prior.bytesRead,durationMs:prior.durationMs,reason:prior.reason,sourceETag,sourceDate});}
+ console.log(JSON.stringify({stage:"start",eligible:all.size,classified,cursorRows:cursor?.rowsRead||0,target:opts.target}));
+ for(let segment=0;classified<opts.target&&segment<opts.maxSegments;segment++){
+  const startRows=cursor?.rowsRead||0;
+  const scan=await Client.fetchCatalog({limit:30000,maxBytes:opts.budgetMiB*1024*1024,maxDurationMs:opts.maxDurationMs,cursor,onProgress:value=>console.log(JSON.stringify({stage:"scan",segment:segment+1,...value,totalEligible:all.size,totalClassified:classified,target:opts.target})),stopWhen:row=>{if(usable(row)&&!all.has(String(row.code))){all.set(String(row.code),row);if(Basket.family(row))classified++}return classified>=opts.target}});
+  sourceETag=scan.sourceETag;sourceDate=scan.sourceDate;cursor=scan.cursor;scans.push({startRows,rowsRead:scan.rowsRead,bytesRead:scan.bytesRead,durationMs:scan.durationMs,reason:scan.reason,sourceETag,sourceDate,rejected:scan.rejected,error:scan.error});
+  const progress={sourceUrl:Client.SOURCE_URL,sourceETag,sourceDate,fetchedAt:scan.fetchedAt,products:[...all.values()],cursor,scans};fs.writeFileSync(path.join(opts.workDir,"catalog-progress.json"),JSON.stringify(progress));
+  console.log(JSON.stringify({stage:"checkpoint",segment:segment+1,eligible:all.size,classified,rowsRead:scan.rowsRead,reason:scan.reason,error:scan.error}));
+  if(classified>=opts.target)break;if(scan.sourceExhausted)throw new Error("Official export exhausted before the standard basket goal");if(!cursor||cursor.rowsRead<=startRows)throw new Error("Catalog byte/time budget did not advance the cursor; increase the bounded budget");
+ }
+ if(classified<opts.target)throw new Error("Catalog goal not reached; resume from "+path.join(opts.workDir,"catalog-progress.json"));
+ const chosen=Basket.select([...all.values()],{limit:opts.target,minPerFamily:60,includeOther:false});if(chosen.length<opts.target||chosen.some(row=>!usable(row)||!Basket.family(row)))throw new Error("Snapshot selection failed identity or basket gates");
+ const generatedAt=new Date().toISOString(),products=chosen.map(row=>({...row,sourceUrl:"https://world.openfoodfacts.org/product/"+row.code})),snapshot={version:1,country:"DE",purpose:"identity",truthEligible:false,sourceUrl:Client.SOURCE_URL,sourceETag,sourceDate,generatedAt,products};
+ const json=Buffer.from(JSON.stringify(snapshot)),compressed=gzipSync(json,{level:9}),base64=compressed.toString("base64"),dataDir=path.resolve(__dirname,"..","data"),filename="de-product-catalog.json.gz.base64";fs.mkdirSync(dataDir,{recursive:true});
+ const manifest={version:1,country:"DE",purpose:"identity",truthEligible:false,generatedAt,source:{name:"Open Food Facts",url:Client.SOURCE_URL,etag:sourceETag,lastModified:sourceDate,license:"ODbL-1.0",licenseUrl:"https://opendatacommons.org/licenses/odbl/1-0/",productUrlPrefix:"https://world.openfoodfacts.org/product/"},snapshot:{file:filename,encoding:"base64",compression:"gzip",products:products.length,jsonBytes:json.length,gzipBytes:compressed.length,base64Bytes:Buffer.byteLength(base64),sha256:hash(json),gzipSha256:hash(compressed)},selection:{target:opts.target,minPerFamily:60,includeOther:false,taxonomySource:Basket.TAXONOMY_SOURCE,scannedEligible:all.size,scannedClassified:classified},coverage:Basket.coverage(products),scans};
+ fs.writeFileSync(path.join(dataDir,filename),base64+"\n");fs.writeFileSync(path.join(dataDir,"de-product-catalog-manifest.json"),JSON.stringify(manifest,null,2)+"\n");fs.writeFileSync(path.join(opts.workDir,"de-product-catalog.json"),json);
+ console.log(JSON.stringify({stage:"complete",products:products.length,families:manifest.coverage.representedFamilies,missingFamilies:manifest.coverage.missingFamilies,jsonBytes:json.length,gzipBytes:compressed.length,sha256:manifest.snapshot.sha256,snapshot:path.join(dataDir,filename)}));
+}
+if(require.main===module)main().catch(error=>{console.error(error);process.exitCode=1});
+module.exports={argumentsFor,obviousPlaceholder,usable};
