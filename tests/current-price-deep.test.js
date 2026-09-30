@@ -63,13 +63,13 @@ const resolve=(rows,options={})=>R.resolveMerchant(query,"REWE",rows,{...ctx,...
 
 // First-party uploads remain observed until identity and proof are server-verified.
 {
- const a={...base,gtin:"4000000000013",source:"ECHTPREIS receipt",sourceType:"receipt",proof:"receipt-a"},b={...a,proof:"receipt-b"};
+ const a={...base,gtin:"4000000000013",source:"SPARKORB receipt",sourceType:"receipt",proof:"receipt-a"},b={...a,proof:"receipt-b"};
  for(const flags of [{},{identityVerified:true},{status:"verified",identityVerified:true},{status:"observed",identityVerified:true,proofVerified:true}]){
   const result=resolve([{...a,...flags},{...b,...flags}]);assert.strictEqual(result.state,"observed");assert.strictEqual(result.truth.state,"observed");
  }
  const flags={status:"verified",identityVerified:true,proofVerified:true},trusted=resolve([{...a,...flags},{...b,...flags}]);assert.strictEqual(trusted.state,"verified");assert.strictEqual(trusted.truth.verifiedEvidence,2);
  const mislabeled=resolve([{...a,sourceType:"official_retailer"},{...b,sourceType:"official_retailer"}]);assert.strictEqual(mislabeled.state,"observed","the registry identifies first-party data despite a misleading label");
- const shelf={...a,source:"ECHTPREIS shelf",sourceType:"shelf"};assert.strictEqual(resolve([shelf,{...shelf,proof:"shelf-b"}]).state,"observed");
+ const shelf={...a,source:"SPARKORB shelf",sourceType:"shelf"};assert.strictEqual(resolve([shelf,{...shelf,proof:"shelf-b"}]).state,"observed");
  const open={...a,source:"Open Prices",sourceType:"open_data"};assert.strictEqual(resolve([open,{...open,proof:"open-b"}]).state,"verified","established open-data consensus remains available");
 }
 
