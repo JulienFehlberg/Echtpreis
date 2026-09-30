@@ -41,6 +41,7 @@ const CanonicalGapRefreshTargets=require("./canonical-gap-refresh-targets");
 const RefreshTargetObservability=require("./refresh-target-observability");
 const RefreshTargetFailureStatus=require("./refresh-target-failure-status");
 const GeoFailureStatus=require("./geo-failure-status");
+const SourceSemantics=require("./source-semantics");
 const pool=process.env.DATABASE_URL?new Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DATABASE_URL.includes("localhost")?false:{rejectUnauthorized:false}}):null;
 const refreshStates={};let latestResearchPlan={},latestTargetSummary={};let refreshTimer=null;
 const PORT=process.env.PORT||10000,DB_FILE=process.env.ECHTPREIS_DB_FILE||path.join("/tmp","echtpreis-db.json");
@@ -104,6 +105,7 @@ async function seedMerchants(){if(!pool)return;for(const [name,norm,category] of
 async function handle(req,res){
  if(req.method==="OPTIONS")return send(res,204,{});
  if(req.method==="GET"&&req.url==="/v1/admin/price-sources/status"){if(!pool)return send(res,503,{error:"database-unavailable"});try{const states=await RefreshStateStore.loadAll(pool);return send(res,200,{sources:PriceSourceStatus.view(states)})}catch(e){return send(res,500,{error:"source-status-failed"})}}
+ if(req.method==="GET"&&req.url==="/v1/admin/price-sources/semantics")return send(res,200,{sources:SourceSemantics.status()});
  if(req.method==="GET"&&req.url==="/v1/admin/price-geo/coverage"){if(!pool)return send(res,503,{error:"database-unavailable"});try{return send(res,200,await GeoCoverage.summarize(pool))}catch(e){return send(res,500,{error:"geo-coverage-failed"})}}
  if(req.method==="GET"&&req.url==="/v1/admin/price-geo/failures"){if(!pool)return send(res,503,{error:"database-unavailable"});try{return send(res,200,{cells:await GeoFailureStatus.view(pool)})}catch(e){return send(res,500,{error:"geo-failure-status-failed"})}}
  if(req.method==="GET"&&req.url==="/v1/admin/price-research/plan")return send(res,200,{budget:Number(process.env.PRICE_RESEARCH_BUDGET||500),sources:ResearchPlanStatus.view(latestResearchPlan)});
