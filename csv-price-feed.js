@@ -1,0 +1,5 @@
+"use strict";
+function split(line){const out=[];let cur="",q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'&&line[i+1]==='"'){cur+='"';i++;continue}if(ch==='"'){q=!q;continue}if(ch===","&&!q){out.push(cur);cur="";continue}cur+=ch}out.push(cur);return out}
+function parse(text=""){const lines=String(text).replace(/^\uFEFF/,"").split(/\r?\n/).filter(Boolean);if(!lines.length)return[];const h=split(lines[0]).map(x=>x.trim().toLowerCase());return lines.slice(1).map(line=>{const v=split(line),o={};h.forEach((k,i)=>o[k]=v[i]??"");return o})}
+function rewe(rows=[],meta={}){return rows.map(x=>({name:x.name,brand:x.brand&&x.brand!=="None"?x.brand:null,ean:x.ean,price:Number(String(x.price).replace(",",".")),pack:x.grammage||null,category:x.category||null,priceType:String(x.sale).toLowerCase()==="true"?"promotion":"regular",region:meta.region||null,storeId:meta.storeId||null,externalLocationId:meta.externalLocationId||null,date:meta.date||new Date().toISOString().slice(0,10),sourceUrl:meta.sourceUrl||null})).filter(x=>x.name&&x.price>0)}
+module.exports={split,parse,rewe};
