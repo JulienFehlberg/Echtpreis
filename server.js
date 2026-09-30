@@ -168,4 +168,4 @@ async function refreshInternetPrices(){if(!pool)return;const manual=String(proce
 function startRefreshLoop(){if(refreshTimer)return;refreshInternetPrices().catch(e=>console.error("Initial price refresh failed",e));refreshTimer=setInterval(()=>refreshInternetPrices().catch(e=>console.error("Price refresh failed",e)),60000);if(refreshTimer.unref)refreshTimer.unref()}
 async function start(){try{await initDb();await seedMerchants();startRefreshLoop();server.listen(PORT,()=>console.log("ECHTPREIS Data API 5.0 on "+PORT))}catch(e){console.error("DB init failed",e);server.listen(PORT,()=>console.log("ECHTPREIS Data API 5.0 fallback on "+PORT))}}
 if(require.main===module)start();
-module.exports={server,start,handle,refreshInternetPrices,startRefreshLoop,refreshStates,receiptHash,receiptCodeHash,rewardScore,validObs,validReceiptPayload,validFeedback,clean};
+module.exports={server,start,initDb,closeDb:async()=>{if(pool)await pool.end()},handle,refreshInternetPrices,startRefreshLoop,refreshStates,receiptHash,receiptCodeHash,rewardScore,validObs,validReceiptPayload,validFeedback,clean};
