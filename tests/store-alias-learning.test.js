@@ -1,0 +1,5 @@
+const assert=require("assert"),L=require("../store-alias-learning");
+let x=L.summarize([{storeId:"A",contributorId:"u1",receiptId:"r1"}]);assert.strictEqual(x.state,"learning");
+x=L.summarize([{storeId:"A",contributorId:"u1",receiptId:"r1"},{storeId:"A",contributorId:"u1",receiptId:"r2"},{storeId:"A",contributorId:"u2",receiptId:"r3"}]);assert.strictEqual(x.state,"trusted");assert.strictEqual(x.storeId,"A");
+x=L.summarize([{storeId:"A",contributorId:"u1",receiptId:"r1"},{storeId:"A",contributorId:"u2",receiptId:"r2"},{storeId:"A",contributorId:"u3",receiptId:"r3"},{storeId:"B",contributorId:"u4",receiptId:"r4"},{storeId:"B",contributorId:"u5",receiptId:"r5"},{storeId:"B",contributorId:"u6",receiptId:"r6"}]);assert.strictEqual(x.state,"conflict");assert.strictEqual(x.storeId,null);
+console.log("store-alias-learning: ok");
