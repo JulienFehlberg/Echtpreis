@@ -1,0 +1,1 @@
+const assert=require("assert"),F=require("../geo-cell-failures");assert.strictEqual(F.delayMs(1),60000);assert.strictEqual(F.delayMs(3),240000);assert(F.delayMs(99)<=86400000);console.log("geo-cell-failures: ok");
