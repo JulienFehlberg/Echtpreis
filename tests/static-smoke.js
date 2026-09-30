@@ -1,8 +1,8 @@
-const fs=require("fs"),os=require("os"),path=require("path"),cp=require("child_process"),assert=require("assert");
+const fs=require("fs"),vm=require("vm"),assert=require("assert");
 const html=fs.readFileSync("index.html","utf8");
 const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(x=>x.trim());
 assert(scripts.length>=3,"inline scripts missing");
-scripts.forEach((code,i)=>{const file=path.join(os.tmpdir(),"echtpreis-inline-"+(i+1)+".js");fs.writeFileSync(file,code);const r=cp.spawnSync(process.execPath,["--check",file],{encoding:"utf8"});assert.strictEqual(r.status,0,"inline script "+(i+1)+" syntax: "+(r.stderr||r.stdout));});
+scripts.forEach((code,i)=>{assert.doesNotThrow(()=>new vm.Script(code,{filename:"echtpreis-inline-"+(i+1)+".js"}),"inline script "+(i+1)+" syntax");});
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.strictEqual(new Set(ids).size,ids.length,"duplicate HTML ids");
 ["productInput","addBtn","compareBtn","demoListBtn","list","stores","results","receiptFile","receiptStore","receiptDate","finishPurchaseBtn","reviewRows","ocrStatus","receiptTotalCheck","receiptStoreDetail","receiptPaymentDetail","receiptInsight","receiptInsightTitle","statsAverage","statsBreakdown","statsTrend","statsDiscoveries","statsRecent","statsInsight","feedbackText","feedbackSend","feedbackStatus","homePulse","homePulseTitle","homePulseDetail"].forEach(id=>assert(ids.includes(id),"missing required element #"+id));
 assert(!html.includes('addEventListener("click",compareStable)'),"legacy compare engine is still bound");

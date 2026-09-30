@@ -5,3 +5,8 @@ assert(!s.includes('resolveStore({merchant:clean(b.store),externalId:clean(b.sto
 assert(!s.includes('recordStoreAliasEvidence(receipt,store.id,clean(b.storeExternalId))'));
 const bi=s.indexOf('req.url==="/v1/current-price-benchmark"'),bx=s.slice(bi,bi+4000);for(const field of ['AS "productId"','AS "regularPrice"','AS "minQuantity"','AS "externalLocationId"','AS "externalProductId"','AS "proofActor"','AS "sourceType"'])assert(bx.includes(field),"benchmark SQL missing "+field);
 console.log("current-price-api-contract: ok");
+
+for(const section of [x,bx]){
+ for(const field of [' AS brand',' AS pack','AS "proofHash"','LEFT JOIN products p ON p.id=po.product_id'])
+  assert(section.includes(field),"current price path drops SKU or proof identity: "+field);
+}

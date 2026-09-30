@@ -804,7 +804,7 @@ function canonicalStoreName(store){
  return raw;
 }
 function normalizeObservation(x){
- return {id:x.id||("ep_"+Date.now()+"_"+Math.random().toString(36).slice(2)),key:x.key||null,store:canonicalStoreName(x.store),price:Number(x.price),per:x.per||"piece",date:x.date||null,validTo:x.validTo||null,region:x.region||null,lat:x.lat!=null&&Number.isFinite(Number(x.lat))?Number(x.lat):null,lon:x.lon!=null&&Number.isFinite(Number(x.lon))?Number(x.lon):null,kind:x.kind||"community",source:x.source||"ECHTPREIS Beleg",product:x.product||x.key||"Unbekannt",proof:x.proof||null,locationId:x.locationId||null,trust:Number(x.trust||0),status:x.status||"observed"};
+ return {id:x.id||("ep_"+Date.now()+"_"+Math.random().toString(36).slice(2)),key:x.key||null,store:canonicalStoreName(x.store),price:Number(x.price),per:x.per||"piece",date:x.date||String(x.observedAt||"").slice(0,10)||null,observedAt:x.observedAt||x.date||null,validFrom:x.validFrom||null,validTo:x.validTo||null,priceType:x.priceType||"regular",minQuantity:x.minQuantity??x.quantityRequired??null,regularPrice:x.regularPrice??null,gtin:x.gtin||null,productId:x.productId||null,storeId:x.storeId||null,proofHash:x.proofHash||x.mediaHash||x.contentHash||null,proofActor:x.proofActor||x.contributorId||null,sourceType:x.sourceType||null,truthEligible:x.truthEligible,sourceHealthState:x.sourceHealthState||null,sourceHealthScore:x.sourceHealthScore??null,isOutlier:x.isOutlier===true,region:x.region||null,lat:x.lat!=null&&Number.isFinite(Number(x.lat))?Number(x.lat):null,lon:x.lon!=null&&Number.isFinite(Number(x.lon))?Number(x.lon):null,kind:x.kind||"community",source:x.source||"ECHTPREIS Beleg",product:x.product||x.key||"Unbekannt",proof:x.proof||null,locationId:x.locationId||null,trust:Number(x.trust||0),status:x.status||"observed"};
 }
 function freshnessDays(x){return x.kind==="official"?null:7}
 function usableObservation(x){
@@ -865,15 +865,8 @@ function plausibleObservationPrice(x){const b=pricePlausibilityBounds(x&&x.key);
 function trustedPrice(key,store,wish=null){
  store=canonicalStoreName(store);let rows=dataEngine().filter(x=>x.key===key&&x.store===store&&plausibleObservationPrice(x));if(wish&&wish.choice&&Object.keys(wish.choice).length)rows=rows.filter(x=>choiceMatchesProductText(wish.choice,x.product||""));
  if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);rows=rows.filter(x=>normalizeProduct(x.product||"").includes(brand))}
- const ranked=window.EchtpreisPriceEngine?.rankObservations(rows,{today:localDateKey(),lat:verifiedPriceLocation?.lat,lon:verifiedPriceLocation?.lon,distanceKm});
- if(ranked&&ranked.confidenceScore>=62)return ranked;
- const newestFirst=a=>a.sort((x,y)=>String(y.date||"").localeCompare(String(x.date||""))||Number(y.trust||0)-Number(x.trust||0)||x.price-y.price);
- const official=newestFirst(rows.filter(x=>x.kind==="official"&&x.trust>=90));if(official.length)return {...official[0],confidence:"hoch",confidenceScore:85};
- const open=newestFirst(rows.filter(x=>x.kind==="openprices"&&x.proof&&x.trust>=70&&(!verifiedPriceLocation||x.lat!=null&&x.lon!=null&&distanceKm(verifiedPriceLocation.lat,verifiedPriceLocation.lon,x.lat,x.lon)<=50)));if(open.length)return {...open[0],confidence:"mittel",confidenceScore:72};
- const groups={};rows.filter(x=>x.kind==="community"&&x.proof).forEach(x=>{let k=[x.price,x.per,x.date].join("|");(groups[k]??=[]).push(x)});
- const confirmed=Object.values(groups).filter(g=>new Set(g.map(x=>x.proof)).size>=2).sort((a,b)=>String(b[0].date||"").localeCompare(String(a[0].date||""))||b.length-a.length||Number(b[0].trust||0)-Number(a[0].trust||0));
- if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:85,status:"confirmed",confidence:"mittel",confidenceScore:70}}
- return null;
+ const ranked=window.EchtpreisPriceEngine?.rankObservations(rows,{today:localDateKey(),maxAgeDays:7,quantity:Number(wish?.packCount??1),lat:verifiedPriceLocation?.lat,lon:verifiedPriceLocation?.lon,distanceKm});
+ return ranked&&ranked.confidenceScore>=62&&!(ranked.conflictCount>0)?ranked:null;
 }
 
 function exactBrandFallbackPrice(key,store,wish){

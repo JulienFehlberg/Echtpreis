@@ -5,6 +5,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  const html=fs.readFileSync("index.html","utf8"),errors=[],vc=new VirtualConsole();
  vc.on("jsdomError",e=>errors.push(String(e.message||e)));
  const dom=new JSDOM(html,{runScripts:"dangerously",url:"https://julienfehlberg.github.io/Echtpreis/",pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){
+  w.eval(fs.readFileSync("app/price-engine.js","utf8"));
   w.fetch=async()=>({ok:false,status:503,json:async()=>({})});w.alert=()=>{};w.confirm=()=>true;w.prompt=()=>null;w.scrollTo=()=>{};Object.defineProperty(w.navigator,"geolocation",{configurable:true,value:{getCurrentPosition:(ok,fail)=>fail&&fail({code:1})}});
   if(w.HTMLElement)w.HTMLElement.prototype.scrollIntoView=function(){};
  }});
