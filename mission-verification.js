@@ -1,0 +1,8 @@
+"use strict";
+function validate(input={}){
+ const store=!!input.storeMatch,product=!!input.productMatch,proof=!!input.proofValid,price=Number(input.price)>0;
+ const errors=[];if(!store)errors.push("store");if(!product)errors.push("product");if(!proof)errors.push("proof");if(!price)errors.push("price");
+ return{ok:errors.length===0,errors,verification:{store,product,proof},confidence:errors.length?0:Math.min(1,Math.max(.5,Number(input.confidence||.85)))};
+}
+function points(missionValue){const v=Number(missionValue||0);if(v>=90)return 100;if(v>=80)return 70;if(v>=65)return 45;if(v>=50)return 25;if(v>=35)return 10;return 0}
+module.exports={validate,points};
