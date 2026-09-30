@@ -30,7 +30,8 @@ const SOURCE_OVERRIDES={
  "German Supermarket Prices":[PURPOSE.DISCOVERY,PURPOSE.IDENTITY,PURPOSE.CORROBORATION],
  "German Supermarket Prices dataset":[PURPOSE.DISCOVERY,PURPOSE.IDENTITY,PURPOSE.CORROBORATION]
 };
-function sourceName(x={}){return String(x.source||x.sourceId||x.id||"").trim()}
+function registeredName(x={}){for(const v of [x.source,x.sourceId,x.id]){const k=String(v||"").trim();if(k&&Sources.SOURCES[k])return k}return null}
+function sourceName(x={}){return registeredName(x)||String(x.source||x.sourceId||x.id||"").trim()}
 function sourceType(x={}){const name=sourceName(x),registered=Sources.SOURCES[name];return String(x.sourceType||x.type||registered?.type||"unknown").toLowerCase()}
 function policy(x={}){
  const name=sourceName(x),registered=Sources.SOURCES[name]||null,type=sourceType(x),purposes=[...(SOURCE_OVERRIDES[name]||TYPE_PURPOSES[type]||TYPE_PURPOSES.unknown)];
@@ -42,4 +43,4 @@ function truthEligible(x={}){return policy(x).currentPrice}
 function allowedFor(x={},purpose){const p=policy(x);return purpose===PURPOSE.CURRENT_PRICE?p.currentPrice:p.purposes.includes(purpose)}
 function primaryPurpose(x={}){const p=policy(x);if(p.currentPrice)return PURPOSE.CURRENT_PRICE;if(p.corroboration)return PURPOSE.CORROBORATION;if(p.identity)return PURPOSE.IDENTITY;if(p.discovery)return PURPOSE.DISCOVERY;if(p.benchmark)return PURPOSE.BENCHMARK;return"none"}
 function status(){return Object.entries(Sources.SOURCES).map(([name,s])=>({name,...policy({source:name,sourceType:s.type}),active:!!s.active,commercialUseStatus:s.commercialUseStatus||null}))}
-module.exports={PURPOSE,TYPE_PURPOSES,SOURCE_OVERRIDES,sourceName,sourceType,policy,truthEligible,allowedFor,primaryPurpose,status};
+module.exports={PURPOSE,TYPE_PURPOSES,SOURCE_OVERRIDES,registeredName,sourceName,sourceType,policy,truthEligible,allowedFor,primaryPurpose,status};
