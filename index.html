@@ -681,6 +681,18 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
  #planner .item-pack-size{width:auto!important;max-width:none!important;flex:0 0 auto!important;min-height:21px!important;margin:0!important;padding:3px 7px!important}
 }
 </style>
+<style>
+/* v7.225 final mobile list polish */
+@media(max-width:430px){
+ #planner .item{grid-template-columns:24px minmax(0,1fr) auto 12px!important;gap:7px!important;padding:3px 0!important;min-height:42px!important}
+ #planner .item>[data-check]{box-sizing:border-box!important;width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;max-width:22px!important;max-height:22px!important;flex:0 0 22px!important;padding:0!important;border-width:1.5px!important;border-radius:6px!important}
+ #planner .itemname{gap:7px!important}
+ #planner .item-title{font-size:12.5px!important}
+ #planner .item-pack-size{min-height:22px!important;padding:3px 7px!important;font-size:8.5px!important}
+ #planner .qty-stepper .qty-buttons button{width:25px!important;height:25px!important;min-width:25px!important;min-height:25px!important}
+ #planner .item:focus-within{background:#f8fbf9!important;border-radius:8px!important}
+}
+</style>
 </head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand">SPARKORB <span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
