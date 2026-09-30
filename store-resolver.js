@@ -8,7 +8,7 @@ function externalScore(q,s){if(!q.externalId)return 0;return String(q.externalId
 function resolve(q={},stores=[]){
  const ranked=stores.map(s=>{const m=merchantScore(q.merchant,s.merchant),e=externalScore(q,s),a=addressScore(q,s);let score=e?1:m*.45+a*.55;if(q.merchant&&!m)score=0;return{store:s,score,signals:{merchant:m,externalId:e,address:a}}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
  if(!ranked.length)return{state:"unresolved",storeId:null,confidence:0,reason:"no-store-match",candidates:[]};
- const best=ranked[0],runner=ranked[1],strongIdentity=best.signals.externalId===1||strongAddress(q,best.store);if(best.score<.72)return{state:"review",storeId:null,confidence:best.score,reason:"weak-store-match",candidates:ranked.slice(0,3)};
+ const best=ranked[0],runner=ranked[1],strongIdentity=best.signals.externalId===1||strongAddress(q,best.store);if(!strongIdentity&&ranked.length>1)return{state:"review",storeId:null,confidence:best.score,reason:"insufficient-store-identity",candidates:ranked.slice(0,3)};if(best.score<.72)return{state:"review",storeId:null,confidence:best.score,reason:"weak-store-match",candidates:ranked.slice(0,3)};
  if(runner&&best.score-runner.score<.08)return{state:"review",storeId:null,confidence:best.score,reason:"ambiguous-store-match",candidates:ranked.slice(0,3)};
  return{state:best.score>=.9&&strongIdentity?"verified":"resolved",storeId:best.store.id,confidence:best.score,reason:best.signals.externalId?"external-id":best.signals.address>=.8?"address":"merchant-address",store:best.store,candidates:ranked.slice(0,3)};
 }
