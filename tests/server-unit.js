@@ -33,3 +33,7 @@ assert(!api.validObs({...good,pricingConfidence:"guess"}),"unconfirmed observati
 assert(!api.validObs({...good,price:-1}),"negative price accepted");
 assert(!api.validObs({...good,per:"pack"}),"invalid unit accepted");
 console.log("server unit smoke OK");
+
+for(const itemCount of [0,-1,1.5,1001,"Infinity","invalid"])
+ assert(!api.validReceiptPayload({...a,items:[{rawName:"Red Bull",lineTotal:2.98,itemCount}]}),"invalid quantity accepted: "+itemCount);
+assert(api.validReceiptPayload({...a,items:[{rawName:"Red Bull",lineTotal:2.98,itemCount:2}]}));
