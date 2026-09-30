@@ -2,6 +2,7 @@
 const crypto=require("crypto");
 const ExternalStore=require("./external-store-matcher");
 const ProductIdentity=require("./product-identity");
+const AliasStore=require("./product-alias-store");
 function key(x){return x.gtin?"gtin:"+x.gtin:"raw:"+String(x.product||"").toLowerCase().replace(/[^a-z0-9äöüß]+/gi," ").trim()}
 function date(x){const d=String(x.observedAt||"").slice(0,10);return d||new Date().toISOString().slice(0,10)}
 function observation(x,batchId,meta={}){
@@ -23,6 +24,7 @@ async function persist(pool,providerResult,meta={}){
  for(const r of providerResult.rejected||[]){await pool.query("INSERT INTO price_import_quarantine(batch_id,source,raw_payload,reason) VALUES($1,$2,$3::jsonb,$4)",[b.id,source,JSON.stringify(r.raw||{}),(r.reasons||["provider-rejected"]).join(",")]);rejected++}
  for(const raw of providerResult.accepted||[]){let x=raw;try{
   if(x.externalProductId){let pm=(await pool.query('SELECT product_id AS "productId",status,confidence::float FROM external_product_mappings WHERE source_id=$1 AND external_product_id=$2',[x.sourceId,x.externalProductId])).rows[0];if(pm&&pm.status==="verified")x={...x,productId:pm.productId};else if(x.gtin){const cp=(await pool.query("SELECT id FROM products WHERE gtin=$1 LIMIT 2",[x.gtin])).rows;if(cp.length===1){x={...x,productId:cp[0].id};await pool.query("INSERT INTO external_product_mappings(source_id,external_product_id,product_id,status,confidence,match_reason,verified_at) VALUES($1,$2,$3,'verified',1,'gtin',now()) ON CONFLICT(source_id,external_product_id) DO NOTHING",[x.sourceId,x.externalProductId,cp[0].id])}}}
+  if(x.productId&&x.product)await AliasStore.observe(pool,{productId:x.productId,alias:x.product,sourceId:x.sourceId||source,confidence:x.gtin?1:.92});
   if(x.externalLocationId){const sm=(await pool.query('SELECT store_id AS "storeId",status,confidence::float,match_reason AS "reason" FROM external_store_mappings WHERE source_id=$1 AND external_location_id=$2',[x.sourceId,x.externalLocationId])).rows[0];if(sm&&sm.status==="verified")x=ExternalStore.apply(x,{state:"verified",storeId:sm.storeId,confidence:sm.confidence,reason:sm.reason})}
   const spec=insertSpec(observation(x,b.id,{source,sourceUrl:url})),q=await pool.query(spec.sql,spec.values);if(q.rowCount)accepted++;else duplicates++;
  }catch(e){await pool.query("INSERT INTO price_import_quarantine(batch_id,source,raw_payload,reason) VALUES($1,$2,$3::jsonb,$4)",[b.id,source,JSON.stringify(x||raw),String(e.message||"persist-error").slice(0,500)]);rejected++}}
