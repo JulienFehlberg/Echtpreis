@@ -23,9 +23,17 @@ function eligible(r,ctx={}){
  return{ok:false,reason:"unsupported-price-type"};
 }
 function location(r,ctx={}){
- if(ctx.storeId&&r.storeId&&String(ctx.storeId)===String(r.storeId))return{score:1,level:"store"};
- if(ctx.region&&r.region&&norm(ctx.region)===norm(r.region))return{score:.88,level:"region"};
- if(r.storeId&&ctx.storeId)return{score:0,level:"different-store"};
+ if(ctx.storeId){
+  if(r.storeId&&String(ctx.storeId)===String(r.storeId))return{score:1,level:"store"};
+  if(r.storeId)return{score:0,level:"different-store"};
+  if(ctx.region&&r.region&&norm(ctx.region)===norm(r.region))return{score:.72,level:"regional-fallback"};
+  return{score:0,level:"location-unknown"};
+ }
+ if(ctx.region){
+  if(r.region&&norm(ctx.region)===norm(r.region))return{score:.88,level:"region"};
+  if(r.region)return{score:0,level:"different-region"};
+  return{score:.45,level:"region-unspecified"};
+ }
  return{score:.55,level:"unspecified"};
 }
 function resolveMerchant(query,merchant,rows=[],ctx={}){
