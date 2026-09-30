@@ -1,4 +1,4 @@
-name: ECHTPREIS release checks
+name: SPARKORB release checks
 
 on:
   push:
