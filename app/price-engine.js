@@ -115,5 +115,6 @@ function sourceAudit(rows=[]){
  for(const x of clean){const k=x.source||x.kind||"unknown";const s=bySource[k]??={observations:0,withProof:0,withGtin:0,withLocation:0,latest:null};s.observations++;if(x.proof)s.withProof++;if(x.gtin)s.withGtin++;if(x.locationId||(x.lat!=null&&x.lon!=null))s.withLocation++;if(!s.latest||x.date>s.latest)s.latest=x.date;}
  return {observations:clean.length,sources:Object.entries(bySource).map(([source,s])=>({source,...s,proofRate:s.observations?s.withProof/s.observations:0,gtinRate:s.observations?s.withGtin/s.observations:0,locationRate:s.observations?s.withLocation/s.observations:0}))};
 }
-\nwindow.EchtpreisPriceEngine={VERSION,PRICE_TYPES,temporalState,priceEligibility,rankObservations,scoreObservation,basketQuality,freshnessScore,locationScore,sourceScore,normalizeObservation,validateObservation,dedupeObservations,sourceAudit,classifyPrice,basketRange};
+
+window.EchtpreisPriceEngine={VERSION,PRICE_TYPES,temporalState,priceEligibility,rankObservations,scoreObservation,basketQuality,freshnessScore,locationScore,sourceScore,normalizeObservation,validateObservation,dedupeObservations,sourceAudit,classifyPrice,basketRange};
 })();
