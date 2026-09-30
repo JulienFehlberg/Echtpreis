@@ -658,6 +658,19 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
  #planner .qty-stepper .qty-buttons button{width:24px!important;height:24px!important;min-width:24px!important}
 }
 </style>
+<style>
+/* v7.223 denser list + aligned pack column */
+@media(max-width:430px){
+ #planner .item{grid-template-columns:16px minmax(0,1fr) auto 12px!important;gap:5px!important;padding:2px 0!important;min-height:35px!important}
+ #planner [data-check]{width:15px!important;height:15px!important;min-width:15px!important;min-height:15px!important;border-width:1.5px!important;border-radius:4px!important}
+ #planner .itemname{display:grid!important;grid-template-columns:minmax(0,118px) 72px!important;align-items:center!important;justify-content:start!important;gap:6px!important;min-width:0!important}
+ #planner .item-title{font-size:11.5px!important;line-height:1!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+ #planner .item-pack-size{width:72px!important;max-width:72px!important;min-height:21px!important;margin:0!important;padding:3px 6px!important;font-size:8px!important;text-align:left!important}
+ #planner .qty-stepper .qty-buttons button{width:23px!important;height:23px!important;min-width:23px!important;border-radius:7px!important;font-size:14px!important}
+ #planner .qty-stepper b{font-size:8px!important}
+ #planner .x{width:12px!important;font-size:11px!important}
+}
+</style>
 </head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand">SPARKORB <span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
