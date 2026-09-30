@@ -76,6 +76,7 @@ function basketQuality(items){
 function basketRange(items){
  let min=0,max=0,exact=0;for(const x of (items||[])){if(!x)continue;const p=Number(x.price||0),state=classifyPrice(x);if(!(p>0))continue;exact+=p;if(state==="verified"){min+=p;max+=p}else if(state==="observed"){min+=p*.97;max+=p*1.03}else{min+=p*.88;max+=p*1.12}}
  return {center:Math.round(exact*100)/100,min:Math.round(min*100)/100,max:Math.round(max*100)/100};
+}
 
 /* Canonical observation contract: every source adapter must emit this shape. */
 function normalizeObservation(raw={}){
