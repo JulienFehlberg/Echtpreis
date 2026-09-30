@@ -45,7 +45,7 @@ function resolveMerchant(query,merchant,rows=[],ctx={}){
   const health=Number(r.sourceHealthScore??85),proof=!!r.proof,score=id.score*.52+loc.score*.20+Math.max(0,1-age/Math.max(1,maxAge))*.13+Math.min(1,health/100)*.10+(proof?.05:0);
   candidates.push({...r,_score:score,_identity:id,_location:loc,_age:age,_eligibility:elig});
  }
- candidates.sort((a,b)=>b._score-a._score||a.price-b.price);
+ candidates.sort((a,b)=>{if(queryMode(query)==="category"){const ua=UnitPrice.unitPrice(a.price,a.pack||a.packageSize||a.product||a.productName),ub=UnitPrice.unitPrice(b.price,b.pack||b.packageSize||b.product||b.productName);if(ua&&ub&&ua.per===ub.per&&Math.abs(a._score-b._score)<.08)return ua.price-ub.price}return b._score-a._score||a.price-b.price});
  if(!candidates.length)return{merchant,state:"unknown",price:null,reason:"no-current-evidence"};
  candidates.forEach(x=>{const cp=UnitPrice.unitPrice(x.price,x.pack||x.packageSize||x.product||x.productName);x._unitPrice=cp?.price??null;x._unit=cp?.per??null;x._packParsed=cp?.pack??null});
  const best=candidates[0],runner=candidates[1];
