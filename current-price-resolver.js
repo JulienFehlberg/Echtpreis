@@ -2,6 +2,7 @@
 const Identity=require("./product-identity");
 const Graph=require("./product-graph");
 const Health=require("./source-health");
+const Compatibility=require("./product-compatibility");
 const PUBLIC_TYPES=new Set(["regular","promotion"]);
 const norm=s=>Identity.norm(s||"");
 function active(r,today){const t=String(today||new Date().toISOString()).slice(0,10),f=r.validFrom&&String(r.validFrom).slice(0,10),to=r.validTo&&String(r.validTo).slice(0,10);return(!f||t>=f)&&(!to||t<=to)}
@@ -11,7 +12,7 @@ function sameMerchant(a,b){const x=merchantKey(a),y=merchantKey(b);return x&&y&&
 function queryMode(q){if(q.gtin)return"exact";if(q.brand&&q.pack)return"sku";if(q.brand)return"brand";return"category"}
 function identity(query,r){
  const m=Identity.match({gtin:query.gtin,name:query.name||query.product,brand:query.brand,pack:query.pack},{gtin:r.gtin,name:r.product||r.productName,brand:r.brand,pack:r.pack});
- const cls=Identity.identityClass(m),mode=queryMode(query);let usable=cls==="ground-truth"||cls==="reviewable";if(mode==="category"&&m.score>=.62)usable=true;if(mode==="exact"&&cls!=="ground-truth")usable=false;return{...m,class:cls,mode,usable};
+ const cls=Identity.identityClass(m),mode=queryMode(query),compat=Compatibility.compatible(query.name||query.product||"",r.product||r.productName||"");let usable=cls==="ground-truth"||cls==="reviewable";if(mode==="category"&&m.score>=.62)usable=true;if(mode==="exact"&&cls!=="ground-truth")usable=false;if(!compat.ok)usable=false;return{...m,class:cls,mode,compatibility:compat,usable};
 }
 function location(r,ctx={}){
  if(ctx.storeId&&r.storeId&&String(ctx.storeId)===String(r.storeId))return{score:1,level:"store"};
