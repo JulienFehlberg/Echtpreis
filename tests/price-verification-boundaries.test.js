@@ -1,6 +1,6 @@
 "use strict";
 const assert=require("assert/strict"),Admin=require("../price-admin-auth"),Identity=require("../receipt-product-verification"),Receipt=require("../receipt-price-facts"),Shelf=require("../shelf-price-facts"),Mission=require("../mission-verification");
-const env={ECHTPREIS_ADMIN_TOKEN:"private-admin-test",PRICE_IMPORT_TOKEN:"legacy-import-test"};
+const env={SPARKORB_ADMIN_TOKEN:"private-admin-test",PRICE_IMPORT_TOKEN:"legacy-import-test"};
 assert.equal(Admin.authorized({url:"/v1/price-missions/verify",headers:{authorization:"Bearer private-admin-test"}},env),true);
 assert.equal(Admin.authorized({url:"/v1/price-missions/verify",headers:{"x-price-import-token":"legacy-import-test"}},env),false);
 assert.equal(Admin.authorized({url:"/v1/admin/open-prices/import",headers:{"x-price-import-token":"legacy-import-test"}},env),true);
