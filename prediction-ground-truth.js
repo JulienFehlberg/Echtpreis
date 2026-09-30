@@ -1,11 +1,11 @@
-"use strict";
+"use strict";\nconst Identity=require("./product-identity");
 function norm(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim()}
 function tokens(s){return new Set(norm(s).split(/\s+/).filter(x=>x.length>1))}
 function jaccard(a,b){const A=tokens(a),B=tokens(b);if(!A.size||!B.size)return 0;let hit=0;for(const x of A)if(B.has(x))hit++;return hit/(A.size+B.size-hit)}
-function productScore(pred,item){
+function productScore(pred,item){\n if(pred.productId&&item.productId&&pred.productId===item.productId)return{score:1,reason:"canonical-product-id"};
  if(pred.gtin&&item.gtin&&String(pred.gtin)===String(item.gtin))return{score:1,reason:"gtin"};
  if(pred.productKey&&item.productKey&&pred.productKey===item.productKey)return{score:.98,reason:"canonical-key"};
- let s=jaccard(pred.productName||pred.productKey,item.productName||item.rawName);
+ const identity=Identity.match({gtin:pred.gtin,name:pred.productName||pred.productKey,packAmount:pred.packAmount,packUnit:pred.packUnit},{gtin:item.gtin,name:item.productName||item.rawName,packAmount:item.packAmount,packUnit:item.packUnit});\n if(Identity.identityClass(identity)==="ground-truth")return{score:.99,reason:"identity-engine"};\n let s=Math.max(jaccard(pred.productName||pred.productKey,item.productName||item.rawName),identity.score*.9);
  if(pred.packAmount&&item.packAmount){const d=Math.abs(Number(pred.packAmount)-Number(item.packAmount))/Math.max(Number(pred.packAmount),Number(item.packAmount));if(d<=.02)s+=.08;else if(d>.15)s-=.18}
  if(pred.packUnit&&item.packUnit&&norm(pred.packUnit)!==norm(item.packUnit))s-=.15;
  return{score:Math.max(0,Math.min(.94,s)),reason:"name-pack"};
