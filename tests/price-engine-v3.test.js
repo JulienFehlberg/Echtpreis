@@ -2,7 +2,7 @@ const assert=require("assert");
 global.window={};
 require("../app/price-engine.js");
 const E=global.window.EchtpreisPriceEngine;
-assert(E&&E.VERSION==="3.2.0");
+assert(E&&E.VERSION==="3.3.0");
 
 const today="2026-09-30";
 const ctx={today,lat:52.54,lon:13.20,distanceKm:(a,b,c,d)=>Math.hypot((a-c)*70,(b-d)*45)};
@@ -49,4 +49,13 @@ console.log("price-engine-v3: ok");
  const xs=[{price:10,kind:"official",confidenceScore:94},{price:5,kind:"receipt",confidenceScore:88},{price:3,kind:"reference",confidenceScore:50},null];
  const q=E.basketQuality(xs);assert.strictEqual(q.verified,2);assert.strictEqual(q.estimated,1);assert.strictEqual(q.unknown,0);assert(q.verifiedCoverage>0.66);
  const r=E.basketRange(xs);assert(r.min<r.center&&r.max>r.center);
+}
+
+{const base={product:"X",store:"REWE",per:"piece",date:"2026-09-30",kind:"official",trust:96,proof:"p"};
+ const rows=[{...base,price:3.49,priceType:"regular",proof:"r"},{...base,price:2.99,priceType:"promotion",validFrom:"2026-09-29",validTo:"2026-10-03",proof:"promo"},{...base,price:2.49,priceType:"loyalty",proof:"loyal"}];
+ assert.strictEqual(E.rankObservations(rows,{today:"2026-09-30"}).price,2.99);assert.strictEqual(E.rankObservations(rows,{today:"2026-09-30",eligibility:{loyalty:true}}).price,2.49);
+ assert.strictEqual(E.rankObservations([{...base,price:1.99,priceType:"promotion",validTo:"2026-09-29"},{...base,price:3.49,priceType:"regular"}],{today:"2026-09-30"}).price,3.49);
+ assert.strictEqual(E.priceEligibility({...base,priceType:"app"},{today:"2026-09-30"}).eligible,false);
+ assert.strictEqual(E.priceEligibility({...base,priceType:"app"},{today:"2026-09-30",eligibility:{app:true}}).eligible,true);
+ assert.strictEqual(E.priceEligibility({...base,priceType:"multi_buy",minQuantity:3},{today:"2026-09-30",quantity:2}).eligible,false);
 }
