@@ -3,6 +3,7 @@ const Identity=require("./product-identity");
 const Graph=require("./product-graph");
 const Health=require("./source-health");
 const Compatibility=require("./product-compatibility");
+const UnitPrice=require("./unit-price");
 const PUBLIC_TYPES=new Set(["regular","promotion"]);
 const norm=s=>Identity.norm(s||"");
 function active(r,today){const t=String(today||new Date().toISOString()).slice(0,10),f=r.validFrom&&String(r.validFrom).slice(0,10),to=r.validTo&&String(r.validTo).slice(0,10);return(!f||t>=f)&&(!to||t<=to)}
@@ -30,10 +31,11 @@ function resolveMerchant(query,merchant,rows=[],ctx={}){
  }
  candidates.sort((a,b)=>b._score-a._score||a.price-b.price);
  if(!candidates.length)return{merchant,state:"unknown",price:null,reason:"no-current-evidence"};
- candidates.forEach(x=>{const cp=Graph.comparisonPrice(x,{name:x.product||x.productName,pack:x.pack});x._unitPrice=cp?.price??null;x._unit=cp?.per??null});
+ candidates.forEach(x=>{const cp=UnitPrice.unitPrice(x.price,x.pack||x.packageSize||x.product||x.productName);x._unitPrice=cp?.price??null;x._unit=cp?.per??null;x._packParsed=cp?.pack??null});
  const best=candidates[0],runner=candidates[1],ambiguous=runner&&best._score-runner._score<.035&&Math.abs(best.price-runner.price)/best.price>.08;
  if(ambiguous)return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",candidates:candidates.slice(0,3)};
- return{merchant,state:best._identity.class==="ground-truth"&&best._location.level==="store"?"verified":"observed",price:Number(best.price),currency:best.currency||"EUR",priceType:best.priceType||"regular",product:best.product||best.productName,gtin:best.gtin||null,storeId:best.storeId||null,region:best.region||null,observedAt:best.observedAt||best.date,validTo:best.validTo||null,source:best.source||null,proof:best.proof||null,confidence:Math.round(best._score*100),match:best._identity.class,queryMode:best._identity.mode,unitPrice:best._unitPrice,unit:best._unit,locationLevel:best._location.level};
+ return{merchant,state:best._identity.class==="ground-truth"&&best._location.level==="store"?"verified":"observed",price:Number(best.price),currency:best.currency||"EUR",priceType:best.priceType||"regular",product:best.product||best.productName,gtin:best.gtin||null,storeId:best.storeId||null,region:best.region||null,observedAt:best.observedAt||best.date,validTo:best.validTo||null,source:best.source||null,proof:best.proof||null,confidence:Math.round(best._score*100),match:best._identity.class,queryMode:best._identity.mode,unitPrice:best._unitPrice,unit:best._unit,packParsed:best._packParsed,locationLevel:best._location.level};
 }
 function compare(query,merchants,rows,ctx={}){return(merchants||[]).map(m=>resolveMerchant(query,m,rows,ctx))}
-module.exports={PUBLIC_TYPES,queryMode,merchantKey,sameMerchant,active,freshnessDays,identity,location,resolveMerchant,compare};
+function leaders(results=[]){const known=results.filter(x=>x&&x.price>0),cash=known.slice().sort((a,b)=>a.price-b.price)[0]||null,unit=known.filter(x=>x.unitPrice>0).sort((a,b)=>a.unitPrice-b.unitPrice)[0]||null;return{lowestCheckout:cash,lowestUnitPrice:unit}}
+module.exports={PUBLIC_TYPES,queryMode,merchantKey,sameMerchant,active,freshnessDays,identity,location,resolveMerchant,compare,leaders};
