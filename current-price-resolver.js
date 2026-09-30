@@ -5,6 +5,7 @@ const Health=require("./source-health");
 const Compatibility=require("./product-compatibility");
 const UnitPrice=require("./unit-price");
 const CurrentTruth=require("./current-price-truth");
+const Semantics=require("./source-semantics");
 const PUBLIC_TYPES=new Set(["regular","promotion"]);
 const CONDITIONAL_TYPES=new Set(["loyalty","app","coupon","multi_buy","personalized"]);
 const norm=s=>Identity.norm(s||"");
@@ -42,7 +43,7 @@ function location(r,ctx={}){
 function identityKey(r){if(r.productId)return"pid:"+r.productId;if(r.gtin)return"gtin:"+String(r.gtin).replace(/\D/g,"");const p=Identity.parsePack(r.pack||r.product||r.productName),pack=p&&p.total?p.total.amount+":"+p.total.unit:"";return"raw:"+norm(r.brand||"")+"|"+norm(r.product||r.productName)+"|"+pack}
 function resolveMerchant(query,merchant,rows=[],ctx={}){
  const today=ctx.today||new Date().toISOString().slice(0,10),maxAge=ctx.maxAgeDays??7,candidates=[];
- for(const r of rows){if(!sameMerchant(merchant,r.merchant||r.store))continue;if(!(Number(r.price)>0)||!active(r,today)||r.sourceHealthState==="quarantine"||r.isOutlier)continue;
+ for(const r of rows){if(!sameMerchant(merchant,r.merchant||r.store))continue;if(!Semantics.truthEligible(r))continue;if(!(Number(r.price)>0)||!active(r,today)||r.sourceHealthState==="quarantine"||r.isOutlier)continue;
   const type=r.priceType||"regular",elig=eligible(r,ctx);if(!elig.ok)continue;
   const id=identity(query,r);if(!id.usable)continue;const loc=location(r,ctx);if(loc.score===0)continue;const age=freshnessDays(r,today);const sourceAgeLimit=r.sourceType==="open_data"?Math.min(Number(maxAge),7):Number(maxAge);if(age>sourceAgeLimit)continue;
   const health=Number(r.sourceHealthScore??85),proof=!!r.proof,tier=CurrentTruth.truthTier(r),authority=tier===1?1:tier===2?.92:tier===3?.72:.45,score=id.score*.46+loc.score*.19+Math.max(0,1-age/Math.max(1,maxAge))*.12+Math.min(1,health/100)*.08+(proof?.04:0)+authority*.11;
