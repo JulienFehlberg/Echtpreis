@@ -36,9 +36,8 @@ function sourceScore(row){
   if(Number.isFinite(health)){if(health<40)score-=35;else if(health<65)score-=15;else if(health<85)score-=5;else score+=Math.min(3,(health-85)/5)}
   return clamp(score,0,100);
 }
-function independentProofs(rows){
-  return new Set(rows.map(r=>r.proof||((r.kind||"unknown")+":"+(r.source||""))).filter(Boolean)).size;
-}
+function proofFingerprint(r={}){const proof=String(r.proof||"");if(proof)return[r.kind||"unknown",r.proofActor||r.contributorId||r.source||"unknown",proof,r.locationId||r.region||"unknown-location",r.productId||r.gtin||r.key||r.product||"unknown-product"].join("|");return[r.kind||"unknown",r.proofActor||r.contributorId||r.source||"unknown",r.locationId||r.region||"unknown-location",r.productId||r.gtin||r.key||r.product||"unknown-product",r.date||"",r.price||""].join("|")}
+function independentProofs(rows){return new Set(rows.map(proofFingerprint)).size;}
 function median(xs){const a=xs.filter(Number.isFinite).sort((x,y)=>x-y);if(!a.length)return null;const m=Math.floor(a.length/2);return a.length%2?a[m]:(a[m-1]+a[m])/2}
 function priceCluster(rows){
   if(!rows.length)return {center:null,agreement:0};
@@ -119,5 +118,5 @@ function sourceAudit(rows=[]){
  return {observations:clean.length,sources:Object.entries(bySource).map(([source,s])=>({source,...s,proofRate:s.observations?s.withProof/s.observations:0,gtinRate:s.observations?s.withGtin/s.observations:0,locationRate:s.observations?s.withLocation/s.observations:0}))};
 }
 
-window.EchtpreisPriceEngine={VERSION,PRICE_TYPES,temporalState,priceEligibility,rankObservations,scoreObservation,basketQuality,freshnessScore,locationScore,sourceScore,normalizeObservation,validateObservation,dedupeObservations,sourceAudit,classifyPrice,basketRange};
+window.EchtpreisPriceEngine={VERSION,PRICE_TYPES,temporalState,priceEligibility,proofFingerprint,independentProofs,rankObservations,scoreObservation,basketQuality,freshnessScore,locationScore,sourceScore,normalizeObservation,validateObservation,dedupeObservations,sourceAudit,classifyPrice,basketRange};
 })();
