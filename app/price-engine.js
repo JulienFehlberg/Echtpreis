@@ -64,9 +64,10 @@ function rankObservations(rows,ctx={}){
  const scored=eligible.map(row=>({...row,confidenceScore:scoreObservation(row,eligible.filter(x=>x.priceType===row.priceType),ctx)}));
  scored.sort((a,b)=>Number(a.price)-Number(b.price)||b.confidenceScore-a.confidenceScore||String(b.date).localeCompare(String(a.date)));
  const top=scored[0],support=scored.filter(r=>r.priceType===top.priceType&&r.per===top.per&&Math.abs(r.price-top.price)/top.price<=.035),cluster=priceCluster(support),proofs=independentProofs(support),boosted=clamp(top.confidenceScore+Math.min(6,Math.max(0,proofs-1)*2),0,100);
- return {...top,confidenceScore:boosted,confidence:boosted>=90?"sehr hoch":boosted>=78?"hoch":boosted>=62?"mittel":"niedrig",supportCount:support.length,independentProofs:proofs,agreement:cluster.agreement,status:boosted>=78?"verified":top.status||"observed",eligibility:priceEligibility(top,ctx).reason};
+ const authoritative=top.kind==="official";const verified=boosted>=78&&(authoritative||proofs>=2);
+ return {...top,confidenceScore:boosted,confidence:boosted>=90?"sehr hoch":boosted>=78?"hoch":boosted>=62?"mittel":"niedrig",supportCount:support.length,independentProofs:proofs,agreement:cluster.agreement,status:verified?"verified":top.status||"observed",eligibility:priceEligibility(top,ctx).reason};
 }
-function classifyPrice(x){if(!x||!(Number(x.price)>0))return "unknown";const s=Number(x.confidenceScore||0);if((x.kind==="official"||x.kind==="receipt"||x.kind==="shelf")&&s>=78)return "verified";if(s>=62)return "observed";return "estimated"}
+function classifyPrice(x){if(!x||!(Number(x.price)>0))return "unknown";const s=Number(x.confidenceScore||0),proofs=Number(x.independentProofs||0);if(x.kind==="official"&&s>=78)return "verified";if((x.kind==="receipt"||x.kind==="shelf")&&s>=78&&proofs>=2)return "verified";if(s>=62)return "observed";return "estimated"}
 function basketQuality(items){
  const xs=Array.isArray(items)?items:[],states=xs.map(x=>classifyPrice(x)),known=xs.filter((x,i)=>states[i]!=="unknown"),verified=xs.filter((x,i)=>states[i]==="verified"),estimated=xs.filter((x,i)=>states[i]==="estimated");
  const coverage=xs.length?known.length/xs.length:0,verifiedCoverage=xs.length?verified.length/xs.length:0,estimatedShare=xs.length?estimated.length/xs.length:0;
