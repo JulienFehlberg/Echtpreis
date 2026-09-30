@@ -5,20 +5,23 @@ const ProductIdentity=require("./product-identity");
 const AliasStore=require("./product-alias-store");
 const StoreAliasStore=require("./store-alias-store");
 const StoreUniverse=require("./store-universe");
+const Semantics=require("./source-semantics");
 function key(x){return x.gtin?"gtin:"+x.gtin:"raw:"+String(x.product||"").toLowerCase().replace(/[^a-z0-9äöüß]+/gi," ").trim()}
 function date(x){const d=String(x.observedAt||"").slice(0,10);return d||new Date().toISOString().slice(0,10)}
 function observation(x,batchId,meta={}){
+ const source=x.source||meta.source||"external",semanticInput={...x,source,sourceType:x.sourceType||null},policy=Semantics.policy(semanticInput);
  return{
   id:crypto.randomUUID(),key:key(x),store:x.merchant||null,storeId:x.storeId||null,externalLocationId:x.externalLocationId||null,
   productId:x.productId||null,externalProductId:x.externalProductId||null,gtin:ProductIdentity.gtinValid(x.gtin)?String(x.gtin).replace(/\D/g,""):null,price:Number(x.price),per:"item",date:date(x),
-  kind:"external",source:x.source||meta.source||"external",product:x.product||null,proof:x.proof||null,proofType:x.proofType||null,
+  kind:"external",source,product:x.product||null,proof:x.proof||null,proofType:x.proofType||null,
   observedAt:x.observedAt||null,validFrom:x.validFrom||null,validTo:x.validTo||null,priceType:x.priceType||"regular",
   regularPrice:Number(x.regularPrice)>0?Number(x.regularPrice):null,minQuantity:Number(x.minQuantity)>1?Number(x.minQuantity):null,currency:x.currency||"EUR",trust:Number(x.registryTrust||0),status:"observed",
-  sourceType:x.sourceType||null,sourceId:x.sourceId||null,proofActor:x.proofActor||null,sourceUrl:x.sourceUrl||meta.sourceUrl||null,fetchedAt:x.fetchedAt||null,importBatchId:batchId
+  sourceType:x.sourceType||policy.type||null,sourceId:x.sourceId||source,proofActor:x.proofActor||null,sourceUrl:x.sourceUrl||meta.sourceUrl||null,fetchedAt:x.fetchedAt||null,importBatchId:batchId,
+  evidencePurpose:x.evidencePurpose||Semantics.primaryPurpose(semanticInput),truthEligible:x.truthEligible===false?false:policy.currentPrice
  };
 }
-const COLUMNS=["id","key","store","store_id","external_location_id","product_id","external_product_id","gtin","price","per","date","kind","source","product","proof","proof_type","observed_at","valid_from","valid_to","price_type","regular_price","min_quantity","currency","trust","status","source_type","source_id","proof_actor","source_url","fetched_at","import_batch_id"];
-function insertSpec(o){const values=[o.id,o.key,o.store,o.storeId,o.externalLocationId,o.productId,o.externalProductId,o.gtin,o.price,o.per,o.date,o.kind,o.source,o.product,o.proof,o.proofType,o.observedAt,o.validFrom,o.validTo,o.priceType,o.regularPrice,o.minQuantity,o.currency,o.trust,o.status,o.sourceType,o.sourceId,o.proofActor,o.sourceUrl,o.fetchedAt,o.importBatchId];const placeholders=values.map((_,i)=>"$"+(i+1)).join(",");return{sql:"INSERT INTO price_observations("+COLUMNS.join(",")+") VALUES("+placeholders+") ON CONFLICT DO NOTHING",values}}
+const COLUMNS=["id","key","store","store_id","external_location_id","product_id","external_product_id","gtin","price","per","date","kind","source","product","proof","proof_type","observed_at","valid_from","valid_to","price_type","regular_price","min_quantity","currency","trust","status","source_type","source_id","proof_actor","source_url","fetched_at","import_batch_id","evidence_purpose","truth_eligible"];
+function insertSpec(o){const values=[o.id,o.key,o.store,o.storeId,o.externalLocationId,o.productId,o.externalProductId,o.gtin,o.price,o.per,o.date,o.kind,o.source,o.product,o.proof,o.proofType,o.observedAt,o.validFrom,o.validTo,o.priceType,o.regularPrice,o.minQuantity,o.currency,o.trust,o.status,o.sourceType,o.sourceId,o.proofActor,o.sourceUrl,o.fetchedAt,o.importBatchId,o.evidencePurpose,o.truthEligible];const placeholders=values.map((_,i)=>"$"+(i+1)).join(",");return{sql:"INSERT INTO price_observations("+COLUMNS.join(",")+") VALUES("+placeholders+") ON CONFLICT DO NOTHING",values}}
 async function persist(pool,providerResult,meta={}){
  const source=meta.source||"external",url=meta.sourceUrl||null,received=(providerResult.accepted?.length||0)+(providerResult.rejected?.length||0);
  const b=(await pool.query("INSERT INTO price_import_batches(source,source_url,received,status) VALUES($1,$2,$3,'running') RETURNING id",[source,url,received])).rows[0];
