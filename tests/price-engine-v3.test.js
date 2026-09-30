@@ -1,7 +1,7 @@
 const assert=require("assert");
 global.window={};
 require("../app/price-engine.js");
-const E=global.window.EchtpreisPriceEngine;
+const E=global.window.SparkorbPriceEngine;
 assert(E&&E.VERSION==="3.5.0");
 
 const today="2026-09-30";
