@@ -10,7 +10,7 @@ const assert=require("assert"),fs=require("fs"),{JSDOM}=require("jsdom");
  await new Promise(r=>setTimeout(r,120));
  try{
   const w=dom.window,today=w.eval("localDateKey()"),base={key:"milch",store:"EDEKA",price:1.09,per:"l",date:today,product:"Milch 1 L",kind:"official",source:"test",proof:"fresh",trust:96};
-  const set=rows=>{w.localStorage.setItem("echtpreis_shared_observations_v1",JSON.stringify(rows));w.invalidateDataEngine();w.resetPriceLookupMemo();};
+  const set=rows=>{w.localStorage.setItem("sparkorb_shared_observations_v1",JSON.stringify(rows));w.invalidateDataEngine();w.resetPriceLookupMemo();};
   set([base]);assert.strictEqual(w.trustedPrice("milch","EDEKA").price,1.09);
   set([{...base,priceType:"app"}]);assert.strictEqual(w.trustedPrice("milch","EDEKA"),null,"app price must survive normalization and require eligibility");
   set([{...base,truthEligible:false}]);assert.strictEqual(w.trustedPrice("milch","EDEKA"),null,"blocked sources cannot become current prices");
@@ -19,7 +19,7 @@ const assert=require("assert"),fs=require("fs"),{JSDOM}=require("jsdom");
   assert.strictEqual(w.trustedPrice("milch","EDEKA",{packCount:3}).price,1.09);
   set([base,{...base,price:1.49,proof:"conflicting"}]);
   assert.strictEqual(w.trustedPrice("milch","EDEKA"),null,"a disputed current price must not appear as a proven checkout quote");
-  set([base]);w.EchtpreisPriceEngine.rankObservations=()=>null;
+  set([base]);w.SparkorbPriceEngine.rankObservations=()=>null;
   assert.strictEqual(w.trustedPrice("milch","EDEKA"),null,"legacy fallback must not revive engine-rejected evidence");
   console.log("browser-current-price: normalization and current-price gates ok");
  }finally{dom.window.close();}
