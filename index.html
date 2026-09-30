@@ -843,10 +843,27 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
  .home-main-actions #homeReceipt .ep-icon,.home-main-actions #homeStats .ep-icon{width:38px!important;height:38px!important;min-width:38px!important}
  .home-main-actions #homeReceipt .homeaction-copy b,.home-main-actions #homeStats .homeaction-copy b{font-size:16px!important}
 }
+</style><style>
+/* v7.261 receipt-story hero */
+.hero{padding-bottom:18px!important}
+.receipt-scene{position:relative;height:132px;margin-top:15px;max-width:430px}
+.mini-receipt{position:absolute;top:5px;width:116px;height:112px;background:#fff;color:#10281f;border-radius:3px;padding:10px 10px 8px;box-shadow:0 10px 24px rgba(0,0,0,.19);transform-origin:50% 100%;box-sizing:border-box}
+.mini-receipt:after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:7px;background:linear-gradient(135deg,transparent 4px,#fff 0) 0 0/8px 8px repeat-x}
+.receipt-a{left:4%;transform:rotate(-6deg);z-index:1}.receipt-b{left:35%;transform:rotate(1deg) translateY(-3px);z-index:3}.receipt-c{left:66%;transform:rotate(6deg);z-index:2}
+.receipt-brand{display:block;font-size:14px;font-weight:950;letter-spacing:.04em;text-align:center;margin-bottom:8px}
+.mini-receipt i{display:block;height:3px;background:#d8dfdc;margin:5px 2px;border-radius:3px}.mini-receipt i:nth-of-type(2){width:72%}
+.mini-receipt small{display:block;margin-top:8px;padding-top:6px;border-top:1px dashed #9daaa5;font-size:7px;font-weight:800;letter-spacing:.12em;color:#73817c}
+.mini-receipt b{display:block;text-align:right;font-size:15px;line-height:1.15;margin-top:2px}
+.receipt-caption{text-align:center;font-size:9px;font-weight:900;letter-spacing:.14em;color:rgba(255,255,255,.68);margin-top:0}
+@media(max-width:430px){.receipt-scene{height:119px;margin-top:12px}.mini-receipt{width:104px;height:102px;padding:8px}.receipt-a{left:2%}.receipt-b{left:34.5%}.receipt-c{left:67%}.receipt-brand{font-size:12px;margin-bottom:6px}.mini-receipt b{font-size:13px}.receipt-caption{font-size:8px}}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand">SPARKORB <span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
-<section class="hero"><div class="hero-copy"><h1>Wissen, wo’s<br>günstiger ist.</h1><div class="hero-demo" aria-label="Beispiel für einen Preisvergleich"><div class="hero-demo-label">BEISPIEL · DEIN EINKAUF</div><div class="hero-demo-row best"><span>ALDI Nord</span><b>38,40 €</b></div><div class="hero-demo-row"><span>REWE</span><b>44,70 €</b></div><div class="hero-demo-row"><span>EDEKA</span><b>47,20 €</b></div><div class="hero-saving"><span>Preisunterschied</span><b>8,80 €</b></div></div></div></section>
+<section class="hero"><div class="hero-copy"><h1>Wissen, wo’s<br>günstiger ist.</h1><div class="receipt-scene" aria-label="Beispiel: derselbe Einkauf bei drei Märkten">
+  <div class="mini-receipt receipt-a"><span class="receipt-brand">ALDI</span><i></i><i></i><i></i><small>SUMME</small><b>38,40 €</b></div>
+  <div class="mini-receipt receipt-b"><span class="receipt-brand">LIDL</span><i></i><i></i><i></i><small>SUMME</small><b>40,15 €</b></div>
+  <div class="mini-receipt receipt-c"><span class="receipt-brand">EDEKA</span><i></i><i></i><i></i><small>SUMME</small><b>47,20 €</b></div>
+</div><div class="receipt-caption">GLEICHER EINKAUF. ANDERER PREIS.</div></div></section>
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homePlan" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 5h2l1.8 9.2h10.9l1.8-6.5H6.1"/><circle cx="9" cy="18.5" r="1.2"/><circle cx="17" cy="18.5" r="1.2"/></svg></span><span class="homeaction-copy"><b>Einkauf planen</b><small>Preise vergleichen &amp; sparen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
