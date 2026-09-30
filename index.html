@@ -15,7 +15,7 @@ function echtpreisSelfCheck(){try{const required=["list","compareBtn","results",
 let echtpreisInstallEvent=null;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();echtpreisInstallEvent=e});window.addEventListener("appinstalled",()=>{echtpreisInstallEvent=null;try{localStorage.setItem("echtpreis_installed","1")}catch(_){}});window.echtpreisInstallPrompt=async()=>{if(!echtpreisInstallEvent)return false;const e=echtpreisInstallEvent;echtpreisInstallEvent=null;await e.prompt();const choice=await e.userChoice;return choice?.outcome==="accepted"};
 window.echtpreisHealthCheck=echtpreisSelfCheck;window.addEventListener("load",()=>setTimeout(echtpreisSelfCheck,50),{once:true});
 </script>
-<script src="app/runtime.js"></script>
+<script src="app/runtime.js"></script>\n<script src="app/price-engine.js"></script>
 <script>window.echtpreisLocalDateKey=window.EchtpreisRuntime?.localDateKey||function(date){var d=date instanceof Date?date:new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};</script>
 <style>
 *{box-sizing:border-box} body{margin:0;background:#f3f5f4;color:#101513;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -865,14 +865,17 @@ function plausibleObservationPrice(x){const b=pricePlausibilityBounds(x&&x.key);
 function trustedPrice(key,store,wish=null){
  store=canonicalStoreName(store);let rows=dataEngine().filter(x=>x.key===key&&x.store===store&&plausibleObservationPrice(x));if(wish&&wish.choice&&Object.keys(wish.choice).length)rows=rows.filter(x=>choiceMatchesProductText(wish.choice,x.product||""));
  if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);rows=rows.filter(x=>normalizeProduct(x.product||"").includes(brand))}
+ const ranked=window.EchtpreisPriceEngine?.rankObservations(rows,{today:localDateKey(),lat:verifiedPriceLocation?.lat,lon:verifiedPriceLocation?.lon,distanceKm});
+ if(ranked&&ranked.confidenceScore>=62)return ranked;
  const newestFirst=a=>a.sort((x,y)=>String(y.date||"").localeCompare(String(x.date||""))||Number(y.trust||0)-Number(x.trust||0)||x.price-y.price);
- const official=newestFirst(rows.filter(x=>x.kind==="official"&&x.trust>=90));if(official.length)return {...official[0],confidence:"hoch"};
- const open=newestFirst(rows.filter(x=>x.kind==="openprices"&&x.proof&&x.trust>=70&&(!verifiedPriceLocation||x.lat!=null&&x.lon!=null&&distanceKm(verifiedPriceLocation.lat,verifiedPriceLocation.lon,x.lat,x.lon)<=50)));if(open.length)return {...open[0],confidence:"mittel"};
+ const official=newestFirst(rows.filter(x=>x.kind==="official"&&x.trust>=90));if(official.length)return {...official[0],confidence:"hoch",confidenceScore:85};
+ const open=newestFirst(rows.filter(x=>x.kind==="openprices"&&x.proof&&x.trust>=70&&(!verifiedPriceLocation||x.lat!=null&&x.lon!=null&&distanceKm(verifiedPriceLocation.lat,verifiedPriceLocation.lon,x.lat,x.lon)<=50)));if(open.length)return {...open[0],confidence:"mittel",confidenceScore:72};
  const groups={};rows.filter(x=>x.kind==="community"&&x.proof).forEach(x=>{let k=[x.price,x.per,x.date].join("|");(groups[k]??=[]).push(x)});
  const confirmed=Object.values(groups).filter(g=>new Set(g.map(x=>x.proof)).size>=2).sort((a,b)=>String(b[0].date||"").localeCompare(String(a[0].date||""))||b.length-a.length||Number(b[0].trust||0)-Number(a[0].trust||0));
- if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:85,status:"confirmed",confidence:"mittel"}}
+ if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:85,status:"confirmed",confidence:"mittel",confidenceScore:70}}
  return null;
 }
+
 function exactBrandFallbackPrice(key,store,wish){
  store=canonicalStoreName(store);if(!wish||wish.matchMode!=="exact"||!wish.exactBrand||!storeCanCarry(store,wish,key))return null;
  const brand=normalizeProduct(wish.exactBrand),history=recentPriceHistory(key,store).filter(x=>normalizeProduct(x.product||"").includes(brand)&&(!wish.choice||choiceMatchesProductText(wish.choice,x.product||""))).sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0));
