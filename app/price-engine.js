@@ -16,7 +16,7 @@ const daysOld=(date,today)=>{
 };
 function freshnessScore(row,today){
   const d=daysOld(row.date,today);
-  if(row.validTo&&row.validTo>=(today||new Date().toISOString().slice(0,10)))return 1;
+  if(row.validTo&&row.validTo>=(today||new Date().toISOString().slice(0,10))&&d<=7)return 1;
   if(d<=1)return 1;if(d<=3)return .96;if(d<=7)return .88;if(d<=14)return .72;if(d<=30)return .48;if(d<=60)return .25;return .08;
 }
 function locationScore(row,ctx){
