@@ -3,7 +3,7 @@ const {Readable,Transform}=require("stream"),{pipeline}=require("stream/promises
 const Catalog=require("./canonical-product-catalog-import");
 const SOURCE_URL="https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz";
 const REQUIRED=["code","product_name","quantity","countries_tags"];
-const HEADERS={"User-Agent":"ECHTPREIS/1.0 (https://github.com/JulienFehlberg/Echtpreis) Germany product catalog","Accept":"application/gzip"};
+const HEADERS={"User-Agent":"SPARKORB/1.0 (https://github.com/JulienFehlberg/Sparkorb) Germany product catalog","Accept":"application/gzip"};
 function bounded(value,fallback,min,max){const n=Number(value);return Number.isSafeInteger(n)?Math.max(min,Math.min(max,n)):fallback}
 function tags(value){return String(value||"").split(",").map(s=>s.trim()).filter(Boolean)}
 class TsvParser{
