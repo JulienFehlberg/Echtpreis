@@ -1,6 +1,6 @@
-# ECHTPREIS – Store-Readiness
+# SPARKORB – Store-Readiness
 
-ECHTPREIS wird ab jetzt so entwickelt, dass dieselbe Kernlogik auf Web, iOS und Android genutzt werden kann.
+SPARKORB wird ab jetzt so entwickelt, dass dieselbe Kernlogik auf Web, iOS und Android genutzt werden kann.
 
 ## Grundprinzip
 
@@ -9,7 +9,7 @@ Die Web-App bleibt die kostenlose Testplattform. Geräteabhängige Funktionen we
 ```
 UI / Features
   ↓
-ECHTPREIS Kernlogik
+SPARKORB Kernlogik
   ↓
 Services (API, Preise, OCR, Speicherung)
   ↓
@@ -23,8 +23,8 @@ Platform Runtime
 
 1. Keine neuen Server-URLs direkt in Feature-Code schreiben. Endpunkte kommen aus `app/config.js`.
 2. Kamera, Standort, externe Links und spätere Push-Funktionen werden über `app/runtime.js` gekapselt.
-3. Preisquellen sind austauschbare Datenquellen. Die Einkaufsliste darf nicht davon abhängen, ob der Preis von ECHTPREIS, Open Prices oder später einem anderen Anbieter kommt.
-4. Bon-OCR liefert ein neutrales ECHTPREIS-Datenformat. Die Statistik kennt weder Tesseract noch einen späteren Cloud-OCR-Anbieter.
+3. Preisquellen sind austauschbare Datenquellen. Die Einkaufsliste darf nicht davon abhängen, ob der Preis von SPARKORB, Open Prices oder später einem anderen Anbieter kommt.
+4. Bon-OCR liefert ein neutrales SPARKORB-Datenformat. Die Statistik kennt weder Tesseract noch einen späteren Cloud-OCR-Anbieter.
 5. Unsichere Daten werden sichtbar als unsicher behandelt und nicht als bestätigte Verfügbarkeit oder Ersparnis gespeichert.
 6. Lokale Testfunktionen müssen ohne kostenpflichtige Dienste funktionieren.
 7. Produktionsdienste dürfen später ergänzt werden, ohne die UI neu zu bauen.
@@ -101,7 +101,7 @@ Kein öffentlicher kommerzieller Release darf allein aufgrund automatisierter Te
 
 
 ### Geplantes Plus-/Abo-Modell
-Vor Aktivierung eines kostenpflichtigen ECHTPREIS-Abos ist zusätzlich ein eigener Checkout-Review Pflicht:
+Vor Aktivierung eines kostenpflichtigen SPARKORB-Abos ist zusätzlich ein eigener Checkout-Review Pflicht:
 - Preis, Abrechnungszeitraum, automatische Verlängerung, Mindestlaufzeit und Kündigungsbedingungen unmittelbar vor Vertragsschluss klar darstellen.
 - Web-Checkout nur mit eindeutig zahlungspflichtiger Bestellschaltfläche.
 - Bei auf der Webseite abschließbaren Dauerschuldverhältnissen die gesetzlich erforderliche Online-Kündigungsmöglichkeit vorsehen.
