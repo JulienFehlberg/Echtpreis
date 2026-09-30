@@ -4,4 +4,7 @@ assert.strictEqual(C.eligible({captureMode:"gallery",challengeId:c.id,challengeN
 assert.strictEqual(C.eligible({captureMode:"live_camera",challengeId:c.id,challengeNonce:c.nonce,challengeExpiresAt:c.expiresAt}).ok,true);
 assert.strictEqual(C.eligible({captureMode:"live_camera",challengeId:c.id,challengeNonce:c.nonce,challengeExpiresAt:c.expiresAt,challengeUsed:true}).ok,false);
 assert.strictEqual(C.eligible({captureMode:"live_camera",challengeId:c.id,challengeNonce:c.nonce,challengeExpiresAt:"2020-01-01T00:00:00Z"},Date.now()).ok,false);
+assert.strictEqual(C.eligible({captureMode:"live_camera",challengeId:c.id,challengeNonce:c.nonce,productId:"p",storeId:"s",challengeExpiresAt:c.expiresAt,expectedChallengeId:c.id,expectedChallengeNonce:c.nonce,expectedProductId:"p",expectedStoreId:"s"}).ok,true);
+assert.strictEqual(C.eligible({captureMode:"live_camera",challengeId:c.id,challengeNonce:"stolen",productId:"p",storeId:"s",challengeExpiresAt:c.expiresAt,expectedChallengeId:c.id,expectedChallengeNonce:c.nonce,expectedProductId:"p",expectedStoreId:"s"}).reason,"capture-nonce-mismatch");
+assert.strictEqual(C.eligible({captureMode:"live_camera",challengeId:c.id,challengeNonce:c.nonce,productId:"other",storeId:"s",challengeExpiresAt:c.expiresAt,expectedChallengeId:c.id,expectedChallengeNonce:c.nonce,expectedProductId:"p",expectedStoreId:"s"}).reason,"capture-product-mismatch");
 console.log("mission-live-capture: ok");
