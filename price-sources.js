@@ -1,6 +1,8 @@
 "use strict";
 const SOURCES={
- "Open Prices":{type:"open_data",baseTrust:78,license:"ODbL",termsUrl:"https://prices.openfoodfacts.org/",attribution:"Open Prices / Open Food Facts",commercialUseStatus:"approved-open-data",active:true},
+ "Open Prices":{type:"open_data",baseTrust:78,license:"ODbL",termsUrl:"https://prices.openfoodfacts.org/",attribution:"Open Prices / Open Food Facts",commercialUseStatus:"approved-open-data",active:true,capabilities:["api","daily-dump","proofs","locations","product-code"]},
+ "Open Food Facts":{type:"product_catalog",baseTrust:82,license:"ODbL",termsUrl:"https://world.openfoodfacts.org/",attribution:"Open Food Facts",commercialUseStatus:"approved-open-data",active:true,capabilities:["gtin","product-name","brand","pack","categories","images"],notes:"Product identity enrichment only; not a current-price source."},
+ "German Supermarket Prices dataset":{type:"aggregated_open_data",baseTrust:65,license:"ODbL",termsUrl:"https://github.com/loukesio/german-supermarket-prices",attribution:"German Supermarket Prices / upstream sources",commercialUseStatus:"review",active:false,capabilities:["multi-retailer","ean","offers","open-prices"],notes:"Candidate discovery source only until provenance, freshness and redistribution terms are reviewed per row/upstream source."},
  "ALDI SÜD":{type:"retailer",baseTrust:96,termsUrl:"https://www.aldi-sued.de/",commercialUseStatus:"review",active:false,notes:"Public product/offer pages verified; production ingestion remains disabled until usage terms are reviewed."},
  "REWE":{type:"retailer",baseTrust:97,termsUrl:"https://www.rewe.de/",commercialUseStatus:"review",active:false,notes:"Public national and market-specific offer pages verified; production ingestion remains disabled until usage terms are reviewed."},
  "EDEKA":{type:"retailer",baseTrust:97,termsUrl:"https://www.edeka.de/",commercialUseStatus:"review",active:false},
