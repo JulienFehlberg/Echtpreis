@@ -1,0 +1,5 @@
+const assert=require("assert"),T=require("../current-price-truth");
+let x=T.fuse([{price:3.99,sourceType:"official_retailer",sourceId:"edeka",storeId:"s1"},{price:3.99,sourceType:"receipt",proof:"receipt:r1",storeId:"s1"},{price:4.99,sourceType:"third_party",sourceId:"x",storeId:"s1"}]);assert.strictEqual(x.price,3.99);assert(x.independentEvidence>=2);
+x=T.fuse([{price:3.99,sourceType:"official_retailer",sourceId:"edeka",storeId:"s1"},{price:3.99,sourceType:"official_retailer",sourceId:"edeka",storeId:"s1"},{price:3.99,sourceType:"official_retailer",sourceId:"edeka",storeId:"s1"}]);assert.strictEqual(x.independentEvidence,1);
+x=T.fuse([{price:3.99,sourceType:"official_retailer",sourceId:"a",storeId:"s1"},{price:3.99,sourceType:"receipt",proof:"receipt:r1",storeId:"s1"},{price:4.99,sourceType:"official_retailer",sourceId:"b",storeId:"s1"},{price:4.99,sourceType:"receipt",proof:"receipt:r2",storeId:"s1"}]);assert.strictEqual(x.state,"conflict");assert.strictEqual(x.price,null);
+console.log("current-price-truth: ok");
