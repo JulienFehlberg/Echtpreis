@@ -1,5 +1,5 @@
 const assert=require("assert"),P=require("../providers/open-prices");
 const raw={id:77,price:3.99,currency:"EUR",date:"2026-09-30",price_is_discounted:true,price_without_discount:4.99,proof_id:8,product:{code:"3017620422003",product_name:"Nutella",brands:"Ferrero",quantity:"450 g"},location:{id:12,name:"EDEKA",city:"Berlin",country:"Deutschland"}};
-const m=P.mapPrice(raw);assert.strictEqual(m.merchant,"EDEKA");assert.strictEqual(m.gtin,"3017620422003");assert.strictEqual(m.priceType,"promotion");assert.strictEqual(m.regularPrice,4.99);assert.strictEqual(m.storeId,"openprices:12");
+const m=P.mapPrice(raw);assert.strictEqual(m.merchant,"EDEKA");assert.strictEqual(m.gtin,"3017620422003");assert.strictEqual(m.priceType,"promotion");assert.strictEqual(m.regularPrice,4.99);assert.strictEqual(m.storeId,null);assert.strictEqual(m.externalLocationId,"openprices:12");
 const x=P.adapt({results:[raw]},{fetchedAt:"2026-09-30T08:00:00Z"});assert.strictEqual(x.accepted.length,1);assert.strictEqual(x.rejected.length,0);assert.strictEqual(x.accepted[0].sourceType,"open_data");assert.strictEqual(x.accepted[0].sourceId,"Open Prices");
 console.log("open-prices-provider: ok");
