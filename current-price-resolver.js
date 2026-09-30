@@ -8,8 +8,9 @@ const CurrentTruth=require("./current-price-truth");
 const PUBLIC_TYPES=new Set(["regular","promotion"]);
 const CONDITIONAL_TYPES=new Set(["loyalty","app","coupon","multi_buy","personalized"]);
 const norm=s=>Identity.norm(s||"");
-function active(r,today){const t=String(today||new Date().toISOString()).slice(0,10),f=r.validFrom&&String(r.validFrom).slice(0,10),to=r.validTo&&String(r.validTo).slice(0,10);return(!f||t>=f)&&(!to||t<=to)}
-function freshnessDays(r,today){const d=r.observedAt||r.date;if(!d)return Infinity;return Math.max(0,(new Date(String(today).slice(0,10))-new Date(String(d).slice(0,10)))/864e5)}
+function day(x){const s=String(x||"").slice(0,10);return/^\d{4}-\d{2}-\d{2}$/.test(s)&&Number.isFinite(Date.parse(s+"T00:00:00Z"))?s:null}
+function active(r,today){const t=day(today||new Date().toISOString()),f=r.validFrom?day(r.validFrom):null,to=r.validTo?day(r.validTo):null;if(!t||(r.validFrom&&!f)||(r.validTo&&!to)||(f&&to&&f>to))return false;return(!f||t>=f)&&(!to||t<=to)}
+function freshnessDays(r,today){const d=day(r.observedAt||r.date),t=day(today);if(!d||!t)return Infinity;const delta=(Date.parse(t+"T00:00:00Z")-Date.parse(d+"T00:00:00Z"))/864e5;return delta<0?Infinity:delta}
 function merchantKey(x){return norm(x).replace(/\b(markt|supermarkt|gmbh|co|kg)\b/g,"").replace(/\s+/g," ").trim()}
 function sameMerchant(a,b){const x=merchantKey(a),y=merchantKey(b);return x&&y&&(x===y||x.startsWith(y)||y.startsWith(x))}
 function queryMode(q){if(q.gtin)return"exact";if(q.brand&&q.pack)return"sku";if(q.brand)return"brand";return"category"}
@@ -64,4 +65,4 @@ function resolveMerchant(query,merchant,rows=[],ctx={}){
 }
 function compare(query,merchants,rows,ctx={}){return(merchants||[]).map(m=>resolveMerchant(query,m,rows,ctx))}
 function leaders(results=[]){const known=results.filter(x=>x&&x.price>0),cash=known.slice().sort((a,b)=>a.price-b.price)[0]||null,unitCandidates=known.filter(x=>x.unitPrice>0&&x.unit),families=new Set(unitCandidates.map(x=>x.unit)),unit=families.size===1?unitCandidates.sort((a,b)=>a.unitPrice-b.unitPrice)[0]||null:null;return{lowestCheckout:cash,lowestUnitPrice:unit,unitComparisonAvailable:families.size===1,unitFamilies:[...families]}}
-module.exports={PUBLIC_TYPES,CONDITIONAL_TYPES,eligible,queryMode,merchantKey,sameMerchant,active,freshnessDays,identity,identityKey,location,resolveMerchant,compare,leaders};
+module.exports={PUBLIC_TYPES,CONDITIONAL_TYPES,day,eligible,queryMode,merchantKey,sameMerchant,active,freshnessDays,identity,identityKey,location,resolveMerchant,compare,leaders};
