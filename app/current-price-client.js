@@ -140,6 +140,6 @@ function create(options={}){
  return Object.freeze({compare,clearCache(){generation++;cache.clear()},cacheInfo(){expired(now());return{entries:cache.size,inflight:pending.size,ttlMs,maxEntries}}});
 }
 const api=Object.freeze({create,normalizeDecision,normalizeResponse,toComparablePrice,parsePack});
-if(root)root.EchtpreisCurrentPriceClient=api;
+if(root)root.SparkorbCurrentPriceClient=api;
 if(typeof module==="object"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
