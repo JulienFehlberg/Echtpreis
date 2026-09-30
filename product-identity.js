@@ -1,7 +1,7 @@
 "use strict";
 const crypto=require("crypto");
 const STOP=new Set(["der","die","das","und","mit","von","im","in","fur","fuer","neu","aktion","angebot"]);
-function norm(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9%]+/g," ").replace(/\s+/g," ").trim()}
+function norm(s){return String(s||"").toLowerCase().replace(/(\d),(\d)/g,"$1.$2").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9.%]+/g," ").replace(/\s+/g," ").trim()}
 function tokens(s){return norm(s).split(" ").filter(x=>x.length>1&&!STOP.has(x))}
 function gtinValid(x){const s=String(x||"").replace(/\D/g,"");if(![8,12,13,14].includes(s.length))return false;let sum=0,odd=true;for(let i=s.length-2;i>=0;i--){sum+=Number(s[i])*(odd?3:1);odd=!odd}return(10-sum%10)%10===Number(s.at(-1))}
 function parsePack(s){
