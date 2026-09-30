@@ -2,13 +2,13 @@ const fs=require("fs"),vm=require("vm"),assert=require("assert");
 const html=fs.readFileSync("index.html","utf8");
 const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(x=>x.trim());
 assert(scripts.length>=3,"inline scripts missing");
-scripts.forEach((code,i)=>{assert.doesNotThrow(()=>new vm.Script(code,{filename:"echtpreis-inline-"+(i+1)+".js"}),"inline script "+(i+1)+" syntax");});
+scripts.forEach((code,i)=>{assert.doesNotThrow(()=>new vm.Script(code,{filename:"sparkorb-inline-"+(i+1)+".js"}),"inline script "+(i+1)+" syntax");});
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.strictEqual(new Set(ids).size,ids.length,"duplicate HTML ids");
 ["productInput","addBtn","compareBtn","demoListBtn","list","stores","results","receiptFile","receiptStore","receiptDate","finishPurchaseBtn","reviewRows","ocrStatus","receiptTotalCheck","receiptStoreDetail","receiptPaymentDetail","receiptInsight","receiptInsightTitle","statsAverage","statsBreakdown","statsTrend","statsDiscoveries","statsRecent","statsInsight","feedbackText","feedbackSend","feedbackStatus","homePulse","homePulseTitle","homePulseDetail"].forEach(id=>assert(ids.includes(id),"missing required element #"+id));
 assert(!html.includes('addEventListener("click",compareStable)'),"legacy compare engine is still bound");
 assert(!html.includes('var demo=byId("demoListBtn")'),"obsolete demo handler is still bound");
-assert(html.includes("window.addEchtpreisItem"),"single-basket bridge missing");
-assert(html.includes("window.replaceEchtpreisList"),"saved-list bridge missing");
+assert(html.includes("window.addSparkorbItem"),"single-basket bridge missing");
+assert(html.includes("window.replaceSparkorbList"),"saved-list bridge missing");
 assert(html.includes("rawForAmount"),"decimal-comma quantity parser missing");
 assert(html.includes('|stk|pcs?|x|packungen?|packs?'),"shopping quantity parser should accept pc/pcs piece notation");
 assert(html.includes("receiptCandidateScore"),"multi-pass receipt scoring missing");
@@ -21,12 +21,12 @@ assert(itemNameGuardStart>=0&&itemNameGuardBlock.includes("endsumme|rechnungsbet
 assert(html.includes("comparisonQuality"),"comparison confidence labelling missing");
 assert(!html.includes("compareStable"),"obsolete duplicate comparison engine must stay removed");
 assert(html.includes('history.sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.trust||0)-Number(a.trust||0)||a.price-b.price)'),"historical fallback must prioritize freshness and trust");
-assert(html.includes("echtpreis_openprices_sync_by_key_v3"),"Open Prices should be cached per product and location scope");
+assert(html.includes("sparkorb_openprices_sync_by_key_v3"),"Open Prices should be cached per product and location scope");
 assert(html.includes("const keys=[...new Set(basket.map(w=>w.key).filter(Boolean))]"),"manual compare should derive and deduplicate basket price categories");
 assert(!html.includes("syncSharedData();ingestOpenPrices();"),"startup must not fetch the full Open Prices catalog");
 assert(html.includes('<script src="app/config.js"></script>'),"store-ready config layer missing");
 assert(html.includes('<script src="app/runtime.js"></script>'),"platform runtime layer missing");
-assert(html.includes("window.EchtpreisRuntime"),"location flow must use the platform runtime");
+assert(html.includes("window.SparkorbRuntime"),"location flow must use the platform runtime");
 assert(html.includes('href="privacy.html"'),"privacy entry point missing");
 assert(html.includes('rel="manifest"'),"installable web-app manifest missing");
 assert(html.includes('apple-mobile-web-app-capable'),"iOS home-screen metadata missing");
@@ -36,7 +36,7 @@ assert(html.includes("function buildReceiptInsight"),"personal receipt insight e
 assert(html.includes("function renderStatsBreakdown"),"monthly spending breakdown missing");
 assert(html.includes("sicher kategorisiert"),"spending breakdown confidence coverage missing");
 assert(html.includes('x.category!=="Sonstiges"'),"uncertain categories must not drive post-scan category facts");
-assert(html.includes("echtpreis_insight_history_v1"),"personal insight history missing");
+assert(html.includes("sparkorb_insight_history_v1"),"personal insight history missing");
 assert(html.includes("function renderStatsCategoryChanges"),"monthly category-change analysis missing");
 assert(html.includes("function renderStatsYearTrend"),"fair year-to-date comparison missing");
 assert(html.includes('id="statsMore"'),"advanced statistics should be grouped for mobile readability");
@@ -56,7 +56,7 @@ assert(html.includes("function renderHomePulse"),"personal home pulse missing");
 assert(html.includes('API_BASE+"/v1/feedback"'),"tester feedback endpoint is not wired into the UI");
 assert(html.includes('id="receiptAiButton"')&&html.includes("Foto wird an OpenAI gesendet"),"receipt AI fallback must disclose external image processing before the user taps");
 assert(html.includes('/v1/receipt-vision/status'),"receipt AI button must stay hidden until backend vision is configured");
-assert(html.includes("echtpreis_feedback_queue_v1"),"offline feedback queue missing");
+assert(html.includes("sparkorb_feedback_queue_v1"),"offline feedback queue missing");
 assert(html.includes("flushFeedbackQueue"),"queued feedback retry missing");
 assert(html.includes("items:valid.map"),"local receipt history must retain line items for future insights");
 assert(html.includes("typicalQty=medianNumber(priorQty)"),"household forecast must normalize latest quantity against typical purchase quantity");
@@ -81,7 +81,7 @@ assert(html.includes("combineReceiptCandidates")&&html.includes(".96,.48")&&html
 assert(html.includes("const pending=Promise.allSettled")&&html.includes("comparisonRefreshPromise=pending")&&html.includes("comparisonRefreshPromise===pending"),"shopping comparison should render cache-first without an older refresh clearing a newer one");
 assert(html.includes("await loadCanonicalComparison(compareBasket")&&html.includes('<script src="app/current-price-client.js"></script>'),"basket comparison must use the canonical server price client");
 assert(html.includes("comparisonRefreshPromise"),"concurrent background comparison refreshes should be deduplicated");
-assert(html.includes("echtpreis_nearby_store_cache_v1"),"nearby stores should persist across sessions for fast repeat comparisons");
+assert(html.includes("sparkorb_nearby_store_cache_v1"),"nearby stores should persist across sessions for fast repeat comparisons");
 
 
 
@@ -132,7 +132,7 @@ assert(html.includes('im Schnitt "+eur(avg)+" pro Einkauf'),"monthly receipt ins
 assert(html.includes('type:"favorite-store"')&&html.includes('type:"favorite-product"'),"stats profile should learn recurring stores and products");
 assert(html.includes('type:"personal-price-move"')&&html.includes('keine allgemeine Marktpreisaussage'),"personal price movement insight must stay scoped to user receipts");
 assert(html.includes('type:"shopping-day"')&&html.includes('type:"category-spend"'),"stats profile should learn shopping day and category patterns");
-assert(html.includes('echtpreis_recent_stats_insights_v1'),"stats insights should rotate instead of showing the same fact every time");
+assert(html.includes('sparkorb_recent_stats_insights_v1'),"stats insights should rotate instead of showing the same fact every time");
 
 assert(html.includes('Datenabdeckung')&&html.includes('deiner Monatsausgaben sind Einzelpositionen zugeordnet'),"monthly breakdown must disclose receipt item coverage");
 assert(html.includes('Gesamtausgaben')&&html.includes('noch nicht einzelnen Artikeln zugeordnet'),"monthly breakdown must separate total spend from recognized item spend");
@@ -149,7 +149,7 @@ assert(html.includes('x.store&&x.store!==current.store'),"personal savings compa
 
 assert(html.includes('coverage>=.7&&currentCoverage>=.8'),"receipt savings claim must require at least 70% basket-value and 80% current-price coverage");
 assert(html.includes('Nur ausreichend aktuelle, nicht bloß historische/Richtwert-Preise'),"receipt analysis must explain current-price quality gate");
-assert(html.includes('deshalb zeigt ECHTPREIS noch keine Warenkorb-Ersparnis'),"weak partial comparisons must not claim basket savings");
+assert(html.includes('deshalb zeigt SPARKORB noch keine Warenkorb-Ersparnis'),"weak partial comparisons must not claim basket savings");
 
 assert(html.includes('id="statsSavingsEvidence"'),"stats should expose evidence-aware savings section");
 assert(html.includes('currentReceiptSavingMeta={store:best.store'),"receipt savings must persist comparison evidence metadata");
@@ -180,7 +180,7 @@ assert(html.includes('data-need-add')&&html.includes('+ Liste'),"recurring need 
 assert(html.includes('dein Tiefpreis')&&html.includes('zuletzt '+"'"+'+eur(x.last.price)'),"need suggestions should include personal price memory");
 assert(html.includes('Du entscheidest selbst, was auf die Liste kommt.'),"smart list suggestions must remain user controlled");
 
-assert(html.includes('echtpreis_open_purchase_plan_v1')&&html.includes('saveOpenPurchasePlan'),"price comparison should preserve the planned basket for later receipt reconciliation");
+assert(html.includes('sparkorb_open_purchase_plan_v1')&&html.includes('saveOpenPurchasePlan'),"price comparison should preserve the planned basket for later receipt reconciliation");
 assert(html.includes('PLAN VS. WIRKLICHKEIT')&&html.includes('buildPlanVsReceipt'),"receipt analysis should reconcile planned and actual purchases");
 assert(html.includes('Zusätzlich gekauft')&&html.includes('Nicht auf dem Beleg erkannt'),"plan reconciliation should surface extras and missing planned products");
 assert(html.includes('planComparison:buildPlanVsReceipt'),"new receipts should persist plan comparison evidence");
@@ -211,7 +211,7 @@ assert(html.includes('cheap.length')&&html.includes('expensive.length'),"persona
 assert(html.includes('id="receiptHeroInsight"')&&html.includes('DAS WICHTIGSTE')&&html.includes('strongestReceiptInsight'),"receipt should lead with one strongest personal aha insight");
 assert(html.includes('score:98')&&html.includes('score:96')&&html.includes('score:94'),"hero insight should prioritize supported savings, personal price anomalies and plan extras");
 assert(html.includes('Beleg-Gesamtsumme')&&html.includes('maßgebliche Ausgabe'),"hero fallback must preserve printed receipt total as source of truth");
-assert(html.includes('Dieser Beleg hat ECHTPREIS beigebracht'),"saved receipt should explain the value learned from scanning");
+assert(html.includes('Dieser Beleg hat SPARKORB beigebracht'),"saved receipt should explain the value learned from scanning");
 assert(html.includes('history.length?"💡 "+history[0].title'),"home pulse should lead with the latest personal shopping discovery");
 
 assert(html.includes('BEIM NÄCHSTEN EINKAUF')&&html.includes('receiptNextMove'),"receipt analysis should turn insight into a concrete next-shopping action");
