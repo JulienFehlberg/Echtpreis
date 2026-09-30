@@ -18,7 +18,7 @@ async function main(){
  assert(database.pathname.endsWith("_test"),"Use a dedicated database whose name ends in _test");
  const pool=new Pool({connectionString,ssl:false,connectionTimeoutMillis:5000});
  const originalFetchPage=OpenPricesClient.fetchPage;let sourceCalls=0;
- OpenPricesClient.fetchPage=async input=>{sourceCalls++;assert.equal(input.orderBy,"-date");assert.equal(input.locationId,"12");return{url:"https://example.test/latest-price",page:1,pages:1,accepted:[{merchant:"EDEKA",product:"Nutella",brand:"Ferrero",pack:"450 g",gtin:"3017620422003",externalProductId:"openprices:3017620422003",externalLocationId:"openprices:12",price:3.99,priceType:"regular",currency:"EUR",observedAt:"2026-09-30T12:00:00Z",source:"Open Prices",sourceId:"Open Prices",sourceType:"open_data",proof:"openprices:proof:107",proofHash:"refresh-image",proofActor:"refresh-observer",truthEligible:true,registryTrust:80}],rejected:[]}};
+ OpenPricesClient.fetchPage=async input=>{sourceCalls++;assert.equal(input.orderBy,"-date");assert.equal(input.locationId,"12");const raw={id:107,type:"PRODUCT",product_code:"3017620422003",product_id:230001,product:{id:230001,code:"3017620422003",product_name:"Nutella",brands:"Ferrero",quantity:"450 g",source:"off"},location_id:12,location_osm_id:120001,location_osm_type:"NODE",location:{id:12,type:"OSM",osm_id:120001,osm_type:"NODE",osm_brand:"EDEKA",osm_name:"EDEKA",osm_tag_key:"shop",osm_tag_value:"supermarket",osm_address_city:"Berlin",osm_address_country:"Deutschland",osm_address_country_code:"DE",osm_address_postcode:"10115",osm_display_name:"EDEKA, Engine Test 1, Berlin, 10115, Deutschland",osm_lat:52.52,osm_lon:13.405},price:3.99,price_is_discounted:false,currency:"EUR",date:"2026-09-30",proof_id:107,proof:{id:107,location_id:12,type:"PRICE_TAG",draft:false,image_md5_hash:"e".repeat(32),date:"2026-09-30",currency:"EUR",owner:"refresh-fixture-observer",location_osm_id:120001,location_osm_type:"NODE"},owner:"refresh-fixture-observer",duplicate_of:null};return{url:"https://example.test/latest-price",page:1,pages:1,rawItems:[raw],accepted:[],rejected:[]}};
  const api=require("../server");
  let testError;
  try{
@@ -32,7 +32,7 @@ async function main(){
   const merchantId=randomUUID(),storeId=randomUUID(),productId=randomUUID();
   const today="2026-09-30",gtin="3017620422003",region="Berlin, DE";
   await pool.query("INSERT INTO merchants(id,name,normalized_name) VALUES($1,'EDEKA','edeka')",[merchantId]);
-  await pool.query("INSERT INTO stores(id,merchant_id,address,postal_code,city,region) VALUES($1,$2,'Engine Test 1','10115','Berlin',$3)",[storeId,merchantId,region]);
+  await pool.query("INSERT INTO stores(id,merchant_id,external_id,address,postal_code,city,region) VALUES($1,$2,'osm:node:120001','Engine Test 1','10115','Berlin',$3)",[storeId,merchantId,region]);
   await pool.query("INSERT INTO products(id,canonical_key,gtin,name,brand,pack_amount,pack_unit,pack_count,identity_status) VALUES($1,$2,$3,'Nutella','Ferrero',450,'g',1,'verified')",[productId,"gtin:"+gtin,gtin]);
   await pool.query("INSERT INTO external_store_mappings(source_id,external_location_id,store_id,status,confidence,match_reason,verified_at) VALUES('Open Prices','openprices:12',$1,'verified',1,'e2e-canonical-store',now())",[storeId]);
 
@@ -102,6 +102,7 @@ async function main(){
   const canonicalClient=CurrentClient.create({apiBase:baseUrl,fetchImpl:fetch});
   const decision=await canonicalClient.compare({product:"Nutella",brand:"Ferrero",pack:"450 g",gtin,productId,merchants:["EDEKA"]},{today,storeIds:{EDEKA:storeId},quantity:1,refresh:true});
   assert.equal(decision.ok,true);assert.equal(decision.results[0].state,"verified");assert.equal(sourceCalls,1);
+  const refreshedRow=(await pool.query("SELECT product_id,store_id,region,status,proof_verified FROM price_observations WHERE proof='openprices:proof:107'")).rows[0];assert(refreshedRow,"On-demand must actually persist its validated raw source evidence");assert.equal(refreshedRow.product_id,productId);assert.equal(refreshedRow.store_id,storeId);assert.equal(refreshedRow.region,region);assert.equal(refreshedRow.status,"observed");assert.equal(refreshedRow.proof_verified,false);
   const comparable=CurrentClient.toComparablePrice(decision.results[0],"kg");assert(Math.abs(comparable.price*.45-3.99)<1e-9);assert.equal(comparable.productId,productId);assert.equal(comparable.storeId,storeId);
   const unsupported=await current({productId,pack:"750 g"});assert.equal(unsupported.state,"unknown");assert.equal(unsupported.price,null);
   const denied=await fetch(baseUrl+"/v1/price-missions/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({submissionId:randomUUID(),storeMatch:true,productMatch:true,proofValid:true})});assert.equal(denied.status,403);
