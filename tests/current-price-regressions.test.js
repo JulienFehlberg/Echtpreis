@@ -10,3 +10,4 @@ const rows=[
 const result=R.resolveMerchant({name:"Butter 250g"},"EDEKA",rows,{today:"2026-09-30",storeId:"s"});assert(result.price>0);assert.notStrictEqual(result.reason,"conflicting-current-evidence");
 const leaders=R.leaders([{price:2,unitPrice:4,unit:"kg"},{price:1,unitPrice:1,unit:"piece"}]);assert.strictEqual(leaders.lowestUnitPrice,null);assert.strictEqual(leaders.unitComparisonAvailable,false);
 console.log("current-price-regressions: ok");
+assert.strictEqual(R.location({externalLocationId:"openprices:12",region:"Berlin"},{storeId:"canonical-store",region:"Berlin"}).level,"external-store-unmapped");assert.strictEqual(R.location({externalLocationId:"openprices:12",region:"Berlin"},{storeId:"canonical-store",region:"Berlin"}).score,0);
