@@ -1,4 +1,5 @@
 "use strict";
+const Semantics=require("./source-semantics");
 const TYPE={pos_feed:.995,official_retailer:.96,retailer_feed:.94,receipt:.90,shelf:.90,open_data:.78,catalog:.76,third_party:.62,unknown:.50};
 const ALIAS={first_party_receipt:"receipt",first_party_shelf:"shelf",retailer:"official_retailer",official:"official_retailer",pos:"pos_feed",official_pos:"pos_feed"};
 function sourceType(r={}){const t=String(r.sourceType||r.kind||"unknown").toLowerCase();return ALIAS[t]||t}
@@ -13,7 +14,7 @@ function dedupe(rows=[]){const m=new Map();for(const r of rows){const k=fingerpr
 function independent(rows=[]){return dedupe(rows).length}
 function median(a){const x=a.slice().sort((p,q)=>p-q),n=x.length;if(!n)return null;return n%2?x[(n-1)/2]:(x[n/2-1]+x[n/2])/2}
 function fuse(rows=[],opts={}){
- const clean=dedupe(rows.filter(r=>Number(r.price)>0));if(!clean.length)return{state:"unknown",reason:"no-evidence",price:null,evidence:[]};
+ const priced=rows.filter(r=>Number(r.price)>0),eligible=priced.filter(Semantics.truthEligible),clean=dedupe(eligible);if(!clean.length)return{state:"unknown",reason:priced.length?"no-truth-eligible-evidence":"no-evidence",price:null,evidence:[],blockedEvidence:priced.length-eligible.length};
  const tolerance=Number(opts.tolerance??.015),groups=[];
  for(const r of clean){let g=groups.find(g=>Math.abs(Number(r.price)-g.center)/g.center<=tolerance);if(!g){g={rows:[],center:Number(r.price)};groups.push(g)}g.rows.push(r);g.center=median(g.rows.map(x=>Number(x.price)))}
  const scored=groups.map(g=>{const indep=g.rows.length,strength=g.rows.reduce((s,r)=>s+base(r),0),types=new Set(g.rows.map(sourceType)).size;return{...g,independent:indep,sourceTypes:types,strength:strength+Math.min(.35,(indep-1)*.12)+Math.min(.18,(types-1)*.06)}}).sort((a,b)=>b.strength-a.strength);
@@ -21,4 +22,4 @@ function fuse(rows=[],opts={}){
  const authoritativeSingle=best.independent===1&&best.rows.some(r=>["pos_feed","official_retailer","retailer_feed"].includes(sourceType(r)))&&base(best.rows[0])>=.94;
  return{state:best.independent>=2||authoritativeSingle?"supported":"observed",reason:best.independent>=2?"independent-consensus":authoritativeSingle?"authoritative-source":"strongest-evidence",price:best.center,evidence:best.rows,independentEvidence:best.independent,sourceTypes:best.sourceTypes,strength:best.strength};
 }
-module.exports={TYPE,ALIAS,sourceType,truthTier,actor,scope,productScope,proofKey,base,fingerprint,dedupe,independent,median,fuse};
+module.exports={TYPE,ALIAS,sourceType,truthTier,actor,scope,productScope,proofKey,base,fingerprint,dedupe,independent,median,fuse,truthEligible:Semantics.truthEligible};
