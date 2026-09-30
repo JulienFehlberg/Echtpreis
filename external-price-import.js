@@ -1,12 +1,13 @@
 "use strict";
 const crypto=require("crypto");
 const ExternalStore=require("./external-store-matcher");
+const ProductIdentity=require("./product-identity");
 function key(x){return x.gtin?"gtin:"+x.gtin:"raw:"+String(x.product||"").toLowerCase().replace(/[^a-z0-9äöüß]+/gi," ").trim()}
 function date(x){const d=String(x.observedAt||"").slice(0,10);return d||new Date().toISOString().slice(0,10)}
 function observation(x,batchId,meta={}){
  return{
   id:crypto.randomUUID(),key:key(x),store:x.merchant||null,storeId:x.storeId||null,externalLocationId:x.externalLocationId||null,
-  productId:x.productId||null,externalProductId:x.externalProductId||null,gtin:x.gtin||null,price:Number(x.price),per:"item",date:date(x),
+  productId:x.productId||null,externalProductId:x.externalProductId||null,gtin:ProductIdentity.gtinValid(x.gtin)?String(x.gtin).replace(/\D/g,""):null,price:Number(x.price),per:"item",date:date(x),
   kind:"external",source:x.source||meta.source||"external",product:x.product||null,proof:x.proof||null,proofType:x.proofType||null,
   observedAt:x.observedAt||null,validFrom:x.validFrom||null,validTo:x.validTo||null,priceType:x.priceType||"regular",
   regularPrice:Number(x.regularPrice)>0?Number(x.regularPrice):null,minQuantity:Number(x.minQuantity)>1?Number(x.minQuantity):null,currency:x.currency||"EUR",trust:Number(x.registryTrust||0),status:"observed",
