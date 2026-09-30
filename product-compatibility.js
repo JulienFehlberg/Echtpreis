@@ -4,7 +4,7 @@ const RULES={
  meat:{beef:["rind","rinder","beef"],pork:["schwein","schweine","pork"],mixed:["gemischt","halb halb","halb/halb"],poultry:["hahnchen","haehnchen","huhn","pute","geflugel"]},
  production:{organic:["bio","bioland","demeter","naturland"],conventional:[]},
  state:{frozen:["tiefkuhl","tiefgek","tk ","gefroren"],fresh:["frisch"]},
- sugar:{zero:["zero","zuckerfrei","ohne zucker"],regular:[]},
+ sugar:{zero:["zero","zuckerfrei","ohne zucker"],regular:["original","classic","klassik"]},
  fat:{lowfat:["fettarm","light","1,5%","1.5%"],fullfat:["3,5%","3.5%","vollmilch"]}
 };
 function hasAny(s,words){const n=norm(s);return words.some(w=>n.includes(norm(w)))}
