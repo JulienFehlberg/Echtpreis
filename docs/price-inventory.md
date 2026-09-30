@@ -26,8 +26,8 @@ Konfiguration:
 | `PRICE_INVENTORY_ENABLED` | aktiviert | `false` deaktiviert den automatischen Inventarlauf. |
 | `PRICE_INVENTORY_MAX_PAGES` | `20` | Seitenbudget je Lauf, auf 1–20 begrenzt. |
 | `PRICE_INVENTORY_INTERVAL_MS` | `3600000` | Abstand zwischen vollständig beendeten Scans. |
-| `ECHTPREIS_INVENTORY_TOKEN` | keiner | Bearer-Token ausschließlich für den Inventar-Refresh. |
-| `ECHTPREIS_ADMIN_TOKEN` | keiner | Übergeordneter administrativer Bearer-Token. |
+| `SPARKORB_INVENTORY_TOKEN` | keiner | Bearer-Token ausschließlich für den Inventar-Refresh. |
+| `SPARKORB_ADMIN_TOKEN` | keiner | Übergeordneter administrativer Bearer-Token. |
 
 ## Identitäten und Preisbedeutung
 
