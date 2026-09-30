@@ -12,6 +12,7 @@ const ReceiptFacts=require("./receipt-price-facts");
 const ShelfFacts=require("./shelf-price-facts");
 const StoreResolver=require("./store-resolver");
 const StoreConfirmation=require("./store-confirmation");
+const StoreAliasLearning=require("./store-alias-learning");
 const pool=process.env.DATABASE_URL?new Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DATABASE_URL.includes("localhost")?false:{rejectUnauthorized:false}}):null;
 const PORT=process.env.PORT||10000,DB_FILE=process.env.ECHTPREIS_DB_FILE||path.join("/tmp","echtpreis-db.json");
 function load(){try{return JSON.parse(fs.readFileSync(DB_FILE,"utf8"))}catch(e){return{observations:[],aliases:[]}}}
@@ -25,6 +26,9 @@ async function materializeReceiptPrices(receiptId){
  const items=(await pool.query('SELECT id,raw_name AS "rawName",product_id AS "productId",product_key AS "productKey",gtin,match_confidence AS "matchConfidence",line_total::float AS "lineTotal",price::float,item_count::float AS "itemCount",pack_amount::float AS "packAmount",pack_unit AS "packUnit",price_type AS "priceType",is_adjustment AS "isAdjustment",is_deposit AS "isDeposit" FROM receipt_items WHERE receipt_id=$1',[receiptId])).rows;
  let accepted=0,rejected=0;if(!["verified","resolved","user_verified"].includes(receipt.storeResolutionState))return{accepted:0,rejected:items.length,reason:"store-unresolved"};for(const item of items){const x=ReceiptFacts.observation(receipt,item);if(!x){rejected++;continue}try{const q=await pool.query("INSERT INTO price_observations(id,key,store,store_id,product_id,gtin,price,per,date,kind,source,product,proof,proof_type,observed_at,price_type,trust,status,pack_amount,pack_unit) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) ON CONFLICT DO NOTHING",[x.id,x.key,x.store,x.storeId,x.productId,x.gtin,x.price,x.per,x.date,x.kind,x.source,x.product,x.proof,x.proofType,x.observedAt,x.priceType,x.trust,x.status,x.packAmount,x.packUnit]);if(q.rowCount)accepted++;else rejected++}catch(e){rejected++}}
  return{accepted,rejected};
+}
+async function learnedStoreAlias(merchant,aliasType,aliasValue){
+ if(!pool||!merchant||!aliasType||!aliasValue)return{state:"unknown",storeId:null};const q=await pool.query('SELECT store_id AS "storeId",receipt_id AS "receiptId",contributor_id AS "contributorId" FROM store_alias_evidence WHERE lower(merchant_name)=lower($1) AND alias_type=$2 AND alias_value=$3 ORDER BY created_at DESC LIMIT 100',[merchant,aliasType,aliasValue]);return StoreAliasLearning.summarize(q.rows);
 }
 async function resolveStore(input={}){
  if(!pool)return{state:"unresolved",storeId:null,confidence:0,reason:"no-database"};const q=await pool.query('SELECT s.id,s.external_id AS "externalId",s.address,s.postal_code AS "postalCode",s.city,s.region,m.name AS merchant FROM stores s JOIN merchants m ON m.id=s.merchant_id WHERE s.active=true AND (lower(m.name)=lower($1) OR lower(m.normalized_name)=lower($1) OR lower($1) LIKE \'%\'||lower(m.normalized_name)||\'%\') LIMIT 100',[clean(input.merchant)]);return StoreResolver.resolve(input,q.rows);
