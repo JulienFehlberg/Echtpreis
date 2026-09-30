@@ -6,6 +6,9 @@ function params(input={}){
  const p=new URLSearchParams();p.set("page",String(Math.max(1,Number(input.page)||1)));p.set("size",String(Math.min(100,Math.max(1,Number(input.size)||50))));
  if(input.productCode)p.set("product_code",String(input.productCode).replace(/\D/g,""));
  if(input.locationId)p.set("location_id",String(input.locationId));
+ if(["date","-date","created","-created","id","-id"].includes(input.orderBy))p.set("order_by",input.orderBy);
+ if(input.currency==="EUR")p.set("currency","EUR");
+ if(/^\d{4}-\d{2}-\d{2}$/.test(String(input.since||"")))p.set("date__gte",input.since);
  return p;
 }
 function nextPage(result={}){const page=Number(result.page||1),pages=Number(result.pages||1);return page<pages?page+1:null}

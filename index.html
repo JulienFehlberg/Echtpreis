@@ -15,7 +15,8 @@ function echtpreisSelfCheck(){try{const required=["list","compareBtn","results",
 let echtpreisInstallEvent=null;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();echtpreisInstallEvent=e});window.addEventListener("appinstalled",()=>{echtpreisInstallEvent=null;try{localStorage.setItem("echtpreis_installed","1")}catch(_){}});window.echtpreisInstallPrompt=async()=>{if(!echtpreisInstallEvent)return false;const e=echtpreisInstallEvent;echtpreisInstallEvent=null;await e.prompt();const choice=await e.userChoice;return choice?.outcome==="accepted"};
 window.echtpreisHealthCheck=echtpreisSelfCheck;window.addEventListener("load",()=>setTimeout(echtpreisSelfCheck,50),{once:true});
 </script>
-<script src="app/runtime.js"></script>\n<script src="app/price-engine.js"></script>\n<script src="app/price-source-adapters.js"></script>
+<script src="app/runtime.js"></script>\n<script src="app/price-engine.js"></script>
+<script src="app/current-price-client.js"></script>\n<script src="app/price-source-adapters.js"></script>
 <script>window.echtpreisLocalDateKey=window.EchtpreisRuntime?.localDateKey||function(date){var d=date instanceof Date?date:new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};</script>
 <style>
 *{box-sizing:border-box} body{margin:0;background:#f3f5f4;color:#101513;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -804,7 +805,7 @@ function canonicalStoreName(store){
  return raw;
 }
 function normalizeObservation(x){
- return {id:x.id||("ep_"+Date.now()+"_"+Math.random().toString(36).slice(2)),key:x.key||null,store:canonicalStoreName(x.store),price:Number(x.price),per:x.per||"piece",date:x.date||null,validTo:x.validTo||null,region:x.region||null,lat:x.lat!=null&&Number.isFinite(Number(x.lat))?Number(x.lat):null,lon:x.lon!=null&&Number.isFinite(Number(x.lon))?Number(x.lon):null,kind:x.kind||"community",source:x.source||"ECHTPREIS Beleg",product:x.product||x.key||"Unbekannt",proof:x.proof||null,locationId:x.locationId||null,trust:Number(x.trust||0),status:x.status||"observed"};
+ return {id:x.id||("ep_"+Date.now()+"_"+Math.random().toString(36).slice(2)),key:x.key||null,store:canonicalStoreName(x.store),price:Number(x.price),per:x.per||"piece",date:x.date||String(x.observedAt||"").slice(0,10)||null,observedAt:x.observedAt||x.date||null,validFrom:x.validFrom||null,validTo:x.validTo||null,priceType:x.priceType||"regular",minQuantity:x.minQuantity??x.quantityRequired??null,regularPrice:x.regularPrice??null,gtin:x.gtin||null,productId:x.productId||null,storeId:x.storeId||null,proofHash:x.proofHash||x.mediaHash||x.contentHash||null,proofActor:x.proofActor||x.contributorId||null,sourceType:x.sourceType||null,truthEligible:x.truthEligible,sourceHealthState:x.sourceHealthState||null,sourceHealthScore:x.sourceHealthScore??null,isOutlier:x.isOutlier===true,region:x.region||null,lat:x.lat!=null&&Number.isFinite(Number(x.lat))?Number(x.lat):null,lon:x.lon!=null&&Number.isFinite(Number(x.lon))?Number(x.lon):null,kind:x.kind||"community",source:x.source||"ECHTPREIS Beleg",product:x.product||x.key||"Unbekannt",proof:x.proof||null,locationId:x.locationId||null,trust:Number(x.trust||0),status:x.status||"observed"};
 }
 function freshnessDays(x){return x.kind==="official"?null:7}
 function usableObservation(x){
@@ -865,15 +866,8 @@ function plausibleObservationPrice(x){const b=pricePlausibilityBounds(x&&x.key);
 function trustedPrice(key,store,wish=null){
  store=canonicalStoreName(store);let rows=dataEngine().filter(x=>x.key===key&&x.store===store&&plausibleObservationPrice(x));if(wish&&wish.choice&&Object.keys(wish.choice).length)rows=rows.filter(x=>choiceMatchesProductText(wish.choice,x.product||""));
  if(wish&&wish.matchMode==="exact"&&wish.exactBrand){const brand=normalizeProduct(wish.exactBrand);rows=rows.filter(x=>normalizeProduct(x.product||"").includes(brand))}
- const ranked=window.EchtpreisPriceEngine?.rankObservations(rows,{today:localDateKey(),lat:verifiedPriceLocation?.lat,lon:verifiedPriceLocation?.lon,distanceKm});
- if(ranked&&ranked.confidenceScore>=62)return ranked;
- const newestFirst=a=>a.sort((x,y)=>String(y.date||"").localeCompare(String(x.date||""))||Number(y.trust||0)-Number(x.trust||0)||x.price-y.price);
- const official=newestFirst(rows.filter(x=>x.kind==="official"&&x.trust>=90));if(official.length)return {...official[0],confidence:"hoch",confidenceScore:85};
- const open=newestFirst(rows.filter(x=>x.kind==="openprices"&&x.proof&&x.trust>=70&&(!verifiedPriceLocation||x.lat!=null&&x.lon!=null&&distanceKm(verifiedPriceLocation.lat,verifiedPriceLocation.lon,x.lat,x.lon)<=50)));if(open.length)return {...open[0],confidence:"mittel",confidenceScore:72};
- const groups={};rows.filter(x=>x.kind==="community"&&x.proof).forEach(x=>{let k=[x.price,x.per,x.date].join("|");(groups[k]??=[]).push(x)});
- const confirmed=Object.values(groups).filter(g=>new Set(g.map(x=>x.proof)).size>=2).sort((a,b)=>String(b[0].date||"").localeCompare(String(a[0].date||""))||b.length-a.length||Number(b[0].trust||0)-Number(a[0].trust||0));
- if(confirmed.length){let x=confirmed[0][0];return {...x,source:"ECHTPREIS Community · "+confirmed[0].length+" unabhängige Nachweise",trust:85,status:"confirmed",confidence:"mittel",confidenceScore:70}}
- return null;
+ const ranked=window.EchtpreisPriceEngine?.rankObservations(rows,{today:localDateKey(),maxAgeDays:7,quantity:Number(wish?.packCount??1),lat:verifiedPriceLocation?.lat,lon:verifiedPriceLocation?.lon,distanceKm});
+ return ranked&&ranked.confidenceScore>=62&&!(ranked.conflictCount>0)?ranked:null;
 }
 
 function exactBrandFallbackPrice(key,store,wish){
@@ -895,10 +889,10 @@ function relevantDealSignal(wish,offer){
 }
 let priceLookupMemo=new Map();
 function resetPriceLookupMemo(){priceLookupMemo.clear()}
-function priceWishSignature(w){return JSON.stringify([w?.key,w?.matchMode,w?.exactBrand,w?.choice||{}])}
+function priceWishSignature(w){return JSON.stringify([w?.key,w?.matchMode,w?.exactBrand,w?.choice||{},w?.packCount,w?.calcAmount,w?.packLabel,w?.ean])}
 function activePrice(key,store,wish=null){
  dataEngine();store=canonicalStoreName(store);const cacheKey=[dataEngineCacheVersion,key,store,priceWishSignature(wish)].join("|");if(priceLookupMemo.has(cacheKey))return priceLookupMemo.get(cacheKey);
- let result=null;if(storeCanCarry(store,wish,key)){const verified=trustedPrice(key,store,wish);result=(store==="dm"||store==="Rossmann")?verified:(wish&&wish.matchMode==="exact"?verified||exactBrandFallbackPrice(key,store,wish):verified||referencePrice(key,store,wish))}
+ let result=null;if(storeCanCarry(store,wish,key)){const verified=canonicalPriceForWish(key,store,wish);result=(store==="dm"||store==="Rossmann")?verified:(wish&&wish.matchMode==="exact"?verified||exactBrandFallbackPrice(key,store,wish):verified||referencePrice(key,store,wish))}
  priceLookupMemo.set(cacheKey,result);return result;
 }
 function addCommunityObservation(obs){
@@ -1004,7 +998,7 @@ async function loadNearbyStores(){
   nearbyStoresFetchedAt=Date.now();nearbyStoresLocation={lat,lon};cachedNearbyStores=nearbyStores.slice(0,100);saveJson("echtpreis_nearby_store_cache_v1",cachedNearbyStores);saveJson("echtpreis_nearby_store_location_v1",nearbyStoresLocation);localStorage.setItem("echtpreis_nearby_store_cache_at",String(nearbyStoresFetchedAt));if(status)status.textContent=nearbyStores.length?nearbyStores.length+" passende Filialen gefunden.":"Keine passenden Filialen in der Nähe gefunden.";return nearbyStores;
  }catch(e){if(request===nearbyStoreRequest){nearbyStores=[];if(!locationAcquired&&verifiedPriceLocation){verifiedPriceLocation=null;invalidateDataEngine()}if(status)status.textContent=/permission|denied|freigegeben/i.test(String(e&&e.message||e))?"Standort nicht freigegeben – Vergleich ohne Entfernung.":"Standort/Filialsuche gerade nicht verfügbar – Vergleich ohne Entfernung."}return[]}
 }
-function nearestStore(brand){return nearbyStores.find(x=>x.brand===brand)||null}
+function nearestStore(brand){return canonicalComparisonBranches.get(canonicalStoreName(brand))||nearbyStores.find(x=>x.brand===brand)||null}
 function routeUrl(x){return x?"https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(x.lat+","+x.lon):""}
 function escHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function locationLabel(x){
@@ -1093,6 +1087,39 @@ function identifyReceiptProduct(name){
 }
 function confidenceLabel(m){return !m.key?"unsicher":m.score>=.95?"sehr sicher":m.score>=.85?"sicher":"prüfen"}
 const API_BASE=window.ECHTPREIS_CONFIG?.apiBase||"https://echtpreis-api.onrender.com";
+
+const canonicalPriceClient=window.EchtpreisCurrentPriceClient?.create({apiBase:API_BASE,fetchImpl:(...args)=>fetch(...args),timeoutMs:10000});
+let canonicalComparisonPrices=new Map(),canonicalComparisonBranches=new Map();
+function canonicalPriceKey(key,store,wish){return JSON.stringify([key,canonicalStoreName(store),priceWishSignature(wish)])}
+function canonicalPriceForWish(key,store,wish){const entry=canonicalComparisonPrices.get(canonicalPriceKey(key,store,wish));return entry&&entry.expiresAt>Date.now()?entry.price:null}
+function canonicalWishQuery(w,merchants){return {product:catalog[w.key]?.label||w.label||w.raw,brand:w.exactBrand||null,pack:w.packPerItem?null:String(w.packLabel||"").replace(/^ca\.\s*/i,"").replace(/^Stück$/,"1 Stück")||null,gtin:w.ean||null,merchants}}
+async function loadCanonicalComparison(items,merchants,revision,runId){
+ const fresh=new Map(),branches=new Map(),today=localDateKey();
+ if(!canonicalPriceClient)return;
+ let next=0;const tasks=items.slice();
+ async function worker(){while(next<tasks.length){const wish=tasks[next++],query=canonicalWishQuery(wish,merchants);let discovered=null;
+  try{const response=await fetchWithTimeout(API_BASE+"/v1/price-query",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...query,...(verifiedPriceLocation?{latitude:verifiedPriceLocation.lat,longitude:verifiedPriceLocation.lon,radiusKm:12}:{}),limit:50})},5000);if(response.ok){const value=await response.json();if(value?.ok===true)discovered=value}}
+  catch(_){}
+  if(runId!==compareRunId||revision!==comparisonRevision)return;
+  const storeIds={},regions={};
+  for(const row of discovered?.stores||[]){const merchant=canonicalStoreName(row.merchant);if(!merchants.includes(merchant)||storeIds[merchant]||row.canonical!==true||!row.id)continue;
+   const distance=Number(row.distanceKm),lat=Number(row.latitude),lon=Number(row.longitude);
+   if(!verifiedPriceLocation||row.distanceKm==null||row.latitude==null||row.longitude==null||String(row.distanceKm).trim()===""||String(row.latitude).trim()===""||String(row.longitude).trim()===""||!Number.isFinite(distance)||distance<0||distance>12||!Number.isFinite(lat)||Math.abs(lat)>90||!Number.isFinite(lon)||Math.abs(lon)>180)continue;
+   storeIds[merchant]=row.id;if(row.region)regions[merchant]=row.region;
+   branches.set(merchant,{id:row.id,brand:merchant,lat,lon,distance,address:[row.address,row.postalCode,row.city].filter(Boolean).join(", "),name:merchant});
+  }
+  if(discovered?.productResolution?.state==="exact"&&discovered.product){const p=discovered.product;query.productId=p.id;query.gtin=p.gtin||query.gtin;query.brand=p.brand||query.brand;query.pack=p.pack||query.pack;query.product=p.name||query.product}
+  const decision=await canonicalPriceClient.compare(query,{today,storeIds,regions,maxAgeDays:7,quantity:Math.max(1,Math.round(Number(wish.packCount)||1)),refresh:true});
+  if(runId!==compareRunId||revision!==comparisonRevision)return;
+  for(const row of decision.results){let quote=window.EchtpreisCurrentPriceClient.toComparablePrice(row,wish.unit||catalog[wish.key]?.unit||"piece",query.pack);
+   if(quote){const proven=quote.state==="verified"&&!quote.comparisonOnly&&quote.locationLevel==="store"&&!!storeIds[canonicalStoreName(row.merchant)];quote={...quote,key:wish.key,store:canonicalStoreName(row.merchant),kind:quote.sourceType==="open_data"?"openprices":["retailer_feed","pos_feed"].includes(quote.sourceType)?"official":"community",canonical:true,reference:!proven,referenceType:!proven?"comparison":null};}
+   fresh.set(canonicalPriceKey(wish.key,row.merchant,wish),{price:quote,expiresAt:Date.now()+60000});
+  }
+ }}
+ await Promise.all(Array.from({length:Math.min(4,tasks.length)},()=>worker()));
+ if(runId===compareRunId&&revision===comparisonRevision){canonicalComparisonPrices=fresh;canonicalComparisonBranches=branches;resetPriceLookupMemo()}
+}
+
 async function fetchWithTimeout(url,options={},ms=12000){const controller=new AbortController(),external=options.signal,onAbort=()=>controller.abort(external?.reason),timer=setTimeout(()=>controller.abort(new DOMException("Zeitüberschreitung","TimeoutError")),ms);if(external){if(external.aborted)onAbort();else external.addEventListener("abort",onAbort,{once:true})}try{return await fetch(url,{...options,signal:controller.signal})}finally{clearTimeout(timer);external?.removeEventListener?.("abort",onAbort)}}
 let apiState="wird verbunden …";
 let sharedDataRequest=0;
@@ -1519,24 +1546,26 @@ function drawList(){
 function purchaseQuantityLabel(w){if(!w)return"";const count=Math.max(1,Math.round(Number(w.packCount)||Number(w.amount)||1));if(w.packPerItem||w.unit==="piece"&&w.packUnit==="piece"&&!w.packLabel||w.packUnit==="piece"&&w.packLabel==="Stück")return count+" Stück";if(w.quantityMode&&w.packUnit==="piece")return count+" Packung(en) · "+w.packLabel;if(w.quantityMode&&w.packAmount>0)return count+" × "+String(w.packLabel||"").replace(/^ca\.\s*/i,"")+" je Packung";if(w.unit==="piece")return count+" Stück";const amount=Number(w.calcAmount||w.amount);if(!(amount>0))return"";const unit=w.unit==="kg"?"g":w.unit==="l"?"ml":w.unit;if(unit==="g"||unit==="ml")return Math.round(amount*1000)+" "+unit;return amount.toLocaleString("de-DE")+" "+unit}
 function comparisonSourceDetails(row,items=basket){
  if(!row||!Array.isArray(row.sources))return "";
- const lines=row.sources.map((p,i)=>{const w=items[i],itemTotal=p.price*(w?.calcAmount||1),quantity=purchaseQuantityLabel(w),valueNote=p.valuePrice?" · "+eur(p.valuePrice.price)+" / "+p.valuePrice.unit:"",quality=p.reference?(p.referenceType==="historical"?"letzter bekannter Preis":p.referenceType==="brand-estimate"?"Markenpreis-Orientierung":"Modellschätzung"):(p.kind==="official"?"offiziell":p.kind==="openprices"?"Open Prices":"belegt"),date=p.date?" · "+formatReceiptDate(p.date):"",substitute=w?.resolvedKey?" · verglichen als "+(catalog[w.resolvedKey]?.label||w.resolvedKey):"";return '<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid rgba(16,32,25,.08)"><span>'+escHtml(w?.label||p.product||p.key)+'<small style="display:block;color:#6d7772">'+escHtml(quantity)+(quantity?" · ":"")+escHtml(p.source||quality)+' · '+escHtml(quality)+escHtml(valueNote)+escHtml(date)+escHtml(substitute)+'</small></span><b style="white-space:nowrap">'+(p.reference?"ca. ":"")+eur(itemTotal)+'</b></div>'}).join("");
+ const lines=row.sources.map((p,i)=>{const w=items[i],itemTotal=p.price*(w?.calcAmount||1),quantity=purchaseQuantityLabel(w),valueNote=p.valuePrice?" · "+eur(p.valuePrice.price)+" / "+p.valuePrice.unit:"",quality=p.reference?(p.referenceType==="historical"?"letzter bekannter Preis":p.referenceType==="brand-estimate"?"Markenpreis-Orientierung":p.referenceType==="comparison"?"beobachtet · Produkt/Filiale noch nicht vollständig bestätigt":"Modellschätzung"):(p.kind==="official"?"offiziell":p.kind==="openprices"?"Open Prices":"belegt"),date=p.date?" · "+formatReceiptDate(p.date):"",substitute=w?.resolvedKey?" · verglichen als "+(catalog[w.resolvedKey]?.label||w.resolvedKey):"";return '<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid rgba(16,32,25,.08)"><span>'+escHtml(w?.label||p.product||p.key)+'<small style="display:block;color:#6d7772">'+escHtml(quantity)+(quantity?" · ":"")+escHtml(p.source||quality)+' · '+escHtml(quality)+escHtml(valueNote)+escHtml(date)+escHtml(substitute)+'</small></span><b style="white-space:nowrap">'+(p.reference?"ca. ":"")+eur(itemTotal)+'</b></div>'}).join("");
  return lines;
 }
 function comparisonQuality(row,totalItems){
  if(!row)return {label:"keine Daten",detail:""};
  const official=(row.sources||[]).filter(p=>p.kind==="official"&&!p.reference).length,observed=(row.sources||[]).filter(p=>!p.reference&&p.kind!=="official").length,historical=(row.sources||[]).filter(p=>p.referenceType==="historical").length,modeled=(row.sources||[]).filter(p=>p.referenceType==="estimate"||p.referenceType==="brand-estimate").length;
  if(row.referenceCount===0)return {label:official===totalItems?"offiziell belegt":"belegt",detail:totalItems+" von "+totalItems+" Preisen aktuell belegt"+(official?" · "+official+" offiziell":"")+(observed?" · "+observed+" beobachtet":""),level:"high"};
+ const comparison=(row.sources||[]).filter(p=>p.referenceType==="comparison").length;
+ if(row.confirmedCount===0&&comparison&&!modeled&&!historical)return {label:"Beobachtete Orientierung",detail:comparison+" Preise beobachtet · Produkt oder Filiale noch nicht vollständig bestätigt. Noch keine belastbare Rangfolge.",level:"medium"};
  if(row.confirmedCount===0)return {label:historical&&!modeled?"historische Orientierung":"Modellschätzung",detail:"0 von "+totalItems+" Preisen aktuell belegt"+(historical?" · "+historical+" zuletzt bekannt":"")+(modeled?" · "+modeled+" modelliert":""),level:"low"};
  return {label:"teilweise geschätzt",detail:row.confirmedCount+" von "+totalItems+" Preisen aktuell belegt"+(historical?" · "+historical+" zuletzt bekannt":"")+(modeled?" · "+modeled+" modelliert":""),level:"medium"};
 }
 let compareRunId=0;
 window.compare=async function compare({skipLocation=false,scroll=true,backgroundRefresh=false}={}){
- const runId=++compareRunId;hasCompared=true;resetPriceLookupMemo();const revision=comparisonRevision;$("compareStatus").textContent=backgroundRefresh?"":!navigator.onLine?"Offline · Vergleich mit zuletzt gespeicherten Preisquellen …":skipLocation?"Vergleich wird aktualisiert …":"Vergleich wird geladen …";
+ const runId=++compareRunId;hasCompared=true;resetPriceLookupMemo();const revision=comparisonRevision;$("compareStatus").textContent=backgroundRefresh?"":!navigator.onLine?"Offline · gespeicherte Preise dienen als Orientierung …":skipLocation?"Vergleich wird aktualisiert …":"Vergleich wird geladen …";
  if(!skipLocation&&!backgroundRefresh){
   const keys=[...new Set(basket.map(w=>w.key).filter(Boolean))],refreshKey=keys.slice().sort().join("|");
   if(!comparisonRefreshPromise||lastRefreshKey!==refreshKey){
    lastRefreshKey=refreshKey;const before=comparisonRevision;
-   const pending=Promise.allSettled([loadNearbyStores(),ingestOpenPrices(false,keys)]).then(()=>{if(before===comparisonRevision&&basket.length&&lastRefreshKey===refreshKey)return compare({skipLocation:true,scroll:false,backgroundRefresh:true})}).finally(()=>{if(comparisonRefreshPromise===pending)comparisonRefreshPromise=null});
+   const pending=Promise.allSettled([loadNearbyStores()]).then(()=>{if(before===comparisonRevision&&basket.length&&lastRefreshKey===refreshKey)return compare({skipLocation:true,scroll:false,backgroundRefresh:true})}).finally(()=>{if(comparisonRefreshPromise===pending)comparisonRefreshPromise=null});
    comparisonRefreshPromise=pending;
   }
  }
@@ -1545,6 +1574,8 @@ window.compare=async function compare({skipLocation=false,scroll=true,background
  if(!selected.size){$("results").style.display="none";$("compareStatus").textContent="Bitte mindestens einen Markt auswählen.";if(!skipLocation)appNotice("Bitte mindestens einen Markt auswählen.","warn");return false}
  const compareBasket=basket.filter(w=>!w.customItem);if(!compareBasket.length){$("results").style.display="none";$("compareStatus").textContent="Für eigene Freitextartikel gibt es noch keinen Preisvergleich.";return false}
  let unclear=compareBasket.filter(w=>!w.key||w.needsClarification||w.needsQuantity);if(unclear.length){$("results").style.display="none";$("compareStatus").textContent="Bitte wähle bei "+unclear.map(w=>w.label).join(", ")+" oben einen ähnlichen Artikel oder die passende Menge aus.";return false}
+ await loadCanonicalComparison(compareBasket,[...selected].map(canonicalStoreName),revision,runId);
+ if(runId!==compareRunId||revision!==comparisonRevision)return false;
  let rows=[...selected].map(store=>{let total=0,known=0,missing=[],sources=[],referenceCount=0,confirmedCount=0;compareBasket.forEach(w=>{let p=w.key?activePrice(w.key,store,w):null;if(p){total+=p.price*w.calcAmount;known++;sources.push({...p,valuePrice:normalizedValuePrice(w.key,p.price,p.product||"")});p.reference?referenceCount++:confirmedCount++}else missing.push(w.label)});return{store,total,known,missing,sources,referenceCount,confirmedCount,coverage:known/compareBasket.length}});
  if(runId!==compareRunId||revision!==comparisonRevision)return false;
  let complete=rows.filter(r=>r.known===compareBasket.length).map(r=>({...r,branch:nearestStore(r.store)})).filter(r=>!nearbyStores.length||r.branch),verifiedComplete=complete.filter(r=>r.referenceCount===0).sort((a,b)=>a.total-b.total);
