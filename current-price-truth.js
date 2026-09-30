@@ -1,9 +1,9 @@
 "use strict";
 const TYPE={official_retailer:.96,retailer_feed:.94,receipt:.90,shelf:.90,open_data:.78,catalog:.76,third_party:.62,unknown:.50};
 function sourceType(r={}){return String(r.sourceType||r.kind||"unknown").toLowerCase()}
-function actor(r={}){return String(r.proofActor||r.sourceId||r.source||r.proof||"unknown")}
+function actor(r={}){return String(r.proofActor||r.sourceId||r.source||"unknown")}
 function base(r={}){const t=sourceType(r);return Number(r.registryTrust)/100||TYPE[t]||TYPE.unknown}
-function fingerprint(r={}){return[sourceType(r),actor(r),r.storeId||r.region||"",r.observedAt||r.date||"",r.proof||""].join("|")}
+function fingerprint(r={}){const proof=String(r.proof||"");if(proof.startsWith("receipt:"))return"receipt|"+proof;if(proof.startsWith("photo:")||String(r.proofType||"").includes("shelf"))return"shelf|"+proof;return[sourceType(r),actor(r),r.storeId||r.region||""].join("|")}
 function independent(rows=[]){return new Set(rows.map(fingerprint)).size}
 function median(a){const x=a.slice().sort((p,q)=>p-q),n=x.length;if(!n)return null;return n%2?x[(n-1)/2]:(x[n/2-1]+x[n/2])/2}
 function fuse(rows=[],opts={}){
