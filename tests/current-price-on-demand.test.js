@@ -1,14 +1,28 @@
 "use strict";
-const assert=require("assert/strict"),Demand=require("../current-price-on-demand");
+const assert=require("assert/strict"),Demand=require("../current-price-on-demand"),Canonical=require("../canonical-inventory-import"),Import=require("../external-price-import");
+const today="2026-09-30";
+function rawPrice(id=1,patch={}){return{id,type:"PRODUCT",product_code:"3017620422003",product:{code:"3017620422003",product_name:"Nutella",brands:"Ferrero",quantity:"450 g"},location_id:12,location:{id:12,type:"OSM",osm_id:1234567,osm_type:"NODE",osm_tag_key:"shop",osm_tag_value:"supermarket",osm_name:"EDEKA",osm_brand:"EDEKA",osm_address_country_code:"DE",osm_address_country:"Deutschland",osm_address_city:"Berlin",osm_lat:52.52,osm_lon:13.4},price:3.99,currency:"EUR",date:today,proof_id:80+id,proof:{id:80+id,type:"PRICE_TAG",draft:false,date:today,currency:"EUR",location_id:12,location_osm_id:1234567,location_osm_type:"NODE",image_md5_hash:"b".repeat(32)},price_per:"UNIT",price_is_discounted:false,duplicate_of:null,...patch}}
 (async()=>{
- let time=1000,calls=0,saved=[],release;
+ let time=Date.parse("2026-09-30T12:00:00Z"),calls=0,saved=[],release,identityCalls=0;
  const target={sourceId:"Open Prices",productCode:"3017620422003",productId:"p",storeId:"s",locationId:"12"};
- const refresh=Demand.create({now:()=>time,fetchPage:async input=>{calls++;assert.equal(input.retries,0);assert.equal(input.timeoutMs,4500);if(release)await release;return{url:"https://example.test/",pages:3,accepted:[{gtin:target.productCode,externalLocationId:"openprices:12"},{gtin:target.productCode,externalLocationId:"openprices:99"},{gtin:"4008400401627",externalLocationId:"openprices:12"}],rejected:[]}},persist:async(_pool,page)=>{saved.push(page.accepted);return{accepted:page.accepted.length,duplicates:0}}});
- let result=await refresh.refresh({},[target]);assert.equal(calls,1);assert.equal(saved[0].length,1);assert.equal(result[0].remainingPages,2);
- result=await refresh.refresh({},[target]);assert.equal(calls,1);assert.equal(result[0].cached,true);
- time+=300001;let end;release=new Promise(resolve=>end=resolve);const a=refresh.refresh({},[target]),b=refresh.refresh({},[target]);await new Promise(resolve=>setImmediate(resolve));assert.equal(calls,2);end();await Promise.all([a,b]);release=null;
- await refresh.refresh({},[{...target,productCode:"12345678"},{...target,sourceId:"retailer"}]);assert.equal(calls,2);
- for(let i=0;i<20;i++)await refresh.refresh({},[{...target,locationId:String(100+i)}]);assert.equal(refresh.info().requests,12);assert.equal(refresh.info().inflight,0);
- const broken=Demand.create({now:()=>time,fetchPage:async()=>{throw Error("upstream")},persist:async()=>{throw Error("should never persist")}});assert.equal((await broken.refresh({},[target]))[0].state,"unavailable");assert.equal((await broken.refresh({},[target]))[0].cached,true);
- console.log("current-price-on-demand: bounded exact-pair refresh, cache, deduplication, backoff and request budget OK");
+ const good=rawPrice(),wrongStore=rawPrice(2,{location_id:99,location:{...good.location,id:99},proof:{...good.proof,id:82,location_id:99}}),wrongProduct=rawPrice(3,{product_code:"4006381333931",product:{...good.product,code:"4006381333931"}}),originalCanonical=Canonical.prepare;
+ const pool={query:async sql=>{throw Error("On-demand must not write scheduler checkpoints: "+sql)}};
+ try{
+  Canonical.prepare=async(_pool,rows,meta)=>{
+   identityCalls++;assert.equal(_pool,pool);assert.deepEqual(rows,[good],"Only the raw requested GTIN/location pair can reach identity writes");assert.equal(meta.sourceId,"Open Prices");
+   const p=Canonical.productCandidate(rows[0]),s=Canonical.storeCandidate(rows[0],[{id:"merchant",name:"EDEKA",active:true}]);assert(p.ok&&s.ok);
+   return{accepted:[{raw:rows[0],productId:"p",storeId:"s",gtin:p.gtin,product:p.name,brand:p.brand,pack:"450 g",packAmount:450,packUnit:"g",packCount:1,merchant:s.merchant.name,region:s.region,externalProductId:p.externalProductId,externalLocationId:s.externalLocationId}],rejected:[],partial:[],counts:{productsCreated:0,storesCreated:0}};
+  };
+  const refresh=Demand.create({now:()=>time,fetchPage:async input=>{calls++;assert.equal(input.retries,0);assert.equal(input.timeoutMs,4500);assert.equal(input.today,today);assert.equal(input.since,"2026-09-23");if(release)await release;return{url:"https://prices.openfoodfacts.org/api/v1/prices?product_code="+target.productCode,pages:3,rawItems:input.locationId==="12"?[good,wrongStore,wrongProduct]:[]}},persist:async(_pool,page)=>{saved.push(page);return{accepted:page.accepted.length,rejected:page.rejected.length,duplicates:0}}});
+  let result=await refresh.refresh(pool,[target]);assert.equal(calls,1);assert.equal(saved[0].accepted.length,1);assert.equal(saved[0].rejected.length,2);assert.equal(result[0].remainingPages,2);assert.equal(result[0].rejected,2);assert.equal(identityCalls,1);
+  const fact=saved[0].accepted[0];assert.equal(fact.productId,"p");assert.equal(fact.storeId,"s");assert.equal(fact.region,"Berlin, DE");assert.equal(fact.proofHash,"b".repeat(32));assert.equal(fact.proof,"openprices:proof:81");assert.equal(Import.observation(fact,"batch").status,"observed");assert(!Object.hasOwn(fact,"proofVerified"));
+  result=await refresh.refresh(pool,[{...target,locationId:"openprices:12"}]);assert.equal(calls,1);assert.equal(result[0].cached,true,"Equivalent numeric/source-prefixed location IDs share one request cache");
+  time+=300001;let end;release=new Promise(resolve=>end=resolve);const a=refresh.refresh(pool,[target]),b=refresh.refresh(pool,[target]);await new Promise(resolve=>setImmediate(resolve));assert.equal(calls,2);end();await Promise.all([a,b]);release=null;assert.equal(identityCalls,2,"Concurrent user requests share one canonical import");
+  await refresh.refresh(pool,[{...target,productCode:"12345678"},{...target,sourceId:"retailer"}]);assert.equal(calls,2);
+  for(let i=0;i<20;i++)await refresh.refresh(pool,[{...target,locationId:String(100+i)}]);assert.equal(refresh.info().requests,12);assert.equal(refresh.info().inflight,0);
+  const broken=Demand.create({now:()=>time,fetchPage:async()=>{throw Error("upstream")},persist:async()=>{throw Error("should never persist")}});assert.equal((await broken.refresh(pool,[target]))[0].state,"unavailable");assert.equal((await broken.refresh(pool,[target]))[0].cached,true);
+  let unsafePersist=0;const mismatch=Demand.create({now:()=>time,fetchPage:async()=>({rawItems:[good]}),prepare:async()=>({accepted:[{gtin:target.productCode,externalLocationId:"openprices:12",productId:"different-product",storeId:"s"}],rejected:[]}),persist:async()=>{unsafePersist++;return{accepted:1}}});assert.equal((await mismatch.refresh(pool,[target]))[0].state,"unavailable");assert.equal(unsafePersist,0,"A canonical ID mismatch must never be attached to the user's requested SKU/store");
+  const adaptedOnly=Demand.create({now:()=>time,fetchPage:async()=>({accepted:[{gtin:target.productCode,externalLocationId:"openprices:12"}]}),persist:async()=>{unsafePersist++;return{accepted:1}}});assert.equal((await adaptedOnly.refresh(pool,[target]))[0].state,"unavailable");assert.equal(unsafePersist,0,"Adapted-only rows cannot bypass raw source proof/OSM gates");
+  console.log("current-price-on-demand: raw proof/OSM → canonical requested pair and DE region, observed-only prices, no scheduler writes; cache, deduplication, backoff and budget preserved");
+ }finally{Canonical.prepare=originalCanonical}
 })().catch(error=>{console.error(error);process.exitCode=1});

@@ -1,5 +1,5 @@
 const fs=require("fs"),vm=require("vm"),assert=require("assert");
-const html=fs.readFileSync("index.html","utf8");
+const html=fs.readFileSync("index.html","utf8").replace(/\r\n/g,"\n");
 const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(x=>x.trim());
 assert(scripts.length>=3,"inline scripts missing");
 scripts.forEach((code,i)=>{assert.doesNotThrow(()=>new vm.Script(code,{filename:"sparkorb-inline-"+(i+1)+".js"}),"inline script "+(i+1)+" syntax");});

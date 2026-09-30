@@ -1,3 +1,25 @@
-const assert=require("assert"),CSV=require("../csv-price-feed"),R=require("../rewe-daily-refresh");
-const rows=CSV.rewe(CSV.parse('name,brand,ean,price,grammage,category,sale,image\n"Nutella 450g",Ferrero,3017620422003,3.99,450g,Brotaufstrich,True,x'),{region:"Bavaria",date:"2026-09-30"});assert.strictEqual(rows[0].price,3.99);assert.strictEqual(rows[0].priceType,"promotion");assert.strictEqual(rows[0].ean,"3017620422003");
-(async()=>{let inserts=0;const pool={query:async(sql,args)=>{if(sql.startsWith("INSERT INTO price_import_batches"))return{rows:[{id:"b1"}]};if(sql.startsWith("INSERT INTO price_observations")){inserts++;assert.strictEqual(args[31],"corroboration");assert.strictEqual(args[32],false);return{rowCount:1,rows:[]}}return{rows:[],rowCount:1}}};const fetchImpl=async()=>({ok:true,status:200,text:async()=> 'name,brand,ean,price,grammage,category,sale,image\n"Nutella 450g",Ferrero,3017620422003,3.99,450g,Brotaufstrich,False,x'});const x=await R.refresh({pool,fetchImpl,feeds:[{region:"Bavaria",url:"https://example.test/rewe.csv"}]});assert.strictEqual(x.received,1);assert.strictEqual(x.accepted,1);assert.strictEqual(inserts,1);console.log("rewe-daily-refresh: ok")})().catch(e=>{console.error(e);process.exit(1)});
+"use strict";
+const assert=require("node:assert/strict"),CSV=require("../csv-price-feed"),R=require("../rewe-daily-refresh"),Provenance=require("../rewe-source-provenance");
+const body='name,brand,ean,price,grammage,category,sale,image\n"Nutella 450g",Ferrero,3017620422003,3.99,450g,Brotaufstrich,True,x',today="2026-09-30";
+const rows=CSV.rewe(CSV.parse(body),{region:"Bavaria",sourceDate:"2024-04-12",today});
+assert.equal(rows[0].price,3.99);assert.equal(rows[0].priceType,"promotion");assert.equal(rows[0].ean,"3017620422003");assert.equal(rows[0].date,"2024-04-12");
+for(const meta of[{}, {date:today},{fetchedAt:today},{publishedAt:today},{lastModified:today}])assert.throws(()=>CSV.rewe(CSV.parse(body),meta),/rewe-source-date-required/);
+assert.throws(()=>CSV.rewe([],{}),/rewe-source-date-required/);
+assert.deepEqual(CSV.rewe([],{sourceDate:"2024-04-12",today}),[]);
+for(const basis of["git-commit-publication","HTTP-Date","last-modified","fetched-at"])assert.throws(()=>Provenance.resolve({},{sourceDate:today,sourceDateBasis:basis,today}),/rewe-source-date-transport-only/);
+assert.throws(()=>Provenance.resolve({date:"2026-09-31"},{today}),/rewe-source-date-invalid/);
+assert.throws(()=>Provenance.resolve({date:"2026-10-01"},{today}),/rewe-source-date-future/);
+assert.throws(()=>Provenance.resolve({date:"2024-04-12"},{sourceDate:"2026-09-30",today}),/rewe-source-date-conflict/);
+assert.equal(Provenance.resolve({observed_at:"2024-04-12T11:56:47Z"},{today}).date,"2024-04-12");
+assert.equal(CSV.rewe(CSV.parse(body.replace('image\n','image,date\n').replace(',True,x',',True,x,2024-04-12')),{today})[0].date,"2024-04-12");
+(async()=>{
+ let queries=0,inserts=0;const observations=[];
+ const pool={query:async(sql,args)=>{queries++;if(sql.startsWith("INSERT INTO price_import_batches"))return{rows:[{id:"b1"}]};if(sql.startsWith("INSERT INTO price_observations")){inserts++;observations.push(args);return{rowCount:1,rows:[]}}return{rows:[],rowCount:1}}};
+ const fetchImpl=async()=>({ok:true,status:200,headers:{get:()=>today},text:async()=>body});
+ await assert.rejects(R.refresh({pool,fetchImpl,feeds:[{region:"Bavaria",url:"https://example.test/rewe.csv"}],today}),/rewe-source-date-required/);assert.equal(queries,0);
+ await assert.rejects(R.refresh({pool,fetchImpl,feeds:[{region:"Bavaria",url:"https://example.test/valid.csv",sourceDate:"2024-04-12"},{region:"Bavaria",url:"https://example.test/undated.csv"}],today}),/rewe-source-date-required/);assert.equal(queries,0);
+ const result=await R.refresh({pool,fetchImpl,feeds:[{region:"Bavaria",url:"https://example.test/rewe.csv",sourceDate:"2024-04-12"}],today});
+ assert.equal(result.received,1);assert.equal(result.accepted,1);assert.equal(inserts,1);
+ assert.equal(observations[0][10],"2024-04-12");assert.equal(observations[0][16],"2024-04-12T12:00:00.000Z");assert.equal(observations[0][31],"corroboration");assert.equal(observations[0][32],false);assert.equal(observations[0][14],null);assert.equal(observations[0][15],null);assert.equal(observations[0][28],"https://example.test/rewe.csv");
+ console.log("rewe-daily-refresh: explicit observation dates preserved, undated/future/conflicting sources fail before writes, historical corroboration never becomes current price evidence OK");
+})().catch(error=>{console.error(error);process.exitCode=1});
