@@ -749,6 +749,27 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
  .compare-details>summary{font-size:10px!important}
 }
 </style>
+<style>
+/* v7.240 layout polish: planner controls */
+@media(max-width:430px){
+ #planner .recent-list-items,#planner .quick-suggestions{margin-top:10px!important}
+ #planner .quick-label{font-size:11px!important;margin:0 0 6px!important;letter-spacing:.01em}
+ #planner .recent-row,#planner .quick-row{gap:6px!important;display:flex!important;overflow-x:auto!important;flex-wrap:nowrap!important;padding-bottom:2px!important;scrollbar-width:none}
+ #planner .recent-row::-webkit-scrollbar,#planner .quick-row::-webkit-scrollbar{display:none}
+ #planner .recent-chip,#planner .quick-chip{flex:0 0 auto!important;min-height:32px!important;padding:6px 9px!important;border-radius:11px!important;font-size:10px!important;line-height:1.05!important}
+ #planner .recent-chip small{font-size:8px!important;margin-top:2px!important}
+ #planner .planner-main>.inputrow{display:grid!important;grid-template-columns:minmax(0,1fr) auto 42px 42px!important;gap:6px!important;margin-top:10px!important;align-items:stretch!important}
+ #planner #productInput{min-width:0!important;height:42px!important;padding:8px 10px!important;border-radius:12px!important;font-size:12px!important}
+ #planner #addBtn{height:42px!important;min-height:42px!important;padding:0 12px!important;border-radius:12px!important;font-size:11px!important}
+ #planner #voiceListBtn,#planner #barcodeBtn{width:42px!important;height:42px!important;min-height:42px!important;padding:0!important;border-radius:12px!important}
+ #planner .planner-main>.detail{font-size:9px!important;line-height:1.25!important;margin-top:6px!important}
+ #planner .compare-action-card{padding:12px!important;margin-top:10px!important}
+ #planner .list-readiness{padding:8px 10px!important;border-radius:12px!important;margin-bottom:8px!important}
+ #planner #compareBtn{min-height:48px!important;border-radius:14px!important;font-size:15px!important}
+ #planner .compare-status{font-size:9px!important;line-height:1.3!important;margin-top:7px!important}
+ #planner .compare-action-card details{margin-top:8px!important;font-size:10px!important}
+}
+</style>
 </head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand">SPARKORB <span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
