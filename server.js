@@ -22,6 +22,7 @@ const ExternalPriceImport=require("./external-price-import");
 const ProductIdentity=require("./product-identity");
 const PriceRefreshRunner=require("./price-refresh-runner");
 const OpenPricesRefresh=require("./open-prices-refresh");
+const PriceRefreshTargets=require("./price-refresh-targets");
 const pool=process.env.DATABASE_URL?new Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DATABASE_URL.includes("localhost")?false:{rejectUnauthorized:false}}):null;
 const refreshStates={};let refreshTimer=null;
 const PORT=process.env.PORT||10000,DB_FILE=process.env.ECHTPREIS_DB_FILE||path.join("/tmp","echtpreis-db.json");
@@ -133,7 +134,7 @@ async function handle(req,res){
  return send(res,404,{error:"Not found"});
 }
 const server=http.createServer((req,res)=>{Promise.resolve(handle(req,res)).catch(e=>{console.error("Request failed",e);if(!res.headersSent)send(res,500,{error:"Interner Serverfehler"});else if(!res.writableEnded)res.end()})});
-async function refreshInternetPrices(){if(!pool)return;const targets=String(process.env.OPEN_PRICES_TARGETS||"").split(",").map(x=>x.trim()).filter(Boolean).map(productCode=>({productCode}));const handlers={"Open Prices":async()=>OpenPricesRefresh.refresh({pool,targets,maxPages:Number(process.env.OPEN_PRICES_MAX_PAGES||100)})};const run=await PriceRefreshRunner.runDue(refreshStates,handlers);for(const r of run.results)if(!r.ok&&!r.skipped)console.error("Price refresh failed",r.name,r.error)}
+async function refreshInternetPrices(){if(!pool)return;const manual=String(process.env.OPEN_PRICES_TARGETS||"").split(",").map(x=>x.trim()).filter(Boolean).map(productCode=>({productCode,priority:100}));let auto=[];try{auto=await PriceRefreshTargets.fromDatabase(pool,{limit:Number(process.env.OPEN_PRICES_AUTO_TARGETS||250)})}catch(e){console.error("Price refresh target selection failed",e)}const seen=new Set(),targets=[...manual,...auto].filter(x=>x.productCode&&!seen.has(x.productCode)&&seen.add(x.productCode));const handlers={"Open Prices":async()=>OpenPricesRefresh.refresh({pool,targets,maxPages:Number(process.env.OPEN_PRICES_MAX_PAGES||100)})};const run=await PriceRefreshRunner.runDue(refreshStates,handlers);for(const r of run.results)if(!r.ok&&!r.skipped)console.error("Price refresh failed",r.name,r.error)}
 function startRefreshLoop(){if(refreshTimer)return;refreshInternetPrices().catch(e=>console.error("Initial price refresh failed",e));refreshTimer=setInterval(()=>refreshInternetPrices().catch(e=>console.error("Price refresh failed",e)),60000);if(refreshTimer.unref)refreshTimer.unref()}
 async function start(){try{await initDb();await seedMerchants();startRefreshLoop();server.listen(PORT,()=>console.log("ECHTPREIS Data API 5.0 on "+PORT))}catch(e){console.error("DB init failed",e);server.listen(PORT,()=>console.log("ECHTPREIS Data API 5.0 fallback on "+PORT))}}
 if(require.main===module)start();
