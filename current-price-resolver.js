@@ -41,7 +41,7 @@ function resolveMerchant(query,merchant,rows=[],ctx={}){
  candidates.forEach(x=>{const cp=UnitPrice.unitPrice(x.price,x.pack||x.packageSize||x.product||x.productName);x._unitPrice=cp?.price??null;x._unit=cp?.per??null;x._packParsed=cp?.pack??null});
  const best=candidates[0],runner=candidates[1];
  const peers=candidates.filter(x=>x._identity.class===best._identity.class&&x._location.level===best._location.level&&x._age<=Math.max(1,best._age+1));
- const peerPrices=peers.map(x=>Number(x.price)).filter(x=>x>0),lo=peerPrices.length?Math.min(...peerPrices):best.price,hi=peerPrices.length?Math.max(...peerPrices):best.price;
+ const truth=CurrentTruth.fuse(peers);if(truth.state==="conflict")return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",truth};\n const peerPrices=peers.map(x=>Number(x.price)).filter(x=>x>0),lo=peerPrices.length?Math.min(...peerPrices):best.price,hi=peerPrices.length?Math.max(...peerPrices):best.price;
  const spread=lo>0?(hi-lo)/lo:0,independent=new Set(peers.map(x=>x.proof||[x.source,x.observedAt,x.price].join("|"))).size;
  const ambiguous=(runner&&best._score-runner._score<.035&&Math.abs(best.price-runner.price)/best.price>.08)||(independent>=2&&spread>.12);
  if(ambiguous)return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",conflict:{independentEvidence:independent,spread},candidates:candidates.slice(0,3)};
