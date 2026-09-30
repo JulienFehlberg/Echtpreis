@@ -5,7 +5,8 @@ const Health=require("./source-health");
 const Compatibility=require("./product-compatibility");
 const UnitPrice=require("./unit-price");
 const CurrentTruth=require("./current-price-truth");
-const PUBLIC_TYPES=new Set(["regular","promotion"]);\nconst CONDITIONAL_TYPES=new Set(["loyalty","app","coupon","multi_buy","personalized"]);
+const PUBLIC_TYPES=new Set(["regular","promotion"]);
+const CONDITIONAL_TYPES=new Set(["loyalty","app","coupon","multi_buy","personalized"]);
 const norm=s=>Identity.norm(s||"");
 function active(r,today){const t=String(today||new Date().toISOString()).slice(0,10),f=r.validFrom&&String(r.validFrom).slice(0,10),to=r.validTo&&String(r.validTo).slice(0,10);return(!f||t>=f)&&(!to||t<=to)}
 function freshnessDays(r,today){const d=r.observedAt||r.date;if(!d)return Infinity;return Math.max(0,(new Date(String(today).slice(0,10))-new Date(String(d).slice(0,10)))/864e5)}
