@@ -5,7 +5,7 @@ function norm(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\
 function tokens(s){return norm(s).split(" ").filter(x=>x.length>1&&!STOP.has(x))}
 function gtinValid(x){const s=String(x||"").replace(/\D/g,"");if(![8,12,13,14].includes(s.length))return false;let sum=0,odd=true;for(let i=s.length-2;i>=0;i--){sum+=Number(s[i])*(odd?3:1);odd=!odd}return(10-sum%10)%10===Number(s.at(-1))}
 function parsePack(s){
- const t=norm(s).replace(/,/g,".");let m=t.match(/\b(\d+)\s*x\s*(\d+(?:\.\d+)?)\s*(kg|g|l|ml|cl)\b/);if(m)return{count:+m[1],amount:+m[2],unit:m[3],total:base(+m[1]*+m[2],m[3])};
+ const t=norm(String(s||"").replace(/(\d),(\d)/g,"$1.$2"));let m=t.match(/\b(\d+)\s*x\s*(\d+(?:\.\d+)?)\s*(kg|g|l|ml|cl)\b/);if(m)return{count:+m[1],amount:+m[2],unit:m[3],total:base(+m[1]*+m[2],m[3])};
  m=t.match(/\b(\d+(?:\.\d+)?)\s*(kg|g|l|ml|cl)\b/);if(m)return{count:1,amount:+m[1],unit:m[2],total:base(+m[1],m[2])};
  m=t.match(/\b(\d+)\s*(stk|stuck|piece|eier|rollen|kapseln)\b/);if(m)return{count:+m[1],amount:+m[1],unit:"piece",total:{amount:+m[1],unit:"piece"}};return null;
 }
