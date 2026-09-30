@@ -1,11 +1,12 @@
 "use strict";
 const crypto=require("crypto");
 const STATES=new Set(["submitted","review","verified","rejected","rewarded"]);
-function fingerprint(x={}){return crypto.createHash("sha256").update([x.storeId,x.productId,x.proofHash||x.proof,x.observedAt&&String(x.observedAt).slice(0,10)].join("|")).digest("hex")}
+function evidenceKey(x={}){return String(x.proofHash||x.mediaHash||x.contentHash||x.proof||"")}
+function fingerprint(x={}){return crypto.createHash("sha256").update([x.storeId,x.productId,evidenceKey(x),x.observedAt&&String(x.observedAt).slice(0,10)].join("|")).digest("hex")}
 function submission(x={}){
  if(!x.storeId||!x.productId||!x.proof)return{ok:false,reason:"missing-required-evidence"};
  const observedAt=x.observedAt||new Date().toISOString(),price=Number(x.price);
- return{ok:true,id:crypto.randomUUID(),storeId:x.storeId,productId:x.productId,missionId:x.missionId||null,contributorId:x.contributorId||null,price:price>0?price:null,proof:x.proof,proofHash:x.proofHash||null,observedAt,state:"submitted",fingerprint:fingerprint({...x,observedAt})};
+ return{ok:true,id:crypto.randomUUID(),storeId:x.storeId,productId:x.productId,missionId:x.missionId||null,contributorId:x.contributorId||null,price:price>0?price:null,proof:x.proof,proofHash:x.proofHash||x.mediaHash||x.contentHash||null,observedAt,state:"submitted",fingerprint:fingerprint({...x,observedAt})};
 }
 function verify(s={},v={}){
  if(s.state!=="submitted"&&s.state!=="review")return{ok:false,reason:"invalid-state"};
@@ -16,4 +17,4 @@ function verify(s={},v={}){
  return{ok:true,state:"verified",confidence:Math.min(1,Number(v.confidence||.8)),verifiedAt:new Date().toISOString()};
 }
 function rewardable(s={}){return s.state==="verified"&&!s.rewardedAt&&Number(s.rewardPoints)>0}
-module.exports={STATES,fingerprint,submission,verify,rewardable};
+module.exports={STATES,evidenceKey,fingerprint,submission,verify,rewardable};
