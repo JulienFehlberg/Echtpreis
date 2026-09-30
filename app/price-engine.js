@@ -5,14 +5,14 @@ const DAY=86400000;
 const SOURCE_BASE={official:96,receipt:92,shelf:90,openprices:78,community:64,reference:20};
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const PRICE_TYPES=new Set(["regular","promotion","loyalty","app","coupon","multi_buy","personalized"]);
-function dateOnly(x){return x?String(x).slice(0,10):null}
-function temporalState(row,today){const t=dateOnly(today||new Date().toISOString()),from=dateOnly(row.validFrom),to=dateOnly(row.validTo);if(from&&t<from)return"future";if(to&&t>to)return"expired";return"active"}
+function dateOnly(x){const s=x?String(x).slice(0,10):null;return s&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&Number.isFinite(Date.parse(s+"T00:00:00Z"))?s:null}
+function temporalState(row,today){const t=dateOnly(today||new Date().toISOString()),from=row.validFrom?dateOnly(row.validFrom):null,to=row.validTo?dateOnly(row.validTo):null;if(!t||(row.validFrom&&!from)||(row.validTo&&!to)||(from&&to&&from>to))return"invalid";if(from&&t<from)return"future";if(to&&t>to)return"expired";return"active"}
 function priceEligibility(row,ctx={}){const type=row.priceType||"regular",time=temporalState(row,ctx.today);if(time!=="active")return{eligible:false,reason:time};if(type==="regular"||type==="promotion")return{eligible:true,reason:"public"};const e=ctx.eligibility||{};if(type==="loyalty"&&!e.loyalty)return{eligible:false,reason:"loyalty-required"};if(type==="app"&&!e.app)return{eligible:false,reason:"app-required"};if(type==="coupon"&&!e.coupon)return{eligible:false,reason:"coupon-required"};if(type==="personalized"&&!e.personalized)return{eligible:false,reason:"personalized"};if(type==="multi_buy"){const need=Number(row.minQuantity||row.quantityRequired||2),qty=Number(ctx.quantity||1);if(qty<need)return{eligible:false,reason:"quantity-required"};}return{eligible:true,reason:"eligible"};}
 
 const daysOld=(date,today)=>{
-  if(!date)return 999;
-  const a=new Date(date+"T12:00:00"),b=new Date((today||new Date().toISOString().slice(0,10))+"T12:00:00");
-  return Math.max(0,(b-a)/DAY);
+  const d=dateOnly(date),t=dateOnly(today||new Date().toISOString());if(!d||!t)return 999;
+  const a=new Date(d+"T12:00:00Z"),b=new Date(t+"T12:00:00Z"),delta=(b-a)/DAY;
+  return delta<0?999:delta;
 };
 function freshnessScore(row,today){
   const d=daysOld(row.date,today);
