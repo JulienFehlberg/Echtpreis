@@ -37,3 +37,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/echtpreis_test
         run: node tests/current-price-postgres.test.js
+      - name: Run PostgreSQL inventory integration test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/echtpreis_test
+        run: node tests/price-inventory-postgres.test.js

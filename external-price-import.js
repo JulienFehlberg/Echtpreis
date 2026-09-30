@@ -12,7 +12,7 @@ function observation(x,batchId,meta={}){
  const source=x.source||meta.source||"external",semanticInput={...x,source,sourceType:x.sourceType||null},policy=Semantics.policy(semanticInput);
  return{
   id:crypto.randomUUID(),key:key(x),store:x.merchant||null,storeId:x.storeId||null,externalLocationId:x.externalLocationId||null,
-  productId:x.productId||null,externalProductId:x.externalProductId||null,gtin:ProductIdentity.gtinValid(x.gtin)?String(x.gtin).replace(/\D/g,""):null,price:Number(x.price),per:"item",date:date(x),
+  productId:x.productId||null,externalProductId:x.externalProductId||null,gtin:ProductIdentity.gtinValid(x.gtin)?String(x.gtin).replace(/\D/g,""):null,price:Number(x.price),per:x.per||"item",date:date(x),
   kind:"external",source,product:x.product||null,proof:x.proof||null,proofType:x.proofType||null,
   observedAt:x.observedAt||null,validFrom:x.validFrom||null,validTo:x.validTo||null,priceType:x.priceType||"regular",
   regularPrice:Number(x.regularPrice)>0?Number(x.regularPrice):null,minQuantity:Number(x.minQuantity)>1?Number(x.minQuantity):null,currency:x.currency||"EUR",trust:Number(x.registryTrust||0),status:"observed",
