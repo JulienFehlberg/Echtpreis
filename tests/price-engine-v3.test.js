@@ -2,7 +2,7 @@ const assert=require("assert");
 global.window={};
 require("../app/price-engine.js");
 const E=global.window.EchtpreisPriceEngine;
-assert(E&&E.VERSION==="3.4.0");
+assert(E&&E.VERSION==="3.5.0");
 
 const today="2026-09-30";
 const ctx={today,lat:52.54,lon:13.20,distanceKm:(a,b,c,d)=>Math.hypot((a-c)*70,(b-d)*45)};
@@ -61,3 +61,5 @@ console.log("price-engine-v3: ok");
 }
 
 {const q=E.basketQuality([{price:2,confidenceScore:90,kind:"official"},null,{price:null}]);assert.strictEqual(q.total,3);assert.strictEqual(q.unknown,2);assert(Math.abs(q.coverage-1/3)<.001);assert(E.sourceScore({kind:"community",trust:100})<80);assert(E.sourceScore({kind:"community",registryTrust:90})>E.sourceScore({kind:"community"}));}
+
+{const rows=[{price:1,date:"2026-09-30",kind:"official",sourceHealthState:"quarantine",trust:99},{price:2,date:"2026-09-30",kind:"official",sourceHealthScore:95,registryTrust:96}];assert.strictEqual(E.rankObservations(rows,{today:"2026-09-30"}).price,2);assert(E.sourceScore({kind:"official",registryTrust:96,sourceHealthScore:30})<E.sourceScore({kind:"official",registryTrust:96,sourceHealthScore:95}));}
