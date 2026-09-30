@@ -40,7 +40,10 @@ async function learnedStoreAlias(merchant,aliasType,aliasValue){
  if(!pool||!merchant||!aliasType||!aliasValue)return{state:"unknown",storeId:null};const q=await pool.query('SELECT store_id AS "storeId",receipt_id AS "receiptId",contributor_id AS "contributorId" FROM store_alias_evidence WHERE lower(merchant_name)=lower($1) AND alias_type=$2 AND alias_value=$3 ORDER BY created_at DESC LIMIT 100',[merchant,aliasType,aliasValue]);return StoreAliasLearning.summarize(q.rows);
 }
 async function resolveStore(input={}){
- if(!pool)return{state:"unresolved",storeId:null,confidence:0,reason:"no-database"};const q=await pool.query('SELECT s.id,s.external_id AS "externalId",s.address,s.postal_code AS "postalCode",s.city,s.region,m.name AS merchant FROM stores s JOIN merchants m ON m.id=s.merchant_id WHERE s.active=true AND (lower(m.name)=lower($1) OR lower(m.normalized_name)=lower($1) OR lower($1) LIKE \'%\'||lower(m.normalized_name)||\'%\') LIMIT 100',[clean(input.merchant)]);return StoreResolver.resolve(input,q.rows);
+ if(!pool)return{state:"unresolved",storeId:null,confidence:0,reason:"no-database"};
+ if(input.trustedExternalId){const learned=await learnedStoreAlias(clean(input.merchant),"receipt-store-id",clean(input.trustedExternalId));if(learned.state==="trusted")return{state:"verified",storeId:learned.storeId,confidence:learned.confidence,reason:"learned-trusted-alias"}}
+ const q=await pool.query('SELECT s.id,s.external_id AS "externalId",s.address,s.postal_code AS "postalCode",s.city,s.region,m.name AS merchant FROM stores s JOIN merchants m ON m.id=s.merchant_id WHERE s.active=true AND (lower(m.name)=lower($1) OR lower(m.normalized_name)=lower($1) OR lower($1) LIKE \'%\'||lower(m.normalized_name)||\'%\') LIMIT 100',[clean(input.merchant)]);
+ return StoreResolver.resolve({...input,externalId:input.trustedExternalId||null},q.rows);
 }
 async function reconcileReceipt(receiptId){
  if(!pool)return{predictions:0,matched:0,reviewable:0,rejected:0};
