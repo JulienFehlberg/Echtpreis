@@ -4,7 +4,7 @@ const ALIAS={first_party_receipt:"receipt",first_party_shelf:"shelf",retailer:"o
 function sourceType(r={}){const t=String(r.sourceType||r.kind||"unknown").toLowerCase();return ALIAS[t]||t}
 function actor(r={}){return String(r.proofActor||r.contributorId||r.sourceId||r.source||"unknown")}
 function base(r={}){const t=sourceType(r),n=Number(r.registryTrust);return Number.isFinite(n)&&n>0?n/100:TYPE[t]||TYPE.unknown}
-function fingerprint(r={}){const proof=String(r.proof||"");if(proof.startsWith("receipt:"))return"receipt|"+proof;if(proof.startsWith("photo:")||String(r.proofType||"").includes("shelf"))return"shelf|"+proof;return[sourceType(r),actor(r),r.storeId||r.region||"",r.validFrom||"",r.validTo||""].join("|")}
+function fingerprint(r={}){const proof=String(r.proof||"");if(proof)return[sourceType(r),proof].join("|");return[sourceType(r),actor(r),r.storeId||r.region||"",r.validFrom||"",r.validTo||"",r.observedAt||r.date||"",r.price||""].join("|")}
 function dedupe(rows=[]){const m=new Map();for(const r of rows){const k=fingerprint(r),old=m.get(k);if(!old||base(r)>base(old))m.set(k,r)}return[...m.values()]}
 function independent(rows=[]){return dedupe(rows).length}
 function median(a){const x=a.slice().sort((p,q)=>p-q),n=x.length;if(!n)return null;return n%2?x[(n-1)/2]:(x[n/2-1]+x[n/2])/2}
