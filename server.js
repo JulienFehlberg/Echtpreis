@@ -10,6 +10,7 @@ const PriceBenchmark=require("./current-price-benchmark");
 const CoverageMissions=require("./coverage-missions");
 const ReceiptFacts=require("./receipt-price-facts");
 const ShelfFacts=require("./shelf-price-facts");
+const StoreResolver=require("./store-resolver");
 const pool=process.env.DATABASE_URL?new Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DATABASE_URL.includes("localhost")?false:{rejectUnauthorized:false}}):null;
 const PORT=process.env.PORT||10000,DB_FILE=process.env.ECHTPREIS_DB_FILE||path.join("/tmp","echtpreis-db.json");
 function load(){try{return JSON.parse(fs.readFileSync(DB_FILE,"utf8"))}catch(e){return{observations:[],aliases:[]}}}
@@ -23,6 +24,9 @@ async function materializeReceiptPrices(receiptId){
  const items=(await pool.query('SELECT id,raw_name AS "rawName",product_id AS "productId",product_key AS "productKey",gtin,match_confidence AS "matchConfidence",line_total::float AS "lineTotal",price::float,item_count::float AS "itemCount",pack_amount::float AS "packAmount",pack_unit AS "packUnit",price_type AS "priceType",is_adjustment AS "isAdjustment",is_deposit AS "isDeposit" FROM receipt_items WHERE receipt_id=$1',[receiptId])).rows;
  let accepted=0,rejected=0;for(const item of items){const x=ReceiptFacts.observation(receipt,item);if(!x){rejected++;continue}try{const q=await pool.query("INSERT INTO price_observations(id,key,store,store_id,product_id,gtin,price,per,date,kind,source,product,proof,proof_type,observed_at,price_type,trust,status,pack_amount,pack_unit) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) ON CONFLICT DO NOTHING",[x.id,x.key,x.store,x.storeId,x.productId,x.gtin,x.price,x.per,x.date,x.kind,x.source,x.product,x.proof,x.proofType,x.observedAt,x.priceType,x.trust,x.status,x.packAmount,x.packUnit]);if(q.rowCount)accepted++;else rejected++}catch(e){rejected++}}
  return{accepted,rejected};
+}
+async function resolveStore(input={}){
+ if(!pool)return{state:"unresolved",storeId:null,confidence:0,reason:"no-database"};const q=await pool.query('SELECT s.id,s.external_id AS "externalId",s.address,s.postal_code AS "postalCode",s.city,s.region,m.name AS merchant FROM stores s JOIN merchants m ON m.id=s.merchant_id WHERE s.active=true AND (lower(m.name)=lower($1) OR lower(m.normalized_name)=lower($1) OR lower($1) LIKE \'%\'||lower(m.normalized_name)||\'%\') LIMIT 100',[clean(input.merchant)]);return StoreResolver.resolve(input,q.rows);
 }
 async function reconcileReceipt(receiptId){
  if(!pool)return{predictions:0,matched:0,reviewable:0,rejected:0};
