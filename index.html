@@ -693,6 +693,23 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
  #planner .item:focus-within{background:#f8fbf9!important;border-radius:8px!important}
 }
 </style>
+<style>
+/* v7.230 compact comparison results */
+#results>.card:has(#merchantResults){padding:18px!important}
+#results>.card:has(#merchantResults)>h2{font-size:clamp(24px,7vw,31px)!important;margin:0 0 10px!important}
+.compare-quality-summary{padding:10px 12px!important;margin:0 0 8px!important;border-radius:14px!important;font-size:11px!important}
+.compare-market{padding:14px 0;border-bottom:1px solid #e5ece8}.compare-market:last-child{border-bottom:0}
+.compare-market-main{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.compare-market-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}.compare-market-copy>b{font-size:17px;line-height:1.15}
+.compare-market-price{font-size:22px;font-weight:950;letter-spacing:-.03em;white-space:nowrap;line-height:1}
+.compare-quality-line{font-size:10px;color:#7b8981}.compare-quality-line.verified{color:#087443;font-weight:800}
+.compare-badge{display:inline-flex;padding:4px 7px;border-radius:999px;background:#eef5f1;color:#557168;font-size:9px;font-weight:850;letter-spacing:.02em}
+.compare-badge.verified{background:#dff4e7;color:#087443}
+.compare-market-actions{display:flex;align-items:center;gap:14px;margin-top:8px}.compare-market-actions .route-link{display:inline-flex!important;margin:0!important;padding:7px 10px!important;border-radius:10px!important;font-size:11px!important}
+.compare-details{margin:0!important}.compare-details>summary{min-height:0!important;font-size:11px!important;color:#687a70!important;cursor:pointer;list-style:none}.compare-details>summary::-webkit-details-marker{display:none}.compare-details>summary:after{content:" ▾";font-size:9px}.compare-details[open]>summary:after{content:" ▴"}.compare-details>.detail{margin:9px 0!important;font-size:10px!important;line-height:1.45!important}
+.compare-memory{margin:8px 0;padding:8px;border-radius:10px;background:#f7f9f8}
+@media(max-width:430px){.compare-market{padding:12px 0}.compare-market-copy>b{font-size:15px}.compare-market-price{font-size:19px}.compare-quality-line{font-size:9px}}
+</style>
 </head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand">SPARKORB <span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
@@ -1663,13 +1680,17 @@ window.compare=async function compare({skipLocation=false,scroll=true,background
   $("personalBasketVerdict").style.display="none";$("winnerLabel").textContent="Noch kein vollständiger Vergleich";$("winnerName").textContent="Für mindestens ein Produkt fehlt ein belastbarer Preis";$("winnerPrice").textContent="—";$("winnerRoute").innerHTML="";
   let best=[...rows].sort((a,b)=>b.coverage-a.coverage)[0];$("winnerCoverage").textContent=best&&best.missing.length?"Fehlt: "+best.missing.join(", "):"";
  }
- const displayComplete=[...verifiedComplete,...complete.filter(r=>r.referenceCount>0).sort((a,b)=>a.store.localeCompare(b.store,"de"))];
- $("merchantResults").innerHTML=displayComplete.length?displayComplete.map(r=>{
+ const displayComplete=[...complete].sort((a,b)=>a.total-b.total);
+ const lowestReference=!verifiedComplete.length&&displayComplete.length?displayComplete[0]:null;
+ $("merchantResults").innerHTML=displayComplete.length?displayComplete.map((r,idx)=>{
   const q=comparisonQuality(r,compareBasket.length),approx=r.referenceCount>0;
   const memorySignals=r.sources.map((p,i)=>{let w=compareBasket[i],m=personalPriceMemoryForWish(w);if(!m||m.count<2||p.reference||!(Number(p.price)>0))return null;let current=Number(p.price),delta=(current-m.median)/m.median;if(Math.abs(delta)<.12)return null;return {name:w.label,current,median:m.median,delta}}).filter(Boolean).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
-  const memoryHtml=memorySignals.length?'<div style="margin:8px 0;padding:8px;border-radius:10px;background:#f7f9f8"><b>🧠 Gegen dein Preisgedächtnis</b>'+memorySignals.slice(0,3).map(x=>'<div class="detail">'+escHtml(x.name)+': '+eur(x.current)+' · '+Math.abs(Math.round(x.delta*100))+' % '+(x.delta>0?'über':'unter')+' deinem typischen Preis '+eur(x.median)+'</div>').join("")+'</div>':'';
-  const details='<details><summary>Preisdetails</summary><div class="detail" style="margin:7px 0">'+escHtml(q.detail)+(approx?' · Richtwerte bestätigen weder Filialpreis noch Verfügbarkeit.':'')+(r.branch&&r.branch.address?' · '+escHtml(r.branch.address):'')+'</div>'+memoryHtml+comparisonSourceDetails(r,compareBasket)+'</details>';
-  return '<div class="merchant"><div style="flex:1;min-width:0"><b>'+escHtml(r.store)+(r.branch?' · '+r.branch.distance.toFixed(1).replace(".",",")+' km':'')+'</b>'+(r.branch?'<br><a class="route-link" href="'+routeUrl(r.branch)+'" target="_blank" rel="noopener">Route →</a>':'')+details+'</div><div class="price">'+(approx?'ca. ':'')+eur(r.total)+'</div></div>';
+  const memoryHtml=memorySignals.length?'<div class="compare-memory"><b>🧠 Gegen dein Preisgedächtnis</b>'+memorySignals.slice(0,3).map(x=>'<div class="detail">'+escHtml(x.name)+': '+eur(x.current)+' · '+Math.abs(Math.round(x.delta*100))+' % '+(x.delta>0?'über':'unter')+' deinem typischen Preis '+eur(x.median)+'</div>').join("")+'</div>':'';
+  const known=Math.max(0,compareBasket.length-r.referenceCount),estimated=Math.max(0,r.referenceCount);
+  const badge=!approx&&idx===0?'<span class="compare-badge verified">Günstigster belegter Korb</span>':(r===lowestReference?'<span class="compare-badge">Niedrigster Richtwert</span>':'');
+  const qualityLine=approx?'<span class="compare-quality-line">Schätzung · '+known+' Preis'+(known===1?'':'e')+' bekannt, '+estimated+' geschätzt</span>':'<span class="compare-quality-line verified">Aktuell belegt</span>';
+  const details='<details class="compare-details"><summary>Details</summary><div class="detail">'+escHtml(q.detail)+(approx?' · Richtwerte bestätigen weder Filialpreis noch Verfügbarkeit.':'')+(r.branch&&r.branch.address?' · '+escHtml(r.branch.address):'')+'</div>'+memoryHtml+comparisonSourceDetails(r,compareBasket)+'</details>';
+  return '<article class="compare-market'+(idx===0?' first':'')+'"><div class="compare-market-main"><div class="compare-market-copy">'+badge+'<b>'+escHtml(r.store)+(r.branch?' · '+r.branch.distance.toFixed(1).replace(".",",")+' km':'')+'</b>'+qualityLine+'</div><div class="compare-market-price">'+(approx?'ca. ':'')+eur(r.total)+'</div></div><div class="compare-market-actions">'+(r.branch?'<a class="route-link" href="'+routeUrl(r.branch)+'" target="_blank" rel="noopener">Route →</a>':'')+details+'</div></article>';
  }).join(""):'<div class="muted" style="padding:14px 0">Für diese Liste fehlt noch ein vollständiger Richtwert.</div>';
  const verified=[...verifiedComplete].sort((a,b)=>a.total-b.total),difference=verified.length>=2?verified[verified.length-1].total-verified[0].total:0;
  $("verifiedSavings").style.display=verified.length>=2&&difference>0.01?"block":"none";
