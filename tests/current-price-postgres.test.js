@@ -113,7 +113,7 @@ async function main(){
   assert.equal(receiptFact.price,2.49);assert.equal(receiptFact.product_id,null);assert.equal(receiptFact.gtin,null);assert.equal(receiptFact.date,today);assert.equal(receiptFact.status,"observed");assert.equal(receiptFact.identity_verified,false);assert.equal(receiptFact.proof_verified,false);assert.equal(receiptFact.per,"piece");
 
   const submissionId=randomUUID();await pool.query("INSERT INTO price_mission_submissions(id,product_id,store_id,price,proof,observed_at,fingerprint) VALUES($1,$2,$3,3.99,'photo:reviewed-shelf','2026-09-30T10:00:00Z','native-shelf-fingerprint')",[submissionId,productId,storeId]);
-  process.env.ECHTPREIS_ADMIN_TOKEN="postgres-admin-test";
+  process.env.SPARKORB_ADMIN_TOKEN="postgres-admin-test";
   const verifiedResponse=await fetch(baseUrl+"/v1/price-missions/verify",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer postgres-admin-test"},body:JSON.stringify({submissionId,storeMatch:true,productMatch:true,proofValid:true})});
   const verifiedBody=await verifiedResponse.json();assert.equal(verifiedResponse.status,200,JSON.stringify(verifiedBody));
   const reviewed=(await pool.query("SELECT date::text,status,identity_verified,proof_verified,per FROM price_observations WHERE id=$1",[verifiedBody.observationId])).rows[0];assert.equal(reviewed.date,today);assert.equal(reviewed.status,"verified");assert.equal(reviewed.identity_verified,true);assert.equal(reviewed.proof_verified,true);assert.equal(reviewed.per,"piece");
@@ -121,7 +121,7 @@ async function main(){
   console.log("current-price-postgres: fresh schema, import, identity, proof deduplication, conditional pricing, discovery, browser client, bounded refresh, native-date receipt/shelf facts and admin HTTP authorization OK");
  }catch(error){testError=error;throw error}
  finally{
-  OpenPricesClient.fetchPage=originalFetchPage;delete process.env.ECHTPREIS_ADMIN_TOKEN;
+  OpenPricesClient.fetchPage=originalFetchPage;delete process.env.SPARKORB_ADMIN_TOKEN;
   const cleanup=[pool.end()];
   if(typeof api.closeDb==="function")cleanup.push(api.closeDb());
   if(api.server.listening)cleanup.push(new Promise((resolve,reject)=>api.server.close(error=>error?reject(error):resolve())));
