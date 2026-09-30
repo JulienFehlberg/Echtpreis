@@ -1,6 +1,13 @@
 "use strict";
 const crypto=require("crypto");
-function unitPaid(item={}){const qty=Math.max(1,Number(item.itemCount||item.count||1)),line=Number(item.lineTotal),price=Number(item.price);if(line>0&&qty>1)return line/qty;if(price>0)return price;if(line>0)return line;return null}
+function unitPaid(item={}){
+ const qty=Number(item.itemCount??item.count??1);
+ if(!Number.isFinite(qty)||qty<1||qty>1000||!Number.isInteger(qty))return null;
+ const hasLine=item.lineTotal!=null,line=Number(item.lineTotal),price=Number(item.price);
+ // The amount paid on the receipt is authoritative, including single-item lines.
+ const paid=hasLine?line/qty:price;
+ return Number.isFinite(paid)&&paid>0?paid:null;
+}
 function observation(receipt,item,opts={}){
  if(!receipt||!item||item.isAdjustment||item.isDeposit)return null;const price=unitPaid(item);if(!(price>0))return null;
  const purchased=receipt.purchasedAt||receipt.purchased_at||receipt.createdAt||new Date().toISOString(),name=String(item.rawName||item.name||item.product||"").trim();if(!name)return null;
