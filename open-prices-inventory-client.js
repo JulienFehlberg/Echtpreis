@@ -1,7 +1,7 @@
 "use strict";
 const Net=require("./resilient-fetch"),Identity=require("./product-identity");
 const BASE="https://prices.openfoodfacts.org/api/v1/prices",DAY=86400000;
-const HEADERS={Accept:"application/json","User-Agent":"ECHTPREIS/1.0 Germany price inventory (Open Prices attribution)"};
+const HEADERS={Accept:"application/json","User-Agent":"SPARKORB/1.0 Germany price inventory (Open Prices attribution)"};
 function validDate(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value+"T00:00:00Z"))&&new Date(value+"T00:00:00Z").toISOString().slice(0,10)===value}
 function integer(value,fallback,min,max){const n=Number(value);return Number.isSafeInteger(n)?Math.min(max,Math.max(min,n)):fallback}
 function normalizeInput(input={}){
