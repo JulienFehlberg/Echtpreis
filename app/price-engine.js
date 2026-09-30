@@ -21,7 +21,8 @@ function freshnessScore(row,today){
 }
 function locationScore(row,ctx){
   if(!ctx)return .75;
-  if(ctx.locationId&&row.locationId&&String(ctx.locationId)===String(row.locationId))return 1;
+  if(ctx.locationId){if(row.locationId&&String(ctx.locationId)===String(row.locationId))return 1;if(row.locationId)return 0;}
+  if(ctx.region&&row.region&&String(ctx.region).toLowerCase()!==String(row.region).toLowerCase())return 0;
   if(ctx.region&&row.region&&String(ctx.region).toLowerCase()===String(row.region).toLowerCase())return .9;
   if(Number.isFinite(row.lat)&&Number.isFinite(row.lon)&&Number.isFinite(ctx.lat)&&Number.isFinite(ctx.lon)&&typeof ctx.distanceKm==="function"){
     const km=ctx.distanceKm(ctx.lat,ctx.lon,row.lat,row.lon);
@@ -59,7 +60,7 @@ function scoreObservation(row,rows,ctx={}){
 }
 function rankObservations(rows,ctx={}){
  const all=(rows||[]).filter(r=>r&&Number(r.price)>0&&r.date&&r.sourceHealthState!=="quarantine"&&!r.isOutlier).map(r=>({...r,priceType:r.priceType||"regular"}));
- const eligible=all.filter(r=>priceEligibility(r,ctx).eligible);if(!eligible.length)return null;
+ const eligible=all.filter(r=>priceEligibility(r,ctx).eligible&&locationScore(r,ctx)>0);if(!eligible.length)return null;
  const scored=eligible.map(row=>({...row,confidenceScore:scoreObservation(row,eligible.filter(x=>x.priceType===row.priceType),ctx)}));
  scored.sort((a,b)=>Number(a.price)-Number(b.price)||b.confidenceScore-a.confidenceScore||String(b.date).localeCompare(String(a.date)));
  const top=scored[0],support=scored.filter(r=>r.priceType===top.priceType&&r.per===top.per&&Math.abs(r.price-top.price)/top.price<=.035),cluster=priceCluster(support),proofs=independentProofs(support),boosted=clamp(top.confidenceScore+Math.min(6,Math.max(0,proofs-1)*2),0,100);
