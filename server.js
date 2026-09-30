@@ -28,6 +28,7 @@ const OpenPricesLocationRefresh=require("./open-prices-location-refresh");
 const ExternalLocationTargets=require("./external-location-targets");
 const StoreRefreshTargets=require("./store-refresh-targets");
 const RefreshStateStore=require("./price-refresh-state-store");
+const PriceSourceStatus=require("./price-source-status");
 const pool=process.env.DATABASE_URL?new Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DATABASE_URL.includes("localhost")?false:{rejectUnauthorized:false}}):null;
 const refreshStates={};let refreshTimer=null;
 const PORT=process.env.PORT||10000,DB_FILE=process.env.ECHTPREIS_DB_FILE||path.join("/tmp","echtpreis-db.json");
@@ -90,6 +91,7 @@ const MERCHANT_SEED=[
 async function seedMerchants(){if(!pool)return;for(const [name,norm,category] of MERCHANT_SEED)await pool.query("INSERT INTO merchants(name,normalized_name,category) VALUES($1,$2,$3) ON CONFLICT(normalized_name) DO UPDATE SET name=EXCLUDED.name,category=EXCLUDED.category",[name,norm,category])}
 async function handle(req,res){
  if(req.method==="OPTIONS")return send(res,204,{});
+ if(req.method==="GET"&&req.url==="/v1/admin/price-sources/status"){if(!pool)return send(res,503,{error:"database-unavailable"});try{const states=await RefreshStateStore.loadAll(pool);return send(res,200,{sources:PriceSourceStatus.view(states)})}catch(e){return send(res,500,{error:"source-status-failed"})}}
  if(req.method==="GET"&&req.url==="/v1/receipt-vision/status")return send(res,200,{enabled:!!process.env.OPENAI_API_KEY});
  if(req.method==="POST"&&req.url==="/v1/receipt-vision")return body(req,async(err,b)=>{
   if(err||!b||!validReceiptImages(b.images))return send(res,400,{error:"Bonfoto ist ungültig oder zu groß."});
