@@ -9,7 +9,7 @@ assert.equal(Inventory.due({status:"finished",finishedAt:"2026-09-30T11:30:00Z"}
 assert.equal(Inventory.due({status:"partial",finishedAt:"2026-09-30T11:58:00Z"},stamp),true,"An unfinished bounded scan must resume without waiting an hour");
 assert.equal(Inventory.due({status:"failed",finishedAt:"2026-09-30T11:58:00Z"},stamp),false,"A failed upstream must not be hammered each minute");
 assert.equal(Inventory.due({status:"failed",finishedAt:"2026-09-30T11:54:00Z"},stamp),true);
-const env={ECHTPREIS_INVENTORY_TOKEN:"inventory-only"};
+const env={SPARKORB_INVENTORY_TOKEN:"inventory-only"};
 for(const url of ["/v1/price-missions/verify","/v1/admin/open-prices/import","/v1/admin/product-store-coverage"]){const req={method:"POST",url,headers:{authorization:"Bearer inventory-only"}};assert.equal(Auth.protectedRoute(req),true);assert.equal(Auth.authorized(req,env),false)}
 const req={method:"POST",url:"/v1/admin/price-inventory/refresh",headers:{authorization:"Bearer inventory-only"}};
 assert.equal(Auth.authorized(req,env),true);assert.equal(Auth.authorized(req,{}),false);
