@@ -1,0 +1,13 @@
+const assert=require("assert");
+const I=require("../price-importer");
+const source={name:"TEST retailer",type:"official",baseTrust:96,url:"https://example.test"};
+const good=I.normalize({gtin:"4008400401627",store:"Testmarkt",price:"1.99",date:"2026-09-30",product:"Testprodukt",proof:"offer-1",priceType:"promotion"},source);
+assert.deepStrictEqual(I.validate(good),[]);
+assert.strictEqual(good.price,1.99);
+assert.strictEqual(good.source,"TEST retailer");
+assert.strictEqual(good.priceType,"promotion");
+assert(I.fingerprint(good).length===64);
+assert(I.validate(I.normalize({store:"X",price:-1,date:"2026-09-30",product:"X"},source)).includes("invalid_price"));
+assert(I.validate(I.normalize({store:"X",price:1,date:"bad",product:"X"},source)).includes("invalid_date"));
+assert(I.validate(I.normalize({store:"X",price:1,date:"2026-09-30",gtin:"123"},source)).includes("invalid_gtin"));
+console.log("price-importer: ok");
