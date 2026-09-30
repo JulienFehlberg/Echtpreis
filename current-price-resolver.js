@@ -26,6 +26,7 @@ function location(r,ctx={}){
  if(ctx.storeId){
   if(r.storeId&&String(ctx.storeId)===String(r.storeId))return{score:1,level:"store"};
   if(r.storeId)return{score:0,level:"different-store"};
+  if(r.externalLocationId)return{score:0,level:"external-store-unmapped"};
   if(ctx.region&&r.region&&norm(ctx.region)===norm(r.region))return{score:.72,level:"regional-fallback"};
   return{score:0,level:"location-unknown"};
  }
