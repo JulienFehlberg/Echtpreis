@@ -1,5 +1,5 @@
 "use strict";
-const Identity=require("./product-identity"),Compatibility=require("./product-compatibility");
+const Identity=require("./product-identity"),Compatibility=require("./product-compatibility"),Variant=require("./product-variant-identity");
 function resolve(external={},products=[]){
  const gtin=String(external.gtin||"").replace(/\D/g,"");
  if(gtin&&Identity.gtinValid(gtin)){
@@ -11,6 +11,8 @@ function resolve(external={},products=[]){
   const externalName=external.product||external.name||"",candidateName=p.name||p.product||"";
   const compat=Compatibility.compatible(externalName,candidateName);
   if(!compat.ok)continue;
+  const variantCompat=Variant.compatibility({...external,name:externalName},{...p,name:candidateName});
+  if(!variantCompat.ok)continue;
   const m=Identity.match({name:externalName,brand:external.brand,pack:external.pack,gtin:external.gtin},{name:candidateName,brand:p.brand,pack:p.pack,gtin:p.gtin});
   scored.push({product:p,match:m,compatibility:compat,score:Number(m.score||0)});
  }
