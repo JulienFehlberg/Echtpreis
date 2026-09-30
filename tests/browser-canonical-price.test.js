@@ -7,7 +7,7 @@ function discovery(mode){const found=mode==="eggs"?{...product,name:"Testbrand E
 function row(merchant,today,mode){
  const store=stores.find(x=>x.merchant===merchant),price=merchant==="REWE"?1.99:2.49;
  if(mode==="unknown")return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",truth:{state:"conflict"}};
- const quote={merchant,state:mode==="observed"?"observed":"verified",kind:"receipt",status:mode==="observed"?"observed":"verified",identityVerified:mode!=="unreviewed",proofVerified:mode!=="unreviewed",price,payablePrice:price,currency:"EUR",priceType:mode==="app"?"app":mode==="multi"?"multi_buy":"regular",conditional:mode==="app"||mode==="multi",minQuantity:mode==="multi"?3:null,product:"Testbrand Butter 250 g",productId:mode==="wrong-product"?ids.penny:ids.product,brand:"Testbrand",pack:"250 g",gtin,storeId:mode==="wrong-store"?ids.product:store&&store.id,region:"Berlin",locationLevel:"store",observedAt:today,confidence:93,queryMode:"exact",match:"ground-truth",proof:"receipt:"+merchant,proofHash:"hash:"+merchant,proofActor:"actor",source:"ECHTPREIS receipt",sourceType:"receipt",truthTier:3,priceAuthority:"observed-evidence",per:"piece",unitPrice:price*4,unit:"kg",packParsed:{amount:250,unit:"g",base:"kg",factor:1000},publicReferencePrice:2.99,truth:{state:mode==="observed"?"observed":"supported",independentEvidence:mode==="observed"?1:2,sourceTypes:1,strength:1.8}};
+ const quote={merchant,state:mode==="observed"?"observed":"verified",kind:"receipt",status:mode==="observed"?"observed":"verified",identityVerified:mode!=="unreviewed",proofVerified:mode!=="unreviewed",price,payablePrice:price,currency:"EUR",priceType:mode==="app"?"app":mode==="multi"?"multi_buy":"regular",conditional:mode==="app"||mode==="multi",minQuantity:mode==="multi"?3:null,product:"Testbrand Butter 250 g",productId:mode==="wrong-product"?ids.penny:ids.product,brand:"Testbrand",pack:"250 g",gtin,storeId:mode==="wrong-store"?ids.product:store&&store.id,region:"Berlin",locationLevel:"store",observedAt:today,confidence:93,queryMode:"exact",match:"ground-truth",proof:"receipt:"+merchant,proofHash:"hash:"+merchant,proofActor:"actor",source:"SPARKORB receipt",sourceType:"receipt",truthTier:3,priceAuthority:"observed-evidence",per:"piece",unitPrice:price*4,unit:"kg",packParsed:{amount:250,unit:"g",base:"kg",factor:1000},publicReferencePrice:2.99,truth:{state:mode==="observed"?"observed":"supported",independentEvidence:mode==="observed"?1:2,sourceTypes:1,strength:1.8}};
  if(mode==="eggs")Object.assign(quote,{product:"Testbrand Eier 6 Stück",pack:"6 Stück",unit:"piece",unitPrice:price/6,packParsed:{amount:6,unit:"piece",base:"piece",factor:1}});
  if(mode==="nutella")Object.assign(quote,{product:"Nutella 450 g",brand:"Ferrero",pack:"450 g",unitPrice:price/.45,packParsed:{amount:450,unit:"g",base:"kg",factor:1000}});
  return quote;
@@ -16,7 +16,7 @@ async function fixture(mode){
  const requests=[],errors=[],vc=new VirtualConsole();let release;
  vc.on("jsdomError",error=>errors.push(String(error.message||error)));
  const dom=new JSDOM(fs.readFileSync("index.html","utf8"),{runScripts:"dangerously",url:"https://example.test/",pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){
-  w.ECHTPREIS_CONFIG={apiBase:"https://prices.example.test"};
+  w.SPARKORB_CONFIG={apiBase:"https://prices.example.test"};
   w.fetch=async(url,options={})=>{
    const path=new URL(String(url),"https://example.test/").pathname;
    if(path==="/v1/price-query"){requests.push({path,body:options.body?JSON.parse(options.body):{}});const value=discovery(mode);if(mode==="invalid-geo")value.stores=value.stores.map(x=>({...x,distanceKm:null,latitude:null,longitude:null}));return{ok:true,json:async()=>value}}
@@ -33,11 +33,11 @@ async function fixture(mode){
   w.alert=()=>{};w.confirm=()=>true;w.prompt=()=>null;w.scrollTo=()=>{};
   Object.defineProperty(w.navigator,"geolocation",{configurable:true,value:{getCurrentPosition:(_,fail)=>fail&&fail({code:1})}});
   w.HTMLElement.prototype.scrollIntoView=function(){};
-  w.localStorage.setItem("echtpreis_receipt_consent","0");
+  w.localStorage.setItem("sparkorb_receipt_consent","0");
  }});
  await new Promise(resolve=>setTimeout(resolve,80));
  const w=dom.window,today=w.eval("localDateKey()");
- w.localStorage.setItem("echtpreis_shared_observations_v1",JSON.stringify([{key:"butter",store:"REWE",price:3,per:"kg",date:today,product:"Testbrand Butter 250 g",kind:"official",source:"local legacy quote",proof:"local-proof",gtin,productId:ids.product,trust:96}]));
+ w.localStorage.setItem("sparkorb_shared_observations_v1",JSON.stringify([{key:"butter",store:"REWE",price:3,per:"kg",date:today,product:"Testbrand Butter 250 g",kind:"official",source:"local legacy quote",proof:"local-proof",gtin,productId:ids.product,trust:96}]));
  w.eval("selected=new Set(['REWE','PENNY']);verifiedPriceLocation={lat:52.52,lon:13.40};nearbyStores=[];basket=[{...parseWish('250 g Butter'),ean:'"+gtin+"',gtin:'"+gtin+"',exactBrand:'Testbrand',matchMode:'exact',choice:{},packCount:1,packAmount:.25,packUnit:'kg',packLabel:'250 g',quantityMode:'packages',amount:.25,calcAmount:.25,unit:'kg',needsClarification:false,needsQuantity:false}];hasCompared=false;comparisonRevision++;invalidateDataEngine();resetPriceLookupMemo();");
  if(mode==="no-location")w.eval("verifiedPriceLocation=null;");
  if(mode==="eggs")w.eval("Object.assign(basket[0],{key:'eier',label:'6 Eier',unit:'piece',packUnit:'piece',packLabel:'6 Stück',packAmount:6,amount:6,calcAmount:6});");
