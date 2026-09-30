@@ -8,4 +8,6 @@ x=T.fuse([{price:3.99,sourceType:"receipt",proof:"r1",proofActor:"u1",storeId:"s
 x=T.fuse([{price:3.99,sourceType:"official_retailer",sourceId:"edeka",storeId:"s1"}]);assert.strictEqual(x.state,"supported");assert.strictEqual(x.reason,"authoritative-source");
 x=T.fuse([{price:3.99,sourceType:"receipt",proof:"upload-a",proofHash:"same-bytes",proofActor:"u1",storeId:"s1",gtin:"4000000000015"},{price:3.99,sourceType:"receipt",proof:"upload-b",proofHash:"same-bytes",proofActor:"u2",storeId:"s1",gtin:"4000000000015"}]);assert.strictEqual(x.independentEvidence,1);
 x=T.fuse([{price:3.99,sourceType:"receipt",proof:"upload-a",proofHash:"bytes-a",proofActor:"u1",storeId:"s1",gtin:"4000000000015"},{price:3.99,sourceType:"receipt",proof:"upload-b",proofHash:"bytes-b",proofActor:"u2",storeId:"s1",gtin:"4000000000015"}]);assert.strictEqual(x.independentEvidence,2);
+assert.strictEqual(T.truthTier({sourceType:"pos_feed"}),1);assert.strictEqual(T.truthTier({sourceType:"official_retailer"}),2);assert.strictEqual(T.truthTier({sourceType:"open_data"}),3);
+x=T.fuse([{price:1.39,sourceType:"pos_feed",storeId:"s",productId:"p"}]);assert.strictEqual(x.state,"supported");assert.strictEqual(x.reason,"authoritative-source");
 console.log("current-price-truth: ok");
