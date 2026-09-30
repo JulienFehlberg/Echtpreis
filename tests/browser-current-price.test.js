@@ -2,6 +2,7 @@ const assert=require("assert"),fs=require("fs"),{JSDOM}=require("jsdom");
 (async()=>{
  const dom=new JSDOM(fs.readFileSync("index.html","utf8"),{runScripts:"dangerously",url:"https://example.test/",pretendToBeVisual:true,beforeParse(w){
   w.eval(fs.readFileSync("app/price-engine.js","utf8"));
+  w.eval(fs.readFileSync("app/current-price-client.js","utf8"));
   w.fetch=async()=>({ok:false,json:async()=>({})});w.alert=()=>{};w.confirm=()=>true;w.prompt=()=>null;w.scrollTo=()=>{};
   Object.defineProperty(w.navigator,"geolocation",{value:{getCurrentPosition:(_,fail)=>fail&&fail({code:1})}});
   w.HTMLElement.prototype.scrollIntoView=function(){};

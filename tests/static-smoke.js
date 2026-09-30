@@ -79,7 +79,7 @@ assert(!html.includes('id="contribute"')&&html.includes('id="pointsContribute"')
 assert(html.includes(".slice(0,3)")&&html.includes("receipt-top-market"),"receipt results must show no more than the three cheapest lower estimates");
 assert(html.includes("combineReceiptCandidates")&&html.includes(".96,.48")&&html.includes(".96,.30"),"receipt OCR must inspect overlapping bands through the bottom of the receipt");
 assert(html.includes("const pending=Promise.allSettled")&&html.includes("comparisonRefreshPromise=pending")&&html.includes("comparisonRefreshPromise===pending"),"shopping comparison should render cache-first without an older refresh clearing a newer one");
-assert(html.includes("Promise.allSettled([loadNearbyStores(),ingestOpenPrices(false,keys)])"),"location and live price refresh should run in parallel");
+assert(html.includes("await loadCanonicalComparison(compareBasket")&&html.includes('<script src="app/current-price-client.js"></script>'),"basket comparison must use the canonical server price client");
 assert(html.includes("comparisonRefreshPromise"),"concurrent background comparison refreshes should be deduplicated");
 assert(html.includes("echtpreis_nearby_store_cache_v1"),"nearby stores should persist across sessions for fast repeat comparisons");
 

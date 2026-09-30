@@ -7,6 +7,8 @@ const Connector=require("../current-price-connector");
 const Registry=require("../current-price-connectors");
 const Provider=require("../providers/open-prices");
 const Import=require("../external-price-import");
+const OpenPricesClient=require("../open-prices-client");
+const CurrentClient=require("../app/current-price-client");
 
 async function main(){
  const connectionString=process.env.DATABASE_URL;
@@ -15,6 +17,8 @@ async function main(){
  assert.equal(database.hostname,"localhost","Use a local PostgreSQL test service");
  assert(database.pathname.endsWith("_test"),"Use a dedicated database whose name ends in _test");
  const pool=new Pool({connectionString,ssl:false,connectionTimeoutMillis:5000});
+ const originalFetchPage=OpenPricesClient.fetchPage;let sourceCalls=0;
+ OpenPricesClient.fetchPage=async input=>{sourceCalls++;assert.equal(input.orderBy,"-date");assert.equal(input.locationId,"12");return{url:"https://example.test/latest-price",page:1,pages:1,accepted:[{merchant:"EDEKA",product:"Nutella",brand:"Ferrero",pack:"450 g",gtin:"3017620422003",externalProductId:"openprices:3017620422003",externalLocationId:"openprices:12",price:3.99,priceType:"regular",currency:"EUR",observedAt:"2026-09-30T12:00:00Z",source:"Open Prices",sourceId:"Open Prices",sourceType:"open_data",proof:"openprices:proof:107",proofHash:"refresh-image",proofActor:"refresh-observer",truthEligible:true,registryTrust:80}],rejected:[]}};
  const api=require("../server");
  let testError;
  try{
@@ -69,7 +73,7 @@ async function main(){
   priced(result,3.99);assert.equal(result.state,"observed");
   assert.equal(result.truth.independentEvidence,1,"Two proof IDs for the same image must remain one piece of evidence");
   result=await current({gtin:null});
-  priced(result,3.99);assert.equal(result.queryMode,"sku");
+  priced(result,3.99);assert.equal(result.queryMode,"exact");
 
   await persist(Provider.adapt({items:[price(103,"independent-image","observer-3")]}),1);
   result=await current();
@@ -90,11 +94,34 @@ async function main(){
   // Legacy observations can use canonical product metadata through the API's products join.
   await pool.query("UPDATE price_observations SET brand=NULL,pack=NULL,pack_amount=NULL,pack_unit=NULL,gtin=NULL");
   result=await current({gtin:null,quantity:1});
-  priced(result,3.99);assert.equal(result.queryMode,"sku");assert.equal(result.state,"verified");
+  priced(result,3.99);assert.equal(result.queryMode,"exact");assert.equal(result.state,"verified");
   priced(await current({quantity:3}),2.99);
-  console.log("current-price-postgres: fresh schema, import, identity, proof deduplication, conditional pricing and HTTP API OK");
+  // The real HTTP discovery route returns the same product and branch used by the browser client.
+  const discoveredResponse=await fetch(baseUrl+"/v1/price-query",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:"Nutella",gtin,merchants:["EDEKA"],storeId})});
+  assert.equal(discoveredResponse.status,200);const discovered=await discoveredResponse.json();assert.equal(discovered.product.id,productId);assert.equal(discovered.stores[0].id,storeId);assert.equal(discovered.refreshTargets[0].locationId,"12");
+  const canonicalClient=CurrentClient.create({apiBase:baseUrl,fetchImpl:fetch});
+  const decision=await canonicalClient.compare({product:"Nutella",brand:"Ferrero",pack:"450 g",gtin,productId,merchants:["EDEKA"]},{today,storeIds:{EDEKA:storeId},quantity:1,refresh:true});
+  assert.equal(decision.ok,true);assert.equal(decision.results[0].state,"verified");assert.equal(sourceCalls,1);
+  const comparable=CurrentClient.toComparablePrice(decision.results[0],"kg");assert(Math.abs(comparable.price*.45-3.99)<1e-9);assert.equal(comparable.productId,productId);assert.equal(comparable.storeId,storeId);
+  const unsupported=await current({productId,pack:"750 g"});assert.equal(unsupported.state,"unknown");assert.equal(unsupported.price,null);
+  const denied=await fetch(baseUrl+"/v1/price-missions/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({submissionId:randomUUID(),storeMatch:true,productMatch:true,proofValid:true})});assert.equal(denied.status,403);
+
+  const receiptId=randomUUID();await pool.query("INSERT INTO receipt_submissions(id,proof_hash,merchant_name,store_id,store_resolution_state,purchased_at) VALUES($1,'receipt-native-date-test','EDEKA',$2,'verified','2026-09-30T10:00:00Z')",[receiptId,storeId]);
+  await pool.query("INSERT INTO receipt_items(receipt_id,raw_name,product_id,line_total,price,item_count) VALUES($1,'Butter 250 g',$2,2.49,3.99,1)",[receiptId,productId]);
+  const materialized=await api.materializeReceiptPrices(receiptId);assert.equal(materialized.accepted,1);
+  const receiptFact=(await pool.query("SELECT price::float,product_id,gtin,date::text,status,identity_verified,proof_verified,per FROM price_observations WHERE proof=$1",["receipt:"+receiptId])).rows[0];
+  assert.equal(receiptFact.price,2.49);assert.equal(receiptFact.product_id,null);assert.equal(receiptFact.gtin,null);assert.equal(receiptFact.date,today);assert.equal(receiptFact.status,"observed");assert.equal(receiptFact.identity_verified,false);assert.equal(receiptFact.proof_verified,false);assert.equal(receiptFact.per,"piece");
+
+  const submissionId=randomUUID();await pool.query("INSERT INTO price_mission_submissions(id,product_id,store_id,price,proof,observed_at,fingerprint) VALUES($1,$2,$3,3.99,'photo:reviewed-shelf','2026-09-30T10:00:00Z','native-shelf-fingerprint')",[submissionId,productId,storeId]);
+  process.env.ECHTPREIS_ADMIN_TOKEN="postgres-admin-test";
+  const verifiedResponse=await fetch(baseUrl+"/v1/price-missions/verify",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer postgres-admin-test"},body:JSON.stringify({submissionId,storeMatch:true,productMatch:true,proofValid:true})});
+  const verifiedBody=await verifiedResponse.json();assert.equal(verifiedResponse.status,200,JSON.stringify(verifiedBody));
+  const reviewed=(await pool.query("SELECT date::text,status,identity_verified,proof_verified,per FROM price_observations WHERE id=$1",[verifiedBody.observationId])).rows[0];assert.equal(reviewed.date,today);assert.equal(reviewed.status,"verified");assert.equal(reviewed.identity_verified,true);assert.equal(reviewed.proof_verified,true);assert.equal(reviewed.per,"piece");
+  const health=await fetch(baseUrl+"/health/price-engine").then(response=>response.json());assert.equal(health.ready,true);assert(health.coverage.current_products>=1);assert(health.coverage.current_stores>=1);
+  console.log("current-price-postgres: fresh schema, import, identity, proof deduplication, conditional pricing, discovery, browser client, bounded refresh, native-date receipt/shelf facts and admin HTTP authorization OK");
  }catch(error){testError=error;throw error}
  finally{
+  OpenPricesClient.fetchPage=originalFetchPage;delete process.env.ECHTPREIS_ADMIN_TOKEN;
   const cleanup=[pool.end()];
   if(typeof api.closeDb==="function")cleanup.push(api.closeDb());
   if(api.server.listening)cleanup.push(new Promise((resolve,reject)=>api.server.close(error=>error?reject(error):resolve())));
