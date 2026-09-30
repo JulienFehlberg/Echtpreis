@@ -16,5 +16,6 @@ function health(stats={}){
  if(cal.grade==="poor")score-=25;else if(cal.grade==="watch")score-=10;
  score=clamp(Math.round(score),0,100);return{score,state:score>=85?"healthy":score>=65?"watch":score>=40?"degraded":"quarantine",acceptance};
 }
+function refreshHealth(lastSuccessAt,expectedMs,now=Date.now()){if(!lastSuccessAt)return{state:"never",ageMs:null,penalty:-35};const ageMs=Math.max(0,now-new Date(lastSuccessAt).getTime()),ratio=ageMs/Math.max(60000,Number(expectedMs)||3600000);return ratio<=1.5?{state:"fresh",ageMs,penalty:0}:ratio<=3?{state:"late",ageMs,penalty:-10}:{state:"stale",ageMs,penalty:-30}}
 function trustAdjustment(h){if(!h)return 0;if(h.state==="healthy")return Math.min(3,Math.round((h.score-85)/5));if(h.state==="watch")return-5;if(h.state==="degraded")return-15;return-35}
-module.exports={proofActor,independentGroups,median,outliers,health,trustAdjustment};
+module.exports={proofActor,independentGroups,median,outliers,health,refreshHealth,trustAdjustment};
