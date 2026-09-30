@@ -1,8 +1,9 @@
 "use strict";
 const crypto=require("crypto");
+const SourceHealth=require("./source-health");
 function cleanText(x,n=300){return String(x??"").trim().slice(0,n)}
 function normalize(raw,source){
- const price=Number(raw.price),trust=Number(raw.trust||source.baseTrust||50);
+ const price=Number(raw.price),trust=Number(source.baseTrust||50);
  return {id:crypto.randomUUID(),key:cleanText(raw.key,120)||null,gtin:cleanText(raw.gtin||raw.ean,32)||null,store:cleanText(raw.store,120),price:Number.isFinite(price)?price:null,per:cleanText(raw.per||"piece",30),date:cleanText(raw.date||raw.observedAt,10),region:cleanText(raw.region,120)||null,kind:cleanText(raw.kind||source.type||"reference",30),source:source.name,sourceUrl:cleanText(raw.sourceUrl||source.url,500)||null,product:cleanText(raw.product||raw.productName,200)||null,proof:cleanText(raw.proof||raw.proofId,200)||null,proofType:cleanText(raw.proofType,40)||null,trust:Math.max(0,Math.min(100,Number.isFinite(trust)?trust:50)),status:"imported",observedAt:raw.observedAt||null,validFrom:raw.validFrom||null,validTo:raw.validTo||null,priceType:cleanText(raw.priceType||"regular",30)};
 }
 function validate(x){const e=[];if(!x.store)e.push("missing_store");if(!(x.price>0&&x.price<100000))e.push("invalid_price");if(!/^\d{4}-\d{2}-\d{2}$/.test(x.date||""))e.push("invalid_date");if(!x.key&&!x.gtin&&!x.product)e.push("missing_product_identity");if(x.gtin&&!/^\d{8,14}$/.test(x.gtin))e.push("invalid_gtin");if(x.validFrom&&x.validTo&&x.validTo<x.validFrom)e.push("invalid_validity");return e}
@@ -14,6 +15,7 @@ async function importBatch(pool,source,rows=[]){
  for(const raw of rows){const x=normalize(raw,source),errors=validate(x);if(errors.length){rejected++;await quarantine(pool,batch,source.name,raw,errors.join(","));continue}const proof=x.proof||("import:"+fingerprint(x));
   try{await pool.query("INSERT INTO price_observations(id,key,gtin,store,price,per,date,region,kind,source,source_url,product,proof,proof_type,trust,status,observed_at,valid_from,valid_to,price_type,import_batch_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)",[x.id,x.key||x.gtin||cleanText(x.product,120),x.gtin,x.store,x.price,x.per,x.date,x.region,x.kind,x.source,x.sourceUrl,x.product,proof,x.proofType,x.trust,x.status,x.observedAt,x.validFrom,x.validTo,x.priceType,batch]);accepted++}catch(e){if(String(e.code)==="23505")duplicates++;else{rejected++;await quarantine(pool,batch,source.name,raw,"db:"+cleanText(e.message,160))}}
  }
- await pool.query("UPDATE price_import_batches SET finished_at=now(),status='finished',accepted=$2,rejected=$3,duplicate_count=$4 WHERE id=$1",[batch,accepted,rejected,duplicates]);return{batchId:batch,received:rows.length,accepted,rejected,duplicates};
+ const proofRate=rows.length?rows.filter(r=>r.proof||r.proofId).length/rows.length:0,gtinRate=rows.length?rows.filter(r=>r.gtin||r.ean).length/rows.length:0;const h=SourceHealth.health({received:rows.length,accepted,rejected,proofRate,gtinRate,freshnessHours:0});
+ await pool.query("UPDATE price_import_batches SET finished_at=now(),status='finished',accepted=$2,rejected=$3,duplicate_count=$4 WHERE id=$1",[batch,accepted,rejected,duplicates]);await pool.query("INSERT INTO price_source_health(id,source,health_score,state,received,accepted,rejected,duplicate_count,proof_rate,gtin_rate) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",[crypto.randomUUID(),source.name,h.score,h.state,rows.length,accepted,rejected,duplicates,proofRate,gtinRate]);return{batchId:batch,received:rows.length,accepted,rejected,duplicates,health:h};
 }
 module.exports={normalize,validate,fingerprint,importBatch,ensureSource};
