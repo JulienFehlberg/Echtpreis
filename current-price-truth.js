@@ -16,6 +16,7 @@ function fuse(rows=[],opts={}){
  for(const r of clean){let g=groups.find(g=>Math.abs(Number(r.price)-g.center)/g.center<=tolerance);if(!g){g={rows:[],center:Number(r.price)};groups.push(g)}g.rows.push(r);g.center=median(g.rows.map(x=>Number(x.price)))}
  const scored=groups.map(g=>{const indep=g.rows.length,strength=g.rows.reduce((s,r)=>s+base(r),0),types=new Set(g.rows.map(sourceType)).size;return{...g,independent:indep,sourceTypes:types,strength:strength+Math.min(.35,(indep-1)*.12)+Math.min(.18,(types-1)*.06)}}).sort((a,b)=>b.strength-a.strength);
  const best=scored[0],runner=scored[1];if(runner&&runner.strength>=best.strength*.82&&Math.abs(best.center-runner.center)/best.center>.04)return{state:"conflict",reason:"competing-evidence-clusters",price:null,clusters:scored.slice(0,3)};
- return{state:best.independent>=2||best.strength>=.94?"supported":"observed",reason:best.independent>=2?"independent-consensus":"strongest-evidence",price:best.center,evidence:best.rows,independentEvidence:best.independent,sourceTypes:best.sourceTypes,strength:best.strength};
+ const authoritativeSingle=best.independent===1&&best.rows.some(r=>["official_retailer","retailer_feed"].includes(sourceType(r)))&&base(best.rows[0])>=.94;
+ return{state:best.independent>=2||authoritativeSingle?"supported":"observed",reason:best.independent>=2?"independent-consensus":authoritativeSingle?"authoritative-source":"strongest-evidence",price:best.center,evidence:best.rows,independentEvidence:best.independent,sourceTypes:best.sourceTypes,strength:best.strength};
 }
 module.exports={TYPE,ALIAS,sourceType,actor,scope,productScope,base,fingerprint,dedupe,independent,median,fuse};
