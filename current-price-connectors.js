@@ -39,5 +39,5 @@ const contracts={
  penny:C.contract({id:"PENNY",merchant:"PENNY",sourceType:"retailer",allowed:false,requiresRegion:true,registryTrust:96,termsStatus:"review"}),
  netto:C.contract({id:"Netto",merchant:"Netto",sourceType:"retailer",allowed:false,requiresRegion:true,registryTrust:95,termsStatus:"review"})
 };
-function status(){return Object.entries(contracts).map(([key,x])=>({key,id:x.id,merchant:x.merchant,allowed:x.allowed,termsStatus:x.termsStatus,requiresStore:x.requiresStore,requiresRegion:x.requiresRegion,registryTrust:x.registryTrust}))}
+function status(){return Object.entries(contracts).map(([key,x])=>({key,id:x.id,merchant:x.merchant,allowed:x.allowed,termsStatus:x.termsStatus,requiresStore:x.requiresStore,requiresRegion:x.requiresRegion,registryTrust:x.registryTrust,purposes:x.purposes,truthEligible:x.truthEligible}))}
 module.exports={contracts,status};
