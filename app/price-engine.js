@@ -175,5 +175,5 @@ function sourceAudit(rows=[]){
  return {observations:clean.length,sources:Object.entries(bySource).map(([source,s])=>({source,...s,proofRate:s.observations?s.withProof/s.observations:0,gtinRate:s.observations?s.withGtin/s.observations:0,locationRate:s.observations?s.withLocation/s.observations:0}))};
 }
 
-window.EchtpreisPriceEngine={VERSION,PRICE_TYPES,temporalState,priceEligibility,proofFingerprint,independentProofs,rankObservations,scoreObservation,basketQuality,freshnessScore,locationScore,sourceScore,normalizeObservation,validateObservation,dedupeObservations,sourceAudit,classifyPrice,basketRange};
+window.SparkorbPriceEngine={VERSION,PRICE_TYPES,temporalState,priceEligibility,proofFingerprint,independentProofs,rankObservations,scoreObservation,basketQuality,freshnessScore,locationScore,sourceScore,normalizeObservation,validateObservation,dedupeObservations,sourceAudit,classifyPrice,basketRange};
 })();
