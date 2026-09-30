@@ -2,7 +2,7 @@ const assert=require("assert");
 global.window={};
 require("../app/price-engine.js");
 const E=global.window.EchtpreisPriceEngine;
-assert(E&&E.VERSION==="3.0.0");
+assert(E&&E.VERSION==="3.2.0");
 
 const today="2026-09-30";
 const ctx={today,lat:52.54,lon:13.20,distanceKm:(a,b,c,d)=>Math.hypot((a-c)*70,(b-d)*45)};
@@ -45,3 +45,8 @@ const ctx={today,lat:52.54,lon:13.20,distanceKm:(a,b,c,d)=>Math.hypot((a-c)*70,(
  assert.strictEqual(q.verifiedCoverage,.5);
 }
 console.log("price-engine-v3: ok");
+{
+ const xs=[{price:10,kind:"official",confidenceScore:94},{price:5,kind:"receipt",confidenceScore:88},{price:3,kind:"reference",confidenceScore:50},null];
+ const q=E.basketQuality(xs);assert.strictEqual(q.verified,2);assert.strictEqual(q.estimated,1);assert.strictEqual(q.unknown,0);assert(q.verifiedCoverage>0.66);
+ const r=E.basketRange(xs);assert(r.min<r.center&&r.max>r.center);
+}
