@@ -1,5 +1,5 @@
 "use strict";
-const assert=require("assert/strict"),{Pool}=require("pg"),Service=require("../wolt-retailer-price-service");
+const assert=require("assert/strict"),{Pool}=require("pg"),Service=require("../wolt-retailer-price-service"),RefreshStore=require("../price-refresh-state-store"),SourceRefresh=require("../price-source-refresh"),SourceState=require("../source-refresh-state"),Sources=require("../price-sources").SOURCES;
 function gtin(index){const body=String(970000000000+index),sum=[...body].reduce((total,digit,position)=>total+Number(digit)*(position%2?3:1),0);return body+(10-sum%10)%10;}
 async function main(){
  const connectionString=process.env.DATABASE_URL;assert(connectionString,"DATABASE_URL is required");const database=new URL(connectionString);assert.equal(database.hostname,"localhost");assert(database.pathname.endsWith("_test"),"Only a dedicated local test database is allowed");
@@ -8,6 +8,13 @@ async function main(){
  try{
   const exists=async table=>!!(await pool.query("SELECT to_regclass($1) AS name",["public."+table])).rows[0].name;
   const baseline={};for(const table of["products","stores","price_observations","receipts","retailer_published_prices"]){baseline[table]=await exists(table)?(await pool.query("SELECT count(*)::int AS count FROM "+table)).rows[0].count:null;}
+  await RefreshStore.ensure(pool);const stateName="POSTGRES TEST bounded grocery continuation",owner="POSTGRES TEST worker",scheduled=new Date(now+60000).toISOString();
+  assert(await RefreshStore.acquire(pool,stateName,owner));assert.equal(await RefreshStore.save(pool,stateName,{lastAttemptAt:new Date(now).toISOString(),lastSuccessAt:new Date(now).toISOString(),nextAttemptAt:scheduled,lastReceived:400,lastAccepted:368},"OTHER TEST worker"),false,"A different worker cannot overwrite the schedule of a held lease");
+  assert(await RefreshStore.save(pool,stateName,{lastAttemptAt:new Date(now).toISOString(),lastSuccessAt:new Date(now).toISOString(),nextAttemptAt:scheduled,lastReceived:400,lastAccepted:368},owner));
+  let resumed=(await RefreshStore.loadAll(pool))[stateName];assert.equal(new Date(resumed.nextAttemptAt).toISOString(),scheduled);assert.equal(SourceRefresh.due(Sources[Service.SOURCE],resumed,now+59999),false);assert.equal(SourceRefresh.due(Sources[Service.SOURCE],resumed,now+60000),true);
+  const sourceFailure=Object.assign(Error("wolt-source-http-429"),{nextAttemptAt:new Date(now+7200000).toISOString()});resumed=SourceState.failure(resumed,sourceFailure,new Date(now+60000).toISOString());assert(await RefreshStore.acquire(pool,stateName,owner));assert(await RefreshStore.save(pool,stateName,resumed,owner));
+  resumed=(await RefreshStore.loadAll(pool))[stateName];assert.equal(new Date(resumed.lastSuccessAt).getTime(),now);assert.equal(resumed.consecutiveFailures,1);assert.equal(SourceRefresh.due(Sources[Service.SOURCE],resumed,now+3600000),false);assert.equal(SourceRefresh.due(Sources[Service.SOURCE],resumed,now+7200000),true);
+  await pool.query("DELETE FROM price_source_refresh_state WHERE source_name=$1",[stateName]);
   const fixtures=Array.from({length:501},(_,index)=>fixture(index)),saved=await Service.persist(pool,fixtures,{now});assert.equal(saved.accepted,501);assert.equal(saved.rejected,0);assert.equal(saved.upserted,501);
   const stored=(await pool.query("SELECT count(*)::int AS total,count(*) FILTER(WHERE scope_country='DE' AND scope_channel='online' AND currency='EUR' AND pack_amount=1000 AND pack_unit='ml' AND pack_count=1 AND price=1.29 AND deposit=0.25 AND displayed_price=1.54)::int AS exact FROM wolt_retailer_published_prices WHERE retailer_sku=ANY($1::text[])",[fixtures.map(row=>row.retailerSku)])).rows[0];assert.equal(stored.total,501);assert.equal(stored.exact,501);
   assert.equal((await Service.persist(pool,fixtures,{now})).unchanged,501);

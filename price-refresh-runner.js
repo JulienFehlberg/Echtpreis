@@ -8,7 +8,7 @@ async function runOne(name,state={},handlers={},ctx={}){
  const nowMs=ctx.nowMs??Date.now();if(!Refresh.due(source,state,nowMs)&&!ctx.force)return{ok:false,name,skipped:"not-due",state};
  const handler=handlers[name]||handlers[source.type];if(typeof handler!=="function")return{ok:false,name,skipped:"no-handler",state};
  locks.add(name);const started=Date.now(),stamp=new Date(nowMs).toISOString();
- try{const result=await handler({name,source,state,ctx});const meta={received:Number(result?.received||0),accepted:Number(result?.accepted||0),durationMs:Date.now()-started};return{ok:true,name,result,state:State.success(state,meta,stamp)}}
+ try{const result=await handler({name,source,state,ctx});if(result?.skipped){const nextAttemptAt=State.nextAttempt(result.retryAfter||result.nextAttemptAt,stamp);return{ok:false,name,skipped:result.skipped,result,state:nextAttemptAt?{...state,nextAttemptAt}:state}}const meta={received:Number(result?.received||0),accepted:Number(result?.accepted||0),durationMs:Date.now()-started,nextAttemptAt:result?.nextAttemptAt};return{ok:true,name,result,state:State.success(state,meta,stamp)}}
  catch(error){return{ok:false,name,error:String(error?.message||error),alert:State.shouldAlert(State.failure(state,error,stamp)),state:State.failure(state,error,stamp)}}
  finally{locks.delete(name)}
 }
