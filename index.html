@@ -1190,6 +1190,25 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
  #voiceListBtn,#barcodeBtn{width:40px!important;min-width:40px!important;height:42px!important}
 }
 </style><style>
+/* v7.287 WhatsApp-style voice action; remove confusing barcode square */
+#planner #barcodeBtn{display:none!important}
+.shopping .inputrow:has(#productInput){grid-template-columns:minmax(0,1fr) 96px 48px!important;gap:7px!important}
+#planner #voiceListBtn{
+ width:48px!important;min-width:48px!important;height:48px!important;min-height:48px!important;
+ padding:0!important;border:0!important;border-radius:50%!important;
+ background:#18a957!important;color:#fff!important;box-shadow:none!important;
+ display:grid!important;place-items:center!important;
+}
+#planner #voiceListBtn:after{
+ content:""!important;display:block!important;width:22px!important;height:28px!important;
+ background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 30' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='7' y='1.5' width='10' height='17' rx='5' fill='white' stroke='white'/%3E%3Cpath d='M3.5 14.5v1.5a8.5 8.5 0 0 0 17 0v-1.5'/%3E%3Cpath d='M12 24.5v4M8 28.5h8'/%3E%3C/svg%3E")!important;
+}
+#planner #voiceListBtn:active{transform:scale(.94)!important;background:#15964e!important}
+@media(max-width:430px){
+ .shopping .inputrow:has(#productInput){grid-template-columns:minmax(0,1fr) 94px 46px!important;gap:6px!important}
+ #planner #voiceListBtn{width:46px!important;min-width:46px!important;height:46px!important;min-height:46px!important}
+}
+</style><style>
 /* v7.286 denser product rows */
 .shopping .list{margin-top:8px!important}
 .shopping .item,.shopping .list-item,.shopping [data-list-item]{min-height:58px!important;padding-top:8px!important;padding-bottom:8px!important}
