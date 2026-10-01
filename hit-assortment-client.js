@@ -142,6 +142,8 @@ function parseNativeRow(raw,p){
  const retailerSku=typeof raw.external_id==="string"?raw.external_id:null,name=text(raw.headline),pack=text(raw.overview,100),parsed=exactPack(raw.overview),gtin=typeof raw.ean==="string"?raw.ean:null,brand=raw.brand==null?null:text(raw.brand,120)||null;
  if(raw.storeId!==p.store.storeId||raw.storeNumber!==p.store.storeNumber)reasons.push("hit-native-store-identity-conflict");
  if(!retailerSku||!/^\d{1,24}[A-Z]{1,3}$/.test(retailerSku))reasons.push("hit-native-sku-required");
+ // Native KG sales quote a weight unit; even a literal 1kg overview does not prove a fixed sold pack.
+ if(typeof retailerSku==="string"&&/^\d+KG$/.test(retailerSku))reasons.push("hit-variable-weight-sale-unit-not-supported");
  if(!gtin||!/^\d{8}$|^\d{12,14}$/.test(gtin)||!Identity.gtinValid(gtin))reasons.push("hit-valid-native-main-gtin-required");
  if(!name||/[\u0000-\u001f\u007f\ufffd<>]/.test(name))reasons.push("hit-native-product-name-required");
  if(!parsed)reasons.push("hit-exact-native-sales-pack-required");
