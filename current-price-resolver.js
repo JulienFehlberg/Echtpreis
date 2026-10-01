@@ -17,7 +17,16 @@ function sameMerchant(a,b){const x=merchantKey(a),y=merchantKey(b);return x&&y&&
 function queryMode(q){if(q.gtin)return"exact";if(q.brand&&q.pack)return"sku";if(q.brand)return"brand";return"category"}
 function identity(query,r){
  const m=Identity.match({gtin:query.gtin,name:query.name||query.product,brand:query.brand,pack:query.pack},{gtin:r.gtin,name:r.product||r.productName,brand:r.brand,pack:r.pack});
- const cls=Identity.identityClass(m),mode=queryMode(query),compat=Compatibility.compatible(query.name||query.product||"",r.product||r.productName||"");let usable=cls==="ground-truth"||cls==="reviewable";if(mode==="category"){const qn=norm(query.name||query.product||""),rn=norm(r.product||r.productName||"");if(Identity.similarity(qn,rn)>=.5||rn.startsWith(qn)||qn.startsWith(rn))usable=true;}if(mode==="exact")usable=Identity.gtinValid(query.gtin)&&Identity.gtinValid(r.gtin)&&String(query.gtin).replace(/\D/g,"")===String(r.gtin).replace(/\D/g,"");if(mode==="sku"){const qp=Identity.parsePack(query.pack||query.name||query.product),rp=Identity.parsePack(r.pack||r.product||r.productName),packExact=!!(qp&&rp&&qp.count===rp.count&&qp.total.unit===rp.total.unit&&Math.abs(qp.total.amount-rp.total.amount)/Math.max(qp.total.amount,rp.total.amount)<=.01),brandExact=!!(query.brand&&r.brand&&norm(query.brand)===norm(r.brand)),nameOverlap=Identity.similarity(query.name||query.product||"",r.product||r.productName||"")>=.5||norm(r.product||r.productName||"").startsWith(norm(query.name||query.product||""));usable=packExact&&brandExact&&nameOverlap}if(!compat.ok)usable=false;return{...m,class:cls,mode,compatibility:compat,usable};
+ const cls=Identity.identityClass(m),mode=queryMode(query),compat=Compatibility.compatible(query.name||query.product||"",r.product||r.productName||"");
+ let usable=cls==="ground-truth"||cls==="reviewable";
+ if(mode==="category"){const qn=norm(query.name||query.product||""),rn=norm(r.product||r.productName||"");if(Identity.similarity(qn,rn)>=.5||rn.startsWith(qn)||qn.startsWith(rn))usable=true;}
+ if(mode==="exact"){
+  usable=Identity.gtinValid(query.gtin)&&Identity.gtinValid(r.gtin)&&String(query.gtin).replace(/\D/g,"")===String(r.gtin).replace(/\D/g,"");
+  // Retailers can attach a consumer GTIN to a larger sales bundle. Identity alone does not prove its pack price.
+  if(usable&&query.pack){const expected=Identity.parsePack(query.pack),actual=Identity.parsePack(r.pack||r.packageSize);usable=!!(expected&&actual&&expected.count===actual.count&&expected.total.unit===actual.total.unit&&Math.abs(expected.total.amount-actual.total.amount)/Math.max(expected.total.amount,actual.total.amount)<=.001);}
+ }
+ if(mode==="sku"){const qp=Identity.parsePack(query.pack||query.name||query.product),rp=Identity.parsePack(r.pack||r.product||r.productName),packExact=!!(qp&&rp&&qp.count===rp.count&&qp.total.unit===rp.total.unit&&Math.abs(qp.total.amount-rp.total.amount)/Math.max(qp.total.amount,rp.total.amount)<=.01),brandExact=!!(query.brand&&r.brand&&norm(query.brand)===norm(r.brand)),nameOverlap=Identity.similarity(query.name||query.product||"",r.product||r.productName||"")>=.5||norm(r.product||r.productName||"").startsWith(norm(query.name||query.product||""));usable=packExact&&brandExact&&nameOverlap}
+ if(!compat.ok)usable=false;return{...m,class:cls,mode,compatibility:compat,usable};
 }
 function eligible(r,ctx={}){
  const type=r.priceType||"regular";if(PUBLIC_TYPES.has(type))return{ok:true,reason:"public"};
