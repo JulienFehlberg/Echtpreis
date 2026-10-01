@@ -969,6 +969,25 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
  .grocery-photo{width:48%!important;height:72%!important;right:-3px!important}
  .market-strip-scroll .market-logo{width:98px!important;height:76px!important}
 }
+</style><style>
+/* v7.268 self-contained market marks + clean hero separation */
+.hero-v264 .hero-copy{width:62%!important;z-index:5!important}
+.hero-v264 h1{font-size:37px!important;line-height:.96!important;max-width:300px!important}
+.hero-v264 p{max-width:225px!important}
+.grocery-photo{width:39%!important;height:68%!important;right:0!important;bottom:0!important;border-radius:0 0 29px 0!important;
+-webkit-mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.35) 18%,#000 42%)!important;mask-image:linear-gradient(to right,transparent 0%,#000 42%)!important}
+.grocery-photo img{width:132%!important;height:112%!important;right:-19%!important;bottom:-7%!important;object-fit:cover!important;object-position:60% 55%!important}
+.market-strip-scroll .market-logo{width:98px!important;height:76px!important;padding:8px!important;position:relative!important;overflow:hidden!important;font-family:Arial,sans-serif!important}
+.market-logo b,.market-logo small{display:block!important;font-style:normal!important;line-height:1!important}
+.market-logo small{font-size:10px!important;font-weight:900!important;margin-top:3px!important}
+.market-logo.m-aldi{border:4px solid #f5a623!important;box-shadow:inset 0 0 0 3px #173e79!important}.market-logo.m-aldi b{background:#173e79;color:#fff;padding:15px 8px 8px;font-size:18px}
+.market-logo.m-lidl{background:#0753a6!important;border:0!important}.market-logo.m-lidl b{width:55px;height:55px;border-radius:50%;background:#ffdf00;color:#e51b23;display:flex!important;align-items:center;justify-content:center;font-size:18px;font-weight:900}
+.market-logo.m-edeka{background:#ffd900!important;border:4px solid #13519b!important;flex-direction:column!important}.edeka-e{font-size:36px!important;color:#13519b!important;font-weight:1000!important}.market-logo.m-edeka small{color:#13519b!important}
+.market-logo.m-rewe{background:#d71920!important;border:0!important}.market-logo.m-rewe b{color:#fff;font-size:20px;font-weight:1000}
+.market-logo.m-kaufland{flex-direction:column!important}.k-mark{width:34px;height:34px;border:3px solid #df1b22;color:#df1b22;font-size:24px!important;display:flex!important;align-items:center;justify-content:center}.market-logo.m-kaufland small{color:#df1b22!important;font-size:11px!important}
+.market-logo.m-netto{background:#ffd719!important;border:0!important}.market-logo.m-netto b{color:#e31c24;font-size:20px;font-style:italic!important;font-weight:1000}
+.market-logo.m-penny{background:#d71920!important;border:0!important}.market-logo.m-penny b{color:#fff;font-size:18px;font-style:italic!important;font-weight:1000}
+@media(max-width:430px){.hero-v264 .hero-copy{width:64%!important}.hero-v264 h1{font-size:36px!important;max-width:290px!important}.grocery-photo{width:40%!important;height:66%!important}}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand"><span class="brand-word">Sparkorb</span><span class="spark-mark" aria-hidden="true"><svg viewBox="0 0 40 48"><path d="M20 2.8C10.6 2.8 3.8 9.8 3.8 18.7c0 11.7 16.2 26.1 16.2 26.1s16.2-14.4 16.2-26.1C36.2 9.8 29.4 2.8 20 2.8Z"/><path class="basket" d="M11.8 18h16.4l-2.2 9.2H14L11.8 18Zm3.2 0 2.1-4.5m7.9 4.5-2.1-4.5"/><circle class="basket" cx="16.2" cy="30.7" r="1.25"/><circle class="basket" cx="24.2" cy="30.7" r="1.25"/></svg></span><span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
@@ -982,13 +1001,13 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
 <div class="market-strip market-strip-v264" aria-label="Unterstützte Märkte">
   <div class="market-strip-head"><div class="market-strip-label">PREISE VERGLEICHEN BEI</div><span>und weiteren Märkten</span></div>
   <div class="market-strip-scroll">
-    <span class="market-logo m-aldi"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Aldi_Nord_201x_logo.svg/240px-Aldi_Nord_201x_logo.svg.png" alt="ALDI"></span>
-<span class="market-logo m-lidl"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/240px-Lidl-Logo.svg.png" alt="Lidl"></span>
-<span class="market-logo m-edeka"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Edeka_Logo_Aktuell.svg/240px-Edeka_Logo_Aktuell.svg.png" alt="EDEKA"></span>
-<span class="market-logo m-rewe"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Logo_REWE.svg/240px-Logo_REWE.svg.png" alt="REWE"></span>
-<span class="market-logo m-kaufland"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Kaufland_201x_logo.svg/240px-Kaufland_201x_logo.svg.png" alt="Kaufland"></span>
-<span class="market-logo m-netto"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Netto_Marken-Discount_2018_logo.svg/240px-Netto_Marken-Discount_2018_logo.svg.png" alt="Netto"></span>
-<span class="market-logo m-penny"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Penny-Logo.svg/240px-Penny-Logo.svg.png" alt="PENNY"></span>
+    <span class="market-logo m-aldi"><b>ALDI</b></span>
+<span class="market-logo m-lidl"><b>Lidl</b></span>
+<span class="market-logo m-edeka"><b class="edeka-e">E</b><small>EDEKA</small></span>
+<span class="market-logo m-rewe"><b>REWE</b></span>
+<span class="market-logo m-kaufland"><b class="k-mark">K</b><small>Kaufland</small></span>
+<span class="market-logo m-netto"><b>Netto</b></span>
+<span class="market-logo m-penny"><b>PENNY</b></span>
   </div>
 </div>
 <div class="homeactions coreactions home-main-actions">
