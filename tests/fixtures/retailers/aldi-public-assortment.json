@@ -1,0 +1,78 @@
+{
+  "fixturePurpose": "Parser regression fixture only. Captured official raw product, never a live-production fallback.",
+  "capturedAt": "2026-09-30T21:59:54.696215+00:00",
+  "sourceUrl": "https://www.aldi-nord.de/produkt/haltbare-vollmilch-1018999.html",
+  "product": {
+    "objectID": "1018999",
+    "name": "Haltbare Vollmilch",
+    "productSlug": "haltbare-vollmilch-1018999",
+    "assets": [
+      {
+        "type": "primary",
+        "url": "https://s7g10.scene7.com/is/image/aldinord/1018999_50_2025_hmilch_01_on"
+      },
+      {
+        "type": "seal",
+        "url": "https://s7g10.scene7.com/is/image/aldinord/haltungsform_3_5_logo_160126_090058"
+      },
+      {
+        "type": "seal",
+        "url": "https://s7g10.scene7.com/is/image/aldinord/herkunft_deutschland_logo"
+      }
+    ],
+    "shortDescription": "3,5 % Fett",
+    "shortDescriptionFormatted": [
+      {
+        "type": "p",
+        "children": [
+          {
+            "type": "text",
+            "text": "3,5 % Fett"
+          }
+        ]
+      }
+    ],
+    "brandName": "MILSANI",
+    "salesUnit": "1-L-Packung",
+    "isAvailable": true,
+    "isComingSoon": false,
+    "isRecall": false,
+    "isDrainedWeight": false,
+    "drainedWeightValue": 0,
+    "isDepositProduct": false,
+    "depositValue": 0,
+    "isBiocidalProduct": false,
+    "nutriScore": "C",
+    "isCooling": false,
+    "isFreezing": false,
+    "categoryIDs": [
+      "milch-milchgetraenke",
+      "milsani"
+    ],
+    "mainCategoryID": "milch-milchgetraenke",
+    "currentPrice": {
+      "priceValue": 0.95,
+      "basePrice": [
+        {
+          "basePriceValue": 0.95,
+          "basePriceScale": "l"
+        }
+      ],
+      "validFrom": 1767826800,
+      "validUntil": 1893366000
+    }
+  },
+  "sitemapUrls": [
+    "https://www.aldi-nord.de/produkt/haltbare-vollmilch-1018999.html",
+    "https://www.aldi-nord.de/produkt/deutsche-markenbutter-6525.html",
+    "https://www.aldi-nord.de/produkt/parboiled-reis-1939.html"
+  ],
+  "sourceUnavailablePage": {
+    "props": {
+      "pageProps": {
+        "hasError": true,
+        "apiData": null
+      }
+    }
+  }
+}
