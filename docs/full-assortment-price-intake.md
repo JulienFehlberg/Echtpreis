@@ -12,6 +12,14 @@ Ein vollständiger Lauf braucht einen vom Händler oder Datenlieferanten belegte
 
 Die Gesamtmenge darf nicht auf die ersten 100, 250, 2.000 oder 5.000 Artikel abgeschnitten werden. Begrenzungen gelten für einzelne Abrufläufe. Persistierte Cursor und faire Warteschlangen setzen danach fort. Quellfehler verlängern weder Frische noch Vollständigkeit.
 
+Die 6.000 priorisierten Grundartikel sind ein Startbestand, keine Obergrenze des Händlerkatalogs. Dieselbe belegte GTIN/Packung bei mehreren Händlern ist eine Produktidentität mit mehreren Preisangeboten; andere Varianten und Packungsgrößen bleiben getrennt. Native Artikel ohne belegte GTIN bleiben über Händler und native Artikel-ID identifizierbar. Sie werden nicht durch ähnlich klingende Namen zu einem gemeinsamen Produkt zusammengelegt.
+
+## Fortsetzung und Aktualität
+
+Ein bestätigter, noch unvollständiger Wolt-Sortimentslauf setzt nach einer Minute fort. Jeder einzelne Abruflauf behält seine Anfragegrenzen und Pausen bei. Nach der letzten nativen Seite gilt wieder das normale Aktualisierungsintervall von 15 Minuten. Fehlende oder widersprüchliche Cursor sowie Läufe ohne bestätigten Fortschritt werden nicht als erfolgreiche Fortsetzung gespeichert.
+
+Der nächste Abrufzeitpunkt wird in PostgreSQL gespeichert. Nach einem Neustart wird ein gültiger, unvollständiger Cursor wieder aufgenommen; Sperrfristen der Quelle bleiben erhalten. Ein wegen einer Sperrfrist oder eines bereits laufenden Abrufs übersprungener Lauf verändert weder den letzten erfolgreichen Abruf noch dessen Artikelzahlen. Die angezeigte Frische beruht auf einem tatsächlich erfolgreichen Quellenabruf.
+
 ## Anforderungen an den öffentlichen Händler-/Shopbestand
 
 | Bereich | Benötigte Angaben |
@@ -35,7 +43,7 @@ Ziel für den vollständigen Normalpreisbestand ist eine Aktualisierung mindeste
 
 ## Verifizierter Quellenstand am 1. Oktober 2026
 
-- **dm:** aktueller autonomer Preisabruf für validierte GTIN/Packungen ist produktiv. Die Quelle gilt für den deutschen Onlineshop. Die Suchentdeckung ist noch unvollständig; 149 aktuelle Preise sind kein vollständiges dm-Sortiment und keine bestätigten Filialpreise.
+- **dm:** aktueller autonomer Preisabruf für validierte GTIN/Packungen ist produktiv. Die Quelle gilt für den deutschen Onlineshop. Die Suchentdeckung ist noch unvollständig; der laufende Teilbestand belegt weder ein vollständiges dm-Sortiment noch bestätigte Filialpreise.
 - **REWE:** der öffentliche Shop zeigt einen umfangreichen Artikelkatalog und verlangt für konkrete Preise eine Standortwahl. Direkte HTTP-Prüfungen des Shops und der Milchseite liefern derzeit HTTP 403. Die normale Shopoberfläche ist im Browser als Gast erreichbar; deren öffentliche Standortwahl wird geprüft. Es liegt noch kein vollständig erfasster Berliner Preisbestand vor.
 - **EDEKA:** die native Berliner Marktseite Britzer Damm bietet datierte Wochenangebote. Der vorbereitete, getestete Client liest nur die regionalen Anzeigen und trennt Aktionspreise, Apppreise und Pfand. Diese Anzeigen belegen keinen vollständigen Normalpreisbestand. Die geprüfte offizielle edeka.shop-Marktsuche liefert für Berlin und 10117 keinen verfügbaren Shop.
 - **Wolt / EDEKA Hilbrecht, Berlin:** der öffentliche Kundenshop liefert ohne Login einen nativen Kategoriebaum mit 263 Blattkategorien und Artikel-/Preisantworten mit echter Pagination. Der neue Collector liest alle Kategorien in fortsetzbaren Läufen; Milch, Butter, Eier, Brot, Nudeln, Reis und weitere Grundartikel zuerst. Preise werden in einem eigenen Onlinebestand gespeichert und über die zentrale Preis-API durchsucht. Vollständigkeit gilt erst nach der letzten bestätigten Seite. Variable Gewichte, ungeklärte Varianten und fehlerhafte Artikel bleiben abgelehnt. GTIN wird nur übernommen, wenn sie nativ vorhanden und gültig ist. Der native Preis enthält angegebenes Pfand; Warenpreis und Pfand werden getrennt. Liefer-/Servicegebühren und Filialpreisgleichheit sind nicht belegt. Eine Normalpreis-/Aktionsklassifikation wird nicht aus einem aktuellen Preis geraten.
