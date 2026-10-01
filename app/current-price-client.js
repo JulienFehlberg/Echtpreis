@@ -96,8 +96,9 @@ function conditionalEligible(raw,ctx,type){
 function checkoutContext(raw,price){
  if(raw.sourceId!=="HIT Berlin store assortment"&&raw.source!=="HIT Berlin store assortment")return raw.checkoutPriceVerified===false?{checkoutPriceVerified:false,payablePackPrice:null}:{};
  const meta=raw.sourceEligibility,goods=Math.round(price*100),deposit=meta?.depositCents;
- const verified=meta?.scopeChannel==="physical-store"&&meta?.nativeStoreId===1775&&meta?.nativeStoreNumber==="258"&&meta?.goodsPriceCents===goods&&meta?.priceIncludesDeposit===false&&meta?.checkoutPriceVerified===true&&Number.isSafeInteger(deposit)&&deposit>=0;
- return{goodsPrice:price,deposit:Number.isSafeInteger(deposit)&&deposit>=0?deposit/100:null,priceIncludesDeposit:false,checkoutPriceVerified:verified,payablePackPrice:verified?(goods+deposit)/100:null};
+ const pack=exactPublishedPack(raw.pack),single=pack?.count===1&&(pack.unit!=="piece"||pack.amount===1);
+ const verified=meta?.scopeChannel==="physical-store"&&meta?.nativeStoreId===1775&&meta?.nativeStoreNumber==="258"&&meta?.goodsPriceCents===goods&&meta?.priceIncludesDeposit===false&&meta?.checkoutPriceVerified===true&&Number.isSafeInteger(deposit)&&deposit>=0&&(deposit===0||single);
+ return{goodsPrice:price,nativeDeposit:Number.isSafeInteger(deposit)&&deposit>=0?deposit/100:null,deposit:verified?deposit/100:null,priceIncludesDeposit:false,checkoutPriceVerified:verified,payablePackPrice:verified?(goods+deposit)/100:null};
 }
 function normalizeDecision(raw,ctx={}){
  const merchant=text(raw&&raw.merchant)||text(ctx.merchant),reject=reason=>unknown(merchant,reason);

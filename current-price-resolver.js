@@ -79,8 +79,9 @@ function resolveMerchant(query,merchant,rows=[],ctx={}){
 function checkoutContext(row,price){
  if(row.sourceId!=="HIT Berlin store assortment"&&row.source!=="HIT Berlin store assortment")return{};
  const meta=row.eligibility,goods=Math.round(price*100),deposit=meta?.depositCents;
- const verified=meta?.scopeChannel==="physical-store"&&meta?.nativeStoreId===1775&&meta?.nativeStoreNumber==="258"&&meta?.goodsPriceCents===goods&&meta?.priceIncludesDeposit===false&&meta?.checkoutPriceVerified===true&&Number.isSafeInteger(deposit)&&deposit>=0;
- return{goodsPrice:price,deposit:Number.isSafeInteger(deposit)&&deposit>=0?deposit/100:null,priceIncludesDeposit:false,checkoutPriceVerified:verified,payablePackPrice:verified?(goods+deposit)/100:null};
+ const pack=Identity.parsePack(row.pack),single=pack?.count===1&&(pack.total.unit!=="piece"||pack.total.amount===1);
+ const verified=meta?.scopeChannel==="physical-store"&&meta?.nativeStoreId===1775&&meta?.nativeStoreNumber==="258"&&meta?.goodsPriceCents===goods&&meta?.priceIncludesDeposit===false&&meta?.checkoutPriceVerified===true&&Number.isSafeInteger(deposit)&&deposit>=0&&(deposit===0||single);
+ return{goodsPrice:price,nativeDeposit:Number.isSafeInteger(deposit)&&deposit>=0?deposit/100:null,deposit:verified?deposit/100:null,priceIncludesDeposit:false,checkoutPriceVerified:verified,payablePackPrice:verified?(goods+deposit)/100:null};
 }
 function compare(query,merchants,rows,ctx={}){return(merchants||[]).map(m=>resolveMerchant(query,m,rows,ctx))}
 function leaders(results=[]){const known=results.filter(x=>x&&x.price>0),cash=known.filter(x=>x.checkoutPriceVerified!==false).sort((a,b)=>(a.payablePackPrice??a.price)-(b.payablePackPrice??b.price))[0]||null,unitCandidates=known.filter(x=>x.unitPrice>0&&x.unit),families=new Set(unitCandidates.map(x=>x.unit)),unit=families.size===1?unitCandidates.sort((a,b)=>a.unitPrice-b.unitPrice)[0]||null:null;return{lowestCheckout:cash,lowestUnitPrice:unit,unitComparisonAvailable:families.size===1,unitFamilies:[...families]}}
