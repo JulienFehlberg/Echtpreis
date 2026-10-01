@@ -187,6 +187,14 @@ test("a conflicting same-GTIN fixed-pack price on another SKU is rejected across
  const result=await collect(h);assert.equal(result.complete,false);assert(result.error);assert.equal(result.received,2);assert.equal(result.cursor.nextPage,1);
 });
 
+test("fresh conflicting same-page GTIN pack quotes invalidate the identity without advancing the checkpoint",async()=>{
+ const alternate=clone(milk);alternate.external_id="000000000000999999ST";alternate.url=alternate.url.replace(milk.external_id,alternate.external_id);alternate.price="1.45";alternate.priceTag.priceCent="45";
+ const h=harness(normalRoute([list([milk,alternate],0,2)],{marketBody:choice(true)}));
+ const result=await collect(h);
+ assert.equal(result.complete,false);assert.equal(result.error.code,"hit-native-page-identity-conflict");assert.deepEqual(result.error.conflictGtins,[milk.ean]);
+ assert.equal(result.accepted.length,0);assert.equal(result.pages.length,0);assert.equal(result.received,0);assert.equal(result.cursor.nextPage,0);assert.equal(result.cursor.pagesFetched,0);assert.equal(h.calls.length,3);
+});
+
 test("same-GTIN conflicts are still detected after a checkpoint resume",async()=>{
  const alternate=clone(milk);alternate.external_id="000000000000999999ST";alternate.url=alternate.url.replace(milk.external_id,alternate.external_id);alternate.price="1.45";alternate.priceTag.priceCent="45";
  const h=harness(normalRoute([list([milk,ordinary],0,3),list([alternate],1,3)],{marketBody:choice(true)}));

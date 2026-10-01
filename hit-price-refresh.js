@@ -25,8 +25,8 @@ async function refresh({pool,maxRequests=8,now=Date.now}={},deps={}){
   let saved;
   try{saved=await(deps.persist||Import.persist)(pool,result.accepted,{storeProfile:Import.STORE_PROFILE,now});}
   catch(error){await recordFailure(pool,error,now());throw error;}
-  const stamp=new Date(now()).toISOString(),partial=result.error,cooldown=partial?new Date(now()+Math.max(3600000,Number(partial.retryAfterMs)||0)).toISOString():null,reset=partial&&/cursor-conflict|count-drift|repeated-sku|cross-page-identity-conflict/.test(partial.code||"");
-  if(partial?.code==="hit-native-cross-page-identity-conflict"){
+  const stamp=new Date(now()).toISOString(),partial=result.error,cooldown=partial?new Date(now()+Math.max(3600000,Number(partial.retryAfterMs)||0)).toISOString():null,reset=partial&&/cursor-conflict|count-drift|repeated-sku|page-identity-conflict/.test(partial.code||"");
+  if(["hit-native-cross-page-identity-conflict","hit-native-page-identity-conflict"].includes(partial?.code)){
    if(!Array.isArray(partial.conflictGtins)||!partial.conflictGtins.length||partial.conflictGtins.some(g=>!/^\d{8,14}$/.test(g)))throw fail("hit-conflict-native-identities-required");
    await pool.query("UPDATE price_observations SET truth_eligible=false,status='conflicting-source' WHERE source_id=$1 AND external_location_id=$2 AND gtin=ANY($3::text[])",[SOURCE,String(Import.STORE_PROFILE.storeId),partial.conflictGtins]);
   }

@@ -1,5 +1,5 @@
 "use strict";
-const crypto=require("node:crypto"),Client=require("./hit-assortment-client");
+const crypto=require("node:crypto"),Client=require("./hit-assortment-client"),Identity=require("./product-identity");
 const SOURCE=Client.SOURCE,COOLDOWN_UNTIL="2026-10-01T19:51:16.522Z";
 const fail=code=>Object.assign(new Error(code),{code});
 const hash=body=>crypto.createHash("sha256").update(body).digest("hex");
@@ -67,9 +67,11 @@ async function collect(options={}){
    if(state.total!==null&&(state.total!==pagination.total||state.limit!==pagination.limit))throw fail("hit-native-pagination-count-drift");
    if(state.nextPage*pagination.limit>=pagination.total&&pagination.total!==0||parsed.rowCount===0&&pagination.total>0)throw fail("hit-native-pagination-stalled");
    if(parsed.rejected.some(row=>row.reasons?.some(reason=>/store.*conflict|store.*required/.test(reason))))throw fail("hit-native-store-conflict");
+   const nativeRows=Client.extractRows(page.body).rows,conflictingSkus=new Set(parsed.rejected.filter(row=>row.reasons?.some(reason=>/^hit-conflicting-native-(gtin-pack|sku)-quotes$/.test(reason))).map(row=>row.retailerSku));
+   if(conflictingSkus.size){const conflictGtins=[...new Set(nativeRows.filter(row=>conflictingSkus.has(row?.external_id)&&typeof row.ean==="string"&&Identity.gtinValid(row.ean)).map(row=>row.ean))];if(conflictGtins.length)throw Object.assign(fail("hit-native-page-identity-conflict"),{conflictGtins});}
    const expected=Math.min(pagination.limit,Math.max(0,pagination.total-state.nextPage*pagination.limit));
    if(parsed.rowCount!==expected)throw fail("hit-native-pagination-row-count-conflict");
-   const skus=Client.extractRows(page.body).rows.map(row=>row?.external_id);
+   const skus=nativeRows.map(row=>row?.external_id);
    if(skus.some(sku=>typeof sku!=="string"||!/^\d{1,24}[A-Z]{1,3}$/.test(sku)||seen.has(sku))||new Set(skus).size!==skus.length)throw fail("hit-native-pagination-repeated-sku");
    const incoming=parsed.accepted.map(c=>({key:[c.gtin,c.normalizedPack.unit,c.normalizedPack.amount/c.packCount,c.packCount].join("|"),quote:{gtin:c.gtin,signature:hash(JSON.stringify([c.name,c.priceCents,c.depositCents,c.nativePriceType]))}})),conflicts=incoming.filter(q=>state.seenQuotes[q.key]&&state.seenQuotes[q.key].signature!==q.quote.signature);
    if(conflicts.length)throw Object.assign(fail("hit-native-cross-page-identity-conflict"),{conflictGtins:[...new Set(conflicts.map(q=>q.quote.gtin))]});
