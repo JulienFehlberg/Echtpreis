@@ -79,6 +79,6 @@ function create(options={}){
  }
  return Object.freeze({search});
 }
-const api=Object.freeze({create,selection,key,candidate,normalizeResponse,physicalBranch,physicalDecision,physicalOffer,storeSelection});
+const api=Object.freeze({create,selection,key,candidate,normalizeResponse,physicalBranch,physicalDecision,physicalOffer,storeSelection,berlinDay});
 if(root)root.SparkorbPublishedProductClient=api;if(typeof module==="object"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);

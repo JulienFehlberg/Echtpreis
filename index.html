@@ -2050,7 +2050,7 @@ function canonicalPriceKey(key,store,wish){return JSON.stringify([key,canonicalS
 function canonicalPriceForWish(key,store,wish){const entry=canonicalComparisonPrices.get(canonicalPriceKey(key,store,wish)),expiry=entry?.price?.sourceEligibility?.sourceExpiresAt;return entry&&entry.expiresAt>Date.now()&&(!expiry||Date.parse(expiry)>Date.now())?entry.price:null}
 function canonicalWishQuery(w,merchants){const selected=window.SparkorbPublishedProductClient?.selection(w.selectedProduct);return selected?{product:"",brand:null,pack:selected.pack,gtin:selected.gtin,merchants}:{product:catalog[w.key]?.label||w.label||w.raw,brand:w.exactBrand||null,pack:w.packPerItem?null:String(w.packLabel||"").replace(/^ca\.\s*/i,"").replace(/^Stück$/,"1 Stück")||null,gtin:w.ean||null,merchants}}
 async function loadCanonicalComparison(items,merchants,revision,runId){
- const fresh=new Map(),branches=new Map(),published=new Map(),physical=new Map(),today=localDateKey();
+ const fresh=new Map(),branches=new Map(),published=new Map(),physical=new Map(),today=window.SparkorbPublishedProductClient?.berlinDay(Date.now())||localDateKey();
  if(!canonicalPriceClient)return;
  let next=0;const tasks=items.slice();
  async function worker(){while(next<tasks.length){const wish=tasks[next++],query=canonicalWishQuery(wish,merchants);let discovered=null;
