@@ -98,7 +98,7 @@ function parseProduct(raw={},meta={}){
  return{ok:true,product,offer,reasons:[],retailerSku:nativeSku};
 }
 function session(options={}){
- const fetchImpl=options.fetchImpl||fetch,pause=options.sleep||sleep,now=options.now||(()=>new Date().toISOString()),maxRequests=integer(options.maxRequests,25,250),timeoutMs=integer(options.timeoutMs,8000,15000),maxResponseBytes=integer(options.maxResponseBytes,4*1024*1024,16*1024*1024),maxTotalBytes=integer(options.maxTotalBytes,8*1024*1024,64*1024*1024),maxDurationMs=integer(options.maxDurationMs,180000,300000),start=Date.now();let requests=0,bytes=0,lastStarted=0;
+ const fetchImpl=options.fetchImpl||fetch,pause=options.sleep||sleep,now=options.now||(()=>new Date().toISOString()),maxRequests=integer(options.maxRequests,25,250),timeoutMs=integer(options.timeoutMs,15000,15000),maxResponseBytes=integer(options.maxResponseBytes,4*1024*1024,16*1024*1024),maxTotalBytes=integer(options.maxTotalBytes,8*1024*1024,64*1024*1024),maxDurationMs=integer(options.maxDurationMs,180000,300000),start=Date.now();let requests=0,bytes=0,lastStarted=0;
  async function request(value,{current=false}={}){
   const url=allowedUrl(value);if(requests>=maxRequests)throw failure("aldi-request-budget-exhausted");if(Date.now()-start>=maxDurationMs)throw failure("aldi-duration-budget-exhausted");
   const wait=Math.max(0,1000-(Date.now()-lastStarted));if(wait)await pause(wait);requests++;lastStarted=Date.now();
