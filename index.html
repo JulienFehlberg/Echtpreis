@@ -1312,6 +1312,17 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
  #results .compare-quality-summary{font-size:9.5px!important}
 }
 </style><style>
+/* v7.295 emphasize store distance */
+#results .compare-store-line{display:flex!important;align-items:center!important;gap:7px!important;flex-wrap:wrap!important}
+#results .compare-store-line>b{font-size:16px!important;line-height:1.2!important}
+#results .compare-distance{display:inline-flex!important;align-items:center!important;gap:3px!important;padding:4px 7px!important;border-radius:999px!important;background:#eef5f1!important;color:#176b47!important;font-size:10px!important;font-weight:900!important;white-space:nowrap!important}
+#results .compare-market.first .compare-distance{background:#dff3e7!important;color:#087443!important}
+@media(max-width:430px){
+ #results .compare-store-line{gap:5px!important}
+ #results .compare-store-line>b{font-size:15px!important}
+ #results .compare-distance{font-size:9.5px!important;padding:4px 6px!important}
+}
+</style><style>
 /* v7.286 denser product rows */
 .shopping .list{margin-top:8px!important}
 .shopping .item,.shopping .list-item,.shopping [data-list-item]{min-height:58px!important;padding-top:8px!important;padding-bottom:8px!important}
@@ -2357,7 +2368,7 @@ window.compare=async function compare({skipLocation=false,scroll=true,background
   const badge=!approx&&idx===0?'<span class="compare-badge verified">'+(excluded.length?'Günstigster belegter Teil':'Günstigster belegter Korb')+'</span>':'';
   const qualityLine=approx?'<span class="compare-quality-line">Schätzung · noch nicht durch aktuelle Preise bestätigt</span>':'<span class="compare-quality-line verified">Aktuell belegt</span>';
   const details='<details class="compare-details"><summary>Preisdetails</summary><div class="detail">'+escHtml([partialNote,q.detail].filter(Boolean).join(' · '))+(approx?' · Richtwerte bestätigen weder Filialpreis noch Verfügbarkeit.':'')+(r.branch&&r.branch.address?' · '+escHtml(r.branch.address):'')+'</div>'+memoryHtml+comparisonSourceDetails(r,compareBasket)+'</details>';
-  return '<article class="compare-market'+(idx===0?' first':'')+'"><div class="compare-market-main"><div class="compare-market-copy">'+badge+'<b>'+escHtml(r.store)+(r.branch?' · '+r.branch.distance.toFixed(1).replace(".",",")+' km':'')+'</b>'+qualityLine+'</div><div class="compare-market-price">'+(excluded.length?'Teilsumme ':approx?'ca. ':'')+eur(r.total)+'</div></div><div class="compare-market-actions">'+(r.branch?'<a class="route-link" href="'+routeUrl(r.branch)+'" target="_blank" rel="noopener">Route →</a>':'')+details+'</div></article>';
+  return '<article class="compare-market'+(idx===0?' first':'')+'"><div class="compare-market-main"><div class="compare-market-copy">'+badge+'<div class="compare-store-line"><b>'+escHtml(r.store)+'</b>'+(r.branch?'<span class="compare-distance" aria-label="Entfernung">⌖ '+r.branch.distance.toFixed(1).replace(".",",")+' km</span>':'')+'</div>'+qualityLine+'</div><div class="compare-market-price">'+(excluded.length?'Teilsumme ':approx?'ca. ':'')+eur(r.total)+'</div></div><div class="compare-market-actions">'+(r.branch?'<a class="route-link" href="'+routeUrl(r.branch)+'" target="_blank" rel="noopener">Route →</a>':'')+details+'</div></article>';
  }).join(""):'<div class="muted" style="padding:14px 0">Für diese Liste fehlt noch ein vollständiger Richtwert.</div>';
  const verified=[...verifiedComplete].sort((a,b)=>a.total-b.total),difference=verified.length>=2?verified[verified.length-1].total-verified[0].total:0;
  $("verifiedSavings").style.display=!excluded.length&&verified.length>=2&&difference>0.01?"block":"none";
