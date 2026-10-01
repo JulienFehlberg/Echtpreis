@@ -22,8 +22,10 @@ function responseFreshness({capturedAt,sourceResponseDate,sourceAgeSeconds},maxA
 }
 function exactPack(value){
  if(typeof value!=="string")return null;
- const normalized=value.replace(/\bSt\.(?=\s|[-]|$)/g,"Stück");
- if(/(?:\bca\.?\b|ungef[aä]hr|mindestens|~|\d\s*[-–]\s*\d|\b(?:pro|je)\s+100\s*[- ]?g\b)/i.test(normalized))return null;
+ const units={liter:"l",milliliter:"ml",kilogramm:"kg",gramm:"g"};
+ // Normalize explicit native salesUnit spelling, never a product title quantity.
+ const normalized=value.replace(/\b(?:milliliter|liter|kilogramm|gramm)\b/gi,unit=>units[unit.toLowerCase()]).replace(/(\d)\s*-\s*(kg|g|ml|cl|l)\b/gi,"$1 $2").replace(/(\d)\s*[x×]\s*(?=\d)/gi,"$1 x ").replace(/\bSt\.(?=\s|[-]|$)/g,"Stück");
+ if(/(?:\bca\.?\b|ungef[aä]hr|mindestens|~|\b(?:variabel|variiert|oder|je\s+nach)\b|\d\s*(?:[-–]|bis)\s*\d|\d\s*\/\s*\d|(?:^|[\s(:])[-+]\s*\d|(?:^|[\s(:])[.,]\d|[A-Za-zÀ-ÿ]\d+\s*[x×]|[x×]\s*[-+]\s*\d|\b(?:pro|je)\s+100\s*[- ]?g\b)/i.test(normalized))return null;
  const quantities=normalized.match(/\b\d+(?:[.,]\d+)?\s*[- ]?\s*(?:kg|g|ml|cl|l|st[uü]ck|stk|rollen|piece)\b/gi)||[];
  if(quantities.length!==1)return null;
  return Inventory.productPack({quantity:normalized}).parsed;
