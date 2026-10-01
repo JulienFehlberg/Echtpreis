@@ -1,6 +1,7 @@
 "use strict";
 const C=require("./current-price-connector");
 const contracts={
+ hitBerlinStore:C.contract({id:"HIT Berlin store assortment",merchant:"HIT",sourceType:"official_retailer",allowed:true,requiresStore:true,registryTrust:95,termsStatus:"public-offer-observation"}),
  posFeed:C.contract({id:"SPARKORB POS feed",merchant:"*",sourceType:"pos_feed",allowed:false,requiresStore:true,requiresRegion:false,registryTrust:99.5,termsStatus:"partner-contract"}),
  aggregatorAktionspreis:C.contract({id:"Aktionspreis",merchant:"*",sourceType:"third_party",allowed:false,requiresRegion:true,registryTrust:72,termsStatus:"review"}),
  aggregatorMarktguru:C.contract({id:"Marktguru",merchant:"*",sourceType:"third_party",allowed:false,requiresRegion:true,registryTrust:72,termsStatus:"review"}),

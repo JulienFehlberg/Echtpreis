@@ -1,0 +1,97 @@
+"use strict";
+
+const crypto=require("node:crypto"),Client=require("./hit-assortment-client"),Discovery=require("./price-query-discovery"),Clock=require("./current-price-query-service");
+const SOURCE="HIT Berlin store assortment",MERCHANT="HIT",TABLE="hit_price_import_evidence",FRESH_MS=300000,DAY_MS=86400000;
+const STORE_PROFILE=Object.freeze({storeId:1775,storeNumber:"258",name:"Berlin-Mitte",city:"Berlin",country:"DE",address:"Anton-Wilhelm-Amo-Str. 69",postalCode:"10117",region:"Berlin",latitude:52.5118284,longitude:13.3841334,sourceUrl:"https://www.hit.de/maerkte/berlin-mitte",officialUrl:"https://www.hit.de/maerkte/berlin-mitte"});
+const hash=value=>crypto.createHash("sha256").update(value).digest("hex"),object=value=>value&&typeof value==="object"&&!Array.isArray(value),fail=code=>Object.assign(new Error(code),{code});
+function timestamp(value){if(typeof value!=="string"||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value))return NaN;const time=Date.parse(value);return Number.isFinite(time)&&new Date(time).toISOString().replace(/\.000Z$/,"Z")===value.replace(/\.000Z$/,"Z")?time:NaN}
+function profile(value=STORE_PROFILE){
+ if(!object(value)||value.storeId!==STORE_PROFILE.storeId||value.storeNumber!==STORE_PROFILE.storeNumber||value.name!==STORE_PROFILE.name||value.city!=="Berlin"||value.country!=="DE")throw fail("hit-import-approved-store-profile-required");
+ for(const field of ["address","postalCode","region","latitude","longitude","sourceUrl","officialUrl"])if(value[field]!=null&&value[field]!==STORE_PROFILE[field])throw fail("hit-import-store-profile-conflict");
+ return STORE_PROFILE;
+}
+function uuid(value){const h=hash(value).slice(0,32);return h.slice(0,8)+"-"+h.slice(8,12)+"-5"+h.slice(13,16)+"-a"+h.slice(17,20)+"-"+h.slice(20)}
+function nowValue(value=Date.now){const time=typeof value==="function"?Number(value()):value instanceof Date?value.getTime():Number(value);if(!Number.isFinite(time))throw fail("hit-import-clock-required");return time}
+function validateCandidate(candidate,options={}){
+ const reasons=[];let store,now;try{store=profile(options.storeProfile);now=nowValue(options.now)}catch(error){return{ok:false,reasons:[error.code]}}
+ if(!object(candidate))return{ok:false,reasons:["hit-import-candidate-required"]};
+ const captured=timestamp(candidate.capturedAt),expiry=timestamp(candidate.expiresAt),response=timestamp(candidate.sourceResponseDate);
+ if(!Number.isFinite(captured)||captured>now||now-captured>FRESH_MS)reasons.push("hit-import-capture-stale-or-future");
+ if(!Number.isFinite(expiry)||expiry!==captured+DAY_MS||expiry<=now)reasons.push("hit-import-native-expiry-invalid");
+ if(!Number.isFinite(response)||Math.abs(response-captured)>FRESH_MS||response>now)reasons.push("hit-import-response-date-stale-or-future");
+ if(candidate.sourceId!==SOURCE||candidate.merchant!==MERCHANT||candidate.nativeStoreId!==store.storeId||candidate.nativeStoreNumber!==store.storeNumber||candidate.storeName!==store.name||candidate.city!=="Berlin"||candidate.country!=="DE"||candidate.scopeCountry!=="DE"||candidate.scopeChannel!=="store-assortment-publication"||candidate.locationScope!=="native-store"||candidate.storeId!==null||candidate.truthEligible!==false||candidate.physicalStorePriceVerified!==false)reasons.push("hit-import-native-source-scope-conflict");
+ if(typeof candidate.gtin!=="string"||!Discovery.validGtin(candidate.gtin)||candidate.gtin.trim()!==candidate.gtin)reasons.push("hit-import-native-gtin-required");
+ const reparsed=Client.parseRow(candidate.nativeProof,{storeProfile:store,capturedAt:candidate.capturedAt,responseDate:candidate.sourceResponseDate,responseAgeSeconds:candidate.sourceAgeSeconds,sourceResponseHash:candidate.sourceResponseHash,sourceResponseUrl:candidate.sourceResponseUrl});
+ if(!reparsed.ok)reasons.push(...reparsed.reasons);else{
+  const fields=["sourceId","merchant","retailerSku","nativeSku","gtin","name","brand","pack","packAmount","packUnit","packCount","price","priceCents","currency","priceBasis","priceKind","regularPrice","promotionStatus","nativePriceType","normalPriceEvidence","deposit","depositCents","depositIncluded","priceIncludesDeposit","nativeStoreId","nativeStoreNumber","storeName","sourceUrl","nativeProductUrl","sourceResponseUrl","sourceResponseHash","sourceResponseDate","sourceAgeSeconds","capturedAt","expiresAt","proofHash","publicationAvailable","availability","nativeInventoryAvailable","nativeInventoryUpdatedAt"];
+  if(fields.some(field=>candidate[field]!==reparsed.candidate[field])||JSON.stringify(candidate.normalizedPack)!==JSON.stringify(reparsed.candidate.normalizedPack))reasons.push("hit-import-reparsed-candidate-conflict");
+ }
+ if(reasons.length)return{ok:false,reasons:[...new Set(reasons)]};
+ const parsed=reparsed.candidate,pack={count:parsed.packCount,amount:parsed.normalizedPack.amount/parsed.packCount,unit:parsed.normalizedPack.unit};
+ if(!Discovery.samePack(pack,Discovery.pack((pack.count>1?pack.count+" x ":"")+pack.amount+" "+pack.unit)))return{ok:false,reasons:["hit-import-exact-pack-required"]};
+ const strictPack=(pack.count>1?pack.count+" x ":"")+pack.amount+" "+pack.unit,externalProductId="hit:store:"+store.storeId+":sku:"+parsed.retailerSku;
+ const captureKey=JSON.stringify([SOURCE,store.storeId,parsed.retailerSku,parsed.capturedAt,parsed.gtin,pack]),signature=hash(JSON.stringify([captureKey,parsed.priceCents,parsed.depositCents,parsed.proofHash,parsed.sourceResponseHash,parsed.sourceResponseDate,parsed.sourceAgeSeconds,parsed.expiresAt]));
+ return{ok:true,reasons:[],candidate:parsed,storeProfile:store,pack,strictPack,externalProductId,externalLocationId:String(store.storeId),observationId:uuid(captureKey),signature,date:Clock.today(new Date(captured))};
+}
+const schemaJobs=new WeakMap();
+async function ensure(pool){
+ if(schemaJobs.has(pool))return schemaJobs.get(pool);
+ const job=(async()=>{const owns=typeof pool.connect==="function",tx=owns?await pool.connect():pool;try{
+  if(owns)await tx.query("BEGIN");
+  await tx.query(`SELECT pg_advisory_xact_lock(hashtext('HIT import schema'));CREATE TABLE IF NOT EXISTS ${TABLE}(source_id text NOT NULL CHECK(source_id='HIT Berlin store assortment'),native_store_id integer NOT NULL CHECK(native_store_id=1775),native_store_number text NOT NULL CHECK(native_store_number='258'),retailer_sku text NOT NULL,captured_at timestamptz NOT NULL,expires_at timestamptz NOT NULL,observation_id uuid NOT NULL UNIQUE,product_id uuid NOT NULL REFERENCES products(id),store_id uuid NOT NULL REFERENCES stores(id),gtin text NOT NULL,pack_amount numeric NOT NULL CHECK(pack_amount>0),pack_unit text NOT NULL CHECK(pack_unit IN ('g','ml','piece')),pack_count integer NOT NULL CHECK(pack_count>0),price_cents integer NOT NULL CHECK(price_cents>0),deposit_cents integer,source_response_hash text NOT NULL CHECK(source_response_hash~'^[a-f0-9]{64}$'),source_response_date timestamptz NOT NULL,source_age_seconds integer,source_url text NOT NULL,source_response_url text NOT NULL,proof_hash text NOT NULL,native_proof jsonb NOT NULL,signature text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(source_id,native_store_id,retailer_sku,captured_at),CHECK(expires_at>captured_at AND expires_at<=captured_at+interval '24 hours'),CHECK(source_age_seconds IS NULL OR source_age_seconds BETWEEN 0 AND 300),CHECK(deposit_cents IS NULL OR deposit_cents>=0));CREATE INDEX IF NOT EXISTS hit_import_latest_idx ON ${TABLE}(store_id,product_id,captured_at DESC)`);
+  if(owns)await tx.query("COMMIT");
+ }catch(error){if(owns)await tx.query("ROLLBACK");throw error}finally{if(owns)tx.release()}})();
+ schemaJobs.set(pool,job);try{return await job}finally{schemaJobs.delete(pool)}
+}
+async function canonicalStore(tx,store){
+ await tx.query("INSERT INTO merchants(name,normalized_name) VALUES($1,'hit') ON CONFLICT(normalized_name) DO NOTHING",[MERCHANT]);
+ const merchant=(await tx.query("SELECT id,name,active FROM merchants WHERE normalized_name='hit' FOR UPDATE")).rows[0];if(!merchant||merchant.name!==MERCHANT||merchant.active!==true)throw fail("hit-import-canonical-merchant-conflict");
+ const external="hit:store:"+store.storeId;let rows=(await tx.query("SELECT * FROM stores WHERE external_id=$1 FOR UPDATE",[external])).rows;
+ if(!rows.length)rows=(await tx.query("INSERT INTO stores(merchant_id,external_id,address,postal_code,city,region,country,latitude,longitude,active) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,true) RETURNING *",[merchant.id,external,store.address,store.postalCode,store.city,store.region,store.country,store.latitude,store.longitude])).rows;
+ const row=rows[0];if(rows.length!==1||row.merchant_id!==merchant.id||row.active!==true||row.address!==store.address||row.postal_code!==store.postalCode||row.city!==store.city||row.region!==store.region||row.country!==store.country||Number(row.latitude)!==store.latitude||Number(row.longitude)!==store.longitude)throw fail("hit-import-canonical-store-conflict");
+ await tx.query("INSERT INTO external_store_mappings(source_id,external_location_id,store_id,status,confidence,match_reason,verified_at) VALUES($1,$2,$3,'verified',1,'official-native-store-id',now()) ON CONFLICT(source_id,external_location_id) DO NOTHING",[SOURCE,String(store.storeId),row.id]);
+ const mapping=(await tx.query("SELECT store_id,status,confidence FROM external_store_mappings WHERE source_id=$1 AND external_location_id=$2 FOR UPDATE",[SOURCE,String(store.storeId)])).rows[0];if(!mapping||mapping.store_id!==row.id||mapping.status!=="verified"||Number(mapping.confidence)!==1)throw fail("hit-import-store-mapping-conflict");
+ return{storeId:row.id,merchantId:merchant.id};
+}
+async function canonicalProduct(tx,row){
+ const c=row.candidate;let product=(await tx.query('SELECT id,gtin,pack_amount AS "packAmount",pack_unit AS "packUnit",pack_count AS "packCount" FROM products WHERE gtin=$1 FOR UPDATE',[c.gtin])).rows[0];let created=false;
+ if(!product){const insert=await tx.query("INSERT INTO products(canonical_key,gtin,name,brand,pack_amount,pack_unit,pack_count,identity_status) VALUES($1,$2,$3,$4,$5,$6,$7,'verified') ON CONFLICT(gtin) DO NOTHING RETURNING id",["gtin:"+c.gtin,c.gtin,c.name,c.brand,row.pack.amount,row.pack.unit,row.pack.count]);created=!!insert.rowCount;product=(await tx.query('SELECT id,gtin,pack_amount AS "packAmount",pack_unit AS "packUnit",pack_count AS "packCount" FROM products WHERE gtin=$1 FOR UPDATE',[c.gtin])).rows[0]}
+ if(!product||!Discovery.samePack(Discovery.productPack(product),row.pack))throw fail("hit-import-canonical-product-pack-conflict");
+ await tx.query("INSERT INTO external_product_mappings(source_id,external_product_id,product_id,status,confidence,match_reason,verified_at) VALUES($1,$2,$3,'verified',1,'native-primary-gtin-and-exact-pack',now()) ON CONFLICT(source_id,external_product_id) DO NOTHING",[SOURCE,row.externalProductId,product.id]);
+ const mapping=(await tx.query("SELECT product_id,status,confidence FROM external_product_mappings WHERE source_id=$1 AND external_product_id=$2 FOR UPDATE",[SOURCE,row.externalProductId])).rows[0];if(!mapping||mapping.product_id!==product.id||mapping.status!=="verified"||Number(mapping.confidence)!==1)throw fail("hit-import-product-mapping-conflict");
+ return{productId:product.id,created};
+}
+async function save(tx,row,store){
+ const c=row.candidate,existing=(await tx.query(`SELECT signature,observation_id FROM ${TABLE} WHERE source_id=$1 AND native_store_id=$2 AND retailer_sku=$3 AND captured_at=$4 FOR UPDATE`,[SOURCE,c.nativeStoreId,c.retailerSku,c.capturedAt])).rows[0];
+ if(existing){if(existing.signature!==row.signature||existing.observation_id!==row.observationId)throw fail("hit-import-same-capture-conflict");return{duplicate:true,observationId:row.observationId}}
+ const product=await canonicalProduct(tx,row),proof="hit:store:"+c.nativeStoreId+":sku:"+c.retailerSku+":capture:"+c.capturedAt+":sha256:"+c.sourceResponseHash;
+ const eligibility={scopeChannel:"physical-store",sourceScope:"physical-store",nativeStoreId:c.nativeStoreId,nativeStoreNumber:c.nativeStoreNumber,goodsPriceCents:c.priceCents,depositCents:c.depositCents,priceIncludesDeposit:false,checkoutPriceVerified:c.depositCents!==null,sourceExpiresAt:c.expiresAt};
+ const columns=["id","key","store","price","per","date","region","kind","source","product","proof","trust","status","pack_amount","pack_unit","store_id","merchant_id","product_id","gtin","proof_type","observed_at","valid_from","valid_to","price_type","currency","source_type","source_id","evidence_purpose","truth_eligible","source_url","fetched_at","external_location_id","external_product_id","brand","pack","proof_hash","identity_verified","proof_verified","pricing_confidence","eligibility"];
+ const values=[row.observationId,"gtin:"+c.gtin,MERCHANT,c.priceCents/100,"piece",row.date,row.storeProfile.region,"external",SOURCE,c.name,proof,95,"observed",row.pack.amount,row.pack.unit,store.storeId,store.merchantId,product.productId,c.gtin,"OFFICIAL_STORE_ASSORTMENT",c.capturedAt,row.date,row.date,"regular","EUR","official_retailer",SOURCE,"current-price",true,c.sourceUrl,c.capturedAt,row.externalLocationId,row.externalProductId,c.brand,row.strictPack,c.proofHash,true,false,"exact-native-pack",JSON.stringify(eligibility)];
+ await tx.query("INSERT INTO price_observations("+columns.join(",")+") VALUES("+values.map((_,i)=>"$"+(i+1)).join(",")+")",values);
+ await tx.query(`INSERT INTO ${TABLE}(source_id,native_store_id,native_store_number,retailer_sku,captured_at,expires_at,observation_id,product_id,store_id,gtin,pack_amount,pack_unit,pack_count,price_cents,deposit_cents,source_response_hash,source_response_date,source_age_seconds,source_url,source_response_url,proof_hash,native_proof,signature) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22::jsonb,$23)`,[SOURCE,c.nativeStoreId,c.nativeStoreNumber,c.retailerSku,c.capturedAt,c.expiresAt,row.observationId,product.productId,store.storeId,c.gtin,row.pack.amount,row.pack.unit,row.pack.count,c.priceCents,c.depositCents,c.sourceResponseHash,c.sourceResponseDate,c.sourceAgeSeconds,c.sourceUrl,c.sourceResponseUrl,c.proofHash,JSON.stringify(c.nativeProof),row.signature]);
+ await tx.query("INSERT INTO product_identity_evidence(product_id,raw_name,merchant,source,gtin,pack_amount,pack_unit,match_score,match_level,proof,observed_at) VALUES($1,$2,$3,$4,$5,$6,$7,1,'native-primary-gtin-and-exact-pack',$8,$9)",[product.productId,c.name,MERCHANT,SOURCE,c.gtin,row.pack.amount,row.pack.unit,proof,c.capturedAt]);
+ // Keep proof history, but admit only the latest actual capture for this native SKU.
+ await tx.query(`UPDATE price_observations po SET truth_eligible=false,status='superseded' FROM ${TABLE} old WHERE po.id=old.observation_id AND old.source_id=$1 AND old.native_store_id=$2 AND old.retailer_sku=$3 AND old.captured_at<$4 AND po.source_id=$1 AND po.store_id=$5 AND po.external_location_id=$6 AND po.external_product_id=$7`,[SOURCE,c.nativeStoreId,c.retailerSku,c.capturedAt,store.storeId,row.externalLocationId,row.externalProductId]);
+ await tx.query(`UPDATE price_observations SET truth_eligible=false,status='superseded' WHERE id=$1 AND EXISTS(SELECT 1 FROM ${TABLE} newer WHERE newer.source_id=$2 AND newer.native_store_id=$3 AND newer.retailer_sku=$4 AND newer.captured_at>$5)`,[row.observationId,SOURCE,c.nativeStoreId,c.retailerSku,c.capturedAt]);
+ return{duplicate:false,observationId:row.observationId,...product};
+}
+async function persist(pool,candidates,options={}){
+ if(!pool||typeof pool.connect!=="function")throw fail("hit-import-transaction-pool-required");const store=profile(options.storeProfile),now=nowValue(options.now);
+ if(!Array.isArray(candidates)||candidates.length>4000)throw fail("hit-import-bounded-candidate-array-required");
+ const accepted=[],rejected=[],validated=[];let duplicates=0,productsCreated=0;
+ for(const [index,candidate]of candidates.entries()){const checked=validateCandidate(candidate,{storeProfile:store,now});if(checked.ok)validated.push({...checked,index});else rejected.push({index,retailerSku:candidate?.retailerSku??null,reasons:checked.reasons})}
+ const captureGroups=new Map(),productGroups=new Map();
+ for(const row of validated){const c=row.candidate,captureKey=JSON.stringify([c.retailerSku,c.capturedAt]),productKey=JSON.stringify([c.gtin,row.pack,c.capturedAt]);for(const [groups,key]of[[captureGroups,captureKey],[productGroups,productKey]]){const group=groups.get(key)||[];group.push(row);groups.set(key,group)}}
+ const conflicts=new Map();for(const group of captureGroups.values())if(new Set(group.map(row=>row.signature)).size>1)for(const row of group)conflicts.set(row.index,"hit-import-conflicting-batch-capture");
+ for(const group of productGroups.values())if(new Set(group.map(row=>JSON.stringify([row.candidate.priceCents,row.candidate.depositCents]))).size>1)for(const row of group)if(!conflicts.has(row.index))conflicts.set(row.index,"hit-import-conflicting-batch-product-quote");
+ const rows=validated.filter(row=>{if(!conflicts.has(row.index))return true;rejected.push({index:row.index,retailerSku:row.candidate.retailerSku,reasons:[conflicts.get(row.index)]});return false});
+ if(!rows.length)return{sourceId:SOURCE,received:candidates.length,accepted,rejected,duplicates,productsCreated,storeId:null,conservativeValidity:"captured-berlin-calendar-day"};
+ await ensure(pool);const tx=await pool.connect();try{
+  await tx.query("BEGIN");await tx.query("SELECT pg_advisory_xact_lock(hashtext($1))",[SOURCE+":store:"+store.storeId]);let canonical;
+  try{canonical=await canonicalStore(tx,store)}catch(error){if(!error.code?.startsWith("hit-import-"))throw error;await tx.query("ROLLBACK");for(const row of rows)rejected.push({index:row.index,retailerSku:row.candidate.retailerSku,reasons:[error.code]});return{sourceId:SOURCE,received:candidates.length,accepted,rejected,duplicates,productsCreated,storeId:null,conservativeValidity:"captured-berlin-calendar-day"}}
+  for(const row of rows){const current=validateCandidate(row.candidate,{storeProfile:store,now:nowValue(options.now)});if(!current.ok){rejected.push({index:row.index,retailerSku:row.candidate.retailerSku,reasons:current.reasons});continue}await tx.query("SAVEPOINT hit_import_row");try{const result=await save(tx,row,canonical);await tx.query("RELEASE SAVEPOINT hit_import_row");if(result.duplicate)duplicates++;else{productsCreated+=result.created?1:0;accepted.push({index:row.index,retailerSku:row.candidate.retailerSku,gtin:row.candidate.gtin,productId:result.productId,storeId:canonical.storeId,observationId:result.observationId,capturedAt:row.candidate.capturedAt,price:row.candidate.price,pack:row.strictPack})}}catch(error){await tx.query("ROLLBACK TO SAVEPOINT hit_import_row");await tx.query("RELEASE SAVEPOINT hit_import_row");if(!error.code?.startsWith("hit-import-"))throw error;rejected.push({index:row.index,retailerSku:row.candidate.retailerSku,reasons:[error.code]})}}
+  await tx.query("COMMIT");return{sourceId:SOURCE,received:candidates.length,accepted,rejected,duplicates,productsCreated,storeId:canonical.storeId,conservativeValidity:"captured-berlin-calendar-day"};
+ }catch(error){await tx.query("ROLLBACK");throw error}finally{tx.release()}
+}
+module.exports={SOURCE,MERCHANT,TABLE,STORE_PROFILE,ensure,validateCandidate,persist};

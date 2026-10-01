@@ -71,7 +71,7 @@ const FIELDS=[
 ].join(",");
 function observationQuery(query,request,scopes=[]){
  const values=[request.today,request.maxAgeDays],param=value=>{values.push(value);return"$"+values.length};
- const where=['po.date>=($1::date-($2::int*interval \'1 day\'))','po.date<=$1::date','(po.store_id IS NULL OR (s.active=true AND m.active=true))'];
+ const where=['po.date>=($1::date-($2::int*interval \'1 day\'))','po.date<=$1::date','(po.store_id IS NULL OR (s.active=true AND m.active=true))',"(po.source_id IS DISTINCT FROM 'HIT Berlin store assortment' OR (po.observed_at>statement_timestamp()-interval '24 hours' AND po.observed_at<=statement_timestamp()))"];
  if(query.gtin)where.push("COALESCE(po.gtin,p.gtin)="+param(query.gtin));
  else if(query.productId)where.push("po.product_id="+param(query.productId));
  else{
