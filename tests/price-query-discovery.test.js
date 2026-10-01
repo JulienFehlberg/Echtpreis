@@ -96,7 +96,7 @@ async function main(){
  assert.equal(Discovery.position({latitude:null,longitude:null}).point,null,"Missing coordinates must not be converted to 0,0");
  assert.deepEqual(Discovery.position({latitude:0,longitude:0}).point,{latitude:0,longitude:0});
  pool=database();await Discovery.resolveQuery(pool,{gtin:product.gtin,region:"Berlin",merchants:["EDEKA"]});
- const regionalCall=pool.calls.find(call=>call.sql.includes("FROM stores s"));assert(regionalCall.sql.includes("lower(s.region)="));assert(regionalCall.sql.includes("lower(s.city)="));assert(regionalCall.args.includes("berlin"));
+ const regionalCall=pool.calls.find(call=>call.sql.includes("FROM stores s"));assert(regionalCall.sql.includes("s.country"));assert(regionalCall.sql.includes('s.external_id AS "externalId"'));assert(regionalCall.sql.includes("lower(s.region)="));assert(regionalCall.sql.includes("lower(s.city)="));assert(regionalCall.args.includes("berlin"));
 
  const unsafeMappings=[{...mapping,status:"review"},{...mapping,confidence:.89},{...mapping,confidence:Infinity},{...mapping,confidence:99},{...mapping,externalLocationId:"osm:12"},{...mapping,sourceId:"Other"},{...mapping,storeId:ids.far}];
  result=await Discovery.resolveQuery(database({mappings:unsafeMappings}),{gtin:product.gtin,storeId:store.id});

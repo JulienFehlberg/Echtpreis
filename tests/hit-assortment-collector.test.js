@@ -85,6 +85,18 @@ test("a request-limited traversal resumes its exact offered queue and preserves 
  const saved=clone(first.cursor),second=await collect(h,{maxRequests:6,cursor:first.cursor});assert.deepEqual(first.cursor,saved);assert.equal(second.complete,true);assert.equal(second.received,3);assert.equal(second.pagesFetched,6);assert.deepEqual(second.accepted.map(c=>c.gtin),[butter.ean]);
  assert.equal(h.calls[5].init.headers.Cookie,undefined);assert(second.pages.every(p=>p.categoryId!==null));
 });
+test("a new Berlin day requires a fresh cycle and accepts a real later price capture",async()=>{
+ const before=Date.parse("2026-10-01T21:59:30.000Z"),after=Date.parse("2026-10-01T22:00:01.000Z"),first=await collect(harness(fixture(),{clock:before}),{maxRequests:5}),original=clone(first.cursor);
+ assert.equal(first.cursorDay,"2026-10-01");assert.equal(first.accepted[0].price,1.25);
+ const expired=harness(fixture(),{clock:after});await assert.rejects(()=>collect(expired,{cursor:first.cursor}),e=>e.code==="hit-continuation-day-conflict");assert.equal(expired.calls.length,0,"Stale cycle metadata cannot spend source requests");assert.deepEqual(first.cursor,original);
+ const changed=clone(milk);changed.price="1.45";changed.priceTag.priceCent="45";const routes=fixture();routes["/sortiment/uebersicht"]=listing([changed,ordinary],null,[dairy],3);routes[new URL(dairy.url).pathname]=listing([changed,ordinary],dairy,[dairy,milkParent,butterParent],3);
+ const fresh=harness(routes,{clock:after}),second=await collect(fresh,{cursor:null,maxRequests:5});assert.equal(second.error,null);assert.equal(second.cursorDay,"2026-10-02");assert.equal(second.pagesFetched,2);assert.equal(second.received,2);assert.equal(second.accepted.length,2);assert.equal(second.accepted[0].price,1.45);assert(Date.parse(second.accepted[0].capturedAt)>=after);assert.equal(Date.parse(second.accepted[0].expiresAt)-Date.parse(second.accepted[0].capturedAt),86400000);assert.notEqual(second.accepted[0].sourceResponseHash,first.accepted[0].sourceResponseHash);assert.equal(fresh.calls.length,5);
+ const next=harness(routes,{clock:after+86400000});await assert.rejects(()=>collect(next,{cursor:second.cursor}),e=>e.code==="hit-continuation-day-conflict");assert.equal(next.calls.length,0,"A 24-hour old cycle cannot keep deduping fresh cards");
+});
+test("a batch day snapshot crossing midnight never changes native capture timestamps",async()=>{
+ const after=Date.parse("2026-10-01T22:00:01.000Z"),h=harness(fixture(),{clock:after}),r=await collect(h,{cursorDay:"2026-10-01",maxRequests:4});assert.equal(r.cursorDay,"2026-10-01");assert.equal(r.accepted.length,2);assert(r.accepted.every(c=>Date.parse(c.capturedAt)>=after));assert(r.accepted.every(c=>Date.parse(c.expiresAt)-Date.parse(c.capturedAt)===86400000));
+ const resumed=harness(fixture(),{clock:after+60000});await assert.rejects(()=>collect(resumed,{cursor:r.cursor}),e=>e.code==="hit-continuation-day-conflict");assert.equal(resumed.calls.length,0,"The next ordinary batch recognizes the earlier scheduling day");
+});
 test("one-page conflicting primary identities produce conflict GTINs without advancing a page",async()=>{
  const alt=clone(milk);alt.external_id="000000000000999999ST";alt.url=alt.url.replace(milk.external_id,alt.external_id);alt.price="1.45";alt.priceTag.priceCent="45";
  const routes=fixture();routes["/sortiment/uebersicht"]=listing([milk,alt],null,[dairy],2);
@@ -155,7 +167,7 @@ test("invalid explicit budgets do not silently become eight requests",async()=>{
 });
 test("invalid and wrong-market version-two checkpoints reject before any source request",async()=>{
  const h=harness(),first=await collect(h,{maxRequests:4}),count=h.calls.length;
- for(const change of [{version:1},{nativeStoreId:1729},{nativeStoreNumber:"054"},{received:0},{pagesFetched:9},{total:100001},{seenQuotes:undefined},{pending:[{...first.cursor.pending[0],url:"https://evil.example/sortiment/kaese-eier-molkerei-4261253"}]}]){
+ for(const change of [{version:1},{cursorDay:undefined},{cursorDay:"2026-02-30"},{cursorDay:"2026-10-01T00:00:00Z"},{nativeStoreId:1729},{nativeStoreNumber:"054"},{received:0},{pagesFetched:9},{total:100001},{seenQuotes:undefined},{pending:[{...first.cursor.pending[0],url:"https://evil.example/sortiment/kaese-eier-molkerei-4261253"}]}]){
   await assert.rejects(()=>collect(h,{cursor:{...clone(first.cursor),...change}}),e=>errorIncludes(e,"cursor"));assert.equal(h.calls.length,count);
  }
 });

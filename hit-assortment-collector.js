@@ -1,5 +1,5 @@
 "use strict";
-const crypto=require("node:crypto"),Client=require("./hit-assortment-client"),Identity=require("./product-identity");
+const crypto=require("node:crypto"),Client=require("./hit-assortment-client"),Identity=require("./product-identity"),Clock=require("./current-price-query-service");
 const SOURCE=Client.SOURCE,COOLDOWN_UNTIL="2026-10-01T19:51:16.522Z";
 const fail=code=>Object.assign(new Error(code),{code});
 const hash=body=>crypto.createHash("sha256").update(body).digest("hex");
@@ -17,6 +17,7 @@ function allowedUrl(input,store){
 }
 const integer=n=>Number.isSafeInteger(n)&&n>=0&&n<=100000;
 const object=value=>value&&typeof value==="object"&&!Array.isArray(value);
+function validDay(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value+"T00:00:00Z"))&&new Date(value+"T00:00:00Z").toISOString().slice(0,10)===value;}
 function nativeNode(raw,store){
  if(!object(raw)||typeof raw.id!=="string"||!/^\d+$/.test(raw.id)||![1,2,3].includes(raw.level)||raw.count!==null&&!integer(raw.count)||typeof raw.url!=="string")throw fail("hit-native-category-invalid");
  const url=allowedUrl(raw.url,store),id=new URL(url).pathname.match(/-(\d+)$/)?.[1];if(id!==raw.id)throw fail("hit-native-category-url-id-conflict");
@@ -25,10 +26,11 @@ function nativeNode(raw,store){
 function coverageFor(state){
  return{visited:state.visited.length,pending:state.pending.length,truncatedLeaves:state.visited.filter(n=>n.truncated).map(n=>({id:n.id,url:n.url,total:n.total,received:n.rowCount})),unresolvedNodes:state.visited.filter(n=>n.unresolved).map(n=>({id:n.id,url:n.url,total:n.total,received:n.rowCount,reason:n.unresolvedReason||"native-category-children-unconfirmed"}))};
 }
-function cursorFor(raw,store){
- const initial={version:2,nativeStoreId:store.storeId,nativeStoreNumber:store.storeNumber,total:null,pagesFetched:0,received:0,initialIndexLoaded:false,overviewLoaded:false,pending:[],visited:[],seenSkus:[],seenQuotes:{},categoryCoverage:{visited:0,pending:0,truncatedLeaves:[],unresolvedNodes:[]}};
+function cursorFor(raw,store,cursorDay=Clock.today()){
+ if(!validDay(cursorDay))throw fail("hit-continuation-cursor-conflict");
+ const initial={version:2,cursorDay,nativeStoreId:store.storeId,nativeStoreNumber:store.storeNumber,total:null,pagesFetched:0,received:0,initialIndexLoaded:false,overviewLoaded:false,pending:[],visited:[],seenSkus:[],seenQuotes:{},categoryCoverage:{visited:0,pending:0,truncatedLeaves:[],unresolvedNodes:[]}};
  if(raw==null)return initial;
- if(!object(raw)||raw.version!==2||raw.nativeStoreId!==store.storeId||raw.nativeStoreNumber!==store.storeNumber||!integer(raw.pagesFetched)||!integer(raw.received)||raw.total!==null&&!integer(raw.total)||typeof raw.initialIndexLoaded!=="boolean"||typeof raw.overviewLoaded!=="boolean"||!Array.isArray(raw.pending)||!Array.isArray(raw.visited)||raw.pending.length>10000||raw.visited.length>10000||raw.visited.length!==raw.pagesFetched||!Array.isArray(raw.seenSkus)||raw.seenSkus.length!==raw.received||raw.seenSkus.some(s=>typeof s!=="string"||!/^\d{1,24}[A-Z]{1,3}$/.test(s))||new Set(raw.seenSkus).size!==raw.received||!object(raw.seenQuotes)||Object.keys(raw.seenQuotes).length>100000||Object.values(raw.seenQuotes).some(q=>!object(q)||!/^[a-f0-9]{64}$/.test(q.signature)||typeof q.gtin!=="string"||!Identity.gtinValid(q.gtin)))throw fail("hit-continuation-cursor-conflict");
+ if(!object(raw)||raw.version!==2||!validDay(raw.cursorDay)||raw.nativeStoreId!==store.storeId||raw.nativeStoreNumber!==store.storeNumber||!integer(raw.pagesFetched)||!integer(raw.received)||raw.total!==null&&!integer(raw.total)||typeof raw.initialIndexLoaded!=="boolean"||typeof raw.overviewLoaded!=="boolean"||!Array.isArray(raw.pending)||!Array.isArray(raw.visited)||raw.pending.length>10000||raw.visited.length>10000||raw.visited.length!==raw.pagesFetched||!Array.isArray(raw.seenSkus)||raw.seenSkus.length!==raw.received||raw.seenSkus.some(s=>typeof s!=="string"||!/^\d{1,24}[A-Z]{1,3}$/.test(s))||new Set(raw.seenSkus).size!==raw.received||!object(raw.seenQuotes)||Object.keys(raw.seenQuotes).length>100000||Object.values(raw.seenQuotes).some(q=>!object(q)||!/^[a-f0-9]{64}$/.test(q.signature)||typeof q.gtin!=="string"||!Identity.gtinValid(q.gtin)))throw fail("hit-continuation-cursor-conflict");
  let pending;try{pending=raw.pending.map(n=>nativeNode(n,store))}catch{throw fail("hit-continuation-cursor-conflict")}
  if(new Set(pending.map(n=>n.id)).size!==pending.length)throw fail("hit-continuation-cursor-conflict");
  for(const v of raw.visited){
@@ -45,7 +47,9 @@ async function collect(options={}){
  if(now()<Date.parse(COOLDOWN_UNTIL))throw Object.assign(fail("hit-source-initial-cooldown"),{nextAttemptAt:COOLDOWN_UNTIL});
  const maxRequests=options.maxRequests===undefined?8:Number(options.maxRequests);if(!Number.isSafeInteger(maxRequests)||maxRequests<1||maxRequests>16)throw fail("hit-request-budget-invalid");
  const pauseMs=Math.max(1000,Number(options.pauseMs)||1000);if(!Number.isFinite(pauseMs))throw fail("hit-request-pause-invalid");
- const state=cursorFor(options.cursor,store),jar=new Map(),seen=new Set(state.seenSkus);
+ // A wrapper supplies one actual-clock day snapshot so a batch crossing midnight has a consistent checkpoint.
+ const cursorDay=options.cursorDay??Clock.today(new Date(now())),state=cursorFor(options.cursor,store,cursorDay),jar=new Map(),seen=new Set(state.seenSkus);
+ if(state.cursorDay!==cursorDay)throw fail("hit-continuation-day-conflict");
  const accepted=[],rejected=[],pages=[];let requests=0,lastRequest=0,error=null;
  async function read(input){
   let url=allowedUrl(input,store);
@@ -132,6 +136,6 @@ async function collect(options={}){
  }
  state.categoryCoverage=coverageFor(state);
  const complete=!error&&state.initialIndexLoaded&&state.overviewLoaded&&state.pending.length===0,nativePaginationComplete=complete&&state.total!==null&&state.received===state.total&&!state.categoryCoverage.truncatedLeaves.length&&!state.categoryCoverage.unresolvedNodes.length;
- return{sourceId:SOURCE,accepted,rejected,pages,requests,complete,categoryTraversalCycleComplete:complete,nativePaginationComplete,publishedTraversalComplete:nativePaginationComplete,categoryCoverage:state.categoryCoverage,physicalStoreAssortmentComplete:false,cursor:complete?null:state,total:state.total,pagesFetched:state.pagesFetched,received:state.received,error};
+ return{sourceId:SOURCE,cursorDay:state.cursorDay,accepted,rejected,pages,requests,complete,categoryTraversalCycleComplete:complete,nativePaginationComplete,publishedTraversalComplete:nativePaginationComplete,categoryCoverage:state.categoryCoverage,physicalStoreAssortmentComplete:false,cursor:complete?null:state,total:state.total,pagesFetched:state.pagesFetched,received:state.received,error};
 }
-module.exports={SOURCE,COOLDOWN_UNTIL,allowedUrl,cursorFor,coverageFor,collect};
+module.exports={SOURCE,COOLDOWN_UNTIL,allowedUrl,validDay,cursorFor,coverageFor,collect};
