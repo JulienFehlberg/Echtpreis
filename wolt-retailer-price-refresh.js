@@ -1,6 +1,9 @@
 "use strict";
 const Client=require("./wolt-retailer-price-client"),Published=require("./wolt-retailer-price-service");
 const SOURCE=Client.SOURCE,REFRESH_MS=15*60*1000,CONTINUATION_MS=60*1000;
+// The former HTML cache timestamp gate is replaced by a fresh native venue response.
+// Only its local validation error may retry with the new proof; source denials stay paused.
+const LEGACY_VENUE_CACHE_ERROR="wolt-native-venue-stale-or-future";
 let running=false;
 async function ensure(pool){
  if(!pool)throw new Error("database-required");
@@ -11,7 +14,7 @@ async function refresh({pool,maxRequests=24,now=Date.now}={},deps={}){
  if(!pool)throw new Error("database-required");if(running)return{received:0,accepted:0,skipped:"already-running"};running=true;
  try{
   const state=await load(pool),time=now();
-  if(state.retryAfter&&time<new Date(state.retryAfter).getTime())return{received:0,accepted:0,skipped:"source-cooldown",retryAfter:state.retryAfter};
+  if(state.retryAfter&&time<new Date(state.retryAfter).getTime()&&state.lastError!==LEGACY_VENUE_CACHE_ERROR)return{received:0,accepted:0,skipped:"source-cooldown",retryAfter:state.retryAfter};
   let collected;
   try{collected=await(deps.fetchOffers||Client.fetchOffers)({cursor:state.cursor||null,maxRequests:Math.max(3,Math.min(64,Math.floor(Number(maxRequests)||24))),now:()=>new Date(now()).toISOString()});}
   catch(error){
@@ -31,6 +34,6 @@ async function refresh({pool,maxRequests=24,now=Date.now}={},deps={}){
   return{...saved,sourceId:SOURCE,sourceRejected:collected.rejected?.length||0,requests:collected.requests,nextAttemptAt:collected.complete?null:new Date(now()+CONTINUATION_MS).toISOString(),catalog:{publishedAssortmentComplete:collected.complete,physicalStoreAssortmentVerified:false,categoryCount:collected.categoryCount,categoriesCompleted:collected.categoriesCompleted,pagesFetched:collected.pagesFetched,receivedCumulative:collected.receivedCumulative??collected.received,nextCursor:collected.complete?null:collected.nextCursor},scope:{country:"DE",channel:"online",city:"Berlin",nativeVenueId:Client.VENUE_ID},independentOfUserReceipts:true};
  }finally{running=false}
 }
-async function resumeAt(pool,now=Date.now()){const state=await load(pool),retry=state.retryAfter?new Date(state.retryAfter).getTime():NaN;if(Number.isFinite(retry)&&retry>now)return new Date(retry).toISOString();const updated=state.updatedAt?new Date(state.updatedAt).getTime():NaN;return state.cursor&&!state.lastError&&Number.isFinite(updated)?new Date(updated+CONTINUATION_MS).toISOString():null;}
+async function resumeAt(pool,now=Date.now()){const state=await load(pool);if(state.lastError===LEGACY_VENUE_CACHE_ERROR)return new Date(now).toISOString();const retry=state.retryAfter?new Date(state.retryAfter).getTime():NaN;if(Number.isFinite(retry)&&retry>now)return new Date(retry).toISOString();const updated=state.updatedAt?new Date(state.updatedAt).getTime():NaN;return state.cursor&&!state.lastError&&Number.isFinite(updated)?new Date(updated+CONTINUATION_MS).toISOString():null;}
 async function status(pool){const state=await load(pool);return{sourceId:SOURCE,...state,publishedAssortmentComplete:!state.cursor&&!!state.lastCompletedAt&&!state.lastError&&state.categoryCount>0&&state.categoriesCompleted===state.categoryCount,physicalStoreAssortmentVerified:false,normalPriceClassificationVerified:false,independentOfUserReceipts:true,refreshIntervalMinutes:15,continuationIntervalMinutes:1,nativeVenueId:Client.VENUE_ID,scopeCountry:"DE",scopeChannel:"online",city:"Berlin"};}
 module.exports={SOURCE,REFRESH_MS,CONTINUATION_MS,ensure,refresh,status,resumeAt};
