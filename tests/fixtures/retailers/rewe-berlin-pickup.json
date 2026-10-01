@@ -1,0 +1,1344 @@
+{
+  "capturedAt": "2026-10-01T10:43:01.477Z",
+  "fixtureNote": "Public REWE guest market source evidence. Tests construct bounded page doubles from these native listings; fixtures are never production imports.",
+  "sourceUrl": "https://www.rewe.de/shop/api/products?marketId=8321066&serviceTypes=PICKUP&page=1&objectsPerPage=40",
+  "filters": {
+    "productCount": 10000,
+    "items": [
+      {
+        "type": "category",
+        "key": "CATEGORY",
+        "label": "Kategorien",
+        "options": [
+          {
+            "id": "3844",
+            "value": "monatshighlights",
+            "label": "Monats-Highlights",
+            "applied": false,
+            "productCount": 1588,
+            "toggleQuery": "categorySlug=monatshighlights&marketId=8321066&serviceType=PICKUP",
+            "subCategories": [
+              {
+                "id": "3845",
+                "value": "neu-im-sortiment",
+                "label": "Neu im Sortiment",
+                "applied": false,
+                "productCount": 62,
+                "toggleQuery": "categorySlug=neu-im-sortiment&marketId=8321066&serviceType=PICKUP",
+                "categoryTags": [
+                  "inspiration"
+                ],
+                "queryParams": [
+                  {
+                    "name": "categorySlug",
+                    "value": "neu-im-sortiment"
+                  }
+                ]
+              }
+            ],
+            "categoryTags": [
+              "inspiration"
+            ],
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "monatshighlights"
+              }
+            ]
+          },
+          {
+            "id": "3862",
+            "value": "bewusste-ernaehrung",
+            "label": "Bewusste Ernährung",
+            "applied": false,
+            "productCount": 2060,
+            "toggleQuery": "categorySlug=bewusste-ernaehrung&marketId=8321066&serviceType=PICKUP",
+            "categoryTags": [
+              "inspiration"
+            ],
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "bewusste-ernaehrung"
+              }
+            ]
+          },
+          {
+            "id": "3776",
+            "value": "regional",
+            "label": "Regional",
+            "applied": false,
+            "productCount": 111,
+            "toggleQuery": "categorySlug=regional&marketId=8321066&serviceType=PICKUP",
+            "categoryTags": [
+              "inspiration"
+            ],
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "regional"
+              }
+            ]
+          },
+          {
+            "id": "3641",
+            "value": "weihnachtswelt",
+            "label": "Weihnachtswelt",
+            "applied": false,
+            "productCount": 354,
+            "toggleQuery": "categorySlug=weihnachtswelt&marketId=8321066&serviceType=PICKUP",
+            "categoryTags": [
+              "inspiration"
+            ],
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "weihnachtswelt"
+              }
+            ]
+          },
+          {
+            "id": "1",
+            "value": "obst-gemuese",
+            "label": "Obst & Gemüse",
+            "applied": false,
+            "productCount": 271,
+            "toggleQuery": "categorySlug=obst-gemuese&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "obst-gemuese"
+              }
+            ]
+          },
+          {
+            "id": "3680",
+            "value": "fleisch-wurst-fisch",
+            "label": "Fleisch, Wurst & Fisch",
+            "applied": false,
+            "productCount": 617,
+            "toggleQuery": "categorySlug=fleisch-wurst-fisch&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "fleisch-wurst-fisch"
+              }
+            ]
+          },
+          {
+            "id": "3684",
+            "value": "kaese-eier-molkerei",
+            "label": "Käse, Eier & Molkerei",
+            "applied": false,
+            "productCount": 1186,
+            "toggleQuery": "categorySlug=kaese-eier-molkerei&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "kaese-eier-molkerei"
+              }
+            ]
+          },
+          {
+            "id": "273",
+            "value": "tiefkuehlkost",
+            "label": "Tiefkühlkost",
+            "applied": false,
+            "productCount": 641,
+            "toggleQuery": "categorySlug=tiefkuehlkost&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "tiefkuehlkost"
+              }
+            ]
+          },
+          {
+            "id": "3693",
+            "value": "backwaren-cerealien-aufstriche",
+            "label": "Backwaren, Cerealien & Aufstriche",
+            "applied": false,
+            "productCount": 973,
+            "toggleQuery": "categorySlug=backwaren-cerealien-aufstriche&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "backwaren-cerealien-aufstriche"
+              }
+            ]
+          },
+          {
+            "id": "3736",
+            "value": "kochen-backen",
+            "label": "Kochen & Backen",
+            "applied": false,
+            "productCount": 445,
+            "toggleQuery": "categorySlug=kochen-backen&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "kochen-backen"
+              }
+            ]
+          },
+          {
+            "id": "3739",
+            "value": "oele-sossen-gewuerze",
+            "label": "Öle, Soßen & Gewürze",
+            "applied": false,
+            "productCount": 568,
+            "toggleQuery": "categorySlug=oele-sossen-gewuerze&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "oele-sossen-gewuerze"
+              }
+            ]
+          },
+          {
+            "id": "3738",
+            "value": "fertiggerichte-konserven",
+            "label": "Fertiggerichte & Konserven",
+            "applied": false,
+            "productCount": 969,
+            "toggleQuery": "categorySlug=fertiggerichte-konserven&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "fertiggerichte-konserven"
+              }
+            ]
+          },
+          {
+            "id": "820",
+            "value": "suesses-salziges",
+            "label": "Süßes & Salziges",
+            "applied": false,
+            "productCount": 1360,
+            "toggleQuery": "categorySlug=suesses-salziges&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "suesses-salziges"
+              }
+            ]
+          },
+          {
+            "id": "893",
+            "value": "kaffee-tee-kakao",
+            "label": "Kaffee, Tee & Kakao",
+            "applied": false,
+            "productCount": 304,
+            "toggleQuery": "categorySlug=kaffee-tee-kakao&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "kaffee-tee-kakao"
+              }
+            ]
+          },
+          {
+            "id": "921",
+            "value": "getraenke-genussmittel",
+            "label": "Getränke & Genussmittel",
+            "applied": false,
+            "productCount": 2087,
+            "toggleQuery": "categorySlug=getraenke-genussmittel&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "getraenke-genussmittel"
+              }
+            ]
+          },
+          {
+            "id": "1066",
+            "value": "drogerie-gesundheit",
+            "label": "Drogerie & Gesundheit",
+            "applied": false,
+            "productCount": 530,
+            "toggleQuery": "categorySlug=drogerie-gesundheit&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "drogerie-gesundheit"
+              }
+            ]
+          },
+          {
+            "id": "1136",
+            "value": "baby-kind",
+            "label": "Baby & Kind",
+            "applied": false,
+            "productCount": 155,
+            "toggleQuery": "categorySlug=baby-kind&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "baby-kind"
+              }
+            ]
+          },
+          {
+            "id": "2095",
+            "value": "tierbedarf",
+            "label": "Tierbedarf",
+            "applied": false,
+            "productCount": 124,
+            "toggleQuery": "categorySlug=tierbedarf&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "tierbedarf"
+              }
+            ]
+          },
+          {
+            "id": "1630",
+            "value": "kueche-haushalt",
+            "label": "Küche & Haushalt",
+            "applied": false,
+            "productCount": 281,
+            "toggleQuery": "categorySlug=kueche-haushalt&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "kueche-haushalt"
+              }
+            ]
+          },
+          {
+            "id": "3087",
+            "value": "haus-freizeit",
+            "label": "Haus & Freizeit",
+            "applied": false,
+            "productCount": 112,
+            "toggleQuery": "categorySlug=haus-freizeit&marketId=8321066&serviceType=PICKUP",
+            "queryParams": [
+              {
+                "name": "categorySlug",
+                "value": "haus-freizeit"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "items": [
+    {
+      "type": "LISTING",
+      "articleId": "FKRIL2JI",
+      "categories": [
+        "921",
+        "922",
+        "933"
+      ],
+      "categoryDetails": [
+        {
+          "id": "921",
+          "name": "Getränke & Genussmittel",
+          "slug": "getraenke-genussmittel",
+          "path": "Getränke & Genussmittel",
+          "categoryLevel": 1
+        },
+        {
+          "id": "922",
+          "name": "Erfrischungsgetränke",
+          "slug": "erfrischungsgetraenke",
+          "path": "Getränke & Genussmittel/Erfrischungsgetränke",
+          "categoryLevel": 2
+        },
+        {
+          "id": "933",
+          "name": "Energydrinks",
+          "slug": "energydrinks",
+          "path": "Getränke & Genussmittel/Erfrischungsgetränke/Energydrinks",
+          "categoryLevel": 3
+        }
+      ],
+      "reusableContainer": false,
+      "detailsUrl": "/p/red-bull-energy-drink-glacier-0-25l/9482185",
+      "imageURL": "https://img.rewe-static.de/9482185/53676715_digital-image.png",
+      "listingId": "8-FKRIL2JI-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200034,
+      "orderLimit": 99,
+      "pricing": {
+        "currentRetailPrice": 149,
+        "grammage": "0,25l (1 l = 5,96 €)",
+        "totalRefundPrice": 25
+      },
+      "productId": "9482185",
+      "serviceType": "PICKUP",
+      "tags": [
+        "lowestprice"
+      ],
+      "title": "Red Bull Energy Drink Glacier 0,25l",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "bulkyGoodsPoints": 4.16667,
+      "baseQuantity": 0.25,
+      "quantityType": "L",
+      "volumeCode": "STK",
+      "gtin": "90486647"
+    },
+    {
+      "type": "LISTING",
+      "articleId": "23376267",
+      "categories": [
+        "1",
+        "3862",
+        "51",
+        "3914",
+        "3909",
+        "54",
+        "3923"
+      ],
+      "categoryDetails": [
+        {
+          "id": "1",
+          "name": "Obst & Gemüse",
+          "slug": "obst-gemuese",
+          "path": "Obst & Gemüse",
+          "categoryLevel": 1
+        },
+        {
+          "id": "3862",
+          "name": "Bewusste Ernährung",
+          "slug": "bewusste-ernaehrung",
+          "path": "Bewusste Ernährung",
+          "categoryLevel": 1,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "3862",
+          "name": "Bewusste Ernährung",
+          "slug": "bewusste-ernaehrung",
+          "path": "Bewusste Ernährung",
+          "categoryLevel": 1,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "51",
+          "name": "Frisches Obst",
+          "slug": "frisches-obst",
+          "path": "Obst & Gemüse/Frisches Obst",
+          "categoryLevel": 2
+        },
+        {
+          "id": "3914",
+          "name": "Biologisch",
+          "slug": "biologisch",
+          "path": "Bewusste Ernährung/Biologisch",
+          "categoryLevel": 2,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "3909",
+          "name": "Bewusst snacken ",
+          "slug": "bewusst-snacken",
+          "path": "Bewusste Ernährung/Bewusst snacken ",
+          "categoryLevel": 2,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "3914",
+          "name": "Biologisch",
+          "slug": "biologisch",
+          "path": "Bewusste Ernährung/Biologisch",
+          "categoryLevel": 2,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "3909",
+          "name": "Bewusst snacken ",
+          "slug": "bewusst-snacken",
+          "path": "Bewusste Ernährung/Bewusst snacken ",
+          "categoryLevel": 2,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "54",
+          "name": "Bananen",
+          "slug": "bananen",
+          "path": "Obst & Gemüse/Frisches Obst/Bananen",
+          "categoryLevel": 3
+        },
+        {
+          "id": "3923",
+          "name": "Bio-Snacks",
+          "slug": "bio-snacks",
+          "path": "Bewusste Ernährung/Biologisch/Bio-Snacks",
+          "categoryLevel": 3,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "3923",
+          "name": "Bio-Snacks",
+          "slug": "bio-snacks",
+          "path": "Bewusste Ernährung/Biologisch/Bio-Snacks",
+          "categoryLevel": 3,
+          "categoryTags": [
+            "inspiration"
+          ]
+        }
+      ],
+      "detailsUrl": "/p/bio-banane-ca-200g/1930502",
+      "imageURL": "https://img.rewe-static.de/1930502/24568902_digital-image.png",
+      "listingId": "8-23376267-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200067,
+      "orderLimit": 15,
+      "pricing": {
+        "currentRetailPrice": 36,
+        "discount": {
+          "validTo": "2026-10-02T22:00:00.000+00:00"
+        },
+        "grammage": "1 Stück ca. 200 g (1 kg = 1,79 €)"
+      },
+      "productId": "1930502",
+      "serviceType": "PICKUP",
+      "tags": [
+        "organic",
+        "discounted"
+      ],
+      "title": "Bio Banane ca. 200g",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "baseQuantity": 1,
+      "quantityType": "KG",
+      "volumeCode": "KGG",
+      "weightPerPiece": 200,
+      "gtin": "23376267"
+    },
+    {
+      "type": "LISTING",
+      "articleId": "EWYNO6CE",
+      "categories": [
+        "921",
+        "3844",
+        "922",
+        "3851",
+        "933"
+      ],
+      "categoryDetails": [
+        {
+          "id": "921",
+          "name": "Getränke & Genussmittel",
+          "slug": "getraenke-genussmittel",
+          "path": "Getränke & Genussmittel",
+          "categoryLevel": 1
+        },
+        {
+          "id": "3844",
+          "name": "Monats-Highlights",
+          "slug": "monatshighlights",
+          "path": "Monats-Highlights",
+          "categoryLevel": 1,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "922",
+          "name": "Erfrischungsgetränke",
+          "slug": "erfrischungsgetraenke",
+          "path": "Getränke & Genussmittel/Erfrischungsgetränke",
+          "categoryLevel": 2
+        },
+        {
+          "id": "3851",
+          "name": "XXL-Packungen für Alle",
+          "slug": "xxl-packungen-fuer-alle",
+          "path": "Monats-Highlights/XXL-Packungen für Alle",
+          "categoryLevel": 2,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "933",
+          "name": "Energydrinks",
+          "slug": "energydrinks",
+          "path": "Getränke & Genussmittel/Erfrischungsgetränke/Energydrinks",
+          "categoryLevel": 3
+        }
+      ],
+      "reusableContainer": false,
+      "detailsUrl": "/p/red-bull-energy-drink-white-edition-kokos-blaubeere-4x0-25l/7706098",
+      "imageURL": "https://img.rewe-static.de/7706098/39510105_digital-image.png",
+      "listingId": "8-EWYNO6CE-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200063,
+      "orderLimit": 15,
+      "pricing": {
+        "currentRetailPrice": 549,
+        "grammage": "4x0,25l",
+        "totalRefundPrice": 100
+      },
+      "productId": "7706098",
+      "serviceType": "PICKUP",
+      "title": "Red Bull Energy Drink White Edition Kokos Blaubeere 4x0,25l",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "bulkyGoodsPoints": 12.5,
+      "baseQuantity": 0.25,
+      "quantityType": "L",
+      "multi1": 4,
+      "volumeCode": "STK",
+      "gtin": "9002490257415"
+    },
+    {
+      "type": "LISTING",
+      "articleId": "DI8FYLFV",
+      "categories": [
+        "820",
+        "841",
+        "849",
+        "3581"
+      ],
+      "categoryDetails": [
+        {
+          "id": "820",
+          "name": "Süßes & Salziges",
+          "slug": "suesses-salziges",
+          "path": "Süßes & Salziges",
+          "categoryLevel": 1
+        },
+        {
+          "id": "841",
+          "name": "Süßwaren",
+          "slug": "suesswaren",
+          "path": "Süßes & Salziges/Süßwaren",
+          "categoryLevel": 2
+        },
+        {
+          "id": "849",
+          "name": "Gummibärchen & Lakritz",
+          "slug": "gummibaerchen-lakritz",
+          "path": "Süßes & Salziges/Süßwaren/Gummibärchen & Lakritz",
+          "categoryLevel": 3
+        },
+        {
+          "id": "3581",
+          "name": "Fruchtgummi",
+          "slug": "fruchtgummi",
+          "path": "Süßes & Salziges/Süßwaren/Gummibärchen & Lakritz/Fruchtgummi",
+          "categoryLevel": 4
+        }
+      ],
+      "detailsUrl": "/p/haribo-balla-balla-vegetarisch-160g/9000686",
+      "imageURL": "https://img.rewe-static.de/9000686/42389871_digital-image.png",
+      "listingId": "8-DI8FYLFV-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200080,
+      "orderLimit": 99,
+      "pricing": {
+        "currentRetailPrice": 119,
+        "grammage": "160g (1 kg = 7,44 €)"
+      },
+      "productId": "9000686",
+      "serviceType": "PICKUP",
+      "tags": [
+        "vegetarian",
+        "lowestprice"
+      ],
+      "title": "Haribo Balla-Balla vegetarisch 160g",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "baseQuantity": 160,
+      "quantityType": "G",
+      "volumeCode": "STK",
+      "gtin": "4001686002407"
+    },
+    {
+      "type": "LISTING",
+      "articleId": "90162565",
+      "categories": [
+        "921",
+        "922",
+        "933"
+      ],
+      "categoryDetails": [
+        {
+          "id": "921",
+          "name": "Getränke & Genussmittel",
+          "slug": "getraenke-genussmittel",
+          "path": "Getränke & Genussmittel",
+          "categoryLevel": 1
+        },
+        {
+          "id": "922",
+          "name": "Erfrischungsgetränke",
+          "slug": "erfrischungsgetraenke",
+          "path": "Getränke & Genussmittel/Erfrischungsgetränke",
+          "categoryLevel": 2
+        },
+        {
+          "id": "933",
+          "name": "Energydrinks",
+          "slug": "energydrinks",
+          "path": "Getränke & Genussmittel/Erfrischungsgetränke/Energydrinks",
+          "categoryLevel": 3
+        }
+      ],
+      "reusableContainer": false,
+      "detailsUrl": "/p/red-bull-energy-drink-0-25l/2201429",
+      "imageURL": "https://img.rewe-static.de/2201429/3209700_digital-image.png",
+      "listingId": "8-90162565-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200123,
+      "orderLimit": 24,
+      "pricing": {
+        "currentRetailPrice": 149,
+        "grammage": "0,25l (1 l = 5,96 €)",
+        "totalRefundPrice": 25
+      },
+      "productId": "2201429",
+      "serviceType": "PICKUP",
+      "tags": [
+        "lowestprice"
+      ],
+      "title": "Red Bull Energy Drink 0,25l",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "bulkyGoodsPoints": 4.16667,
+      "baseQuantity": 0.25,
+      "quantityType": "L",
+      "volumeCode": "STK",
+      "gtin": "90162565"
+    },
+    {
+      "type": "LISTING",
+      "articleId": "20475963",
+      "categories": [
+        "1",
+        "3844",
+        "2",
+        "3791",
+        "7",
+        "3793"
+      ],
+      "categoryDetails": [
+        {
+          "id": "1",
+          "name": "Obst & Gemüse",
+          "slug": "obst-gemuese",
+          "path": "Obst & Gemüse",
+          "categoryLevel": 1
+        },
+        {
+          "id": "3844",
+          "name": "Monats-Highlights",
+          "slug": "monatshighlights",
+          "path": "Monats-Highlights",
+          "categoryLevel": 1,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "2",
+          "name": "Frisches Gemüse",
+          "slug": "frisches-gemuese",
+          "path": "Obst & Gemüse/Frisches Gemüse",
+          "categoryLevel": 2
+        },
+        {
+          "id": "3791",
+          "name": "Internationale Spezialitäten ",
+          "slug": "internationale-spezialitaeten",
+          "path": "Monats-Highlights/Internationale Spezialitäten ",
+          "categoryLevel": 2,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "7",
+          "name": "Kartoffeln",
+          "slug": "kartoffeln",
+          "path": "Obst & Gemüse/Frisches Gemüse/Kartoffeln",
+          "categoryLevel": 3
+        },
+        {
+          "id": "3793",
+          "name": "Asiatisch",
+          "slug": "asiatisch",
+          "path": "Monats-Highlights/Internationale Spezialitäten /Asiatisch",
+          "categoryLevel": 3,
+          "categoryTags": [
+            "inspiration"
+          ]
+        }
+      ],
+      "detailsUrl": "/p/suesskartoffel-ca-500g/475963",
+      "imageURL": "https://img.rewe-static.de/0475963/24569668_digital-image.png",
+      "listingId": "8-20475963-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200104,
+      "orderLimit": 99,
+      "pricing": {
+        "currentRetailPrice": 190,
+        "grammage": "1 Stück ca. 500 g (1 kg = 3,79 €)"
+      },
+      "productId": "475963",
+      "serviceType": "PICKUP",
+      "title": "Süßkartoffel ca. 500g",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "baseQuantity": 1,
+      "quantityType": "KG",
+      "volumeCode": "KGG",
+      "weightPerPiece": 500,
+      "gtin": "20475963"
+    },
+    {
+      "type": "LISTING",
+      "articleId": "ZXC57FGN",
+      "categories": [
+        "3680",
+        "165",
+        "172"
+      ],
+      "categoryDetails": [
+        {
+          "id": "3680",
+          "name": "Fleisch, Wurst & Fisch",
+          "slug": "fleisch-wurst-fisch",
+          "path": "Fleisch, Wurst & Fisch",
+          "categoryLevel": 1
+        },
+        {
+          "id": "165",
+          "name": "Wurst & Aufschnitt",
+          "slug": "wurst-aufschnitt",
+          "path": "Fleisch, Wurst & Fisch/Wurst & Aufschnitt",
+          "categoryLevel": 2
+        },
+        {
+          "id": "172",
+          "name": "Salami",
+          "slug": "salami",
+          "path": "Fleisch, Wurst & Fisch/Wurst & Aufschnitt/Salami",
+          "categoryLevel": 3
+        }
+      ],
+      "detailsUrl": "/p/kamar-sucuk-knoblauchwurst-250g/9208010",
+      "imageURL": "https://img.rewe-static.de/9208010/44036972_digital-image.png",
+      "listingId": "8-ZXC57FGN-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200041,
+      "orderLimit": 99,
+      "pricing": {
+        "currentRetailPrice": 379,
+        "grammage": "250g (1 kg = 15,16 €)"
+      },
+      "productId": "9208010",
+      "serviceType": "PICKUP",
+      "tags": [
+        "cool"
+      ],
+      "title": "Kamar Sucuk Knoblauchwurst 250g",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "baseQuantity": 250,
+      "quantityType": "G",
+      "volumeCode": "STK",
+      "gtin": "4008460243049"
+    },
+    {
+      "type": "LISTING",
+      "articleId": "ZLW5M4YQ",
+      "categories": [
+        "1066",
+        "1074",
+        "2459"
+      ],
+      "categoryDetails": [
+        {
+          "id": "1066",
+          "name": "Drogerie & Gesundheit",
+          "slug": "drogerie-gesundheit",
+          "path": "Drogerie & Gesundheit",
+          "categoryLevel": 1
+        },
+        {
+          "id": "1074",
+          "name": "Körperpflege & -reinigung",
+          "slug": "koerperpflege-reinigung",
+          "path": "Drogerie & Gesundheit/Körperpflege & -reinigung",
+          "categoryLevel": 2
+        },
+        {
+          "id": "2459",
+          "name": "Duschgel",
+          "slug": "duschgel",
+          "path": "Drogerie & Gesundheit/Körperpflege & -reinigung/Duschgel",
+          "categoryLevel": 3
+        }
+      ],
+      "detailsUrl": "/p/today-cremedusche-milch-kokos-300ml/2537386",
+      "imageURL": "https://img.rewe-static.de/2537386/25493507_digital-image.png",
+      "listingId": "8-ZLW5M4YQ-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200004,
+      "orderLimit": 99,
+      "pricing": {
+        "currentRetailPrice": 55,
+        "grammage": "300ml (1 l = 1,83 €)"
+      },
+      "productId": "2537386",
+      "serviceType": "PICKUP",
+      "tags": [
+        "lowestprice"
+      ],
+      "title": "Today Cremedusche Milch & Kokos 300ml",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "baseQuantity": 300,
+      "quantityType": "ML",
+      "volumeCode": "STK",
+      "gtin": "21698194"
+    },
+    {
+      "type": "LISTING",
+      "articleId": "VW1NGD39",
+      "categories": [
+        "3736",
+        "732",
+        "733"
+      ],
+      "categoryDetails": [
+        {
+          "id": "3736",
+          "name": "Kochen & Backen",
+          "slug": "kochen-backen",
+          "path": "Kochen & Backen",
+          "categoryLevel": 1
+        },
+        {
+          "id": "732",
+          "name": "Reis",
+          "slug": "reis",
+          "path": "Kochen & Backen/Reis",
+          "categoryLevel": 2
+        },
+        {
+          "id": "733",
+          "name": "Basmatireis",
+          "slug": "basmatireis",
+          "path": "Kochen & Backen/Reis/Basmatireis",
+          "categoryLevel": 3
+        }
+      ],
+      "detailsUrl": "/p/rewe-beste-wahl-basmati-reis-500g/8886901",
+      "imageURL": "https://img.rewe-static.de/8886901/38596158_digital-image.png",
+      "listingId": "8-VW1NGD39-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200002,
+      "orderLimit": 99,
+      "pricing": {
+        "currentRetailPrice": 249,
+        "grammage": "4x125g (1 kg = 4,98 €)"
+      },
+      "productId": "8886901",
+      "serviceType": "PICKUP",
+      "title": "REWE Beste Wahl Basmati Reis 500g",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "baseQuantity": 125,
+      "quantityType": "G",
+      "multi1": 4,
+      "volumeCode": "STK",
+      "gtin": "4337256799416"
+    }
+  ],
+  "prefix13Item": {
+    "type": "LISTING",
+    "articleId": "8002270041853",
+    "categories": [
+      "921",
+      "3844",
+      "964",
+      "3791",
+      "966",
+      "3798",
+      "967"
+    ],
+    "categoryDetails": [
+      {
+        "id": "921",
+        "name": "Getränke & Genussmittel",
+        "slug": "getraenke-genussmittel",
+        "path": "Getränke & Genussmittel",
+        "categoryLevel": 1
+      },
+      {
+        "id": "3844",
+        "name": "Monats-Highlights",
+        "slug": "monatshighlights",
+        "path": "Monats-Highlights",
+        "categoryLevel": 1,
+        "categoryTags": [
+          "inspiration"
+        ]
+      },
+      {
+        "id": "964",
+        "name": "Wasser",
+        "slug": "wasser",
+        "path": "Getränke & Genussmittel/Wasser",
+        "categoryLevel": 2
+      },
+      {
+        "id": "3791",
+        "name": "Internationale Spezialitäten ",
+        "slug": "internationale-spezialitaeten",
+        "path": "Monats-Highlights/Internationale Spezialitäten ",
+        "categoryLevel": 2,
+        "categoryTags": [
+          "inspiration"
+        ]
+      },
+      {
+        "id": "966",
+        "name": "Mineralwasser",
+        "slug": "mineralwasser",
+        "path": "Getränke & Genussmittel/Wasser/Mineralwasser",
+        "categoryLevel": 3
+      },
+      {
+        "id": "3798",
+        "name": "Italienisch",
+        "slug": "italienisch",
+        "path": "Monats-Highlights/Internationale Spezialitäten /Italienisch",
+        "categoryLevel": 3,
+        "categoryTags": [
+          "inspiration"
+        ]
+      },
+      {
+        "id": "967",
+        "name": "Mineralwasser classic",
+        "slug": "mineralwasser-classic",
+        "path": "Getränke & Genussmittel/Wasser/Mineralwasser/Mineralwasser classic",
+        "categoryLevel": 4
+      }
+    ],
+    "reusableContainer": false,
+    "detailsUrl": "/p/san-pellegrino-mineralwasser-medium-6x0-5l/22685",
+    "imageURL": "https://img.rewe-static.de/0022685/7217130_digital-image.png",
+    "listingId": "13-8002270041853-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+    "listingVersion": 1200008,
+    "orderLimit": 99,
+    "pricing": {
+      "currentRetailPrice": 474,
+      "grammage": "6x0,50l (1 l = 1,58 €)",
+      "totalRefundPrice": 150
+    },
+    "productId": "22685",
+    "serviceType": "PICKUP",
+    "title": "San Pellegrino Mineralwasser Medium 6x0,5l",
+    "viewInfo": {
+      "detailsViewRequired": false
+    },
+    "hazardsAndWarnings": [],
+    "bulkyGoodsPoints": 25,
+    "baseQuantity": 0.5,
+    "quantityType": "L",
+    "multi1": 6,
+    "volumeCode": "STK",
+    "gtin": "8002270041853"
+  },
+  "conflictingPackItem": {
+    "type": "LISTING",
+    "articleId": "4337256175388",
+    "categories": [
+      "3684",
+      "223",
+      "225",
+      "3475"
+    ],
+    "categoryDetails": [
+      {
+        "id": "3684",
+        "name": "Käse, Eier & Molkerei",
+        "slug": "kaese-eier-molkerei",
+        "path": "Käse, Eier & Molkerei",
+        "categoryLevel": 1
+      },
+      {
+        "id": "223",
+        "name": "Joghurt, Desserts & Alternativen",
+        "slug": "joghurt-desserts-alternativen",
+        "path": "Käse, Eier & Molkerei/Joghurt, Desserts & Alternativen",
+        "categoryLevel": 2
+      },
+      {
+        "id": "225",
+        "name": "Joghurt & Alternativen",
+        "slug": "joghurt-alternativen",
+        "path": "Käse, Eier & Molkerei/Joghurt, Desserts & Alternativen/Joghurt & Alternativen",
+        "categoryLevel": 3
+      },
+      {
+        "id": "3475",
+        "name": "Joghurt Griechischer Art",
+        "slug": "joghurt-griechischer-art",
+        "path": "Käse, Eier & Molkerei/Joghurt, Desserts & Alternativen/Joghurt & Alternativen/Joghurt Griechischer Art",
+        "categoryLevel": 4
+      }
+    ],
+    "detailsUrl": "/p/ja-joghurt-griechischer-art-honig-4x150g/8518631",
+    "imageURL": "https://img.rewe-static.de/8518631/32493661_digital-image.png",
+    "listingId": "13-4337256175388-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+    "listingVersion": 1200007,
+    "orderLimit": 99,
+    "pricing": {
+      "currentRetailPrice": 159,
+      "grammage": "4x600g (1 kg = 2,65 €)"
+    },
+    "productId": "8518631",
+    "serviceType": "PICKUP",
+    "tags": [
+      "cool"
+    ],
+    "title": "ja! Joghurt Griechischer Art Honig 4x150g",
+    "viewInfo": {
+      "detailsViewRequired": false
+    },
+    "hazardsAndWarnings": [],
+    "baseQuantity": 600,
+    "quantityType": "G",
+    "multi1": 4,
+    "volumeCode": "STK",
+    "gtin": "4337256175388"
+  },
+  "pieceItems": [
+    {
+      "type": "LISTING",
+      "articleId": "ZI5NOVT6",
+      "categories": [
+        "1066",
+        "1090",
+        "1091"
+      ],
+      "categoryDetails": [
+        {
+          "id": "1066",
+          "name": "Drogerie & Gesundheit",
+          "slug": "drogerie-gesundheit",
+          "path": "Drogerie & Gesundheit",
+          "categoryLevel": 1
+        },
+        {
+          "id": "1090",
+          "name": "Haarpflege & Beauty",
+          "slug": "haarpflege-beauty",
+          "path": "Drogerie & Gesundheit/Haarpflege & Beauty",
+          "categoryLevel": 2
+        },
+        {
+          "id": "1091",
+          "name": "Bürsten & Kämme",
+          "slug": "buersten-kaemme",
+          "path": "Drogerie & Gesundheit/Haarpflege & Beauty/Bürsten & Kämme",
+          "categoryLevel": 3
+        }
+      ],
+      "detailsUrl": "/p/parsa-beauty-essential-foehnbuerste-schwarz/8050784",
+      "imageURL": "https://img.rewe-static.de/8050784/43242028_digital-image.png",
+      "listingId": "8-ZI5NOVT6-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200013,
+      "orderLimit": 99,
+      "pricing": {
+        "currentRetailPrice": 299,
+        "grammage": "1 Stück"
+      },
+      "productId": "8050784",
+      "serviceType": "PICKUP",
+      "title": "Parsa Beauty Essential Föhnbürste schwarz",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "baseQuantity": 1,
+      "quantityType": "ST",
+      "volumeCode": "STK",
+      "gtin": "4001065689076"
+    },
+    {
+      "type": "LISTING",
+      "articleId": "TIV39T02",
+      "categories": [
+        "1",
+        "3862",
+        "2",
+        "3914",
+        "3",
+        "3924"
+      ],
+      "categoryDetails": [
+        {
+          "id": "1",
+          "name": "Obst & Gemüse",
+          "slug": "obst-gemuese",
+          "path": "Obst & Gemüse",
+          "categoryLevel": 1
+        },
+        {
+          "id": "3862",
+          "name": "Bewusste Ernährung",
+          "slug": "bewusste-ernaehrung",
+          "path": "Bewusste Ernährung",
+          "categoryLevel": 1,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "2",
+          "name": "Frisches Gemüse",
+          "slug": "frisches-gemuese",
+          "path": "Obst & Gemüse/Frisches Gemüse",
+          "categoryLevel": 2
+        },
+        {
+          "id": "3914",
+          "name": "Biologisch",
+          "slug": "biologisch",
+          "path": "Bewusste Ernährung/Biologisch",
+          "categoryLevel": 2,
+          "categoryTags": [
+            "inspiration"
+          ]
+        },
+        {
+          "id": "3",
+          "name": "Gurken",
+          "slug": "gurken",
+          "path": "Obst & Gemüse/Frisches Gemüse/Gurken",
+          "categoryLevel": 3
+        },
+        {
+          "id": "3924",
+          "name": "Bio-Brotzeit von süß bis herzhaft",
+          "slug": "bio-brotzeit-von-suess-bis-herzhaft",
+          "path": "Bewusste Ernährung/Biologisch/Bio-Brotzeit von süß bis herzhaft",
+          "categoryLevel": 3,
+          "categoryTags": [
+            "inspiration"
+          ]
+        }
+      ],
+      "detailsUrl": "/p/rewe-bio-gurke-1-stueck/7359497",
+      "imageURL": "https://img.rewe-static.de/7359497/24569872_digital-image.png",
+      "listingId": "8-TIV39T02-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200084,
+      "orderLimit": 99,
+      "pricing": {
+        "currentRetailPrice": 119,
+        "grammage": "1 Stück"
+      },
+      "productId": "7359497",
+      "serviceType": "PICKUP",
+      "tags": [
+        "organic"
+      ],
+      "title": "REWE Bio Gurke 1 Stück",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "baseQuantity": 1,
+      "quantityType": "ST",
+      "volumeCode": "STK",
+      "gtin": "7610632984741"
+    },
+    {
+      "type": "LISTING",
+      "articleId": "UDNDSBAY",
+      "categories": [
+        "820",
+        "841",
+        "842",
+        "846"
+      ],
+      "categoryDetails": [
+        {
+          "id": "820",
+          "name": "Süßes & Salziges",
+          "slug": "suesses-salziges",
+          "path": "Süßes & Salziges",
+          "categoryLevel": 1
+        },
+        {
+          "id": "841",
+          "name": "Süßwaren",
+          "slug": "suesswaren",
+          "path": "Süßes & Salziges/Süßwaren",
+          "categoryLevel": 2
+        },
+        {
+          "id": "842",
+          "name": "Bonbons & Kaugummi",
+          "slug": "bonbons-kaugummi",
+          "path": "Süßes & Salziges/Süßwaren/Bonbons & Kaugummi",
+          "categoryLevel": 3
+        },
+        {
+          "id": "846",
+          "name": "Kaugummi",
+          "slug": "kaugummi",
+          "path": "Süßes & Salziges/Süßwaren/Bonbons & Kaugummi/Kaugummi",
+          "categoryLevel": 4
+        }
+      ],
+      "detailsUrl": "/p/wrigley-s-airwaves-lime-ginger-10-dragees/9581688",
+      "imageURL": "https://img.rewe-static.de/9581688/50647815_digital-image.png",
+      "listingId": "8-UDNDSBAY-7ae33841-fa98-3b7e-9ee5-8132f39c189c",
+      "listingVersion": 1200016,
+      "orderLimit": 99,
+      "pricing": {
+        "currentRetailPrice": 95,
+        "grammage": "10 Stück"
+      },
+      "productId": "9581688",
+      "serviceType": "PICKUP",
+      "title": "Wrigley's Airwaves Lime & Ginger 10 Dragees",
+      "viewInfo": {
+        "detailsViewRequired": false
+      },
+      "hazardsAndWarnings": [],
+      "baseQuantity": 10,
+      "quantityType": "ST",
+      "volumeCode": "STK",
+      "gtin": "42123842"
+    }
+  ]
+}
