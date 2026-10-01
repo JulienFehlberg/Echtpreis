@@ -2,6 +2,11 @@
 const Net=require("./resilient-fetch"),Identity=require("./product-identity");
 const BASE="https://prices.openfoodfacts.org/api/v1/prices",DAY=86400000;
 const HEADERS={Accept:"application/json","User-Agent":"SPARKORB/1.0 Germany price inventory (Open Prices attribution)"};
+const BERLIN=Object.freeze({lat:52.52,lon:13.405,radiusKm:35,minLat:52.34,maxLat:52.68,minLon:13.09,maxLon:13.76});
+function region(value="DE"){if(value==="DE"||value==="Berlin")return value;throw new Error("open-prices-inventory-invalid-region")}
+function scopeMetadata(value="DE",locationIds=[]){const selected=region(value);return{country:"DE",region:selected,city:selected==="Berlin"?"Berlin":null,locationType:selected==="Berlin"?"OSM":null,geo:selected==="Berlin"?{lat:BERLIN.lat,lon:BERLIN.lon,radiusKm:BERLIN.radiusKm}:null,locationIds:[...locationIds]}}
+function sameGeo(value){return value&&value.lat===BERLIN.lat&&value.lon===BERLIN.lon&&value.radiusKm===BERLIN.radiusKm}
+function cursorMatches(cursor,n){return!!cursor&&cursor.since===n.since&&cursor.until===n.today&&String(cursor.locationIds||"")===n.scope&&(cursor.region??"DE")===n.region&&(n.region==="Berlin"?sameGeo(cursor.geo):cursor.geo==null)&&Number.isSafeInteger(cursor.nextPage)&&cursor.nextPage>0}
 function validDate(value){return typeof value==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value+"T00:00:00Z"))&&new Date(value+"T00:00:00Z").toISOString().slice(0,10)===value}
 function integer(value,fallback,min,max){const n=Number(value);return Number.isSafeInteger(n)?Math.min(max,Math.max(min,n)):fallback}
 function normalizeInput(input={}){
@@ -11,14 +16,15 @@ function normalizeInput(input={}){
  const since=input.since?input.since<earliest?earliest:input.since:earliest;if(since>today)throw new Error("open-prices-inventory-invalid-window");
  const locationIds=Array.isArray(input.locationIds)?[...new Set(input.locationIds.map(Number).filter(n=>Number.isSafeInteger(n)&&n>0))].sort((a,b)=>a-b):[];
  if(input.locationIds!=null&&(!Array.isArray(input.locationIds)||locationIds.length!==new Set(input.locationIds.map(Number)).size||locationIds.length>100))throw new Error("open-prices-inventory-invalid-locations");
- let page=integer(input.page,1,1,1000000);const scope=locationIds.join(",");
- if(input.cursor){const c=input.cursor;if(c.since!==since||c.until!==today||String(c.locationIds||"")!==scope||!Number.isSafeInteger(c.nextPage)||c.nextPage<1)throw new Error("open-prices-inventory-invalid-cursor");page=c.nextPage;}
- return{today,since,locationIds,scope,page,size:integer(input.size,100,1,100),maxPages:integer(input.maxPages,20,1,20),maxItems:integer(input.maxItems,2000,1,2000),timeoutMs:integer(input.timeoutMs,6000,1000,6000),retries:integer(input.retries,1,0,1),baseDelayMs:integer(input.baseDelayMs,150,50,500)};
+ let page=integer(input.page,1,1,1000000);const scope=locationIds.join(","),selectedRegion=region(input.region??"DE");
+ if(input.cursor){if(!cursorMatches(input.cursor,{since,today,scope,region:selectedRegion}))throw new Error("open-prices-inventory-invalid-cursor");page=input.cursor.nextPage;}
+ return{today,since,locationIds,scope,region:selectedRegion,page,size:integer(input.size,100,1,100),maxPages:integer(input.maxPages,20,1,20),maxItems:integer(input.maxItems,2000,1,2000),timeoutMs:integer(input.timeoutMs,6000,1000,6000),retries:integer(input.retries,1,0,1),baseDelayMs:integer(input.baseDelayMs,150,50,500)};
 }
 function params(input={}){
  const n=normalizeInput(input),p=new URLSearchParams({page:String(n.page),size:String(n.size),date__gte:n.since,date__lte:n.today,currency:"EUR",order_by:"-date,-id",duplicate_of__isnull:"true"});
- // The upstream prices endpoint does not support a country filter. Location
- // IDs are optional; every returned price is still checked against its country.
+ // Native geographic filters bound the Berlin scan. The circle includes nearby
+ // Brandenburg, so country, city and coordinates are checked on every row too.
+ if(n.region==="Berlin"){p.set("lat",String(BERLIN.lat));p.set("lon",String(BERLIN.lon));p.set("radius_km",String(BERLIN.radiusKm));p.set("location__type","OSM")}
  if(n.locationIds.length)p.set("location_id__in",n.scope);return p;
 }
 function germanLocation(location={}){
@@ -26,10 +32,15 @@ function germanLocation(location={}){
  if(code)return code==="DE";
  return["deutschland","germany","bundesrepublik deutschland","de"].includes(String(location.osm_address_country||location.country||"").trim().toLowerCase());
 }
+function coordinate(value,min,max){if(value==null||value===""||typeof value==="boolean"||typeof value!=="number"&&typeof value!=="string"||typeof value==="string"&&!value.trim())return false;const n=Number(value);return Number.isFinite(n)&&n>=min&&n<=max}
+function berlinLocation(location={}){
+ return germanLocation(location)&&location.type==="OSM"&&String(location.osm_address_city||"").trim().toLowerCase()==="berlin"&&coordinate(location.osm_lat,BERLIN.minLat,BERLIN.maxLat)&&coordinate(location.osm_lon,BERLIN.minLon,BERLIN.maxLon);
+}
 function rejectionReasons(row,n){
  const reasons=[];if(!row||typeof row!=="object"||Array.isArray(row))return["invalid-row"];
  if(!Number.isSafeInteger(row.id)||row.id<=0)reasons.push("invalid-id");
  if(!germanLocation(row.location||{}))reasons.push("country-outside-DE");
+ if(n.region==="Berlin"&&!berlinLocation(row.location||{}))reasons.push("location-outside-Berlin");
  if(n.locationIds.length&&!n.locationIds.includes(Number(row.location_id||row.location?.id)))reasons.push("location-outside-scope");
  if(!validDate(row.date)||row.date<n.since||row.date>n.today)reasons.push("date-outside-window");
  if(row.currency!=="EUR")reasons.push("unsupported-currency");
@@ -75,7 +86,7 @@ async function fetchInventory(input={},fetchImpl=fetch){
   // Stop after a complete page so a continuation never loses the remainder.
   if(items.length>=n.maxItems)break;
  }
- const cursor=page==null?null:{nextPage:page,since:n.since,until:n.today,locationIds:n.scope};
- return{ok:error===null,items,rejected,received:pages.reduce((s,p)=>s+p.size,0),total,pages,fetchedPages:pages.length,nextPage:page,cursor,complete,partial:!complete,error,sourceUrl:BASE,fetchedAt:new Date().toISOString(),country:"DE",window:{since:n.since,until:n.today},coverage:coverage(items)};
+ const selectedScope=scopeMetadata(n.region,n.locationIds),cursor=page==null?null:{nextPage:page,since:n.since,until:n.today,locationIds:n.scope,region:n.region,geo:selectedScope.geo};
+ return{ok:error===null,items,rejected,received:pages.reduce((s,p)=>s+p.size,0),total,pages,fetchedPages:pages.length,nextPage:page,cursor,complete,partial:!complete,error,sourceUrl:BASE,fetchedAt:new Date().toISOString(),country:"DE",scope:selectedScope,window:{since:n.since,until:n.today},coverage:coverage(items)};
 }
-module.exports={BASE,validDate,normalizeInput,params,germanLocation,rejectionReasons,validatePage,fetchPage,fetchInventory,fetchAll:fetchInventory,coverage};
+module.exports={BASE,BERLIN,region,scopeMetadata,sameGeo,cursorMatches,validDate,normalizeInput,params,germanLocation,berlinLocation,rejectionReasons,validatePage,fetchPage,fetchInventory,fetchAll:fetchInventory,coverage};
