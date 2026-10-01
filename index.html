@@ -1070,6 +1070,15 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
  .market-logo-row>span{width:62px!important;height:52px!important;flex-basis:62px!important;padding:9px!important}
  .market-logo-row img{max-height:33px!important}
 }
+</style><style>
+/* v7.276 Sparkorb hero cleanup */
+.market-strip-real{display:none!important}
+.hero-basket,.grocery-photo,.hero-photo-real{display:none!important}
+.hero-real-photo{display:block!important;position:absolute!important;right:-2px!important;bottom:0!important;width:49%!important;height:78%!important;z-index:3!important;overflow:hidden!important;border-radius:52% 0 28px 0!important;pointer-events:none!important}
+.hero-real-photo:before{content:""!important;position:absolute!important;inset:0!important;z-index:2!important;background:linear-gradient(90deg,#00553d 0%,rgba(0,85,61,.82) 8%,rgba(0,85,61,.28) 23%,transparent 43%),linear-gradient(0deg,#00553d 0%,rgba(0,85,61,.4) 10%,transparent 28%)!important}
+.hero-real-photo img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:52% 50%!important;filter:saturate(1.08) contrast(1.04)!important}
+.hero-v264{margin-bottom:16px!important}
+@media(max-width:430px){.hero-real-photo{width:48%!important;height:73%!important;right:0!important;bottom:0!important}}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand"><span class="brand-word">Sparkorb</span><span class="spark-mark" aria-hidden="true"><svg viewBox="0 0 40 48"><path d="M20 2.8C10.6 2.8 3.8 9.8 3.8 18.7c0 11.7 16.2 26.1 16.2 26.1s16.2-14.4 16.2-26.1C36.2 9.8 29.4 2.8 20 2.8Z"/><path class="basket" d="M11.8 18h16.4l-2.2 9.2H14L11.8 18Zm3.2 0 2.1-4.5m7.9 4.5-2.1-4.5"/><circle class="basket" cx="16.2" cy="30.7" r="1.25"/><circle class="basket" cx="24.2" cy="30.7" r="1.25"/></svg></span><span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
@@ -1078,17 +1087,7 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
     <h1>Wissen, wo’s<br>günstiger ist.</h1>
     <p>Dein Einkauf. Preise in deiner Nähe vergleichen.</p>
   </div>
-  <div class="hero-real-photo" aria-hidden="true"><img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=90" alt=""></div></section><div class="market-strip-real" aria-label="Preise vergleichen bei">
-<div class="market-strip-head"><div class="market-strip-label">PREISE VERGLEICHEN BEI</div><span>und weiteren Märkten</span></div>
-<div class="market-logo-row">
-<span><img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Aldi_Nord_201x_logo.svg" alt="ALDI"></span>
-<span><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Lidl-Logo.svg" alt="Lidl"></span>
-<span><img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Logo_Edeka.svg" alt="EDEKA"></span>
-<span><img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Logo_REWE.svg" alt="REWE"></span>
-<span><img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Kaufland_Logo.svg" alt="Kaufland"></span>
-<span><img src="https://upload.wikimedia.org/wikipedia/commons/f/f1/Netto_Marken-Discount_2018_logo.svg" alt="Netto"></span>
-<span><img src="https://upload.wikimedia.org/wikipedia/commons/8/8e/Penny-Logo.svg" alt="PENNY"></span>
-</div></div><div class="homeactions coreactions home-main-actions">
+  <div class="hero-real-photo" aria-hidden="true"><img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=90" alt=""></div></section><div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homePlan" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 5h2l1.8 9.2h10.9l1.8-6.5H6.1"/><circle cx="9" cy="18.5" r="1.2"/><circle cx="17" cy="18.5" r="1.2"/></svg></span><span class="homeaction-copy"><b>Einkauf planen</b><small>Preise vergleichen &amp; sparen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
 <button class="homeaction" id="homeReceipt" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-2.2-1.5-2.8 1.5L9.2 19 7 20.5v-17Z"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/></svg></span><span class="homeaction-copy"><b>Beleg scannen</b><small>Einkauf in Sekunden verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
 <button class="homeaction" id="homeStats" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19V11M12 19V5M19 19v-8"/><path d="M3.5 19.5h17"/></svg></span><span class="homeaction-copy"><b>Meine Statistik</b><small>Einkaufsverhalten verstehen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
