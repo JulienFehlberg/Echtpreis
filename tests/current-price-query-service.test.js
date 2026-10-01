@@ -67,8 +67,9 @@ async function main(){
  assert.equal(unit.price,1.99);assert.equal(unit.regularPrice,2.49);assert.equal(unit.per,"piece");assert.equal(unit.originalPrice,7.96);assert.equal(unit.originalPer,"kg");assert.equal(unit.priceBasis,"derived-pack");
  assert.equal(Service.normalizeObservation({...base,price:1.2,per:"l",pack:"6 x 500 ml"}).price,3.6);
  for(const changes of [{per:"kg",pack:null},{per:"kg",pack:"500 ml"},{per:"l",pack:"250 g"},{per:"g"},{per:null},{price:Infinity},{price:-2}])assert.equal(Service.normalizeObservation({...base,...changes}),null,JSON.stringify(changes));
- result=await Service.compareCurrentPrices(database({observations:[{...base,price:7.96,per:"kg",pack:"250 g"}]}),{...request,pack:null});
- assert.equal(result.results[0].price,1.99);assert.equal(result.results[0].unitPrice,7.96);assert.equal(result.results[0].priceBasis,"derived-pack");assert.equal(result.results[0].originalPer,"kg");
+ result=await Service.compareCurrentPrices(database({observations:[{...base,price:8,per:"kg",pack:"450 g"}]}),{...request,pack:null});
+ assert.equal(result.results[0].price,3.6);assert.equal(result.results[0].unitPrice,8);assert.equal(result.results[0].priceBasis,"derived-pack");assert.equal(result.results[0].originalPer,"kg");
+ for(const pack of["500 g","2 x 225 g","2 x 450 g"]){result=await Service.compareCurrentPrices(database({observations:[{...base,pack}]}),{...request,pack:null});assert.equal(result.query.pack,"450 g");assert.equal(result.results[0].state,"unknown","The canonical GTIN pack must reject a different native sales bundle");assert.equal(result.results[0].price,null);}
  result=await Service.compareCurrentPrices(database({observations:[{...base,price:7.96,per:"kg",pack:null}]}),request);
  assert.equal(result.results[0].state,"unknown","Unknown unit-price pack must not become a checkout quote");
 
