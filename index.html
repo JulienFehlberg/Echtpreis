@@ -1419,6 +1419,14 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
  #results .compare-market-actions:has(.compare-details[open])>.compare-details{margin-top:5px!important}
 }
 </style><style>
+/* v7.302 human-readable price details */
+#results .compare-detail-summary{color:#65736c!important}
+#results .price-detail-list{width:100%!important;margin-top:5px!important}
+#results .price-detail-row{display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:12px!important;padding:9px 0!important;border-top:1px solid #e7ece9!important}
+#results .price-detail-name{display:block!important;font-size:12px!important;color:#26352e!important}
+#results .price-detail-row small{display:block!important;margin-top:2px!important;font-size:9.5px!important;line-height:1.3!important;color:#78847e!important}
+#results .price-detail-value{font-size:12px!important;white-space:nowrap!important;color:#52645b!important}
+</style><style>
 /* v7.286 denser product rows */
 .shopping .list{margin-top:8px!important}
 .shopping .item,.shopping .list-item,.shopping [data-list-item]{min-height:58px!important;padding-top:8px!important;padding-bottom:8px!important}
@@ -2410,8 +2418,18 @@ function drawList(){
 function purchaseQuantityLabel(w){if(!w)return"";const count=Math.max(1,Math.round(Number(w.packCount)||Number(w.amount)||1));if(w.packPerItem||w.unit==="piece"&&w.packUnit==="piece"&&!w.packLabel||w.packUnit==="piece"&&w.packLabel==="Stück")return count+" Stück";if(w.quantityMode&&w.packUnit==="piece")return count+" Packung(en) · "+w.packLabel;if(w.quantityMode&&w.packAmount>0)return count+" × "+String(w.packLabel||"").replace(/^ca\.\s*/i,"")+" je Packung";if(w.unit==="piece")return count+" Stück";const amount=Number(w.calcAmount||w.amount);if(!(amount>0))return"";const unit=w.unit==="kg"?"g":w.unit==="l"?"ml":w.unit;if(unit==="g"||unit==="ml")return Math.round(amount*1000)+" "+unit;return amount.toLocaleString("de-DE")+" "+unit}
 function comparisonSourceDetails(row,items=basket){
  if(!row||!Array.isArray(row.sources))return "";
- const lines=row.sources.map((p,i)=>{const w=items[i],itemTotal=p.price*(w?.calcAmount||1),quantity=purchaseQuantityLabel(w),valueNote=p.valuePrice?" · "+eur(p.valuePrice.price)+" / "+p.valuePrice.unit:"",quality=p.reference?(p.referenceType==="historical"?"letzter bekannter Preis":p.referenceType==="brand-estimate"?"Markenpreis-Orientierung":p.referenceType==="comparison"?"beobachtet · Produkt/Filiale noch nicht vollständig bestätigt":"Modellschätzung"):(p.kind==="official"?"offiziell":p.kind==="openprices"?"Open Prices":"belegt"),date=p.date?" · "+formatReceiptDate(p.date):"",substitute=w?.resolvedKey?" · verglichen als "+(catalog[w.resolvedKey]?.label||w.resolvedKey):"";return '<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid rgba(16,32,25,.08)"><span>'+escHtml(w?.label||p.product||p.key)+'<small style="display:block;color:#6d7772">'+escHtml(quantity)+(quantity?" · ":"")+escHtml(p.source||quality)+' · '+escHtml(quality)+escHtml(valueNote)+escHtml(date)+escHtml(substitute)+'</small></span><b style="white-space:nowrap">'+(p.reference?"ca. ":"")+eur(itemTotal)+'</b></div>'}).join("");
- return lines;
+ const lines=row.sources.map((p,i)=>{
+  const w=items[i],itemTotal=p.price*(w?.calcAmount||1),quantity=purchaseQuantityLabel(w);
+  let sourceLabel="";
+  if(!p.reference) sourceLabel=p.kind==="official"?"Aktueller Händlerpreis":"Aktuell beobachteter Preis";
+  else if(p.referenceType==="historical") sourceLabel="Letzter bekannter Preis";
+  else if(p.referenceType==="brand-estimate") sourceLabel="Geschätzter Markenpreis";
+  else if(p.referenceType==="comparison") sourceLabel="Beobachteter Richtwert";
+  else sourceLabel="Geschätzter Preis";
+  const date=p.date?" · Stand "+formatReceiptDate(p.date):"";
+  return '<div class="price-detail-row"><span><b class="price-detail-name">'+escHtml(w?.label||p.product||p.key)+'</b><small>'+escHtml(quantity)+(quantity?" · ":"")+escHtml(sourceLabel)+escHtml(date)+'</small></span><b class="price-detail-value">'+(p.reference?"ca. ":"")+eur(itemTotal)+'</b></div>'
+ }).join("");
+ return '<div class="price-detail-list">'+lines+'</div>';
 }
 function comparisonQuality(row,totalItems){
  if(!row)return {label:"keine Daten",detail:""};
@@ -2463,7 +2481,7 @@ window.compare=async function compare({skipLocation=false,scroll=true,background
   const known=Math.max(0,compareBasket.length-r.referenceCount),estimated=Math.max(0,r.referenceCount);
   const deltaFromLow=lowestShown!=null?r.total-lowestShown:0;const priceHint=approx&&deltaFromLow>0.009?'<span class="compare-price-delta">+'+eur(deltaFromLow)+' zur niedrigsten Schätzung</span>':'';const badge=!approx&&idx===0?'<span class="compare-badge verified">'+(excluded.length?'Günstigster belegter Teil':'Günstigster belegter Korb')+'</span>':'';
   const qualityLine=approx?'<span class="compare-quality-line">Schätzung · noch nicht durch aktuelle Preise bestätigt</span>':'<span class="compare-quality-line verified">Aktuell belegt</span>';
-  const details='<details class="compare-details"><summary>Preisdetails</summary><div class="detail">'+escHtml([partialNote,q.detail].filter(Boolean).join(' · '))+(approx?' · Richtwerte bestätigen weder Filialpreis noch Verfügbarkeit.':'')+(r.branch&&r.branch.address?' · '+escHtml(r.branch.address):'')+'</div>'+memoryHtml+comparisonSourceDetails(r,compareBasket)+'</details>';
+  const details='<details class="compare-details"><summary>Preisdetails</summary><div class="detail compare-detail-summary">'+(approx?'Diese Preise sind eine Orientierung und noch nicht vollständig aktuell bestätigt.':'Diese Preise sind aktuell belegt.')+(r.branch&&r.branch.address?'<br><b>Markt:</b> '+escHtml(r.branch.address):'')+'</div>'+memoryHtml+comparisonSourceDetails(r,compareBasket)+'</details>';
   return '<article class="compare-market'+(idx===0?' first':'')+'"><div class="compare-market-main"><div class="compare-market-copy">'+badge+'<div class="compare-store-line"><b>'+escHtml(r.store)+'</b>'+(r.branch?'<span class="compare-distance" aria-label="Entfernung"><span>'+r.branch.distance.toFixed(1).replace(".",",")+' km</span></span>':'')+'</div>'+qualityLine+'</div><div class="compare-market-price">'+(excluded.length?'Teilsumme ':approx?'ca. ':'')+eur(r.total)+priceHint+'</div></div><div class="compare-market-actions">'+(r.branch?'<a class="route-link" href="'+routeUrl(r.branch)+'" target="_blank" rel="noopener">Route →</a>':'')+details+'</div></article>';
  }).join(""):'<div class="muted" style="padding:14px 0">Für diese Liste fehlt noch ein vollständiger Richtwert.</div>';
  const verified=[...verifiedComplete].sort((a,b)=>a.total-b.total),difference=verified.length>=2?verified[verified.length-1].total-verified[0].total:0;
