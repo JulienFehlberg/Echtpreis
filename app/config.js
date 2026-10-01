@@ -1,6 +1,6 @@
 (function(){
   const cfg={
-    appName:"SPARKORB",
+    appName:"Sparkorb",
     environment:"test",
     apiBase:"https://echt"+"preis-api.onrender.com",
     openPricesBase:"https://prices.openfoodfacts.org",

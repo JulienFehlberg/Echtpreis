@@ -1,7 +1,7 @@
 {
-  "name": "SPARKORB",
-  "short_name": "SPARKORB",
-  "description": "Versteh, was du bezahlst. Bons analysieren, Einkaufsverhalten verstehen und Preise vergleichen.",
+  "name": "Sparkorb",
+  "short_name": "Sparkorb",
+  "description": "Deine Liste. Dein günstigster Einkauf. Einkaufsliste erstellen, verfügbare Preise vergleichen und den Einkauf vorab planen.",
   "lang": "de-DE",
   "start_url": "./",
   "scope": "./",

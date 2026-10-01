@@ -1,0 +1,1678 @@
+{
+  "version": 1,
+  "exportDate": "2026-10-01",
+  "exportedAt": "2026-09-30T22:36:49.065Z",
+  "sourceId": "dm online",
+  "purpose": "discovery",
+  "truthEligible": false,
+  "targetsSha256": "5cfc1b998165638c26618ca50172e77096e12d924d17bb85b42621fb504076d1",
+  "source": {
+    "publisher": "dm-drogerie markt",
+    "origin": "https://product-search.services.dmtech.com",
+    "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl",
+    "discoveryUrls": [
+      "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance",
+      "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance",
+      "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance",
+      "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance",
+      "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+    ],
+    "sourceHash": "c9453cd9806cf11001b2c00519720dd5cbe7b10501e5cae59529eb1a85f7a603",
+    "hashBasis": "SHA256 of JSON.stringify(captured identity records); not an HTTP body hash",
+    "discoveredAt": "2026-09-30T22:30:43.224Z",
+    "discoveredAtBasis": "completion of captured read-only discovery and identity validation probe",
+    "count": 150
+  },
+  "targets": [
+    {
+      "retailerSku": "1567494",
+      "gtin": "4066447948356",
+      "name": "Mandelmus, braun, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1567494/dmbio-mandelmus-braun",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1461618",
+      "gtin": "4058172925122",
+      "name": "Bourbon-Vanille gemahlen, 5 g",
+      "sourceUrl": "https://www.dm.de/p/d/1461618/dmbio-bourbon-vanille-gemahlen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1449136",
+      "gtin": "4070765069976",
+      "name": "Mandelmus weiß, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1449136/dmbio-mandelmus-weiss",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1517804",
+      "gtin": "4067796181500",
+      "name": "Haferflocken, Feinblatt, glutenfrei, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1517804/dmbio-haferflocken-feinblatt-glutenfrei",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1465655",
+      "gtin": "4066447763270",
+      "name": "Vanillezucker mit Bourbon-Vanille (4x8g), 32 g",
+      "sourceUrl": "https://www.dm.de/p/d/1465655/dmbio-vanillezucker-mit-bourbon-vanille-4x8g",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3127144",
+      "gtin": "4070765004113",
+      "name": "Buchweizen Rigatoni, 300 g",
+      "sourceUrl": "https://www.dm.de/p/d/3127144/dmbio-buchweizen-rigatoni",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1446282",
+      "gtin": "4066447148428",
+      "name": "Trockenfrüchte, Gojibeeren sonnengetrocknet, 150 g",
+      "sourceUrl": "https://www.dm.de/p/d/1446282/dmbio-trockenfruechte-gojibeeren-sonnengetrocknet",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1625056",
+      "gtin": "4067796147575",
+      "name": "Dinkelflakes, 400 g",
+      "sourceUrl": "https://www.dm.de/p/d/1625056/dmbio-dinkelflakes",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3138422",
+      "gtin": "4070765064155",
+      "name": "Trockenfrüchte, Mangostücke gefriergetrocknet, 25 g",
+      "sourceUrl": "https://www.dm.de/p/d/3138422/dmbio-trockenfruechte-mangostuecke-gefriergetrocknet",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1676867",
+      "gtin": "4066447562644",
+      "name": "Linsenwaffeln, gesalzen, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/1676867/dmbio-linsenwaffeln-gesalzen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1569960",
+      "gtin": "4066447884869",
+      "name": "Hafermehl, glutenfrei, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1569960/dmbio-hafermehl-glutenfrei",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1578738",
+      "gtin": "4067796168341",
+      "name": "Veggie Hack, 75 g",
+      "sourceUrl": "https://www.dm.de/p/d/1578738/dmbio-veggie-hack",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3118195",
+      "gtin": "4070765030631",
+      "name": "Adventskalender 2026 Feine Teesorten, 1 St",
+      "sourceUrl": "https://www.dm.de/p/d/3118195/dmbio-adventskalender-2026-feine-teesorten",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1666918",
+      "gtin": "4066447520590",
+      "name": "Ceylon Zimt, 50 g",
+      "sourceUrl": "https://www.dm.de/p/d/1666918/dmbio-ceylon-zimt",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1588701",
+      "gtin": "4067796194746",
+      "name": "Müsli Crunchy, Dinkel, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1588701/dmbio-muesli-crunchy-dinkel",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1457774",
+      "gtin": "4070765023060",
+      "name": "Porridge, Kakao Dinkel mit Haselnüssen, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1457774/dmbio-porridge-kakao-dinkel-mit-haselnuessen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1612898",
+      "gtin": "4067796194661",
+      "name": "Knuspermüsli, Kokos Mandel Granola, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1612898/dmbio-knuspermuesli-kokos-mandel-granola",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1581077",
+      "gtin": "4066447615845",
+      "name": "Erdnüsse blanchiert, geröstet, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1581077/dmbio-erdnuesse-blanchiert-geroestet",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1666949",
+      "gtin": "4058172507960",
+      "name": "Gewürzmischung, Italienische Kräuter, 35 g",
+      "sourceUrl": "https://www.dm.de/p/d/1666949/dmbio-gewuerzmischung-italienische-kraeuter",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1515565",
+      "gtin": "4066447889949",
+      "name": "Nudeln, Ravioli, 270 g",
+      "sourceUrl": "https://www.dm.de/p/d/1515565/dmbio-nudeln-ravioli",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1490261",
+      "gtin": "4066447523027",
+      "name": "Gemüsebrühe Nachfüllbeutel, 290 g",
+      "sourceUrl": "https://www.dm.de/p/d/1490261/dmbio-gemuesebruehe-nachfuellbeutel",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1446464",
+      "gtin": "4066447104417",
+      "name": "Roggen Vollkornmehl, 1.000 g",
+      "sourceUrl": "https://www.dm.de/p/d/1446464/dmbio-roggen-vollkornmehl",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1446529",
+      "gtin": "4066447855807",
+      "name": "Muttersaft, Granatapfel naturtrüb, 330 ml",
+      "sourceUrl": "https://www.dm.de/p/d/1446529/dmbio-muttersaft-granatapfel-naturtrueb",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3127090",
+      "gtin": "4070765058246",
+      "name": "Veganes Gulasch, 350 g",
+      "sourceUrl": "https://www.dm.de/p/d/3127090/dmbio-veganes-gulasch",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1639884",
+      "gtin": "4067796139266",
+      "name": "Reisnudeln Pad Thai, 225 g",
+      "sourceUrl": "https://www.dm.de/p/d/1639884/dmbio-reisnudeln-pad-thai",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1494147",
+      "gtin": "4067796194685",
+      "name": "Knuspermüsli, Kerne & Saaten Granola, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1494147/dmbio-knuspermuesli-kerne-und-saaten-granola",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3079748",
+      "gtin": "4066447948233",
+      "name": "Cashewmus, 0,25 kg",
+      "sourceUrl": "https://www.dm.de/p/d/3079748/dmbio-cashewmus",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1590014",
+      "gtin": "4067796000283",
+      "name": "Müsli Crunchy, Hafer, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1590014/dmbio-muesli-crunchy-hafer",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1690086",
+      "gtin": "4066447615982",
+      "name": "Fruchtriegel, Kokos, 60 g",
+      "sourceUrl": "https://www.dm.de/p/d/1690086/dmbio-fruchtriegel-kokos",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1568371",
+      "gtin": "4066447951349",
+      "name": "Schoko-Müsli mit Knusperflakes glutenfrei, 375 g",
+      "sourceUrl": "https://www.dm.de/p/d/1568371/dmbio-schoko-muesli-mit-knusperflakes-glutenfrei",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=0&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1490005",
+      "gtin": "4070765077094",
+      "name": "Sojaflocken, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1490005/dmbio-sojaflocken",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1697279",
+      "gtin": "4070765022841",
+      "name": "Haferdrink Barista, 1 l",
+      "sourceUrl": "https://www.dm.de/p/d/1697279/dmbio-haferdrink-barista",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1635196",
+      "gtin": "4066447373189",
+      "name": "Braune Linsen, 240 g",
+      "sourceUrl": "https://www.dm.de/p/d/1635196/dmbio-braune-linsen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1683668",
+      "gtin": "4067796196597",
+      "name": "Dattelsüße, 200 g",
+      "sourceUrl": "https://www.dm.de/p/d/1683668/dmbio-dattelsuesse",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1608294",
+      "gtin": "4066447674767",
+      "name": "Trockenfrüchte, Erdbeerscheiben gefriergetrocknet, 25 g",
+      "sourceUrl": "https://www.dm.de/p/d/1608294/dmbio-trockenfruechte-erdbeerscheiben-gefriergetrocknet",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1512947",
+      "gtin": "4066447918700",
+      "name": "natives Olivenöl, 500 ml",
+      "sourceUrl": "https://www.dm.de/p/d/1512947/dmbio-natives-olivenoel",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3064623",
+      "gtin": "4066447948455",
+      "name": "Kokos-Mandel Creme, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/3064623/dmbio-kokos-mandel-creme",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3147709",
+      "gtin": "4070765068498",
+      "name": "Kürbispüree, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/3147709/dmbio-kuerbispueree",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1691036",
+      "gtin": "4070765022827",
+      "name": "Pflanzendrink, Kokos natur, 1 l",
+      "sourceUrl": "https://www.dm.de/p/d/1691036/dmbio-pflanzendrink-kokos-natur",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1615564",
+      "gtin": "4066447656879",
+      "name": "Kakao Nibs, 200 g",
+      "sourceUrl": "https://www.dm.de/p/d/1615564/dmbio-kakao-nibs",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1440256",
+      "gtin": "4070765038798",
+      "name": "Quinoa, gepufft, 125 g",
+      "sourceUrl": "https://www.dm.de/p/d/1440256/dmbio-quinoa-gepufft",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1466795",
+      "gtin": "4070765055849",
+      "name": "Haferkleie mit Keim, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1466795/dmbio-haferkleie-mit-keim",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1588699",
+      "gtin": "4067796000306",
+      "name": "Müsli Crunchy, Schoko, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1588699/dmbio-muesli-crunchy-schoko",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1490874",
+      "gtin": "4066447599466",
+      "name": "Brezeln, Dinkel ohne Aufstreusalz, mini, 125 g",
+      "sourceUrl": "https://www.dm.de/p/d/1490874/dmbio-brezeln-dinkel-ohne-aufstreusalz-mini",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1601903",
+      "gtin": "4058172893094",
+      "name": "Speisestärke, reine Maisstärke, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1601903/dmbio-speisestaerke-reine-maisstaerke",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1517245",
+      "gtin": "4067796168402",
+      "name": "Trockenfrüchte, Sauerkirschen entsteint, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/1517245/dmbio-trockenfruechte-sauerkirschen-entsteint",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1675768",
+      "gtin": "4066447918724",
+      "name": "Bratöl Olive, 750 ml",
+      "sourceUrl": "https://www.dm.de/p/d/1675768/dmbio-bratoel-olive",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1611058",
+      "gtin": "4058172824616",
+      "name": "Couscous, Kichererbsen & Rote Linsen, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1611058/dmbio-couscous-kichererbsen-und-rote-linsen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1445885",
+      "gtin": "4070765018523",
+      "name": "Nudeln, Locken aus Dinkel Vollkorn, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1445885/dmbio-nudeln-locken-aus-dinkel-vollkorn",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1694085",
+      "gtin": "4067796069853",
+      "name": "Cashewbruch, 300 g",
+      "sourceUrl": "https://www.dm.de/p/d/1694085/dmbio-cashewbruch",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1586139",
+      "gtin": "4058172848742",
+      "name": "Nudeln, Gnocchi aus Kartoffeln & Sommerdinkel, 400 g",
+      "sourceUrl": "https://www.dm.de/p/d/1586139/dmbio-nudeln-gnocchi-aus-kartoffeln-und-sommerdinkel",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1617559",
+      "gtin": "4066447877007",
+      "name": "Hanfsamen geschält, 200 g",
+      "sourceUrl": "https://www.dm.de/p/d/1617559/dmbio-hanfsamen-geschaelt",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1616197",
+      "gtin": "4070765022711",
+      "name": "Müsli Crunchy, Nuss mit Honig verfeinert, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1616197/dmbio-muesli-crunchy-nuss-mit-honig-verfeinert",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1492417",
+      "gtin": "4067796156560",
+      "name": "Knabbertiere Sesam, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/1492417/dmbio-knabbertiere-sesam",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1459848",
+      "gtin": "4066447918687",
+      "name": "Natives Olivenöl extra, 750 ml",
+      "sourceUrl": "https://www.dm.de/p/d/1459848/dmbio-natives-olivenoel-extra",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1679981",
+      "gtin": "4067796064179",
+      "name": "Kichererbsenwaffeln, gesalzen, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/1679981/dmbio-kichererbsenwaffeln-gesalzen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1634194",
+      "gtin": "4066447874228",
+      "name": "Pistazien, geröstet & gesalzen, 200 g",
+      "sourceUrl": "https://www.dm.de/p/d/1634194/dmbio-pistazien-geroestet-und-gesalzen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3064113",
+      "gtin": "4066447874365",
+      "name": "Nudeln, Konjaknudeln, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/3064113/dmbio-nudeln-konjaknudeln",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1640499",
+      "gtin": "4066447084894",
+      "name": "Müsliriegel, Hafer Nuss, 3er Pack, 105 g",
+      "sourceUrl": "https://www.dm.de/p/d/1640499/dmbio-muesliriegel-hafer-nuss-3er-pack",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1639888",
+      "gtin": "4067796185751",
+      "name": "Cantuccini, Dinkel mit Mandeln, 150 g",
+      "sourceUrl": "https://www.dm.de/p/d/1639888/dmbio-cantuccini-dinkel-mit-mandeln",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=1&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3127080",
+      "gtin": "4070765101805",
+      "name": "Chili con Tofu, 350 g",
+      "sourceUrl": "https://www.dm.de/p/d/3127080/dmbio-chili-con-tofu",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1593466",
+      "gtin": "4067796067514",
+      "name": "Mini Schokokekse, Dinkel, 125 g",
+      "sourceUrl": "https://www.dm.de/p/d/1593466/dmbio-mini-schokokekse-dinkel",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1601885",
+      "gtin": "4070765063097",
+      "name": "Trockenfrüchte, Ananas Stücke, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/1601885/dmbio-trockenfruechte-ananas-stuecke",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1454206",
+      "gtin": "4066447855548",
+      "name": "Kokoswasser, natur, 330 ml",
+      "sourceUrl": "https://www.dm.de/p/d/1454206/dmbio-kokoswasser-natur",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3076851",
+      "gtin": "4066447884906",
+      "name": "Gemüsechips, 90 g",
+      "sourceUrl": "https://www.dm.de/p/d/3076851/dmbio-gemuesechips",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1449336",
+      "gtin": "4066447248692",
+      "name": "Kokosblütenzucker, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1449336/dmbio-kokosbluetenzucker",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3065327",
+      "gtin": "4066447954951",
+      "name": "Dinkel Wraps, 240 g",
+      "sourceUrl": "https://www.dm.de/p/d/3065327/dmbio-dinkel-wraps",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3064622",
+      "gtin": "4066447948318",
+      "name": "Sesammus, Tahin, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/3064622/dmbio-sesammus-tahin",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1465685",
+      "gtin": "4058172925146",
+      "name": "Vanillepudding mit Bourbon-Vanille (3x35 g), 105 g",
+      "sourceUrl": "https://www.dm.de/p/d/1465685/dmbio-vanillepudding-mit-bourbon-vanille-3x35-g",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1634190",
+      "gtin": "4067796068559",
+      "name": "Fruchtmark Apfel kaltgerieben, 360 g",
+      "sourceUrl": "https://www.dm.de/p/d/1634190/dmbio-fruchtmark-apfel-kaltgerieben",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "2971686",
+      "gtin": "4070765051865",
+      "name": "Vegane Snackwurst Landjäger Art, 70 g",
+      "sourceUrl": "https://www.dm.de/p/d/2971686/dmbio-vegane-snackwurst-landjaeger-art",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1641127",
+      "gtin": "4067796063509",
+      "name": "Gegarte Maronen verzehrfertig, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/1641127/dmbio-gegarte-maronen-verzehrfertig",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3133120",
+      "gtin": "4070765039146",
+      "name": "Kaffee Konzentrat, 310 ml",
+      "sourceUrl": "https://www.dm.de/p/d/3133120/dmbio-kaffee-konzentrat",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3134095",
+      "gtin": "4066447983647",
+      "name": "Kindersnack Dinkel Pizza-Kräcker ab 3 Jahren, 80 g",
+      "sourceUrl": "https://www.dm.de/p/d/3134095/dmbio-kindersnack-dinkel-pizza-kraecker-ab-3-jahren",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1627399",
+      "gtin": "4067796187052",
+      "name": "Cannellini Bohnen, 240 g",
+      "sourceUrl": "https://www.dm.de/p/d/1627399/dmbio-cannellini-bohnen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1470153",
+      "gtin": "4066447991673",
+      "name": "Hirseflocken, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1470153/dmbio-hirseflocken",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1490002",
+      "gtin": "4067796081466",
+      "name": "4-Korn Flocken, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1490002/dmbio-4-korn-flocken",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3064785",
+      "gtin": "4070765001686",
+      "name": "Pistazien Cashewmus, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/3064785/dmbio-pistazien-cashewmus",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1487980",
+      "gtin": "4066447896886",
+      "name": "Kräutertee Brennnessel (20 Beutel), 30 g",
+      "sourceUrl": "https://www.dm.de/p/d/1487980/dmbio-kraeutertee-brennnessel-20-beutel",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1469719",
+      "gtin": "4070765085570",
+      "name": "Ghee, geklärte Butter, 180 g",
+      "sourceUrl": "https://www.dm.de/p/d/1469719/dmbio-ghee-geklaerte-butter",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1520714",
+      "gtin": "4058172620942",
+      "name": "Sojasauce Shoyu, 250 ml",
+      "sourceUrl": "https://www.dm.de/p/d/1520714/dmbio-sojasauce-shoyu",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1639878",
+      "gtin": "4066447087130",
+      "name": "Kimchi, fermentiertes Gemüse, 240 g",
+      "sourceUrl": "https://www.dm.de/p/d/1639878/dmbio-kimchi-fermentiertes-gemuese",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1447037",
+      "gtin": "4067796069877",
+      "name": "Trockenfrüchte, Mangostreifen, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/1447037/dmbio-trockenfruechte-mangostreifen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1638679",
+      "gtin": "4066447087192",
+      "name": "Riesenbohnen in Tomatensauce, Gigantes, 230 g",
+      "sourceUrl": "https://www.dm.de/p/d/1638679/dmbio-riesenbohnen-in-tomatensauce-gigantes",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3120738",
+      "gtin": "4070765015652",
+      "name": "Toastbrötchen, Die Puren Hafer- & Saaten, 350 g",
+      "sourceUrl": "https://www.dm.de/p/d/3120738/dmbio-toastbroetchen-die-puren-hafer-und-saaten",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1679798",
+      "gtin": "4066447363159",
+      "name": "Brezeln, schokoliert in Vollmilchschokolade, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/1679798/dmbio-brezeln-schokoliert-in-vollmilchschokolade",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3065356",
+      "gtin": "4067796191325",
+      "name": "Dinkel Flatbread, 300 g",
+      "sourceUrl": "https://www.dm.de/p/d/3065356/dmbio-dinkel-flatbread",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1338837",
+      "gtin": "4066447936179",
+      "name": "Sonnenblumenhack, 75 g",
+      "sourceUrl": "https://www.dm.de/p/d/1338837/dmbio-sonnenblumenhack",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1535292",
+      "gtin": "4066447203431",
+      "name": "Müsliriegel, Hafer Kakao, 35 g",
+      "sourceUrl": "https://www.dm.de/p/d/1535292/dmbio-muesliriegel-hafer-kakao",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1491797",
+      "gtin": "4067796161885",
+      "name": "Fruchtriegel Apfel, Banane, Kirsche ab 1Jahr, 25 g",
+      "sourceUrl": "https://www.dm.de/p/d/1491797/dmbio-fruchtriegel-apfel-banane-kirsche-ab-1jahr",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=2&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1526195",
+      "gtin": "4066447677003",
+      "name": "Knäckebrot, Roggen & Dinkel, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1526195/dmbio-knaeckebrot-roggen-und-dinkel",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3130898",
+      "gtin": "4070765014587",
+      "name": "Erbsenwaffeln, gesalzen, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/3130898/dmbio-erbsenwaffeln-gesalzen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1638727",
+      "gtin": "4066447885019",
+      "name": "Soft-Tomaten, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/1638727/dmbio-soft-tomaten",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1491605",
+      "gtin": "4070765023053",
+      "name": "Porridge, Basis mit Dinkel & Flohsamen, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1491605/dmbio-porridge-basis-mit-dinkel-und-flohsamen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1666931",
+      "gtin": "4067796188356",
+      "name": "Paprika, edelsüß, 70 g",
+      "sourceUrl": "https://www.dm.de/p/d/1666931/dmbio-paprika-edelsuess",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1549898",
+      "gtin": "4066447889925",
+      "name": "Fertiggericht, Gemüsepfanne mit Bulgur & Quinoa, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1549898/dmbio-fertiggericht-gemuesepfanne-mit-bulgur-und-quinoa",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1586991",
+      "gtin": "4070765022780",
+      "name": "Haferdrink, glutenfrei, 1 l",
+      "sourceUrl": "https://www.dm.de/p/d/1586991/dmbio-haferdrink-glutenfrei",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1624419",
+      "gtin": "4058172824579",
+      "name": "Basmatireis mit Olivenöl verfeinert, Express, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1624419/dmbio-basmatireis-mit-olivenoel-verfeinert-express",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1638677",
+      "gtin": "4070765106442",
+      "name": "Nudeln, Kritharaki aus Hartweizengrieß, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1638677/dmbio-nudeln-kritharaki-aus-hartweizengriess",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1626830",
+      "gtin": "4067796194036",
+      "name": "Salat Topping, 135 g",
+      "sourceUrl": "https://www.dm.de/p/d/1626830/dmbio-salat-topping",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1356633",
+      "gtin": "4070765058864",
+      "name": "Senf mittelscharf, 200 ml",
+      "sourceUrl": "https://www.dm.de/p/d/1356633/dmbio-senf-mittelscharf",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1626807",
+      "gtin": "4070765022810",
+      "name": "Pflanzendrink, Cashew natur, 1 l",
+      "sourceUrl": "https://www.dm.de/p/d/1626807/dmbio-pflanzendrink-cashew-natur",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1702349",
+      "gtin": "4066447663075",
+      "name": "Knuspermüsli, Fruchtringe, 300 g",
+      "sourceUrl": "https://www.dm.de/p/d/1702349/dmbio-knuspermuesli-fruchtringe",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1442854",
+      "gtin": "4067796063400",
+      "name": "Amaranth, gepufft, 125 g",
+      "sourceUrl": "https://www.dm.de/p/d/1442854/dmbio-amaranth-gepufft",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1674121",
+      "gtin": "4066447256628",
+      "name": "Schokolierte Himbeeren in Zartbitter, 50 g",
+      "sourceUrl": "https://www.dm.de/p/d/1674121/dmbio-schokolierte-himbeeren-in-zartbitter",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1489949",
+      "gtin": "4070765021523",
+      "name": "Dinkel Zwieback, 200 g",
+      "sourceUrl": "https://www.dm.de/p/d/1489949/dmbio-dinkel-zwieback",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1496925",
+      "gtin": "4070765075953",
+      "name": "Kalamon Oliven ohne Stein, 180 g",
+      "sourceUrl": "https://www.dm.de/p/d/1496925/dmbio-kalamon-oliven-ohne-stein",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3138125",
+      "gtin": "4070765100730",
+      "name": "Gemüsebrühe Paste, 190 g",
+      "sourceUrl": "https://www.dm.de/p/d/3138125/dmbio-gemuesebruehe-paste",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3127069",
+      "gtin": "4070765109115",
+      "name": "Palak Paneer, 350 g",
+      "sourceUrl": "https://www.dm.de/p/d/3127069/dmbio-palak-paneer",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1447036",
+      "gtin": "4067796166859",
+      "name": "Trockenfrüchte, Datteln entsteint, 200 g",
+      "sourceUrl": "https://www.dm.de/p/d/1447036/dmbio-trockenfruechte-datteln-entsteint",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1623103",
+      "gtin": "4067796185195",
+      "name": "Seitan Bratwurst, nach Chorizo-Art gewürzt, 130 g",
+      "sourceUrl": "https://www.dm.de/p/d/1623103/dmbio-seitan-bratwurst-nach-chorizo-art-gewuerzt",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1539815",
+      "gtin": "4066447855845",
+      "name": "Ingwer & Kurkuma Shot 7 Tage, 280 ml",
+      "sourceUrl": "https://www.dm.de/p/d/1539815/dmbio-ingwer-und-kurkuma-shot-7-tage",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1488556",
+      "gtin": "4070765101621",
+      "name": "Chili sin Carne, 400 g",
+      "sourceUrl": "https://www.dm.de/p/d/1488556/dmbio-chili-sin-carne",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "2968954",
+      "gtin": "4066447990782",
+      "name": "Ingwer & Rote Bete Shot 7 Tage, 280 ml",
+      "sourceUrl": "https://www.dm.de/p/d/2968954/dmbio-ingwer-und-rote-bete-shot-7-tage",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1454951",
+      "gtin": "4058172716232",
+      "name": "Basmatireis aus Vollkorn, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1454951/dmbio-basmatireis-aus-vollkorn",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1545323",
+      "gtin": "4070765022834",
+      "name": "Haferdrink, Barista mit Soja, 1 l",
+      "sourceUrl": "https://www.dm.de/p/d/1545323/dmbio-haferdrink-barista-mit-soja",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1450106",
+      "gtin": "4066447231373",
+      "name": "Grüner Tee Matcha, gemahlen, 30 g",
+      "sourceUrl": "https://www.dm.de/p/d/1450106/dmbio-gruener-tee-matcha-gemahlen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1690673",
+      "gtin": "4066447422986",
+      "name": "Nudeln, Penne aus Vollkornreis, glutenfrei, 400 g",
+      "sourceUrl": "https://www.dm.de/p/d/1690673/dmbio-nudeln-penne-aus-vollkornreis-glutenfrei",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3064090",
+      "gtin": "4067796202915",
+      "name": "Vegane Currywurst, 350 g",
+      "sourceUrl": "https://www.dm.de/p/d/3064090/dmbio-vegane-currywurst",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1435253",
+      "gtin": "4067796255003",
+      "name": "Bratwürstchen, Tofu & Weizeneiweiß, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1435253/dmbio-bratwuerstchen-tofu-und-weizeneiweiss",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=3&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1454977",
+      "gtin": "4066447519662",
+      "name": "Soja Schnetzel, 150 g",
+      "sourceUrl": "https://www.dm.de/p/d/1454977/dmbio-soja-schnetzel",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1510735",
+      "gtin": "4066447304954",
+      "name": "Gelierzucker, 2:1 für 1 kg Früchte, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1510735/dmbio-gelierzucker-2-1-fuer-1-kg-fruechte",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1639886",
+      "gtin": "4066447087123",
+      "name": "Nudeln, Mie-Nudeln aus Dinkel, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1639886/dmbio-nudeln-mie-nudeln-aus-dinkel",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1431385",
+      "gtin": "4066447707540",
+      "name": "Reismehl, glutenfrei, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1431385/dmbio-reismehl-glutenfrei",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1713047",
+      "gtin": "4066447985191",
+      "name": "Backpulver mit Reinweinstein (4x17 g), 68 g",
+      "sourceUrl": "https://www.dm.de/p/d/1713047/dmbio-backpulver-mit-reinweinstein-4x17-g",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1692279",
+      "gtin": "4070765012224",
+      "name": "Müsli, Paleo, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1692279/dmbio-muesli-paleo",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1446524",
+      "gtin": "4070765031119",
+      "name": "Pflanzensaft, Aloe Vera naturtrüb, 330 ml",
+      "sourceUrl": "https://www.dm.de/p/d/1446524/dmbio-pflanzensaft-aloe-vera-naturtrueb",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1665593",
+      "gtin": "4067796125153",
+      "name": "Kurkuma, gemahlen, 60 g",
+      "sourceUrl": "https://www.dm.de/p/d/1665593/dmbio-kurkuma-gemahlen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1555133",
+      "gtin": "4070765022766",
+      "name": "Haferdrink, Vanille, 1 l",
+      "sourceUrl": "https://www.dm.de/p/d/1555133/dmbio-haferdrink-vanille",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3118193",
+      "gtin": "4070765030518",
+      "name": "Schoko Adventskalender 2026, 1 St",
+      "sourceUrl": "https://www.dm.de/p/d/3118193/dmbio-schoko-adventskalender-2026",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3081974",
+      "gtin": "4067796193893",
+      "name": "Leinsamen Mix, 200 g",
+      "sourceUrl": "https://www.dm.de/p/d/3081974/dmbio-leinsamen-mix",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1515749",
+      "gtin": "4066447732672",
+      "name": "Kokosmehl, 300 g",
+      "sourceUrl": "https://www.dm.de/p/d/1515749/dmbio-kokosmehl",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1691724",
+      "gtin": "4066447422825",
+      "name": "Müsli Crunchy, Hafer Beeren, glutenfrei, 350 g",
+      "sourceUrl": "https://www.dm.de/p/d/1691724/dmbio-muesli-crunchy-hafer-beeren-glutenfrei",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1624418",
+      "gtin": "4058172824593",
+      "name": "Langkorn & Wildreis mit Olivenöl verfeinert, Express, 250 g",
+      "sourceUrl": "https://www.dm.de/p/d/1624418/dmbio-langkorn-und-wildreis-mit-olivenoel-verfeinert-express",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1666804",
+      "gtin": "4066447068184",
+      "name": "Curry, mild, 60 g",
+      "sourceUrl": "https://www.dm.de/p/d/1666804/dmbio-curry-mild",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1444740",
+      "gtin": "4070765023046",
+      "name": "Müsli, Bircher nach Schweizer Art, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1444740/dmbio-muesli-bircher-nach-schweizer-art",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3070601",
+      "gtin": "4067796203639",
+      "name": "Brotaufstrich, Getrocknete Tomate & Feta, 135 g",
+      "sourceUrl": "https://www.dm.de/p/d/3070601/dmbio-brotaufstrich-getrocknete-tomate-und-feta",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1597029",
+      "gtin": "4066447238402",
+      "name": "Grüner Tee Matcha Sticks (10 Sticks), 20 g",
+      "sourceUrl": "https://www.dm.de/p/d/1597029/dmbio-gruener-tee-matcha-sticks-10-sticks",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1691025",
+      "gtin": "4067796013023",
+      "name": "Bliss Balls, gesalzene Mandel, 60 g",
+      "sourceUrl": "https://www.dm.de/p/d/1691025/dmbio-bliss-balls-gesalzene-mandel",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1649145",
+      "gtin": "4067796063905",
+      "name": "Macadamianüsse, geröstet & gesalzen, 100 g",
+      "sourceUrl": "https://www.dm.de/p/d/1649145/dmbio-macadamianuesse-geroestet-und-gesalzen",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1447530",
+      "gtin": "4067796063318",
+      "name": "Leinsamen, ganz, 500 g",
+      "sourceUrl": "https://www.dm.de/p/d/1447530/dmbio-leinsamen-ganz",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1454153",
+      "gtin": "4067796068573",
+      "name": "Fruchtmark Apfel mit Banane, 360 g",
+      "sourceUrl": "https://www.dm.de/p/d/1454153/dmbio-fruchtmark-apfel-mit-banane",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1641114",
+      "gtin": "4066447869644",
+      "name": "Bunte Herbstnudeln, 340 g",
+      "sourceUrl": "https://www.dm.de/p/d/1641114/dmbio-bunte-herbstnudeln",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1573521",
+      "gtin": "4066447495409",
+      "name": "Kartoffel Fix, 35 g",
+      "sourceUrl": "https://www.dm.de/p/d/1573521/dmbio-kartoffel-fix",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1503058",
+      "gtin": "4067796252019",
+      "name": "Tofu, geräuchert, 200 g",
+      "sourceUrl": "https://www.dm.de/p/d/1503058/dmbio-tofu-geraeuchert",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1491795",
+      "gtin": "4067796161861",
+      "name": "Fruchtriegel Apfel-Banane ab 1 Jahr, 25 g",
+      "sourceUrl": "https://www.dm.de/p/d/1491795/dmbio-fruchtriegel-apfel-banane-ab-1-jahr",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1502968",
+      "gtin": "4067796002102",
+      "name": "Pflanzendrink, Reis natur, 1 l",
+      "sourceUrl": "https://www.dm.de/p/d/1502968/dmbio-pflanzendrink-reis-natur",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "3063809",
+      "gtin": "4066447869743",
+      "name": "Tomatensoße, Bolognese mit Linsen & Kürbis, vegan, 350 g",
+      "sourceUrl": "https://www.dm.de/p/d/3063809/dmbio-tomatensosse-bolognese-mit-linsen-und-kuerbis-vegan",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1566736",
+      "gtin": "4066447395181",
+      "name": "Kokosdrink Pur ab 1 Jahr, 330 ml",
+      "sourceUrl": "https://www.dm.de/p/d/1566736/dmbio-kokosdrink-pur-ab-1-jahr",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    },
+    {
+      "retailerSku": "1574334",
+      "gtin": "4066447422849",
+      "name": "Laugen-Knusper-Snack glutenfrei, 80 g",
+      "sourceUrl": "https://www.dm.de/p/d/1574334/dmbio-laugen-knusper-snack-glutenfrei",
+      "discoveredAt": "2026-09-30T22:30:43.224Z",
+      "origin": {
+        "source": "dm online",
+        "sourceUrl": "https://product-search.services.dmtech.com/de/search/crawl?query=dmBio&pageSize=30&currentPage=4&sort=editorial_relevance"
+      }
+    }
+  ]
+}

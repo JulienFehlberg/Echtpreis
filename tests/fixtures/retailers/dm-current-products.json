@@ -1,0 +1,31 @@
+{
+  "source": "https://products.dm.de/product/products/tiles/de/dans/1453253,1697279",
+  "capturedAt": "2026-09-30T22:08:20.209085Z",
+  "products": {
+    "1453253": {
+      "dan": 1453253,
+      "gtin": 4070765022773,
+      "brand": {"name": "dmBio"},
+      "title": {"tileHeadline": "Haferdrink Zuckerfrei, 1 l"},
+      "self": "/p/d/1453253/dmbio-haferdrink-zuckerfrei",
+      "price": {"price": {"current": {"value": "0,90 €"}}, "tileInfos": ["1 l (0,90 € je 1 l)"]},
+      "netPrice": {"price": {"current": {"value": "0,76 €"}}},
+      "trackingData": {"price": 0.9, "currency": "EUR", "brand": "dmBio"},
+      "isPharmacy": false
+    },
+    "1697279": {
+      "dan": 1697279,
+      "gtin": 4070765022841,
+      "brand": {"name": "dmBio"},
+      "title": {"tileHeadline": "Haferdrink Barista, 1 l"},
+      "self": "/p/d/1697279/dmbio-haferdrink-barista",
+      "price": {"price": {"current": {"value": "1,45 €"}}, "tileInfos": ["1 l (1,45 € je 1 l)"]},
+      "trackingData": {"price": 1.45, "currency": "EUR", "brand": "dmBio"},
+      "isPharmacy": false
+    }
+  },
+  "availability": {
+    "1453253": {"rows": [{"icon": "GREEN", "text": "Lieferbar"}, {"icon": "GRAY", "text": "<linking>dm-Markt wählen</linking>"}], "isPurchasable": true},
+    "1697279": {"rows": [{"icon": "GREEN", "text": "Lieferbar"}, {"icon": "GRAY", "text": "<linking>dm-Markt wählen</linking>"}], "isPurchasable": true}
+  }
+}

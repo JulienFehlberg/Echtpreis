@@ -1,5 +1,6 @@
 "use strict";
 const SOURCES={
+ "dm online":{type:"retailer_published_offer",baseTrust:96,termsUrl:"https://www.dm.de/",attribution:"dm.de official published online offers",commercialUseStatus:"public-offer-observation",publicOfferScope:"online:DE",active:true,refreshMs:900000,capabilities:["retailer-sku","gtin","exact-pack","published-online-price","online-availability"],notes:"Autonomous direct observation of the official German online offer. Separate published-price inventory; does not establish physical branch prices or checkout/shipping totals."},
  "SPARKORB POS feed":{refreshMs:60000,type:"pos_feed",baseTrust:99.5,commercialUseStatus:"partner-contract",active:false,capabilities:["store-exact","product-exact","current-price","validity","conditional-price"],notes:"Gold-standard slot for future authorized retailer/POS pricing feeds; disabled until a partner feed is contracted and authenticated."},
  "German Supermarket Prices":{type:"aggregated_open_data",baseTrust:68,license:"ODbL-1.0",termsUrl:"https://github.com/loukesio/german-supermarket-prices",attribution:"loukesio/german-supermarket-prices + upstream sources",commercialUseStatus:"license-review",active:false,refreshMs:86400000,capabilities:["multi-retailer","ean","offers","drugstore","berlin-region"],notes:"Snapshot spanning 16 retailers; mixed upstream provenance means each row must retain its original source and offer validity."},
  "REWE daily open dataset":{type:"aggregated_open_data",baseTrust:76,license:"Apache-2.0",termsUrl:"https://github.com/L480/rewe-price-data",attribution:"L480/rewe-price-data",commercialUseStatus:"approved-open-data",active:false,refreshMs:86400000,capabilities:["historical","ean","pack","category","sale"],notes:"Legacy two-region CSV exports have no price observation date or exact store ID. Last file updates were published in April 2024. Disabled for current-price research; dated archives remain corroboration only. Fetch time never dates a price."},
@@ -42,6 +43,6 @@ const SOURCES={
  "SPARKORB receipt":{type:"first_party_receipt",baseTrust:92,commercialUseStatus:"first-party",active:true},
  "SPARKORB shelf":{type:"first_party_shelf",baseTrust:90,commercialUseStatus:"first-party",active:true}
 };
-function canImport(name){const s=SOURCES[name];return !!(s&&s.active&&["first-party","approved","approved-open-data"].includes(s.commercialUseStatus))}
+function canImport(name){const s=SOURCES[name];return !!(s&&s.active&&(["first-party","approved","approved-open-data"].includes(s.commercialUseStatus)||(s.commercialUseStatus==="public-offer-observation"&&s.publicOfferScope==="online:DE")))}
 function publicStatus(){return Object.entries(SOURCES).map(([name,s])=>({name,type:s.type,baseTrust:s.baseTrust,active:s.active,commercialUseStatus:s.commercialUseStatus,license:s.license||null,notes:s.notes||null}))}
 module.exports={SOURCES,canImport,publicStatus};
