@@ -34,11 +34,16 @@ function validateCandidate(candidate,options={}){
  return{ok:true,reasons:[],candidate:parsed,storeProfile:store,pack,strictPack,externalProductId,externalLocationId:String(store.storeId),observationId:uuid(captureKey),signature,date:Clock.today(new Date(captured))};
 }
 const schemaJobs=new WeakMap();
+async function quarantineUnsupportedWeight(pool){
+ const result=await pool.query(`UPDATE price_observations po SET truth_eligible=false,status='unsupported-weight-sale-unit' FROM ${TABLE} evidence WHERE po.id=evidence.observation_id AND evidence.source_id=$1 AND evidence.native_store_id=$2 AND evidence.native_store_number=$3 AND evidence.retailer_sku~'^[0-9]+KG$' AND po.source=$1 AND po.source_id=$1 AND po.store_id=evidence.store_id AND po.product_id=evidence.product_id AND po.gtin=evidence.gtin AND po.external_location_id=$4 AND po.external_product_id=('hit:store:'||$4||':sku:'||evidence.retailer_sku) AND po.truth_eligible=true`,[SOURCE,STORE_PROFILE.storeId,STORE_PROFILE.storeNumber,String(STORE_PROFILE.storeId)]);
+ return Number.isInteger(result.rowCount)&&result.rowCount>0?result.rowCount:0;
+}
 async function ensure(pool){
  if(schemaJobs.has(pool))return schemaJobs.get(pool);
  const job=(async()=>{const owns=typeof pool.connect==="function",tx=owns?await pool.connect():pool;try{
   if(owns)await tx.query("BEGIN");
   await tx.query(`SELECT pg_advisory_xact_lock(hashtext('HIT import schema'));CREATE TABLE IF NOT EXISTS ${TABLE}(source_id text NOT NULL CHECK(source_id='HIT Berlin store assortment'),native_store_id integer NOT NULL CHECK(native_store_id=1775),native_store_number text NOT NULL CHECK(native_store_number='258'),retailer_sku text NOT NULL,captured_at timestamptz NOT NULL,expires_at timestamptz NOT NULL,observation_id uuid NOT NULL UNIQUE,product_id uuid NOT NULL REFERENCES products(id),store_id uuid NOT NULL REFERENCES stores(id),gtin text NOT NULL,pack_amount numeric NOT NULL CHECK(pack_amount>0),pack_unit text NOT NULL CHECK(pack_unit IN ('g','ml','piece')),pack_count integer NOT NULL CHECK(pack_count>0),price_cents integer NOT NULL CHECK(price_cents>0),deposit_cents integer,source_response_hash text NOT NULL CHECK(source_response_hash~'^[a-f0-9]{64}$'),source_response_date timestamptz NOT NULL,source_age_seconds integer,source_url text NOT NULL,source_response_url text NOT NULL,proof_hash text NOT NULL,native_proof jsonb NOT NULL,signature text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(source_id,native_store_id,retailer_sku,captured_at),CHECK(expires_at>captured_at AND expires_at<=captured_at+interval '24 hours'),CHECK(source_age_seconds IS NULL OR source_age_seconds BETWEEN 0 AND 300),CHECK(deposit_cents IS NULL OR deposit_cents>=0));CREATE INDEX IF NOT EXISTS hit_import_latest_idx ON ${TABLE}(store_id,product_id,captured_at DESC)`);
+  await quarantineUnsupportedWeight(tx);
   if(owns)await tx.query("COMMIT");
  }catch(error){if(owns)await tx.query("ROLLBACK");throw error}finally{if(owns)tx.release()}})();
  schemaJobs.set(pool,job);try{return await job}finally{schemaJobs.delete(pool)}
@@ -94,4 +99,4 @@ async function persist(pool,candidates,options={}){
   await tx.query("COMMIT");return{sourceId:SOURCE,received:candidates.length,accepted,rejected,duplicates,productsCreated,storeId:canonical.storeId,conservativeValidity:"captured-berlin-calendar-day"};
  }catch(error){await tx.query("ROLLBACK");throw error}finally{tx.release()}
 }
-module.exports={SOURCE,MERCHANT,TABLE,STORE_PROFILE,ensure,validateCandidate,persist};
+module.exports={SOURCE,MERCHANT,TABLE,STORE_PROFILE,ensure,quarantineUnsupportedWeight,validateCandidate,persist};
