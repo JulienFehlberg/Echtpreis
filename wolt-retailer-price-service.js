@@ -5,9 +5,12 @@ const Identity = require("./product-identity");
 const Inventory = require("./canonical-inventory-import");
 const {matchesProductQuery} = require("./published-price-service");
 
-const SOURCE = "Wolt EDEKA Berlin", MERCHANT = "EDEKA", DAY_MS = 86400000;
-const VENUE = Object.freeze({nativeVenueId:"67ebb70ed3581534a525c522",slug:"edeka-hilbrecht",nativeMarketId:"800401",name:"EDEKA Hilbrecht",postalCode:"10969",city:"Berlin",country:"DE"});
-const TABLE = "wolt_retailer_published_prices";
+const Venues=require("./wolt-retailer-venues"),DAY_MS=86400000,TABLE="wolt_retailer_published_prices",schemaInFlight=new WeakMap();
+const sqlLiteral=value=>"'"+value.replace(/'/g,"''")+"'";
+const approvedScope=Object.values(Venues.PROFILES).map(p=>"(source_id="+sqlLiteral(p.sourceId)+" AND merchant="+sqlLiteral(p.merchant)+" AND native_venue_id="+sqlLiteral(p.nativeVenueId)+")").join(" OR ");
+function createService(profileKey="edekaBerlin"){
+ if(arguments.length>1)throw Object.assign(new Error("wolt-venue-profile-not-approved"),{code:"wolt-venue-profile-not-approved"});
+ const PROFILE=Venues.resolve(profileKey),SOURCE=PROFILE.sourceId,MERCHANT=PROFILE.merchant,VENUE=PROFILE;
 const text = (value,max=200) => typeof value === "string" ? value.trim().slice(0,max) : "";
 function fail(code) { const error = new Error(code); error.code = code; return error; }
 function clock(options={}) { const value=options.now===undefined?Date.now():new Date(options.now).getTime(); if(!Number.isFinite(value))throw fail("invalid-time"); return value; }
@@ -15,9 +18,9 @@ function timestamp(value) { if(typeof value!=="string"||!/^\d{4}-\d{2}-\d{2}T\d{
 function nativeUrl(value,response=false) {
  try {
   const url=new URL(value); if(url.protocol!=="https:"||url.username||url.password||url.port||url.hash)return null;
-  if(!response)return !url.search&&url.hostname==="wolt.com"&&/^\/de\/deu\/berlin\/venue\/edeka-hilbrecht\/?$/.test(url.pathname)?url.href:null;
+  if(!response)return !url.search&&url.hostname==="wolt.com"&&["/de/deu/berlin/venue/"+VENUE.slug,"/de/deu/berlin/venue/"+VENUE.slug+"/"].includes(url.pathname)?url.href:null;
   if([...url.searchParams].some(([key,value])=>key!=="page_token"||!value||value.length>4000)||url.searchParams.getAll("page_token").length>1)return null;
-  return url.hostname==="consumer-api.wolt.com"&&/^\/consumer-api\/consumer-assortment\/v1\/venues\/slug\/edeka-hilbrecht\/assortment(?:\/categories\/slug\/[a-z0-9-]+)?$/.test(url.pathname)?url.href:null;
+  return url.hostname==="consumer-api.wolt.com"&&new RegExp("^/consumer-api/consumer-assortment/v1/venues/slug/"+VENUE.slug+"/assortment(?:/categories/slug/[a-z0-9-]+)?$").test(url.pathname)?url.href:null;
  } catch { return null; }
 }
 function validateOffer(raw={},options={}) {
@@ -67,7 +70,7 @@ function validateOffer(raw={},options={}) {
  const shopRaw=raw.shop&&typeof raw.shop==="object"&&!Array.isArray(raw.shop)?raw.shop:{};
  const shop={nativeVenueId:text(shopRaw.nativeVenueId,80),slug:text(shopRaw.slug,100),name:text(shopRaw.name,160),address:text(shopRaw.address,200),postalCode:text(shopRaw.postalCode,10),city:text(shopRaw.city,80),country:text(shopRaw.country,8),nativeMarketId:text(shopRaw.nativeMarketId,80)||null};
  const normalized=value=>value.normalize("NFKC").toLowerCase().replace(/ß/g,"ss").replace(/[^a-z0-9]/g,"");
- if(shop.nativeVenueId!==nativeVenueId||shop.slug!==VENUE.slug||!normalized(shop.name).includes("edekahilbrecht")||!["ritterstr3840","ritterstrasse3840"].includes(normalized(shop.address))||shop.postalCode!==VENUE.postalCode||shop.city!==VENUE.city||shop.country!==VENUE.country||shop.nativeMarketId!==null&&shop.nativeMarketId!==VENUE.nativeMarketId)reasons.push("native-Berlin-shop-scope-required");
+ if(shop.nativeVenueId!==nativeVenueId||shop.slug!==VENUE.slug||normalized(shop.name)!==normalized(VENUE.name)||!(profileKey==="edekaBerlin"?["ritterstr3840","ritterstrasse3840"]:PROFILE.allowedAddresses.map(normalized)).includes(normalized(shop.address))||shop.postalCode!==VENUE.postalCode||shop.city!==VENUE.city||shop.country!==VENUE.country||shop.nativeMarketId!==null&&shop.nativeMarketId!==VENUE.nativeMarketId)reasons.push("native-Berlin-shop-scope-required");
  if(raw.nativeMarketId!=null&&String(raw.nativeMarketId)!==VENUE.nativeMarketId)reasons.push("native-market-scope-conflict");
  if(reasons.length)return{ok:false,reasons};
  const single=Identity.base(parsed.amount,parsed.unit);
@@ -75,16 +78,29 @@ function validateOffer(raw={},options={}) {
 }
 async function ensure(pool) {
  if(!pool)throw fail("database-required");
- await pool.query(`CREATE TABLE IF NOT EXISTS ${TABLE}(
- source_id text NOT NULL CHECK(source_id='Wolt EDEKA Berlin'),merchant text NOT NULL CHECK(merchant='EDEKA'),native_venue_id text NOT NULL CHECK(native_venue_id='67ebb70ed3581534a525c522'),retailer_sku text NOT NULL CHECK(retailer_sku~'^[a-f0-9]{24}$'),gtin text,name text NOT NULL,brand text,description text,pack text NOT NULL,
+ if(schemaInFlight.has(pool))return schemaInFlight.get(pool);
+ const pending=pool.query(`CREATE TABLE IF NOT EXISTS ${TABLE}(
+ source_id text NOT NULL,merchant text NOT NULL,native_venue_id text NOT NULL,retailer_sku text NOT NULL CHECK(retailer_sku~'^[a-f0-9]{24}$'),gtin text,name text NOT NULL,brand text,description text,pack text NOT NULL,
  pack_amount numeric NOT NULL CHECK(pack_amount>0 AND pack_amount NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),pack_unit text NOT NULL CHECK(pack_unit IN ('g','ml','piece')),pack_count int NOT NULL CHECK(pack_count>0),
  price numeric NOT NULL CHECK(price>0 AND price NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),deposit numeric CHECK(deposit>=0 AND deposit NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),deposit_label text,displayed_price numeric NOT NULL CHECK(displayed_price>0 AND displayed_price NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),original_price numeric CHECK(original_price>0 AND original_price NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),currency text NOT NULL CHECK(currency='EUR'),
  price_type text NOT NULL CHECK(price_type IN ('unknown','promotion')),promotion_status text NOT NULL CHECK(promotion_status IN ('unknown','promotion')),availability text NOT NULL CHECK(availability IN ('available','unavailable','unknown')),
  captured_at timestamptz NOT NULL,expires_at timestamptz NOT NULL,source_url text NOT NULL,source_response_url text NOT NULL,proof_hash text NOT NULL,source_response_hash text NOT NULL,shop jsonb NOT NULL,
  scope_country text NOT NULL CHECK(scope_country='DE'),scope_channel text NOT NULL CHECK(scope_channel='online'),offer_hash text NOT NULL,updated_at timestamptz NOT NULL DEFAULT now(),
- PRIMARY KEY(source_id,native_venue_id,retailer_sku),CHECK(displayed_price=price+COALESCE(deposit,0)),CHECK(expires_at=captured_at+interval '24 hours'));
+ PRIMARY KEY(source_id,native_venue_id,retailer_sku),CONSTRAINT wolt_published_approved_venue CHECK(${approvedScope}),CHECK(displayed_price=price+COALESCE(deposit,0)),CHECK(expires_at=captured_at+interval '24 hours'));
+ DO $$ BEGIN
+  IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='${TABLE}'::regclass AND conname='wolt_published_approved_venue') THEN
+   PERFORM pg_advisory_xact_lock(hashtext('sparkorb-wolt-approved-venues-v1'));
+   IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='${TABLE}'::regclass AND conname='wolt_published_approved_venue') THEN
+    ALTER TABLE ${TABLE} DROP CONSTRAINT IF EXISTS wolt_retailer_published_prices_source_id_check;
+    ALTER TABLE ${TABLE} DROP CONSTRAINT IF EXISTS wolt_retailer_published_prices_merchant_check;
+    ALTER TABLE ${TABLE} DROP CONSTRAINT IF EXISTS wolt_retailer_published_prices_native_venue_id_check;
+    ALTER TABLE ${TABLE} ADD CONSTRAINT wolt_published_approved_venue CHECK(${approvedScope});
+   END IF;
+  END IF;
+ END $$;
  CREATE INDEX IF NOT EXISTS wolt_retailer_published_gtin_idx ON ${TABLE}(gtin,captured_at DESC);
  CREATE INDEX IF NOT EXISTS wolt_retailer_published_capture_idx ON ${TABLE}(native_venue_id,captured_at DESC);`);
+ schemaInFlight.set(pool,pending);try{await pending;}finally{if(schemaInFlight.get(pool)===pending)schemaInFlight.delete(pool);}
 }
 const columns=["source_id","merchant","native_venue_id","retailer_sku","gtin","name","brand","description","pack","pack_amount","pack_unit","pack_count","price","deposit","deposit_label","displayed_price","original_price","currency","price_type","promotion_status","availability","captured_at","expires_at","source_url","source_response_url","proof_hash","source_response_hash","shop","scope_country","scope_channel","offer_hash"];
 function row(offer) {
@@ -121,7 +137,7 @@ async function persist(pool,inputs=[],options={}) {
 }
 const FIELDS=`source_id AS "sourceId",merchant,native_venue_id AS "nativeVenueId",retailer_sku AS "retailerSku",gtin,name,brand,description,pack,pack_amount::float AS "packAmount",pack_unit AS "packUnit",pack_count AS "packCount",price::float,deposit::float,deposit_label AS "depositLabel",displayed_price::float AS "displayedPrice",original_price::float AS "originalPrice",currency,price_type AS "priceType",promotion_status AS "promotionStatus",availability,captured_at AS "capturedAt",expires_at AS "expiresAt",source_url AS "sourceUrl",source_response_url AS "sourceResponseUrl",proof_hash AS "proofHash",source_response_hash AS "sourceResponseHash",shop,scope_country AS "scopeCountry",scope_channel AS "scopeChannel"`;
 function querySpec(options={}) {
- const now=clock(options),params=[new Date(now).toISOString()],where=["source_id='Wolt EDEKA Berlin'","scope_country='DE'","scope_channel='online'","captured_at<=$1::timestamptz","captured_at>=$1::timestamptz-interval '24 hours'","expires_at>$1::timestamptz"],param=value=>{params.push(value);return"$"+params.length;};
+ const now=clock(options),params=[new Date(now).toISOString()],where=["source_id="+sqlLiteral(SOURCE),"scope_country='DE'","scope_channel='online'","captured_at<=$1::timestamptz","captured_at>=$1::timestamptz-interval '24 hours'","expires_at>$1::timestamptz"],param=value=>{params.push(value);return"$"+params.length;};
  if(options.merchant!=null){const merchant=text(options.merchant,80);if(!merchant)throw fail("invalid-merchant");where.push("lower(merchant)=lower("+param(merchant)+")");}
  if(options.nativeVenueId!=null){const venue=text(options.nativeVenueId,80);if(!/^[a-f0-9]{24}$/.test(venue))throw fail("invalid-native-venue-id");where.push("native_venue_id="+param(venue));}
  if(options.gtin!=null){const gtin=String(options.gtin).trim();if(!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(gtin)||!Identity.gtinValid(gtin))throw fail("invalid-gtin");where.push("gtin="+param(gtin));}
@@ -139,4 +155,6 @@ async function status(pool,options={}) {
  const markets=await pool.query(`SELECT merchant,source_id AS "sourceId",native_venue_id AS "nativeVenueId",(array_agg(shop ORDER BY captured_at DESC,retailer_sku))[1] AS shop,count(*)::int AS "storedPrices",count(*) FILTER(WHERE ${fresh})::int AS "currentPrices",count(DISTINCT gtin) FILTER(WHERE ${fresh})::int AS "productsWithCurrentPublishedPrices",MAX(captured_at) AS "lastCapturedAt" FROM ${TABLE} WHERE source_id=$2 AND scope_country='DE' AND scope_channel='online' GROUP BY merchant,source_id,native_venue_id ORDER BY native_venue_id`,[now,SOURCE]);
  return{ok:true,...result.rows[0],markets:markets.rows,scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24,state:"published",truthEligible:false,shippingIncluded:false,serviceFeesIncluded:false,independentOfUserReceipts:true,note:"Veröffentlichte Berliner Wolt-Marktpreise; Lieferkanal und Filialpreise werden getrennt ausgewiesen. Unbelegte Normalpreis-/Aktionszuordnung bleibt unbekannt."};
 }
-module.exports={SOURCE,MERCHANT,DAY_MS,VENUE,ensure,validateOffer,persist,querySpec,search,status,matchesProductQuery};
+return{PROFILE,SOURCE,MERCHANT,DAY_MS,TABLE,VENUE,ensure,validateOffer,persist,querySpec,search,status,matchesProductQuery};
+}
+module.exports={...createService(),createService};
