@@ -1282,6 +1282,20 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
  #results .compare-market-price{font-size:17px!important}
 }
 </style><style>
+/* v7.293 simplify result cards */
+#results .compare-market-actions{margin-top:6px!important}
+#results .compare-details>summary{padding:7px 2px!important;color:#64746b!important}
+#results .compare-market-actions .route-link{border-radius:12px!important;font-weight:900!important}
+#results>details.card{margin-top:5px!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:10px 4px!important;text-align:center!important}
+#results>details.card>summary{display:inline-block!important;font-size:11px!important;color:#738179!important;opacity:.82!important}
+#results>details.card[open]{background:#f7faf8!important;padding:12px!important;text-align:left!important}
+#results>details.card[open]>summary{display:block!important;text-align:center!important;margin-bottom:8px!important}
+@media(max-width:430px){
+ #results .compare-market-actions{gap:7px!important}
+ #results .compare-market-actions .route-link{min-height:32px!important;padding:6px 10px!important}
+ #results .compare-details>summary{font-size:10.5px!important}
+}
+</style><style>
 /* v7.286 denser product rows */
 .shopping .list{margin-top:8px!important}
 .shopping .item,.shopping .list-item,.shopping [data-list-item]{min-height:58px!important;padding-top:8px!important;padding-bottom:8px!important}
@@ -1376,7 +1390,7 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
 <section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div><div id="winnerRoute"></div></div>
 <div class="card" id="personalBasketVerdict" style="display:none"><div class="smallcap">🧠 Gegen dein Preisgedächtnis</div><h2 id="personalBasketVerdictTitle"></h2><div id="personalBasketVerdictDetail" class="detail"></div></div><div class="card savings-card" id="verifiedSavings" style="display:none"><h2>Belegter Preisunterschied</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
 <div class="card"><h2>Was kostet dein Einkauf?</h2><div id="compareQualitySummary" class="compare-quality-summary" style="display:none"></div><div id="merchantResults"></div></div>
-<details class="card"><summary style="font-weight:800;cursor:pointer">Vergleichsmethode & Datenqualität</summary><div class="muted" style="margin-top:10px"><b>Rangfolge:</b> Ein Händler kann nur dann als günstigster erscheinen, wenn für den vollständigen verglichenen Warenkorb belastbare Preisbelege vorliegen. Diese belegten Warenkörbe werden ausschließlich nach dem berechneten Gesamtpreis der gewählten Mengen sortiert; Entfernung oder Händlername beeinflussen die Preisrangfolge nicht.<br><br><b>Referenzwerte:</b> Modellierte Richtwerte, Marken-Schätzungen und historische Preise dürfen keinen Händler zum Gewinner oder Verlierer machen. Liegen nur solche Werte vor, erscheinen Händler ohne Preis-Rangfolge. „ca.“ kennzeichnet Orientierungswerte und ist keine Behauptung eines aktuellen Filialpreises oder einer Verfügbarkeit.<br><br><b>Vergleichbarkeit:</b> Packungs- und Mengeneinheiten werden soweit möglich normalisiert. Fehlende, unklare oder nicht vergleichbare Artikel verhindern einen vollständig belegten Vergleich. Die verwendeten Einzelquellen, Aktualität und Schätzstatus stehen bei jedem Markt unter „Preisdetails“.<br><br><b>Spar-Aussagen:</b> Ein konkreter Preisvorteil wird nur aus ausreichend aktuellen, nicht bloß historischen oder modellierten Preisen abgeleitet. Tatsächliche Preise und Filialbestände können sich ändern.</div></details>
+<details class="card"><summary style="font-weight:800;cursor:pointer">So entstehen die Preise</summary><div class="muted" style="margin-top:10px"><b>Rangfolge:</b> Ein Händler kann nur dann als günstigster erscheinen, wenn für den vollständigen verglichenen Warenkorb belastbare Preisbelege vorliegen. Diese belegten Warenkörbe werden ausschließlich nach dem berechneten Gesamtpreis der gewählten Mengen sortiert; Entfernung oder Händlername beeinflussen die Preisrangfolge nicht.<br><br><b>Referenzwerte:</b> Modellierte Richtwerte, Marken-Schätzungen und historische Preise dürfen keinen Händler zum Gewinner oder Verlierer machen. Liegen nur solche Werte vor, erscheinen Händler ohne Preis-Rangfolge. „ca.“ kennzeichnet Orientierungswerte und ist keine Behauptung eines aktuellen Filialpreises oder einer Verfügbarkeit.<br><br><b>Vergleichbarkeit:</b> Packungs- und Mengeneinheiten werden soweit möglich normalisiert. Fehlende, unklare oder nicht vergleichbare Artikel verhindern einen vollständig belegten Vergleich. Die verwendeten Einzelquellen, Aktualität und Schätzstatus stehen bei jedem Markt unter „Preisdetails“.<br><br><b>Spar-Aussagen:</b> Ein konkreter Preisvorteil wird nur aus ausreichend aktuellen, nicht bloß historischen oder modellierten Preisen abgeleitet. Tatsächliche Preise und Filialbestände können sich ändern.</div></details>
 
 </section>
 </section>
@@ -2326,7 +2340,7 @@ window.compare=async function compare({skipLocation=false,scroll=true,background
   const known=Math.max(0,compareBasket.length-r.referenceCount),estimated=Math.max(0,r.referenceCount);
   const badge=!approx&&idx===0?'<span class="compare-badge verified">'+(excluded.length?'Günstigster belegter Teil':'Günstigster belegter Korb')+'</span>':'';
   const qualityLine=approx?'<span class="compare-quality-line">Schätzung · noch nicht durch aktuelle Preise bestätigt</span>':'<span class="compare-quality-line verified">Aktuell belegt</span>';
-  const details='<details class="compare-details"><summary>Details</summary><div class="detail">'+escHtml([partialNote,q.detail].filter(Boolean).join(' · '))+(approx?' · Richtwerte bestätigen weder Filialpreis noch Verfügbarkeit.':'')+(r.branch&&r.branch.address?' · '+escHtml(r.branch.address):'')+'</div>'+memoryHtml+comparisonSourceDetails(r,compareBasket)+'</details>';
+  const details='<details class="compare-details"><summary>Preisdetails</summary><div class="detail">'+escHtml([partialNote,q.detail].filter(Boolean).join(' · '))+(approx?' · Richtwerte bestätigen weder Filialpreis noch Verfügbarkeit.':'')+(r.branch&&r.branch.address?' · '+escHtml(r.branch.address):'')+'</div>'+memoryHtml+comparisonSourceDetails(r,compareBasket)+'</details>';
   return '<article class="compare-market'+(idx===0?' first':'')+'"><div class="compare-market-main"><div class="compare-market-copy">'+badge+'<b>'+escHtml(r.store)+(r.branch?' · '+r.branch.distance.toFixed(1).replace(".",",")+' km':'')+'</b>'+qualityLine+'</div><div class="compare-market-price">'+(excluded.length?'Teilsumme ':approx?'ca. ':'')+eur(r.total)+'</div></div><div class="compare-market-actions">'+(r.branch?'<a class="route-link" href="'+routeUrl(r.branch)+'" target="_blank" rel="noopener">Route →</a>':'')+details+'</div></article>';
  }).join(""):'<div class="muted" style="padding:14px 0">Für diese Liste fehlt noch ein vollständiger Richtwert.</div>';
  const verified=[...verifiedComplete].sort((a,b)=>a.total-b.total),difference=verified.length>=2?verified[verified.length-1].total-verified[0].total:0;
