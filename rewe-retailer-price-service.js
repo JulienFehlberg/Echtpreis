@@ -1,5 +1,6 @@
 "use strict";
 const SearchFilters=require("./retailer-product-search-filters");
+const Schema=require("./retailer-schema-lifecycle");
 
 const crypto=require("crypto"),Identity=require("./product-identity"),Inventory=require("./canonical-inventory-import");
 const {matchesProductQuery}=require("./published-price-service");
@@ -83,6 +84,7 @@ function validateOffer(raw={},options={}){
 }
 async function ensure(pool){
  if(!pool)throw fail("database-required");
+ return Schema.ensure(pool,TABLE,async()=>{
  await pool.query(`CREATE TABLE IF NOT EXISTS ${TABLE}(
  source_id text NOT NULL CHECK(source_id='REWE Berlin pickup'),merchant text NOT NULL CHECK(merchant='REWE'),native_market_id text NOT NULL CHECK(native_market_id='8321066'),native_store_id text NOT NULL CHECK(native_store_id='7ae33841-fa98-3b7e-9ee5-8132f39c189c'),retailer_sku text NOT NULL CHECK(retailer_sku~'^[1-9][0-9]{0,4}-[A-Za-z0-9]{1,40}-7ae33841-fa98-3b7e-9ee5-8132f39c189c$'),retailer_product_id text NOT NULL CHECK(retailer_product_id~'^[1-9][0-9]{0,11}$'),native_article_id text NOT NULL,gtin text CHECK(gtin IS NULL OR gtin~'^([0-9]{8}|[0-9]{12}|[0-9]{13}|[0-9]{14})$'),name text NOT NULL CHECK(length(name)>0),brand text,description text,pack text NOT NULL,
  pack_amount numeric NOT NULL CHECK(pack_amount>0 AND pack_amount NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),pack_unit text NOT NULL CHECK(pack_unit IN ('g','ml','piece')),pack_count int NOT NULL CHECK(pack_count>0),
@@ -102,6 +104,7 @@ async function ensure(pool){
  END $$;
  CREATE INDEX IF NOT EXISTS rewe_retailer_published_gtin_idx ON ${TABLE}(gtin,captured_at DESC);
  CREATE INDEX IF NOT EXISTS rewe_retailer_published_capture_idx ON ${TABLE}(native_market_id,captured_at DESC);`);
+ });
 }
 const columns=["source_id","merchant","native_market_id","native_store_id","retailer_sku","retailer_product_id","native_article_id","gtin","name","brand","description","pack","pack_amount","pack_unit","pack_count","price","deposit","deposit_label","displayed_price","original_price","currency","price_type","promotion_status","availability","captured_at","expires_at","native_promotion_valid_to","source_url","source_response_url","proof_hash","source_response_hash","shop","scope_country","scope_channel","offer_hash"];
 function row(offer){

@@ -119,6 +119,13 @@ async function main(){
   const verifiedBody=await verifiedResponse.json();assert.equal(verifiedResponse.status,200,JSON.stringify(verifiedBody));
   const reviewed=(await pool.query("SELECT date::text,status,identity_verified,proof_verified,per FROM price_observations WHERE id=$1",[verifiedBody.observationId])).rows[0];assert.equal(reviewed.date,today);assert.equal(reviewed.status,"verified");assert.equal(reviewed.identity_verified,true);assert.equal(reviewed.proof_verified,true);assert.equal(reviewed.per,"piece");
   const health=await fetch(baseUrl+"/health/price-engine").then(response=>response.json());assert.equal(health.ready,true);assert(health.coverage.current_products>=1);assert(health.coverage.current_stores>=1);
+  // Real PostgreSQL: one request-local scope read, fresh evidence per position,
+  // and the final canonical branch gate are retained under bounded concurrency.
+  const Batch=require("../current-price-benchmark-service"),counts={products:0,scopes:0,observations:0,finalStores:0};let active=0,maxActive=0;
+  const counted={query:async(sql,params)=>{if(sql.includes("FROM products"))counts.products++;if(sql.includes("FROM price_observations po"))counts.observations++;if(sql.includes("FROM stores s JOIN merchants"))counts[sql.includes("s.country")?"finalStores":"scopes"]++;active++;maxActive=Math.max(maxActive,active);try{return await pool.query(sql,params);}finally{active--;}}};
+  const basketInput={products:Array.from({length:30},()=>({gtin,pack:"450 g"})),merchants:["EDEKA"],storeIds:{EDEKA:storeId},region:"Berlin",today};
+  const basket=await Batch.compare(counted,basketInput);assert.equal(basket.ok,true);assert.equal(basket.summary.totalCells,30);assert.equal(basket.summary.knownCells,30);assert.deepEqual(basket.items.map(item=>item.key),Array.from({length:30},(_,i)=>String(i)));assert.deepEqual(counts,{products:30,scopes:1,observations:30,finalStores:1});assert(maxActive>=2&&maxActive<=3,"At most two product jobs and the shared initial scope query use PostgreSQL concurrently");
+  const differentPack=await Batch.compare(counted,{...basketInput,products:[{gtin,pack:"450 g"},{gtin,pack:"2 x 225 g"}]});assert.equal(differentPack.summary.knownCells,1,"Equal total weight cannot merge different native sales packs");assert.equal(counts.scopes,2,"A later basket gets a fresh canonical scope read");
   console.log("current-price-postgres: fresh schema, import, identity, proof deduplication, conditional pricing, discovery, browser client, bounded refresh, native-date receipt/shelf facts and admin HTTP authorization OK");
  }catch(error){testError=error;throw error}
  finally{

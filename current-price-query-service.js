@@ -42,7 +42,7 @@ function validateRequest(input={}){
  return{ok:!errors.length,errors:[...new Set(errors)],value:{product,productId,gtin,brand,pack,merchants,today,maxAgeDays:Math.min(7,age),quantity,storeId,region,storeIds,regions,eligibility}};
 }
 function merchantMatches(a,b){const aliases=Discovery.merchantAliases(a),other=Discovery.merchantAliases(b);return aliases.some(alias=>other.includes(alias))}
-async function resolveScopes(pool,request){
+async function readScopes(pool,request){
  const requestedIds=[...new Set([request.storeId,...request.storeIds.values()].filter(Boolean))];
  let known=[];
  if(requestedIds.length){
@@ -60,6 +60,16 @@ async function resolveScopes(pool,request){
  }
  if(request.storeId&&byId.has(request.storeId)&&!scopes.some(scope=>scope.storeId===request.storeId))errors.push("store-merchant-conflict");
  return{ok:!errors.length,errors:[...new Set(errors)],scopes};
+}
+async function resolveScopes(pool,request,options={}){
+ const cache=options.scopeCache;if(!(cache instanceof WeakMap))return readScopes(pool,request);
+ let scopes=cache.get(pool);if(!scopes){scopes=new Map();cache.set(pool,scopes);}
+ const entries=map=>[...map].sort(([a],[b])=>a.localeCompare(b));
+ const signature=JSON.stringify([request.merchants,request.storeId,entries(request.storeIds),request.region,entries(request.regions)]);
+ let pending=scopes.get(signature);
+ if(!pending){pending=Promise.resolve().then(()=>readScopes(pool,request));scopes.set(signature,pending);}
+ try{const result=await pending;if(!result.ok&&scopes.get(signature)===pending)scopes.delete(signature);return result;}
+ catch(error){if(scopes.get(signature)===pending)scopes.delete(signature);throw error;}
 }
 const FIELDS=[
  'po.id,po.product_id AS "productId",COALESCE(po.gtin,p.gtin) AS gtin,po.product,COALESCE(po.brand,p.brand) AS brand',
@@ -112,7 +122,7 @@ async function compareCurrentPrices(pool,input={},opts={}){
  const checked=validateRequest(input);
  if(!checked.ok)return{ok:false,statusCode:400,error:"invalid-price-query",errors:checked.errors};
  const request=checked.value;
- const [productResolution,scopeResolution]=await Promise.all([Discovery.resolveProducts(pool,{product:request.product,productId:request.productId,gtin:request.gtin,brand:request.brand,pack:request.pack},opts),resolveScopes(pool,request)]);
+ const [productResolution,scopeResolution]=await Promise.all([Discovery.resolveProducts(pool,{product:request.product,productId:request.productId,gtin:request.gtin,brand:request.brand,pack:request.pack},opts),resolveScopes(pool,request,opts)]);
  if(!scopeResolution.ok)return{ok:false,statusCode:400,error:"invalid-store-scope",errors:scopeResolution.errors};
  if(productResolution.state==="invalid")return{ok:false,statusCode:400,error:"invalid-product-identity",errors:[productResolution.reason]};
  const canonical=productResolution.selected;
