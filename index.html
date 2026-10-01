@@ -1370,6 +1370,24 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
  #results .compare-market-price{font-size:16.5px!important}
 }
 </style><style>
+/* v7.300 one-glance comparison hierarchy */
+#results .compare-market-copy{display:flex!important;flex-direction:column!important;justify-content:center!important}
+#results .compare-store-line{min-height:25px!important}
+#results .compare-market-price{min-width:92px!important;text-align:right!important}
+#results .compare-market:not(.first) .compare-quality-line{opacity:.72!important}
+#results .compare-market-actions{opacity:.9!important}
+#results .compare-market:hover .compare-market-actions,
+#results .compare-market.first .compare-market-actions{opacity:1!important}
+#results .compare-market.first{padding-top:11px!important;padding-bottom:11px!important}
+#results .compare-market.first .compare-market-price{font-size:18px!important}
+#results .compare-market.first .compare-distance{font-weight:950!important}
+@media(max-width:430px){
+ #results .compare-market-main{min-height:43px!important}
+ #results .compare-market-price{min-width:86px!important}
+ #results .compare-market:not(.first) .compare-market-actions{margin-top:2px!important}
+ #results .compare-market:not(.first) .compare-quality-line{font-size:9px!important}
+}
+</style><style>
 /* v7.286 denser product rows */
 .shopping .list{margin-top:8px!important}
 .shopping .item,.shopping .list-item,.shopping [data-list-item]{min-height:58px!important;padding-top:8px!important;padding-bottom:8px!important}
