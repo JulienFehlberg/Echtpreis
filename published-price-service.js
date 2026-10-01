@@ -63,6 +63,12 @@ function querySpec(options={}){
  return{sql:"SELECT "+FIELDS+" FROM retailer_published_prices WHERE "+where.join(" AND ")+" ORDER BY captured_at DESC,merchant,retailer_sku LIMIT "+param(limit),params};
 }
 function published(row){return{...row,capturedAt:new Date(row.capturedAt).toISOString(),expiresAt:new Date(row.expiresAt).toISOString(),state:"published",current:true,priceBasis:"pack",shippingIncluded:false}}
+function matchesProductQuery(offer,query={}){
+ if(!offer||!query.gtin||String(offer.gtin)!==String(query.gtin).trim())return false;
+ if(query.brand){const normalize=value=>String(value||"").normalize("NFKC").toLowerCase().replace(/\s+/g,"").trim();if(normalize(offer.brand)!==normalize(query.brand))return false;}
+ if(query.pack){const expected=Inventory.productPack({quantity:query.pack}).parsed,actual=Inventory.productPack({quantity:offer.pack}).parsed;if(!expected||!actual||expected.count!==actual.count||expected.total.unit!==actual.total.unit||Math.abs(expected.total.amount-actual.total.amount)/Math.max(expected.total.amount,1)>.001)return false;}
+ return true;
+}
 async function search(pool,options={}){if(!pool)throw fail("database-required");const query=querySpec(options);await ensure(pool);const result=await pool.query(query.sql,query.params);return{items:result.rows.map(published),scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24}}
 async function status(pool,options={}){
  if(!pool)throw fail("database-required");const now=new Date(clock(options)).toISOString();await ensure(pool);
@@ -71,4 +77,4 @@ async function status(pool,options={}){
  const merchants=await pool.query(`SELECT merchant,source_id AS "sourceId",count(*)::int AS "storedPrices",count(*) FILTER(WHERE ${fresh})::int AS "currentPrices",MAX(captured_at) AS "lastCapturedAt" FROM retailer_published_prices WHERE scope_country='DE' AND scope_channel='online' GROUP BY merchant,source_id ORDER BY merchant`,[now]);
  return{ok:true,...result.rows[0],merchants:merchants.rows,scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24,state:"published",note:"Veröffentlichte Onlinepreise für Deutschland mit eigener Verfügbarkeit und Abrufzeit."};
 }
-module.exports={SOURCE,MERCHANT,DAY_MS,ensure,validateOffer,persist,querySpec,search,status};
+module.exports={SOURCE,MERCHANT,DAY_MS,ensure,validateOffer,persist,querySpec,search,status,matchesProductQuery};
