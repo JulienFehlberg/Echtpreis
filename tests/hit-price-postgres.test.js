@@ -41,6 +41,15 @@ async function main(){
   const invalid=await Import.persist(pool,[{...good,nativeStoreId:1776},{...good,gtin:"invalid"},{...good,capturedAt:new Date(now-300001).toISOString()}],options);assert.equal(invalid.rejected.length,3);assert.equal(invalid.accepted.length,0);
   assert.equal(await count(pool,"receipt_submissions"),baseline.receipts);assert.equal(await count(pool,"availability_observations"),baseline.availability,"Public price cards do not claim observed shelf stock");assert.equal(await count(pool,"product_alias_evidence"),baseline.aliases,"No alias EAN or receipt-name learning is performed");
   const status=await Refresh.status(pool);assert.equal(status.nativeStoreId,1775);assert.equal(status.physicalStoreAssortmentComplete,false);assert.equal(status.publishedTraversalComplete,false);assert.equal(status.historicalProducts,1);assert.equal(status.currentProducts,Query.today()===today?1:0);assert.equal(status.unknownDepositPrices,0);
+  const oldKilogramSku="000000000002001956KG",paidObservation=paid.accepted[0].observationId;
+  // Simulate a legacy kilogram observation in this isolated test DB. Historical evidence stays present.
+  await pool.query("UPDATE price_observations SET external_product_id=$2 WHERE id=$1",[paidObservation,"hit:store:1775:sku:"+oldKilogramSku]);
+  await pool.query("UPDATE hit_price_import_evidence SET retailer_sku=$2 WHERE observation_id=$1",[paidObservation,oldKilogramSku]);
+  assert.equal((await Query.compareCurrentPrices(pool,input)).results.find(r=>r.merchant==="HIT").price,null,"Already stored kilogram prices are excluded from fixed pack queries");
+  const kilogramStatus=await Refresh.status(pool);assert.equal(kilogramStatus.currentProducts,0);assert.equal(kilogramStatus.currentPrices,0);assert.equal(kilogramStatus.unsupportedKilogramCaptures,1);assert.equal(kilogramStatus.historicalProducts,1,"Excluded observations remain historical evidence");
+  await pool.query("UPDATE price_observations SET external_product_id=$2 WHERE id=$1",[paidObservation,nativeId]);
+  await pool.query("UPDATE hit_price_import_evidence SET retailer_sku=$2 WHERE observation_id=$1",[paidObservation,sku]);
+  assert.equal((await Refresh.status(pool)).unsupportedKilogramCaptures,0);
   const coverageColumn=(await pool.query("SELECT data_type FROM information_schema.columns WHERE table_name=$1 AND column_name='scan_coverage'",[Refresh.TABLE])).rows[0];assert.equal(coverageColumn.data_type,"jsonb","The persisted category coverage schema is real PostgreSQL DDL");
   console.log("hit-price-postgres tests passed");
  }catch(error){testError=error;throw error}finally{await pool.end();await api.closeDb();if(testError)process.exitCode=1}
