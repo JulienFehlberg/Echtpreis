@@ -1,7 +1,8 @@
 "use strict";
 const SearchFilters=require("./retailer-product-search-filters");
+const Schema=require("./retailer-schema-lifecycle");
 const Identity=require("./product-identity"),Inventory=require("./canonical-inventory-import");
-const DAY_MS=86400000,SOURCE="dm online",MERCHANT="dm";
+const DAY_MS=86400000,SOURCE="dm online",MERCHANT="dm",TABLE="retailer_published_prices";
 function fail(code){const error=new Error(code);error.code=code;return error}
 function clock(options={}){const value=options.now===undefined?Date.now():new Date(options.now).getTime();if(!Number.isFinite(value))throw fail("invalid-time");return value}
 const text=(value,max=200)=>typeof value==="string"?value.trim().slice(0,max):"";
@@ -31,6 +32,7 @@ function validateOffer(raw={},options={}){
 }
 async function ensure(pool){
  if(!pool)throw fail("database-required");
+ return Schema.ensure(pool,TABLE,async()=>{
  await pool.query(`CREATE TABLE IF NOT EXISTS retailer_published_prices(
  merchant text NOT NULL,source_id text NOT NULL,retailer_sku text NOT NULL,gtin text NOT NULL,name text NOT NULL,brand text,pack text NOT NULL,
  pack_amount numeric NOT NULL CHECK(pack_amount>0 AND pack_amount NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),pack_unit text NOT NULL CHECK(pack_unit IN ('g','ml','piece')),pack_count int NOT NULL CHECK(pack_count>0),
@@ -39,6 +41,7 @@ async function ensure(pool){
  PRIMARY KEY(merchant,retailer_sku,scope_country,scope_channel));
  CREATE INDEX IF NOT EXISTS retailer_published_gtin_idx ON retailer_published_prices(gtin,captured_at DESC);
  CREATE INDEX IF NOT EXISTS retailer_published_capture_idx ON retailer_published_prices(merchant,captured_at DESC);`);
+ });
 }
 const columns=["merchant","source_id","retailer_sku","gtin","name","brand","pack","pack_amount","pack_unit","pack_count","price","currency","captured_at","expires_at","source_url","proof_hash","scope_country","scope_channel","availability"];
 const row=offer=>({merchant:offer.merchant,source_id:offer.sourceId,retailer_sku:offer.retailerSku,gtin:offer.gtin,name:offer.name,brand:offer.brand,pack:offer.pack,pack_amount:offer.packAmount,pack_unit:offer.packUnit,pack_count:offer.packCount,price:offer.price,currency:offer.currency,captured_at:offer.capturedAt,expires_at:offer.expiresAt,source_url:offer.sourceUrl,proof_hash:offer.proofHash,scope_country:offer.scopeCountry,scope_channel:offer.scopeChannel,availability:offer.availability});

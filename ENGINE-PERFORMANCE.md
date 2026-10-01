@@ -1,0 +1,11 @@
+# Price engine request lifecycle
+
+Each current-price benchmark resolves identical retailer/region/store scopes once within that request and processes at most two product positions concurrently. Indexed results preserve the shopping-list order, including the same GTIN in different sales packs. Each position still reads its canonical product and current observations independently; source validity, pack identity and channel boundaries remain unchanged. A new benchmark gets a new scope cache.
+
+The 30-position regression requires 30 product reads, one shared scope read and 30 observation reads: 61 calls instead of 90, plus one final canonical-store read when prices are present. That final read continues to reject foreign, inactive, wrong-city and wrong-merchant branches. A failing position stops new jobs; already-started jobs finish before the lowest failing input index is returned or thrown. Rejected and unsuccessful scope resolutions are evicted so a later attempt can retry.
+
+Published retailer services initialize and migrate their tables once after successful initialization per pool and physical table. Both Wolt profiles share that table lifecycle. Concurrent initializations share one promise; failed migrations remain retryable. The explicit reset helper is for intentional schema changes or transaction rollback, and cannot reset an initialization in progress. Production reads use the pool's normal auto-committed schema operations.
+
+Caching schema success does not cache prices or quarantine decisions. Wolt read queries, status counts and the cross-retailer GTIN union exclude native sales-pack conflicts even if an unsafe row was added after initialization. Existing imports also retain their pack validation. Historical migration still preserves captured proof and flags unsafe legacy rows.
+
+Validation: dedicated schema and batch lifecycle programs, service regressions, and PostgreSQL integration fixtures for the 30-position query count and an unflagged pack conflict inserted after initialization. Query counts describe database round trips, not a latency guarantee. Live before/after timing must use the identical basket and deployed commit, retain the existing timeout, and report individual samples separately from background-load or network effects.

@@ -1,5 +1,6 @@
 "use strict";
 const SearchFilters=require("./retailer-product-search-filters");
+const Schema=require("./retailer-schema-lifecycle");
 
 const crypto=require("node:crypto"),Client=require("./aldi-assortment-client"),Identity=require("./product-identity");
 const SOURCE=Client.SOURCE,MERCHANT="ALDI Nord",TABLE="aldi_assortment_published_prices",DAY_MS=86400000,CHANNEL="assortment-publication";
@@ -39,6 +40,7 @@ function validateOffer(raw={},options={}){
 }
 async function ensure(pool){
  if(!pool)throw fail("database-required");
+ return Schema.ensure(pool,TABLE,async()=>{
  await pool.query(`CREATE TABLE IF NOT EXISTS ${TABLE}(
  source_id text NOT NULL CHECK(source_id='ALDI Nord published assortment'),merchant text NOT NULL CHECK(merchant='ALDI Nord'),retailer_sku text NOT NULL CHECK(retailer_sku~'^[1-9][0-9]{0,14}$'),gtin text CHECK(gtin IS NULL),name text NOT NULL CHECK(length(name)>0),brand text,variant text,pack text NOT NULL,
  pack_amount numeric NOT NULL CHECK(pack_amount>0 AND pack_amount NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),pack_unit text NOT NULL CHECK(pack_unit IN ('g','ml','piece')),pack_count int NOT NULL CHECK(pack_count>0),
@@ -47,6 +49,7 @@ async function ensure(pool){
  scope_country text NOT NULL CHECK(scope_country='DE'),scope_channel text NOT NULL CHECK(scope_channel='assortment-publication'),location_scope text NOT NULL CHECK(location_scope='unknown'),offer_hash text NOT NULL CHECK(offer_hash~'^[a-f0-9]{64}$'),updated_at timestamptz NOT NULL DEFAULT now(),
  PRIMARY KEY(source_id,retailer_sku),CHECK(native_valid_from<=captured_at AND native_valid_until>captured_at),CHECK(expires_at>captured_at AND expires_at<=captured_at+interval '24 hours' AND expires_at<=native_valid_until),CHECK(source_response_date>=captured_at-interval '5 minutes' AND source_response_date<=captured_at+interval '5 minutes'),CHECK(source_url~('^https://www[.]aldi-nord[.]de/produkt/[a-z0-9-]+-'||retailer_sku||'[.]html$')));
  CREATE INDEX IF NOT EXISTS aldi_assortment_published_capture_idx ON ${TABLE}(captured_at DESC);`);
+ });
 }
 const mapping={sourceId:"source_id",merchant:"merchant",retailerSku:"retailer_sku",gtin:"gtin",name:"name",brand:"brand",variant:"variant",pack:"pack",packAmount:"pack_amount",packUnit:"pack_unit",packCount:"pack_count",price:"price",deposit:"deposit",currency:"currency",priceKind:"price_kind",promotionStatus:"promotion_status",availability:"availability",publicationAvailable:"publication_available",capturedAt:"captured_at",nativeValidFrom:"native_valid_from",nativeValidUntil:"native_valid_until",expiresAt:"expires_at",sourceUrl:"source_url",sourceResponseHash:"source_response_hash",proofHash:"proof_hash",sourceResponseDate:"source_response_date",sourceAgeSeconds:"source_age_seconds",scopeCountry:"scope_country",scopeChannel:"scope_channel",locationScope:"location_scope"};
 const types={pack_amount:"numeric",pack_count:"int",pack_unit:"text",price:"numeric",deposit:"numeric",publication_available:"boolean",captured_at:"timestamptz",native_valid_from:"timestamptz",native_valid_until:"timestamptz",expires_at:"timestamptz",source_response_date:"timestamptz",source_age_seconds:"int"};

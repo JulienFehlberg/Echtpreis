@@ -30,12 +30,18 @@ function prepare(input={}){
 async function compare(pool,input={},query=Query){
  const prepared=prepare(input);if(!prepared.ok)return prepared;
  if(!pool||typeof pool.query!=="function")throw Object.assign(new Error("database-required"),{code:"database-required"});
- const entries=[];
- for(let index=0;index<prepared.requests.length;index++){
-  const result=await query.compareCurrentPrices(pool,prepared.requests[index],{includeRefreshTargets:false});
-  if(!result.ok)return result;
-  entries.push(...result.results.map(row=>({...row,product:prepared.items[index].product,benchmarkKey:prepared.items[index].key,query:result.query})));
+ // This scope cache lives for one comparison only; observations and expiry are never cached.
+ const scopeCache=new WeakMap(),results=new Array(prepared.requests.length),failures=new Map();let next=0,stopped=false;
+ async function worker(){
+  while(!stopped&&next<prepared.requests.length){const index=next++;
+   try{const result=await query.compareCurrentPrices(pool,prepared.requests[index],{includeRefreshTargets:false,scopeCache});
+    if(!result.ok){failures.set(index,{result});stopped=true;}else results[index]=result;
+   }catch(error){failures.set(index,{error});stopped=true;}
+  }
  }
+ await Promise.all(Array.from({length:Math.min(2,prepared.requests.length)},()=>worker()));
+ if(failures.size){const first=failures.get(Math.min(...failures.keys()));if("error" in first)throw first.error;return first.result;}
+ const entries=results.flatMap((result,index)=>result.results.map(row=>({...row,product:prepared.items[index].product,benchmarkKey:prepared.items[index].key,query:result.query})));
  const storeIds=[...new Set(entries.map(row=>row.storeId).filter(id=>typeof id==="string"&&UUID.test(id)))],stores=new Map();
  if(storeIds.length){
   const found=await pool.query('SELECT s.id,s.country,s.city,s.region,s.active,m.name AS merchant,m.active AS "merchantActive" FROM stores s JOIN merchants m ON m.id=s.merchant_id WHERE s.id=ANY($1::uuid[]) AND s.active=true AND m.active=true',[storeIds]);

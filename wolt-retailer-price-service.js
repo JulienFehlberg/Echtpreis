@@ -1,5 +1,6 @@
 "use strict";
 const SearchFilters=require("./retailer-product-search-filters");
+const Schema=require("./retailer-schema-lifecycle");
 
 const crypto = require("crypto");
 const Identity = require("./product-identity");
@@ -7,7 +8,7 @@ const Inventory = require("./canonical-inventory-import");
 const SalesPack = require("./wolt-sales-pack-validation");
 const {matchesProductQuery} = require("./published-price-service");
 
-const Venues=require("./wolt-retailer-venues"),DAY_MS=86400000,TABLE="wolt_retailer_published_prices",schemaInFlight=new WeakMap();
+const Venues=require("./wolt-retailer-venues"),DAY_MS=86400000,TABLE="wolt_retailer_published_prices";
 const sqlLiteral=value=>"'"+value.replace(/'/g,"''")+"'";
 const approvedScope=Object.values(Venues.PROFILES).map(p=>"(source_id="+sqlLiteral(p.sourceId)+" AND merchant="+sqlLiteral(p.merchant)+" AND native_venue_id="+sqlLiteral(p.nativeVenueId)+")").join(" OR ");
 function createService(profileKey="edekaBerlin"){
@@ -81,8 +82,8 @@ function validateOffer(raw={},options={}) {
 }
 async function ensure(pool) {
  if(!pool)throw fail("database-required");
- if(schemaInFlight.has(pool))return schemaInFlight.get(pool);
- const pending=pool.query(`CREATE TABLE IF NOT EXISTS ${TABLE}(
+ return Schema.ensure(pool,TABLE,async()=>{
+ await pool.query(`CREATE TABLE IF NOT EXISTS ${TABLE}(
  source_id text NOT NULL,merchant text NOT NULL,native_venue_id text NOT NULL,retailer_sku text NOT NULL CHECK(retailer_sku~'^[a-f0-9]{24}$'),gtin text,name text NOT NULL,brand text,description text,pack text NOT NULL,
  pack_amount numeric NOT NULL CHECK(pack_amount>0 AND pack_amount NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),pack_unit text NOT NULL CHECK(pack_unit IN ('g','ml','piece')),pack_count int NOT NULL CHECK(pack_count>0),
  price numeric NOT NULL CHECK(price>0 AND price NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),deposit numeric CHECK(deposit>=0 AND deposit NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),deposit_label text,displayed_price numeric NOT NULL CHECK(displayed_price>0 AND displayed_price NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),original_price numeric CHECK(original_price>0 AND original_price NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)),currency text NOT NULL CHECK(currency='EUR'),
@@ -105,7 +106,7 @@ async function ensure(pool) {
  UPDATE ${TABLE} SET validation_issue='wolt-native-sales-pack-conflict' WHERE validation_issue IS NULL AND ${SalesPack.SQL_CONFLICT};
  CREATE INDEX IF NOT EXISTS wolt_retailer_published_gtin_idx ON ${TABLE}(gtin,captured_at DESC);
  CREATE INDEX IF NOT EXISTS wolt_retailer_published_capture_idx ON ${TABLE}(native_venue_id,captured_at DESC);`);
- schemaInFlight.set(pool,pending);try{await pending;}finally{if(schemaInFlight.get(pool)===pending)schemaInFlight.delete(pool);}
+ });
 }
 const columns=["source_id","merchant","native_venue_id","retailer_sku","gtin","name","brand","description","pack","pack_amount","pack_unit","pack_count","price","deposit","deposit_label","displayed_price","original_price","currency","price_type","promotion_status","availability","captured_at","expires_at","source_url","source_response_url","proof_hash","source_response_hash","shop","scope_country","scope_channel","offer_hash"];
 function row(offer) {
@@ -142,7 +143,7 @@ async function persist(pool,inputs=[],options={}) {
 }
 const FIELDS=`source_id AS "sourceId",merchant,native_venue_id AS "nativeVenueId",retailer_sku AS "retailerSku",gtin,name,brand,description,pack,pack_amount::float AS "packAmount",pack_unit AS "packUnit",pack_count AS "packCount",price::float,deposit::float,deposit_label AS "depositLabel",displayed_price::float AS "displayedPrice",original_price::float AS "originalPrice",currency,price_type AS "priceType",promotion_status AS "promotionStatus",availability,captured_at AS "capturedAt",expires_at AS "expiresAt",source_url AS "sourceUrl",source_response_url AS "sourceResponseUrl",proof_hash AS "proofHash",source_response_hash AS "sourceResponseHash",shop,scope_country AS "scopeCountry",scope_channel AS "scopeChannel"`;
 function querySpec(options={}) {
- const now=clock(options),params=[new Date(now).toISOString()],where=["source_id="+sqlLiteral(SOURCE),"validation_issue IS NULL","scope_country='DE'","scope_channel='online'","captured_at<=$1::timestamptz","captured_at>=$1::timestamptz-interval '24 hours'","expires_at>$1::timestamptz"],param=value=>{params.push(value);return"$"+params.length;};
+ const now=clock(options),params=[new Date(now).toISOString()],where=["source_id="+sqlLiteral(SOURCE),"validation_issue IS NULL","NOT ("+SalesPack.SQL_CONFLICT+")","scope_country='DE'","scope_channel='online'","captured_at<=$1::timestamptz","captured_at>=$1::timestamptz-interval '24 hours'","expires_at>$1::timestamptz"],param=value=>{params.push(value);return"$"+params.length;};
  if(options.merchant!=null){const merchant=text(options.merchant,80);if(!merchant)throw fail("invalid-merchant");where.push("lower(merchant)=lower("+param(merchant)+")");}
  if(options.nativeVenueId!=null){const venue=text(options.nativeVenueId,80);if(!/^[a-f0-9]{24}$/.test(venue))throw fail("invalid-native-venue-id");where.push("native_venue_id="+param(venue));}
  if(options.gtin!=null){const gtin=String(options.gtin).trim();if(!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(gtin)||!Identity.gtinValid(gtin))throw fail("invalid-gtin");where.push("gtin="+param(gtin));}
@@ -154,11 +155,11 @@ function querySpec(options={}) {
  return{sql:"SELECT "+FIELDS+" FROM "+TABLE+" WHERE "+where.join(" AND ")+" ORDER BY captured_at DESC,native_venue_id,retailer_sku LIMIT "+param(limit),params};
 }
 function published(record) { return{...record,capturedAt:new Date(record.capturedAt).toISOString(),expiresAt:new Date(record.expiresAt).toISOString(),nativePriceEUR:record.displayedPrice,nativePriceIncludesDeposit:true,depositIncludedInDisplayedPrice:record.deposit!==null?true:null,payablePackPrice:record.deposit!==null?record.displayedPrice:null,state:"published",current:true,priceBasis:"pack",shippingIncluded:false,serviceFeesIncluded:false,truthEligible:false,identityStatus:record.gtin?"native-gtin":"native-retailer-sku"}; }
-async function search(pool,options={}) { if(!pool)throw fail("database-required");const query=querySpec(options);if(options.scopeChannel!==undefined&&options.scopeChannel!=="online")return{items:[],scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24,truthEligible:false};await ensure(pool);const result=await pool.query(query.sql,query.params);return{items:result.rows.map(published),scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24,truthEligible:false}; }
+async function search(pool,options={}) { if(!pool)throw fail("database-required");const query=querySpec(options);if(options.scopeChannel!==undefined&&options.scopeChannel!=="online")return{items:[],scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24,truthEligible:false};await ensure(pool);const result=await pool.query(query.sql,query.params);return{items:result.rows.filter(record=>!SalesPack.multipackConflict(record.name,record.packAmount,record.packUnit,record.packCount)).map(published),scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24,truthEligible:false}; }
 async function status(pool,options={}) {
  if(!pool)throw fail("database-required");const now=new Date(clock(options)).toISOString();await ensure(pool);
- const fresh="validation_issue IS NULL AND captured_at<=$1::timestamptz AND captured_at>=$1::timestamptz-interval '24 hours' AND expires_at>$1::timestamptz";
- const result=await pool.query(`SELECT count(*)::int AS "storedPrices",count(*) FILTER(WHERE validation_issue='wolt-native-sales-pack-conflict')::int AS "excludedPackConflicts",count(*) FILTER(WHERE ${fresh})::int AS "currentPrices",count(DISTINCT gtin) FILTER(WHERE ${fresh})::int AS "productsWithCurrentPublishedPrices",count(DISTINCT native_venue_id) FILTER(WHERE ${fresh})::int AS "marketsWithCurrentPublishedPrices",count(*) FILTER(WHERE ${fresh} AND availability='available')::int AS "availableCurrentPrices",MAX(captured_at) AS "lastCapturedAt" FROM ${TABLE} WHERE source_id=$2 AND scope_country='DE' AND scope_channel='online'`,[now,SOURCE]);
+ const fresh="validation_issue IS NULL AND NOT ("+SalesPack.SQL_CONFLICT+") AND captured_at<=$1::timestamptz AND captured_at>=$1::timestamptz-interval '24 hours' AND expires_at>$1::timestamptz";
+ const result=await pool.query(`SELECT count(*)::int AS "storedPrices",count(*) FILTER(WHERE validation_issue='wolt-native-sales-pack-conflict' OR (${SalesPack.SQL_CONFLICT}))::int AS "excludedPackConflicts",count(*) FILTER(WHERE ${fresh})::int AS "currentPrices",count(DISTINCT gtin) FILTER(WHERE ${fresh})::int AS "productsWithCurrentPublishedPrices",count(DISTINCT native_venue_id) FILTER(WHERE ${fresh})::int AS "marketsWithCurrentPublishedPrices",count(*) FILTER(WHERE ${fresh} AND availability='available')::int AS "availableCurrentPrices",MAX(captured_at) AS "lastCapturedAt" FROM ${TABLE} WHERE source_id=$2 AND scope_country='DE' AND scope_channel='online'`,[now,SOURCE]);
  const markets=await pool.query(`SELECT merchant,source_id AS "sourceId",native_venue_id AS "nativeVenueId",(array_agg(shop ORDER BY captured_at DESC,retailer_sku))[1] AS shop,count(*)::int AS "storedPrices",count(*) FILTER(WHERE ${fresh})::int AS "currentPrices",count(DISTINCT gtin) FILTER(WHERE ${fresh})::int AS "productsWithCurrentPublishedPrices",MAX(captured_at) AS "lastCapturedAt" FROM ${TABLE} WHERE source_id=$2 AND scope_country='DE' AND scope_channel='online' GROUP BY merchant,source_id,native_venue_id ORDER BY native_venue_id`,[now,SOURCE]);
  return{ok:true,...result.rows[0],markets:markets.rows,scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24,state:"published",truthEligible:false,shippingIncluded:false,serviceFeesIncluded:false,independentOfUserReceipts:true,note:"Veröffentlichte Berliner Wolt-Marktpreise; Lieferkanal und Filialpreise werden getrennt ausgewiesen. Unbelegte Normalpreis-/Aktionszuordnung bleibt unbekannt."};
 }
