@@ -1229,6 +1229,36 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
 .shopping .compare-action-card details summary::-webkit-details-marker{display:none!important}
 .shopping .compare-action-card details summary:after{content:"  ›";font-weight:800!important;color:#738179!important}
 </style><style>
+/* v7.290 comparison result hierarchy */
+#results{margin-top:14px!important}
+#results>.winner{position:relative!important;border-radius:24px!important;padding:20px!important;margin:0 0 10px!important;box-shadow:0 14px 34px rgba(8,116,67,.16)!important}
+#results>.winner .smallcap{font-size:10px!important;letter-spacing:.9px!important;opacity:.82!important}
+#results #winnerName{font-size:24px!important;line-height:1.05!important;margin-top:7px!important}
+#results #winnerPrice{font-size:38px!important;line-height:1!important;margin:9px 0 7px!important}
+#results #winnerCoverage{font-size:11px!important;line-height:1.35!important;opacity:.82!important}
+#results #winnerRoute .route-link{width:100%!important;margin-top:14px!important;min-height:44px!important;background:#fff!important;border-radius:14px!important}
+#results>.card{margin:9px 0!important;border-radius:20px!important;padding:15px!important}
+#results>.card>h2{font-size:18px!important}
+#results .compare-quality-summary{margin:8px 0 3px!important;padding:8px 10px!important;border-radius:11px!important;background:#f2f6f3!important;font-size:10px!important;color:#66746d!important}
+#results .compare-market{padding:13px 0!important;border-bottom:1px solid #e5ebe7!important}
+#results .compare-market:last-child{border-bottom:0!important}
+#results .compare-market-main{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:12px!important;align-items:center!important}
+#results .compare-market-copy>b{display:block!important;font-size:16px!important;line-height:1.2!important}
+#results .compare-market-price{font-size:19px!important;font-weight:950!important;white-space:nowrap!important}
+#results .compare-quality-line{display:block!important;margin-top:3px!important;font-size:10px!important;color:#78857e!important}
+#results .compare-badge{display:inline-block!important;margin:0 0 5px!important;padding:4px 7px!important;border-radius:999px!important;background:#e6f5ec!important;color:#087443!important;font-size:9px!important;font-weight:900!important}
+#results .compare-market-actions{display:flex!important;align-items:center!important;gap:9px!important;margin-top:7px!important}
+#results .compare-market-actions .route-link{margin:0!important;min-height:34px!important;padding:7px 10px!important;font-size:11px!important}
+#results .compare-details{font-size:11px!important;color:#68766f!important}
+#results .compare-details>summary{cursor:pointer!important;font-weight:800!important}
+#results>details.card{padding:12px 15px!important}
+#results>details.card>summary{font-size:12px!important;color:#68766f!important}
+#finishCard{background:#f7faf8!important}
+@media(max-width:430px){
+ #results #winnerName{font-size:22px!important}
+ #results #winnerPrice{font-size:35px!important}
+}
+</style><style>
 /* v7.286 denser product rows */
 .shopping .list{margin-top:8px!important}
 .shopping .item,.shopping .list-item,.shopping [data-list-item]{min-height:58px!important;padding-top:8px!important;padding-bottom:8px!important}
