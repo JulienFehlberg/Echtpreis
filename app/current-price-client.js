@@ -86,12 +86,19 @@ function publishedAlternatives(raw,query,ctx){
  }
  return[...rows].filter(([key])=>!conflicts.has(key)).map(([,value])=>value);
 }
-function currentResponse(value,time){return{...clone(value),publishedAlternatives:(value.publishedAlternatives||[]).filter(row=>Date.parse(row.expiresAt)>time&&Date.parse(row.capturedAt)<=time&&time-Date.parse(row.capturedAt)<=DAY).map(clone)};}
+function currentResponse(value,time){return{...clone(value),results:(value.results||[]).map(row=>row.sourceEligibility?.sourceExpiresAt!=null&&!(isoTime(row.sourceEligibility.sourceExpiresAt)>time)?unknown(row.merchant,"source-price-expired"):clone(row)),publishedAlternatives:(value.publishedAlternatives||[]).filter(row=>Date.parse(row.expiresAt)>time&&Date.parse(row.capturedAt)<=time&&time-Date.parse(row.capturedAt)<=DAY).map(clone)};}
 function conditionalEligible(raw,ctx,type){
  if(PUBLIC_TYPES.has(type))return true;
  if(!CONDITIONAL_TYPES.has(type))return false;
  if(type==="multi_buy"){const need=number(raw.minQuantity??raw.quantityRequired),quantity=number(ctx.quantity??1);return Number.isSafeInteger(need)&&need>=2&&Number.isSafeInteger(quantity)&&quantity>=need}
  return !!ctx.eligibility&&ctx.eligibility[type]===true;
+}
+function checkoutContext(raw,price){
+ if(raw.sourceId!=="HIT Berlin store assortment"&&raw.source!=="HIT Berlin store assortment")return raw.checkoutPriceVerified===false?{checkoutPriceVerified:false,payablePackPrice:null}:{};
+ const meta=raw.sourceEligibility,goods=Math.round(price*100),deposit=meta?.depositCents;
+ const pack=exactPublishedPack(raw.pack),single=pack?.count===1&&(pack.unit!=="piece"||pack.amount===1);
+ const verified=meta?.scopeChannel==="physical-store"&&meta?.nativeStoreId===1775&&meta?.nativeStoreNumber==="258"&&meta?.goodsPriceCents===goods&&meta?.priceIncludesDeposit===false&&meta?.checkoutPriceVerified===true&&Number.isSafeInteger(deposit)&&deposit>=0&&(deposit===0||single);
+ return{goodsPrice:price,nativeDeposit:Number.isSafeInteger(deposit)&&deposit>=0?deposit/100:null,deposit:verified?deposit/100:null,priceIncludesDeposit:false,checkoutPriceVerified:verified,payablePackPrice:verified?(goods+deposit)/100:null};
 }
 function normalizeDecision(raw,ctx={}){
  const merchant=text(raw&&raw.merchant)||text(ctx.merchant),reject=reason=>unknown(merchant,reason);
@@ -107,6 +114,7 @@ function normalizeDecision(raw,ctx={}){
  const type=raw.priceType??"regular";
  if(!conditionalEligible(raw,ctx,type)||raw.conditional===true&&!CONDITIONAL_TYPES.has(type))return reject("ineligible-price");
  if(raw.truthEligible===false||raw.sourceHealthState==="quarantine")return reject("no-current-evidence");
+ if(raw.sourceId==="HIT Berlin store assortment"||raw.source==="HIT Berlin store assortment"){const expiry=isoTime(raw.sourceEligibility?.sourceExpiresAt),captured=isoTime(raw.observedAt),time=ctx.now===undefined?Date.now():Number(ctx.now);if(expiry===null||captured===null||expiry!==captured+DAY||captured>time||!Number.isFinite(time)||expiry<=time)return reject("source-price-expired");}
  const storeId=text(raw.storeId),region=text(raw.region),locationLevel=text(raw.locationLevel);
  if(ctx.storeId&&storeId&&storeId!==text(ctx.storeId))return reject("different-store");
  if(ctx.storeId&&!storeId&&locationLevel!=="regional-fallback")return reject("location-unknown");
@@ -120,7 +128,7 @@ function normalizeDecision(raw,ctx={}){
  const firstParty=["receipt","shelf"].includes(raw.sourceType)||["receipt","shelf"].includes(raw.kind),verifiedFirstParty=raw.status==="verified"&&raw.identityVerified===true&&raw.proofVerified===true;
  const state=raw.state==="verified"&&firstParty&&!verifiedFirstParty?"observed":raw.state;
  return{
-  merchant,state,kind:text(raw.kind)||null,status:text(raw.status)||null,identityVerified:raw.identityVerified===true,proofVerified:raw.proofVerified===true,truthEligible:raw.truthEligible!==false,sourceEligibility:raw.sourceEligibility&&typeof raw.sourceEligibility==="object"&&!Array.isArray(raw.sourceEligibility)?clone(raw.sourceEligibility):null,price,payablePrice:payable,currency:"EUR",priceType:type,conditional:CONDITIONAL_TYPES.has(type),minQuantity:number(raw.minQuantity??raw.quantityRequired),
+  merchant,state,kind:text(raw.kind)||null,status:text(raw.status)||null,identityVerified:raw.identityVerified===true,proofVerified:raw.proofVerified===true,truthEligible:raw.truthEligible!==false,sourceEligibility:raw.sourceEligibility&&typeof raw.sourceEligibility==="object"&&!Array.isArray(raw.sourceEligibility)?clone(raw.sourceEligibility):null,price,payablePrice:payable,...checkoutContext(raw,price),currency:"EUR",priceType:type,conditional:CONDITIONAL_TYPES.has(type),minQuantity:number(raw.minQuantity??raw.quantityRequired),
   publicReferencePrice:positive(raw.publicReferencePrice),regularPrice:positive(raw.regularPrice),product:text(raw.product),productId:text(raw.productId)||null,brand:text(raw.brand)||null,pack:text(raw.pack)||null,gtin:gtin||null,
   storeId:storeId||null,region:region||null,locationLevel:locationLevel||null,scopeWarning:text(raw.scopeWarning)||null,comparisonOnly:raw.comparisonOnly===true,match:text(raw.match)||null,queryMode:text(raw.queryMode)||null,
   observedAt:text(raw.observedAt),date:observed,validFrom:from,validTo:to,source:text(raw.source)||null,sourceType:text(raw.sourceType)||null,sourceId:text(raw.sourceId)||null,sourceUrl:text(raw.sourceUrl)||null,
@@ -142,16 +150,18 @@ function normalizeResponse(raw,query,ctx={}){
 }
 function toComparablePrice(decision,targetPer,requestedPack){
  if(!decision||!STATES.has(decision.state)||decision.currency!=="EUR")return null;
- const payable=positive(decision.payablePrice??decision.price);if(payable==null||!["kg","l","piece"].includes(targetPer))return null;
+ if(decision.checkoutPriceVerified===false||decision.sourceEligibility?.checkoutPriceVerified===false)return null;
+ if((decision.sourceId==="HIT Berlin store assortment"||decision.source==="HIT Berlin store assortment")&&checkoutContext(decision,positive(decision.price)).checkoutPriceVerified!==true)return null;
+ const payable=positive(decision.payablePackPrice??decision.payablePrice??decision.price);if(payable==null||!["kg","l","piece"].includes(targetPer))return null;
  let price=payable,factor=1;
  if(targetPer==="piece"){
   const parsed=parsePack(decision.packParsed)||parsePack(decision.pack)||parsePack(decision.product);
-  if(decision.unit==="piece"&&positive(decision.unitPrice)!=null){price=Number(decision.unitPrice);factor=price/payable}
+  if(decision.unit==="piece"&&positive(decision.unitPrice)!=null&&payable===positive(decision.price)){price=Number(decision.unitPrice);factor=price/payable}
   else if(parsed&&parsed.base==="piece"){factor=1/parsed.amount;price=payable*factor}
  }
  if(targetPer!=="piece"){
   const parsed=parsePack(decision.packParsed)||parsePack(decision.pack)||parsePack(decision.product)||(decision.queryMode==="sku"?parsePack(requestedPack):null);
-  if(decision.unit===targetPer&&positive(decision.unitPrice)!=null){price=Number(decision.unitPrice);factor=price/payable}
+  if(decision.unit===targetPer&&positive(decision.unitPrice)!=null&&payable===positive(decision.price)){price=Number(decision.unitPrice);factor=price/payable}
   else if(parsed&&parsed.base===targetPer){factor=parsed.factor/parsed.amount;price=payable*factor}
   else if(decision.per!==targetPer)return null;
  }

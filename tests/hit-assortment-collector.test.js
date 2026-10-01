@@ -1,0 +1,166 @@
+"use strict";
+const assert=require("node:assert/strict"),crypto=require("node:crypto"),Collector=require("../hit-assortment-collector");
+const store={storeId:1775,storeNumber:"258",name:"Berlin-Mitte",city:"Berlin",country:"DE",officialUrl:"https://www.hit.de/maerkte/berlin-mitte"};
+const clock=Date.parse(Collector.COOLDOWN_UNTIL)+60000,clone=structuredClone;
+const attr=x=>JSON.stringify(x).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const cat=(id,name,path,level,count,order)=>({id,name,url:"https://www.hit.de"+path,level,count,order});
+const dairy=cat(4261253,"Kaese, Eier & Molkerei","/sortiment/kaese-eier-molkerei-4261253",1,3,1);
+const milkParent=cat(4261298,"Milch","/sortiment/kaese-eier-molkerei/milch-4261298",2,2,2);
+const milkLeaf=cat(4261891,"H- Kuh","/sortiment/kaese-eier-molkerei/milch-h-kuh-4261891",3,2,3);
+const butterParent=cat(4261321,"Butter & Fette","/sortiment/kaese-eier-molkerei/butter-fette-4261321",2,1,4);
+const butterLeaf=cat(4261911,"Butter abgepackt","/sortiment/kaese-eier-molkerei/butter-fette-butter-abgepackt-4261911",3,1,5);
+// Real native identities, quantity literals and unconditional tags from the saved public HIT Berlin payloads.
+const product=(sku,ean,name,pack,price,type="discount")=>({
+ external_id:sku,ean,storeId:1775,storeNumber:"258",headline:name,overview:pack,price,deposit:null,
+ url:"https://www.hit.de/sortiment/kaese-eier-molkerei/milch-h-kuh-4261891/produkt-"+sku,
+ inventoryAvailable:true,inventoryUpdatedAt:"2026-10-01T19:24:29+02:00",
+ priceTag:{type,badgeText:type==="discount"?"DAUER\nDISCOUNT\nPREIS":null,priceEuro:price.split(".")[0],priceCent:price.split(".")[1],priceStrikeThroughText:null,beforeText:null,belowText:null,couponCode:null,couponName:null,highlightUntil:type==="discount"?"2026-10-01T23:59:59+00:00":null}
+});
+const milk=product("000000000000548963ST","4388860095920","REWE BIO H-Vollmilch 3,8%","1l Packung","1.25");
+const ordinary=product("000000000000866799ST","4388844268159","ja! H-Milch 3,5%","1l Packung","0.95");
+const butter=product("000000000000156719ST","4008452010222","Weihenstephan Butter","250g Packung","2.79","standard");
+const listing=(rows,node=null,categories=[],total=rows.length,limit=2,overrides={})=>{
+ const data={data:rows,pagination:{page:0,limit,total},meta:node?{category:{id:String(node.id)},is_exact_match:true}:{is_exact_match:true},filters:{categories},status:200,...overrides.data};
+ const params={for_store:1775,limit,return_exact_match:"1",...(node?{for_category:String(node.id)}:{}),...overrides.params};
+ return '<div data-component="assortment/list" data-data="'+attr(data)+'" data-params="'+attr(params)+'"></div>';
+};
+const navigation=nodes=>nodes.map(n=>'<a href="'+n.url+'" class="ga_filter_assortment_category"><span class="hit-font-h5">'+n.name.replace(/&/g,"&amp;")+'</span></a>').join("");
+const choice=(quoted=false)=>'<a href='+(quoted?'"'+store.officialUrl+'?mein-markt=1"':store.officialUrl+'?mein-markt=1')+'>Mein Markt</a>';
+function fixture(){
+ return{
+  "/sortiment":navigation([dairy]),
+  "/sortiment/uebersicht":listing([milk,ordinary],null,[dairy],3),
+  [new URL(dairy.url).pathname]:listing([milk,ordinary],dairy,[dairy,milkParent,butterParent],3),
+  [new URL(milkParent.url).pathname]:listing([milk,ordinary],milkParent,[dairy,milkParent,milkLeaf],2),
+  [new URL(butterParent.url).pathname]:listing([butter],butterParent,[dairy,butterParent,butterLeaf],1),
+  [new URL(milkLeaf.url).pathname]:listing([milk,ordinary],milkLeaf,[dairy,milkParent,milkLeaf],2),
+  [new URL(butterLeaf.url).pathname]:listing([butter],butterLeaf,[dairy,butterParent,butterLeaf],1)
+ };
+}
+function harness(routes=fixture(),options={}){
+ let time=options.clock??clock;const calls=[],delays=[];
+ const response=(body,opts={})=>{
+  const headers=new Headers({"content-type":"text/html; charset=UTF-8",date:new Date(time).toUTCString(),age:"0"});
+  for(const [name,value]of Object.entries(opts.headers||{}))if(value===null)headers.delete(name);else headers.set(name,value);
+  for(const cookie of opts.cookies||[])headers.append("set-cookie",cookie);
+  return new Response(body,{status:opts.status||200,headers});
+ };
+ const fetchImpl=async(url,init)=>{
+  const parsed=new URL(url),call={url,at:time,init:{...init,headers:{...init.headers}}};calls.push(call);
+  assert.equal(init.method,"GET");assert.equal(init.redirect,"manual");assert(init.signal instanceof AbortSignal);
+  if(options.route)return options.route(parsed,call,calls.length,response);
+  if(parsed.pathname===new URL(store.officialUrl).pathname)return response(parsed.searchParams.has("mein-markt")?"Guest market selected":choice(),parsed.searchParams.has("mein-markt")?options.selection||{}:options.market||{});
+  const spec=routes[parsed.pathname];assert.notEqual(spec,undefined,"Unobserved category request "+url);
+  return typeof spec==="string"?response(spec):response(spec.body,spec);
+ };
+ return{calls,delays,now:()=>time,options:{storeProfile:store,fetchImpl,now:()=>time,maxRequests:16,pauseMs:1000,delay:async ms=>{assert(Number.isFinite(ms)&&ms>=1000);delays.push(ms);time+=ms}}};
+}
+async function collect(h,opts={}){const saved=Date.now;Date.now=h.now;try{return await Collector.collect({...h.options,...opts})}finally{Date.now=saved}}
+const cases=[];const test=(name,run)=>cases.push({name,run});
+const errorIncludes=(e,s)=>(e.code||e.message||"").includes(s);
+test("native category URLs cover small leaves; duplicate parent rows never inflate distinct SKU progress",async()=>{
+ const h=harness(),result=await collect(h);
+ assert.equal(result.complete,true);assert.equal(result.categoryTraversalCycleComplete,true);assert.equal(result.nativePaginationComplete,true);assert.equal(result.publishedTraversalComplete,true);assert.equal(result.physicalStoreAssortmentComplete,false);
+ assert.equal(result.total,3);assert.equal(result.received,3);assert.equal(result.pagesFetched,6);assert.equal(result.pages.length,6);assert.equal(result.requests,9);assert.equal(result.cursor,null);assert.equal(result.error,null);
+ assert.deepEqual(result.accepted.map(c=>c.gtin),[milk.ean,ordinary.ean,butter.ean]);assert.equal(result.accepted[2].pack,"250g Packung");assert.equal(result.accepted[0].price,1.25);assert.equal(result.accepted[0].deposit,null);
+ assert.equal(result.pages.reduce((n,p)=>n+p.uniqueRowCount,0),3);assert(result.pages.every(p=>p.uniqueRowCount<=p.rowCount&&p.pagination.page===0));assert(result.pages.every(p=>p.capturedAt&&p.sourceResponseHash.length===64));
+ assert.deepEqual(result.categoryCoverage,{visited:6,pending:0,truncatedLeaves:[],unresolvedNodes:[]});
+ assert(h.calls.every(c=>!new URL(c.url).searchParams.has("page")));assert(h.calls.every(c=>!new URL(c.url).pathname.startsWith("/api/")));
+ for(let n=1;n<h.calls.length;n++)assert(h.calls[n].at-h.calls[n-1].at>=1000);
+ const firstBody=fixture()["/sortiment/uebersicht"];assert.equal(result.accepted[0].sourceResponseHash,crypto.createHash("sha256").update(firstBody).digest("hex"));
+});
+test("larger leaves preserve their first-page prices while reporting an explicit pagination gap",async()=>{
+ const routes=fixture(),large={...milkLeaf,count:3};routes[new URL(milkParent.url).pathname]=listing([milk,ordinary],milkParent,[dairy,milkParent,large],3);routes[new URL(milkLeaf.url).pathname]=listing([milk,ordinary],large,[dairy,milkParent,large],3);
+ const h=harness(routes),r=await collect(h);assert.equal(r.complete,true);assert.equal(r.nativePaginationComplete,false);assert.equal(r.publishedTraversalComplete,false);assert.equal(r.physicalStoreAssortmentComplete,false);
+ assert.deepEqual(r.categoryCoverage.truncatedLeaves,[{id:String(milkLeaf.id),url:milkLeaf.url,total:3,received:2}]);assert.equal(r.accepted.length,3);assert(!h.calls.some(c=>c.url.includes("page=")));
+});
+test("missing or insufficient native child coverage stays unresolved even after a traversal cycle",async()=>{
+ for(const children of [[],[{...milkParent,count:1}],[{...milkParent,count:null}]]){
+  const routes=fixture();routes[new URL(dairy.url).pathname]=listing([milk,ordinary],dairy,[dairy,...children],3);
+  const r=await collect(harness(routes));assert.equal(r.complete,true);assert.equal(r.nativePaginationComplete,false);assert(r.categoryCoverage.unresolvedNodes.some(n=>n.id===String(dairy.id)));
+ }
+});
+test("a request-limited traversal resumes its exact offered queue and preserves the caller cursor",async()=>{
+ const h=harness(),first=await collect(h,{maxRequests:5});assert.equal(first.complete,false);assert.equal(first.requests,5);assert.equal(first.pagesFetched,2);assert.equal(first.received,2);assert.equal(first.cursor.version,2);assert.equal(first.cursor.pending.length,2);
+ const saved=clone(first.cursor),second=await collect(h,{maxRequests:6,cursor:first.cursor});assert.deepEqual(first.cursor,saved);assert.equal(second.complete,true);assert.equal(second.received,3);assert.equal(second.pagesFetched,6);assert.deepEqual(second.accepted.map(c=>c.gtin),[butter.ean]);
+ assert.equal(h.calls[5].init.headers.Cookie,undefined);assert(second.pages.every(p=>p.categoryId!==null));
+});
+test("one-page conflicting primary identities produce conflict GTINs without advancing a page",async()=>{
+ const alt=clone(milk);alt.external_id="000000000000999999ST";alt.url=alt.url.replace(milk.external_id,alt.external_id);alt.price="1.45";alt.priceTag.priceCent="45";
+ const routes=fixture();routes["/sortiment/uebersicht"]=listing([milk,alt],null,[dairy],2);
+ const r=await collect(harness(routes));assert.equal(r.complete,false);assert.equal(r.error.code,"hit-native-page-identity-conflict");assert.deepEqual(r.error.conflictGtins,[milk.ean]);assert.equal(r.pages.length,0);assert.equal(r.received,0);assert.equal(r.cursor.pending.length,1);
+});
+test("fresh contradiction on the first resumed category returns an unchanged checkpoint and conflict GTINs",async()=>{
+ const h=harness(),first=await collect(h,{maxRequests:4});assert.equal(first.received,2);
+ const conflict=clone(milk);conflict.price="1.45";conflict.priceTag.priceCent="45";const routes=fixture();routes[new URL(dairy.url).pathname]=listing([conflict,ordinary],dairy,[dairy,milkParent,butterParent],3);
+ const r=await collect(harness(routes),{cursor:first.cursor});assert.equal(r.error.code,"hit-native-cross-page-identity-conflict");assert.deepEqual(r.error.conflictGtins,[milk.ean]);assert.equal(r.accepted.length,0);assert.equal(r.pages.length,0);assert.equal(r.received,2);assert.equal(r.cursor.pending[0].id,String(dairy.id));
+});
+test("equal same-GTIN pack quotes on another SKU dedupe while native SKU counts remain accurate",async()=>{
+ const alternate=clone(milk);alternate.external_id="000000000000999999ST";alternate.url=alternate.url.replace(milk.external_id,alternate.external_id);
+ const routes=fixture();routes[new URL(milkLeaf.url).pathname]=listing([alternate,ordinary],milkLeaf,[dairy,milkParent,milkLeaf],2);
+ const r=await collect(harness(routes));assert.equal(r.complete,true);assert.equal(r.received,4);assert.equal(r.accepted.filter(c=>c.gtin===milk.ean).length,1);assert.equal(r.nativePaginationComplete,false);
+});
+test("source HTTP denial stops immediately and honors a longer native Retry-After",async()=>{
+ for(const status of [403,429]){
+  const routes=fixture();routes[new URL(dairy.url).pathname]={body:"Denied",status,headers:{"retry-after":"7200"}};
+  const h=harness(routes),r=await collect(h);assert.equal(r.error.code,"hit-source-http-"+status);assert(r.error.retryAfterMs>=7200000);assert.equal(r.received,2);assert.equal(r.pages.length,1);assert.equal(r.cursor.pending[0].id,String(dairy.id));assert.equal(h.calls.length,5);
+ }
+});
+test("wrong native store or category proof cannot advance a partial scan",async()=>{
+ for(const body of [listing([{...milk,storeId:1729,storeNumber:"054"},ordinary],dairy,[dairy,milkParent],3),listing([milk,ordinary],dairy,[dairy,milkParent],3,2,{params:{for_store:1729}}),listing([milk,ordinary],milkParent,[dairy,milkParent],3)]){
+  const routes=fixture();routes[new URL(dairy.url).pathname]=body;const r=await collect(harness(routes));assert.equal(r.complete,false);assert(r.error);assert.equal(r.received,2);assert.equal(r.pages.length,1);assert.equal(r.cursor.pending[0].id,String(dairy.id));
+ }
+});
+test("short, empty or nonnative listing responses keep the previous checkpoint",async()=>{
+ for(const body of [listing([],dairy,[dairy],3),listing([milk],dairy,[dairy],3),"<header>Berlin-Mitte</header>"]){
+  const routes=fixture();routes[new URL(dairy.url).pathname]=body;const r=await collect(harness(routes));assert.equal(r.complete,false);assert(r.error);assert.equal(r.received,2);assert.equal(r.pages.length,1);assert.equal(r.cursor.pagesFetched,1);
+ }
+});
+test("duplicate rows within one native page cannot inflate publication completeness",async()=>{
+ const routes=fixture();routes["/sortiment/uebersicht"]=listing([milk,clone(milk)],null,[dairy],2);
+ const r=await collect(harness(routes));assert.equal(r.complete,false);assert(r.error);assert.equal(r.received,0);assert.equal(r.pages.length,0);
+});
+test("old capture dates and cache ages cannot renew current native goods prices",async()=>{
+ for(const headers of [{age:"301"},{date:new Date(clock-600000).toUTCString()},{date:null},{age:"broken"}]){
+  const routes=fixture();routes["/sortiment/uebersicht"]={body:routes["/sortiment/uebersicht"],headers};const r=await collect(harness(routes));assert.equal(r.complete,false);assert(r.error);assert.equal(r.accepted.length,0);assert.equal(r.received,0);
+ }
+});
+test("guest cookies retain host, path, expiry, deletion and path-order isolation",async()=>{
+ const h=harness(fixture(),{market:{cookies:["root=public; Path=/","market=only; Path=/maerkte","catalog=only; Path=/sortiment","boundary=wrong; Path=/sort","wrong=private; Domain=evil.example; Path=/","expired=old; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/","deleted=initial; Path=/","same=root; Path=/","same=catalog; Path=/sortiment"]},selection:{cookies:["deleted=gone; Max-Age=0; Path=/"]}});
+ assert.equal((await collect(h)).complete,true);
+ const selection=h.calls[1].init.headers.Cookie,index=h.calls[2].init.headers.Cookie;assert(selection.includes("market=only"));assert(!selection.includes("catalog=only"));assert(index.includes("catalog=only"));
+ for(const name of ["market=only","boundary=wrong","wrong=private","expired=old","deleted="])assert(!index.includes(name),name);
+ assert(index.indexOf("same=catalog")<index.indexOf("same=root"));assert.equal(h.calls[0].init.headers.Cookie,undefined);
+});
+test("short-lived cookies expire as paced requests advance and sessions never cross invocations",async()=>{
+ const h=harness(fixture(),{market:{cookies:["short=public; Max-Age=2; Path=/"]},selection:{cookies:["PHPSESSID=fake-guest; Path=/"]}});
+ assert.equal((await collect(h)).complete,true);assert(h.calls[1].init.headers.Cookie.includes("short=public"));assert(!h.calls[2].init.headers.Cookie.includes("short="));
+ const firstCount=h.calls.length;assert.equal((await collect(h)).complete,true);assert.equal(h.calls[firstCount].init.headers.Cookie,undefined);
+});
+test("cross-origin, private-path and unsupported pagination redirects fail before another request",async()=>{
+ for(const location of ["https://evil.example/sortiment","https://www.hit.de/konto","https://www.hit.de/sortiment/uebersicht?page=1","http://www.hit.de/sortiment","https://u:secret@www.hit.de/sortiment","https://www.hit.de/sortiment#fragment"]){
+  const h=harness({}, {route:(url,call,n,response)=>response("",{status:302,headers:{location}})});await assert.rejects(()=>collect(h),e=>errorIncludes(e,"url-not-allowed"));assert.equal(h.calls.length,1);
+ }
+});
+test("redirect loops cannot spend more than their bounded attempts",async()=>{
+ const h=harness({}, {route:(url,call,n,response)=>response("",{status:302,headers:{location:store.officialUrl}})});
+ await assert.rejects(()=>collect(h),e=>errorIncludes(e,"redirect-limit"));assert.equal(h.calls.length,4);
+});
+test("initial source cooldown has no network side effects",async()=>{
+ const h=harness({}, {clock:Date.parse(Collector.COOLDOWN_UNTIL)-1,route:()=>assert.fail("No fetch allowed")});await assert.rejects(()=>collect(h),e=>errorIncludes(e,"cooldown")&&e.nextAttemptAt===Collector.COOLDOWN_UNTIL);assert.equal(h.calls.length,0);assert.equal(h.delays.length,0);
+});
+test("invalid explicit budgets do not silently become eight requests",async()=>{
+ for(const maxRequests of [0,-1,NaN,Infinity]){const h=harness();await assert.rejects(()=>collect(h,{maxRequests}));assert.equal(h.calls.length,0)}
+ for(const maxRequests of [1,2,3]){const h=harness();let r;try{r=await collect(h,{maxRequests})}catch(e){assert(errorIncludes(e,"budget"))}assert(h.calls.length<=maxRequests);if(r){assert.equal(r.complete,false);assert.equal(r.received,0)}}
+});
+test("invalid and wrong-market version-two checkpoints reject before any source request",async()=>{
+ const h=harness(),first=await collect(h,{maxRequests:4}),count=h.calls.length;
+ for(const change of [{version:1},{nativeStoreId:1729},{nativeStoreNumber:"054"},{received:0},{pagesFetched:9},{total:100001},{seenQuotes:undefined},{pending:[{...first.cursor.pending[0],url:"https://evil.example/sortiment/kaese-eier-molkerei-4261253"}]}]){
+  await assert.rejects(()=>collect(h,{cursor:{...clone(first.cursor),...change}}),e=>errorIncludes(e,"cursor"));assert.equal(h.calls.length,count);
+ }
+});
+test("offered category identifiers cannot be replaced with credentials, guessed paths or page queries",async()=>{
+ for(const url of ["https://www.hit.de/sortiment/uebersicht?page=1","https://www.hit.de/sortiment/uebersicht?for_q=milk","https://www.hit.de/sortiment/%6bilch-4261891","https://www.hit.de/maerkte/berlin-zoo?mein-markt=1","https://www.hit.de/maerkte/berlin-mitte?mein-markt=1&mein-markt=1","https://www.hit.de/sortiment/kaese-eier-molkerei-4261253?markt=054","https://www.hit.de:444/sortiment","https://www.hit.de/sortiment/../konto"])
+  assert.throws(()=>Collector.allowedUrl(url,store),e=>errorIncludes(e,"url-not-allowed"),url);
+});
+(async()=>{const failures=[];for(const {name,run}of cases)try{await run()}catch(e){failures.push(name+": "+e.stack)}if(failures.length){console.error(failures.join("\n\n"));process.exitCode=1}else console.log("hit-assortment-collector: OK ("+cases.length+" offline category and safety cases)")})().catch(e=>{console.error(e);process.exitCode=1});
