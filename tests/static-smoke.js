@@ -104,7 +104,8 @@ assert(html.includes('id="receiptCameraFile"'),"camera receipt input missing");
 assert(html.includes('id="receiptFile" type="file" accept="image/*,application/pdf" multiple'),"gallery/PDF receipt input missing");
 assert(html.includes('accordionNavigation:["homeReceipt","homePlan","homeStats"].every'),"runtime health check must verify accordion navigation");
 assert(html.includes("plannerViewport:!!document.querySelector('meta[name=\"viewport\"]')".replaceAll("\\\"","\"")),"runtime health check must verify planner viewport shell");
-assert(html.includes('<span class="version">v7.220.0 RC</span>')&&html.includes('version:"7.220"'),"visible and health-check versions must stay aligned");
+const visibleVersion=html.match(/<span class="version">v(\d+\.\d+)\.\d+ RC<\/span>/);
+assert(visibleVersion&&html.includes('version:"'+visibleVersion[1]+'"'),"visible and health-check versions must stay aligned");
 
 console.log("static smoke OK · scripts="+scripts.length+" · catalog labels="+products+" · Open Prices categories="+cat);
 
@@ -280,8 +281,8 @@ assert(html.includes('function mergeBasketQuantity(target,incoming)')&&html.incl
 assert(html.includes('const incomingCount=Math.max(1,Number(incoming.packCount)||1)'),"explicit quantities should survive duplicate merging");
 assert(html.includes('normalizeSpokenQuantity')&&html.includes('spokenNumberWords'),"shopping input should normalize spoken German quantity words");
 assert(html.includes('elf:11'),"spoken German quantity normalization should include eleven");
-assert(html.includes('spoken quantities should work after common shopping filler words too'),"spoken quantity filler-word regression marker missing");
-assert(html.includes('replace(/^\\s*(?:(?:bitte|noch|dazu|und)\\s+)+/i,"")'),"spoken quantity normalization should strip repeated shopping filler words");
+assert(html.includes('Voice input: remove conversational filler without losing the quantity/product phrase.'),"spoken quantity filler-word regression marker missing");
+assert(html.includes('replace(/^\\s*(?:(?:bitte|noch|dazu|und|gern|gerne)\\s+)+/i,"")'),"spoken quantity normalization should strip repeated shopping filler words");
 assert(html.includes('q=q.replace(/^\\d+\\s*(?:x|packungen?|packs?)'),"shopping suggestions should strip multipack prefixes before matching products");
 assert(html.includes('kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x'),"shopping parser should accept explicit unit and x-style quantity input");
 assert(html.includes('protectedDecimal=source.replace(/(\\d),(\\d)/g,"$1§DEC§$2")'),"pasted shopping lists must preserve German decimal commas");
