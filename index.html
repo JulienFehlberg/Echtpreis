@@ -1345,6 +1345,22 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
  #results .compare-price-delta{font-size:8px!important}
 }
 </style><style>
+/* v7.298 fix expanded price-details layout */
+#results .compare-details[open]{display:block!important;width:100%!important;flex-basis:100%!important;margin-top:5px!important}
+#results .compare-details[open]>summary{display:inline-block!important;margin:0 0 8px!important}
+#results .compare-details[open]>.detail{padding:9px 10px!important;border-radius:10px!important;background:#f7f9f8!important;font-size:10px!important;line-height:1.35!important}
+#results .compare-details[open] .source-details,
+#results .compare-details[open] .compare-source-details{width:100%!important}
+#results .compare-market-actions:has(.compare-details[open]){flex-wrap:wrap!important;align-items:flex-start!important}
+#results .compare-market-actions:has(.compare-details[open])>.route-link{align-self:flex-start!important}
+#results .compare-details[open] table,
+#results .compare-details[open] .source-row{width:100%!important}
+#results .compare-details[open] .detail{max-width:none!important}
+@media(max-width:430px){
+ #results .compare-details[open]{font-size:10px!important}
+ #results .compare-details[open]>.detail{padding:8px!important}
+}
+</style><style>
 /* v7.286 denser product rows */
 .shopping .list{margin-top:8px!important}
 .shopping .item,.shopping .list-item,.shopping [data-list-item]{min-height:58px!important;padding-top:8px!important;padding-bottom:8px!important}
