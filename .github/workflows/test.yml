@@ -49,3 +49,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
         run: node tests/price-coverage-postgres.test.js
+      - name: Run PostgreSQL autonomous retailer price integration test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
+        run: node tests/published-price-postgres.test.js

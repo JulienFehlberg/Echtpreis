@@ -58,6 +58,29 @@ async function waitFor(predicate){for(let i=0;i<100;i++){if(predicate())return;a
    await f.w.compare({skipLocation:true,scroll:false});assert.strictEqual(f.requests.filter(x=>x.path==="/v1/current-prices").length,1,"an unchanged comparison reuses the fresh canonical decision");
   }finally{f.dom.window.close()}
  }
+ {
+  const f=await fixture("success");try{
+   await f.w.compare({skipLocation:true,scroll:false});
+   assert.strictEqual(f.w.document.getElementById("verifiedSavings").style.display,"block","the fully evidenced butter comparison starts with a supported price difference");
+   f.w.eval("basket.push({...parseWish('Batterien'),customItem:true,key:null,needsClarification:false,needsQuantity:false});comparisonRevision++;");
+   assert.strictEqual(await f.w.compare({skipLocation:true,scroll:false}),true);
+   const d=f.w.document,price=f.w.activePrice("butter","REWE",f.w.eval("basket[0]"));
+   assert(price&&!price.reference,"an unpriced custom item must preserve the supported butter comparison");
+   assert(!d.getElementById("winnerLabel").textContent.includes("vollständig belegter Warenkorb"),"excluding batteries must not label the two-item list as a fully evidenced basket");
+   assert.strictEqual(d.getElementById("verifiedSavings").style.display,"none","a supported difference for butter must not become a whole-list saving when batteries have no price");
+   assert((d.getElementById("winnerName").textContent+" "+d.getElementById("winnerCoverage").textContent).includes("Batterien"),"the partial comparison must visibly name the excluded list item");
+  }finally{f.dom.window.close()}
+ }
+ {
+  const f=await fixture("success");try{
+   f.w.eval("basket.push({label:'Batterien',raw:'Batterien',customItem:true});comparisonRevision++;");
+   await f.w.compare({skipLocation:true,scroll:false});const d=f.w.document;
+   assert(d.getElementById("winnerLabel").textContent.includes("Teilvergleich"),"a priced subset cannot claim the cheapest complete shopping list");
+   assert(d.getElementById("winnerCoverage").textContent.includes("Batterien")&&d.getElementById("winnerCoverage").textContent.includes("1 von 2"),"excluded items and whole-list coverage must be visible");
+   assert.strictEqual(d.getElementById("verifiedSavings").style.display,"none","an unpriced item blocks whole-basket savings claims");
+   assert(d.getElementById("merchantResults").textContent.includes("Teilsumme"));
+  }finally{f.dom.window.close()}
+ }
  for(const mode of ["eggs","nutella"]){
   const f=await fixture(mode);try{await f.w.compare({skipLocation:true,scroll:false});const wish=f.w.eval("basket[0]"),price=f.w.activePrice(wish.key,"REWE",wish);assert(price&&!price.reference);assert(Math.abs(price.price*wish.calcAmount-1.99)<1e-9,"a "+mode+" package costs its checkout amount despite differing catalog or pack units");assert(f.w.document.getElementById("winnerPrice").textContent.includes("1,99"))}finally{f.dom.window.close()}
  }

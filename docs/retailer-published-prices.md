@@ -1,0 +1,13 @@
+# Autonomous retailer prices
+
+Sparkorb's external price collection runs without app-user receipts. Receipts supplement evidence; they are not required to start, refresh or query the retailer price inventory.
+
+The first direct retailer connector reads dm's official German product services. The public search listing discovers retailer product IDs and GTINs. Listing prices are never imported: the listing can be cached for four days. Current offers are fetched from the official product tile service with a short cache lifetime; online purchase availability is read separately. Responses retain exact retailer SKU, GTIN, package, EUR price, source product URL, capture time and payload hash. A past price-change date is not substituted for the current offer capture.
+
+These are published German **online** offers. They do not establish the price or stock of any physical dm branch, or the final delivered basket cost. Prices are saved in a separate published-offer inventory and expire after 24 hours. Source failure preserves existing evidence without extending its freshness. Out-of-stock and unknown availability are explicit.
+
+Automatic discovery covers food staples and common household purchases and resumes across bounded runs. Discovered product targets persist in PostgreSQL. A checksum-validated seed contains 150 real retailer identities for cold starts when search is throttled; it contains no bundled prices or availability. Every price is fetched from the current official price service. Every run refreshes at most 100 product targets in stable order, with separate source leases, success/failure timestamps and backoff. No user request or receipt submission is needed. The default discovery budget is eight requests per run, and current-price/availability bulk collection uses at most two requests per run. A partial discovery rate-limit response is persisted and delays further discovery for an hour; already discovered products can still receive current offers. Retries also consume request budgets.
+
+`GET /v1/published-prices` queries current offers using `merchant`, `gtin` or `search`; `GET /v1/published-prices/status` reports this autonomous inventory separately from physical-store evidence. `/v1/price-coverage` remains the exact physical product/store evidence audit. An online offer never silently supplies a missing local branch price.
+
+Validation includes recorded official response shapes, source/date/package/currency/hash gates, request budgets, persistent rotation, pure source-driven ingestion with zero new receipts, online-scope SQL reads, expiry and source-failure behavior.
