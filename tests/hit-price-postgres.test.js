@@ -49,7 +49,17 @@ async function main(){
   assert.deepEqual((await pool.query("SELECT * FROM hit_price_import_evidence WHERE observation_id=$1",[paidId])).rows[0],originalLedger,"The original ledger and native response remain immutable");
   // Real PostgreSQL join and browser admission for a separately labelled physical offer.
   const Physical=require("../hit-product-discovery"),Published=require("../published-product-discovery"),Picker=require("../app/published-product-client");
+  const SearchFilters=require("../retailer-product-search-filters");
+  for(const [pack,amount,count]of[["0.0049 kg",4.9,1],["4.9 g",4.9,1],["0.0041 kg",4.1,1],["4.1 g",4.1,1],["2 x 4.9 g",4.9,2]]){
+   const values=[],clause=SearchFilters.sqlPack(pack,value=>{values.push(value);return "$"+values.length;});
+   const rows=(await pool.query("SELECT pack_amount::float AS amount,pack_count AS count FROM (VALUES (4.9::numeric,'g',1),(4.1::numeric,'g',1),(9.8::numeric,'g',1),(4.9::numeric,'g',2)) AS fixture(pack_amount,pack_unit,pack_count) WHERE "+clause,values)).rows;
+   assert.deepEqual(rows,[{amount,count}],"Decimal conversion uses the same narrow comparison while retaining multipack count: "+pack);
+  }
   let physical=await Physical.search(pool,{search:"H-Milch",limit:200,now:Date.now()});assert.equal(physical.items.length,1,JSON.stringify(physical));
+  assert.equal((await Physical.search(pool,{search:"H-Milch",pack:"1 l",limit:1})).items.length,1,"The real SQL matches canonical 1l/native 1000ml before LIMIT");
+  assert.equal((await Physical.search(pool,{search:"H-Milch",pack:"2 x 500 ml",limit:1})).items.length,0,"Equal total volume cannot match a different sales pack");
+  assert.equal((await Physical.search(pool,{search:"H-Milch",pack:"500 ml",limit:1})).items.length,0);
+  const scopedPack=await Published.search(pool,{search:"H-Milch",pack:"1000 ml",scopeChannel:"physical-store",limit:1},{search:async()=>{throw Error("No online lookup for physical scope");}});assert.equal(scopedPack.items.length,1);assert.deepEqual(scopedPack.scopeChannels,["physical-store"]);
   const picked=await Published.search(pool,{search:"H-Milch",limit:20}, {search:async()=>({items:[]})});
   assert.equal(picked.items.length,1);assert.equal(picked.physicalStorePrices,true);assert.equal(picked.items[0].offers.length,0);assert.equal(picked.items[0].physicalOffers.length,1);
   const normalizedPicker=Picker.normalizeResponse(JSON.parse(JSON.stringify(picked)),{now:Date.now()});assert.equal(normalizedPicker.items.length,1,JSON.stringify(normalizedPicker));assert.equal(normalizedPicker.items[0].physicalOffers[0].storeId,storeId);

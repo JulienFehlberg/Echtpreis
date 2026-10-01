@@ -12,11 +12,11 @@ function physicalBranch(raw,storeId){
 }
 function amount(value,unit){
  if(typeof value!=="number"||!Number.isFinite(value)||value<=0)return null;
- const units={g:["g",1],kg:["g",1000],ml:["ml",1],cl:["ml",10],l:["ml",1000],piece:["piece",1],"stück":["piece",1],stk:["piece",1]},entry=units[text(unit).toLowerCase()];
+ const units={g:["g",1],kg:["g",1000],ml:["ml",1],cl:["ml",10],l:["ml",1000],piece:["piece",1],pieces:["piece",1],"stück":["piece",1],stuck:["piece",1],stk:["piece",1],st:["piece",1]},entry=units[text(unit).toLowerCase()];
  return entry&&Number.isFinite(value*entry[1])?{amount:value*entry[1],unit:entry[0]}:null;
 }
 function pack(raw){
- const match=text(raw).toLowerCase().match(/^(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*(kg|g|ml|cl|l|piece|stk|stück)$/);if(!match)return null;
+ const match=text(raw).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").match(/^(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*(kg|g|ml|cl|l|pieces?|stk|stuck|st)$/);if(!match)return null;
  const count=Number(match[1]||1),single=amount(Number(match[2].replace(",",".")),match[3]);
  return Number.isSafeInteger(count)&&count>0&&count<=1000&&single?{...single,count}:null;
 }
@@ -29,6 +29,14 @@ function selection(raw){
  return{gtin,name,brand:brand||null,pack:description,packAmount:parsed.amount,packUnit:parsed.unit,packCount:parsed.count};
 }
 function key(raw){const valid=selection(raw);return valid?JSON.stringify([valid.gtin,valid.packUnit,valid.packAmount,valid.packCount]):null;}
+function searchFilters(options={}){
+ const rawPack=options.pack,rawChannel=options.scopeChannel;
+ if(rawPack!=null&&typeof rawPack!=="string")return{ok:false,reason:"invalid-pack-filter"};
+ const description=text(rawPack);if(description.length>80||description&&!pack(description))return{ok:false,reason:"invalid-pack-filter"};
+ if(rawChannel!=null&&typeof rawChannel!=="string")return{ok:false,reason:"invalid-scope-channel-filter"};
+ const scopeChannel=text(rawChannel);if(scopeChannel&&!['physical-store','online','pickup'].includes(scopeChannel))return{ok:false,reason:"invalid-scope-channel-filter"};
+ return{ok:true,pack:description||null,parsedPack:description?pack(description):null,scopeChannel:scopeChannel||null};
+}
 function storeSelection(raw){return raw&&raw.merchant==="HIT"&&UUID.test(text(raw.storeId))?{merchant:"HIT",storeId:raw.storeId.toLowerCase()}:null;}
 function physicalDecision(raw,query={},branch=raw?.branch,options={}){
  if(!raw||typeof raw!=="object"||Array.isArray(raw)||!Current||raw.sourceId!==HIT||raw.source!==HIT||raw.merchant!=="HIT"||raw.sourceType!=="official_retailer"||raw.truthEligible!==true||raw.identityVerified!==true||raw.comparisonOnly===true||raw.locationLevel!=="store"||raw.region!=="Berlin"||raw.priceBasis!=="pack"||raw.per!=="piece"||raw.priceType!=="regular"||raw.conditional===true||!["observed","verified"].includes(raw.status)||!UUID.test(text(raw.productId)))return null;
@@ -51,34 +59,39 @@ function physicalOffer(raw,query={},options={}){
  const value=physicalDecision(raw,query,raw.branch,options);return value?{...value,sourceResponseDate:raw.sourceResponseDate,sourceAgeSeconds:raw.sourceAgeSeconds,sourceResponseHash:raw.sourceResponseHash}:null;
 }
 function candidate(raw,options={}){
- const identity=selection(raw);if(!identity||!Current||!Array.isArray(raw.offers)||raw.offers.length>200||raw.physicalOffers!=null&&!Array.isArray(raw.physicalOffers)||(raw.physicalOffers?.length||0)+raw.offers.length>200)return null;
- const offers=raw.offers.map(offer=>Current.normalizePublishedAlternative(offer,{gtin:identity.gtin,pack:identity.pack},options)).filter(Boolean);
- const physicalOffers=(raw.physicalOffers||[]).map(offer=>physicalOffer(offer,{gtin:identity.gtin,pack:identity.pack},options)).filter(Boolean);
+ const filters=searchFilters(options),identity=selection(raw);if(!filters.ok||!identity||!Current||!Array.isArray(raw.offers)||raw.offers.length>200||raw.physicalOffers!=null&&!Array.isArray(raw.physicalOffers)||(raw.physicalOffers?.length||0)+raw.offers.length>200)return null;
+ if(filters.parsedPack&&(filters.parsedPack.unit!==identity.packUnit||filters.parsedPack.count!==identity.packCount||Math.abs(filters.parsedPack.amount-identity.packAmount)>1e-9))return null;
+ const allowed=offer=>offer&&(!filters.scopeChannel||offer.scopeChannel===filters.scopeChannel);
+ const offers=raw.offers.map(offer=>Current.normalizePublishedAlternative(offer,{gtin:identity.gtin,pack:identity.pack},options)).filter(allowed);
+ const physicalOffers=(raw.physicalOffers||[]).map(offer=>physicalOffer(offer,{gtin:identity.gtin,pack:identity.pack},options)).filter(allowed);
  return offers.length||physicalOffers.length?{...identity,offers,physicalOffers}:null;
 }
 function normalizeResponse(raw,options={}){
+ const filters=searchFilters(options);if(!filters.ok)return{ok:false,items:[],reason:filters.reason};
  if(!raw||raw.ok!==true||!Array.isArray(raw.items)||raw.items.length>20||raw.items.reduce((sum,item)=>sum+(Array.isArray(item?.offers)?item.offers.length:0)+(Array.isArray(item?.physicalOffers)?item.physicalOffers.length:0),0)>200)return{ok:false,items:[],reason:"invalid-response"};
  const rows=new Map(),duplicates=new Set();for(const input of raw.items){const value=candidate(input,options);if(!value)continue;const id=key(value);if(rows.has(id))duplicates.add(id);rows.set(id,value);}
- return{ok:true,items:[...rows].filter(([id])=>!duplicates.has(id)).map(([,value])=>value),discoveryTruncated:raw.discoveryTruncated===true};
+ return{ok:true,items:[...rows].filter(([id])=>!duplicates.has(id)).map(([,value])=>value),discoveryTruncated:raw.discoveryTruncated===true,appliedFilters:{pack:filters.pack,scopeChannel:filters.scopeChannel}};
 }
 function create(options={}){
  const apiBase=text(options.apiBase).replace(/\/+$/,""),fetchImpl=options.fetchImpl||root.fetch?.bind(root),now=typeof options.now==="function"?options.now:Date.now;
- async function search(raw,{signal}={}){
-  const query=text(raw);if(query.length<2||query.length>120||typeof fetchImpl!=="function")return{ok:false,items:[],reason:"invalid-search"};
+ async function search(raw,options={}){
+  const object=raw&&typeof raw==="object"&&!Array.isArray(raw),query=text(object?raw.search:raw),signal=options.signal,filters=searchFilters({pack:options.pack===undefined&&object?raw.pack:options.pack,scopeChannel:options.scopeChannel===undefined&&object?raw.scopeChannel:options.scopeChannel});
+  if(query.length<2||query.length>120||typeof fetchImpl!=="function")return{ok:false,items:[],reason:"invalid-search"};
+  if(!filters.ok)return{ok:false,items:[],reason:filters.reason};
   const controller=new AbortController(),abort=()=>controller.abort(),timeout=Number(options.timeoutMs)||8000;let timer;
   if(signal?.aborted)return{ok:false,items:[],reason:"cancelled"};signal?.addEventListener("abort",abort,{once:true});
   try{
    const result=await Promise.race([
-    Promise.resolve().then(async()=>{const response=await fetchImpl(apiBase+"/v1/published-products?search="+encodeURIComponent(query)+"&limit=20",{method:"GET",credentials:"omit",signal:controller.signal});if(!response?.ok)throw Error("unavailable");return response.json();}),
+    Promise.resolve().then(async()=>{const response=await fetchImpl(apiBase+"/v1/published-products?search="+encodeURIComponent(query)+"&limit=20"+(filters.pack?"&pack="+encodeURIComponent(filters.pack):"")+(filters.scopeChannel?"&scopeChannel="+encodeURIComponent(filters.scopeChannel):""),{method:"GET",credentials:"omit",signal:controller.signal});if(!response?.ok)throw Error("unavailable");return response.json();}),
     new Promise((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(Error("timeout"));},Math.max(1,Math.min(10000,timeout)));})
    ]);
    if(controller.signal.aborted)return{ok:false,items:[],reason:"cancelled"};
-   return normalizeResponse(result,{now:now()});
+   return normalizeResponse(result,{now:now(),pack:filters.pack,scopeChannel:filters.scopeChannel});
   }catch(_){return{ok:false,items:[],reason:controller.signal.aborted?"cancelled":"unavailable"};}
   finally{clearTimeout(timer);signal?.removeEventListener("abort",abort);}
  }
  return Object.freeze({search});
 }
-const api=Object.freeze({create,selection,key,candidate,normalizeResponse,physicalBranch,physicalDecision,physicalOffer,storeSelection,berlinDay});
+const api=Object.freeze({create,selection,key,candidate,normalizeResponse,searchFilters,physicalBranch,physicalDecision,physicalOffer,storeSelection,berlinDay});
 if(root)root.SparkorbPublishedProductClient=api;if(typeof module==="object"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);

@@ -1,4 +1,5 @@
 "use strict";
+const SearchFilters=require("./retailer-product-search-filters");
 
 const crypto = require("crypto");
 const Identity = require("./product-identity");
@@ -147,11 +148,13 @@ function querySpec(options={}) {
  if(options.gtin!=null){const gtin=String(options.gtin).trim();if(!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(gtin)||!Identity.gtinValid(gtin))throw fail("invalid-gtin");where.push("gtin="+param(gtin));}
  if(options.search!=null){const search=text(options.search);if(search){const p=param("%"+search.replace(/[\\%_]/g,"\\$&")+"%");where.push("(name ILIKE "+p+" ESCAPE '\\' OR brand ILIKE "+p+" ESCAPE '\\')");}}
  if(options.today!=null){const today=String(options.today);if(!/^\d{4}-\d{2}-\d{2}$/.test(today)||!Number.isFinite(Date.parse(today))||new Date(today).toISOString().slice(0,10)!==today)throw fail("invalid-date");where.push("(captured_at AT TIME ZONE 'Europe/Berlin')::date<="+param(today)+"::date");}
+ const requestedChannel=SearchFilters.channel(options.scopeChannel);if(requestedChannel&&requestedChannel!=="online")where.push("false");
+ const packClause=SearchFilters.sqlPack(options.pack,param);if(packClause)where.push(packClause);
  const requested=Number(options.limit??50),limit=Number.isFinite(requested)?Math.max(1,Math.min(200,Math.floor(requested))):50;
  return{sql:"SELECT "+FIELDS+" FROM "+TABLE+" WHERE "+where.join(" AND ")+" ORDER BY captured_at DESC,native_venue_id,retailer_sku LIMIT "+param(limit),params};
 }
 function published(record) { return{...record,capturedAt:new Date(record.capturedAt).toISOString(),expiresAt:new Date(record.expiresAt).toISOString(),nativePriceEUR:record.displayedPrice,nativePriceIncludesDeposit:true,depositIncludedInDisplayedPrice:record.deposit!==null?true:null,payablePackPrice:record.deposit!==null?record.displayedPrice:null,state:"published",current:true,priceBasis:"pack",shippingIncluded:false,serviceFeesIncluded:false,truthEligible:false,identityStatus:record.gtin?"native-gtin":"native-retailer-sku"}; }
-async function search(pool,options={}) { if(!pool)throw fail("database-required");const query=querySpec(options);await ensure(pool);const result=await pool.query(query.sql,query.params);return{items:result.rows.map(published),scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24,truthEligible:false}; }
+async function search(pool,options={}) { if(!pool)throw fail("database-required");const query=querySpec(options);if(options.scopeChannel!==undefined&&options.scopeChannel!=="online")return{items:[],scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24,truthEligible:false};await ensure(pool);const result=await pool.query(query.sql,query.params);return{items:result.rows.map(published),scopeCountry:"DE",scopeChannel:"online",maxAgeHours:24,truthEligible:false}; }
 async function status(pool,options={}) {
  if(!pool)throw fail("database-required");const now=new Date(clock(options)).toISOString();await ensure(pool);
  const fresh="validation_issue IS NULL AND captured_at<=$1::timestamptz AND captured_at>=$1::timestamptz-interval '24 hours' AND expires_at>$1::timestamptz";
