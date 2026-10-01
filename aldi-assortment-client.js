@@ -2,6 +2,7 @@
 
 const crypto=require("node:crypto"),Inventory=require("./canonical-inventory-import");
 const SOURCE="ALDI Nord published assortment",ORIGIN="https://www.aldi-nord.de",SITEMAP_URL=ORIGIN+"/sitemaps/.aldi-nord-sitemap-products.xml";
+const GAP_RETRY_MS=60*60*1000,GAP_CODES=Object.freeze(["aldi-native-source-unavailable","aldi-product-page-schema-invalid","aldi-native-request-identity-conflict","aldi-native-product-identity-conflict","aldi-native-product-name-required","aldi-exact-sales-pack-required","aldi-drained-weight-unresolved","aldi-product-variant-unresolved"]);
 const hash=value=>crypto.createHash("sha256").update(value).digest("hex"),sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const failure=(code,extra={})=>Object.assign(new Error(code),{code,...extra});
 const compareSku=(a,b)=>a.length-b.length||a.localeCompare(b);
@@ -121,22 +122,52 @@ async function discoverTargets(options={}){
  const s=session({...options,maxRequests:1}),response=await s.request(SITEMAP_URL),parsed=parseSitemap(response.raw);
  return{...parsed,complete:true,completeCatalog:true,catalogScope:"published-public-product-pages",sourceId:SOURCE,purpose:"discovery",truthEligible:false,sourceUrl:SITEMAP_URL,sourceResponseHash:response.sourceResponseHash,sourceResponseDate:response.sourceResponseDate,sourceAgeSeconds:response.sourceAgeSeconds,discoveredAt:response.capturedAt,requests:s.requests,bytes:s.bytes};
 }
+function cursorGaps(cursor,targets){
+ if(cursor.unresolvedTargets===undefined)return[];
+ if(!Array.isArray(cursor.unresolvedTargets))throw failure("aldi-price-cursor-invalid");
+ const seen=new Set(),positions=new Map(targets.map((target,index)=>[target.retailerSku,{target,index}]));
+ return cursor.unresolvedTargets.map(raw=>{
+  let target;try{target=targetForUrl(raw?.sourceUrl)}catch{throw failure("aldi-price-cursor-invalid")}
+  if(!raw||Array.isArray(raw)||raw.retailerSku!==target.retailerSku||seen.has(raw.retailerSku)||!GAP_CODES.includes(raw.code)||!Number.isSafeInteger(raw.attempts)||raw.attempts<1||!Number.isSafeInteger(raw.attempts+1)||timestamp(raw.capturedAt)!==raw.capturedAt||timestamp(raw.sourceResponseDate)!==raw.sourceResponseDate||raw.sourceAgeSeconds!==null&&!Number.isSafeInteger(raw.sourceAgeSeconds)||timestamp(raw.retryAfter)!==raw.retryAfter||Date.parse(raw.retryAfter)!==Date.parse(raw.capturedAt)+GAP_RETRY_MS||!/^[a-f0-9]{64}$/.test(raw.sourceResponseHash||""))throw failure("aldi-price-cursor-invalid");
+  try{responseFreshness(raw,5*60*1000)}catch{throw failure("aldi-price-cursor-invalid")}
+  if(targets.length){const position=positions.get(raw.retailerSku);if(!position||position.index>=cursor.nextIndex||position.target.sourceUrl!==raw.sourceUrl)throw failure("aldi-price-cursor-invalid")}
+  seen.add(raw.retailerSku);return{retailerSku:raw.retailerSku,sourceUrl:raw.sourceUrl,code:raw.code,attempts:raw.attempts,capturedAt:raw.capturedAt,sourceResponseHash:raw.sourceResponseHash,sourceResponseDate:raw.sourceResponseDate,sourceAgeSeconds:raw.sourceAgeSeconds??null,retryAfter:raw.retryAfter};
+ });
+}
 async function fetchProducts(input=[],options={}){
- const normalized=stableTargets(input),targets=normalized.targets,s=session(options),offers=[],products=[],rejected=[...normalized.rejected],cursor=options.cursor;let index=0,processed=0,partialError=null,cursorReset=false;
+ const normalized=stableTargets(input),targets=normalized.targets,s=session(options),offers=[],products=[],rejected=[...normalized.rejected],confirmedTargets=[],cursor=options.cursor,now=options.now||(()=>new Date().toISOString());let index=0,processed=0,gapAttempts=0,partialError=null,cursorReset=false,durableProgress=false,gaps=new Map();
  if(cursor){
   if(!/^[a-f0-9]{64}$/.test(cursor.snapshotHash||"")||!Number.isSafeInteger(cursor.nextIndex)||cursor.nextIndex<0||cursor.lastSku!=null&&sku(cursor.lastSku)!==cursor.lastSku||cursor.nextIndex===0&&cursor.lastSku!=null||cursor.nextIndex>0&&!cursor.lastSku)throw failure("aldi-price-cursor-invalid");
-  if(cursor.snapshotHash===normalized.snapshotHash){if(cursor.nextIndex>targets.length||cursor.nextIndex>0&&targets[cursor.nextIndex-1].retailerSku!==cursor.lastSku||cursor.nextIndex===0&&cursor.lastSku!=null)throw failure("aldi-price-cursor-invalid");index=cursor.nextIndex}
-  else{if(cursor.nextIndex>0&&!cursor.lastSku)throw failure("aldi-price-cursor-invalid");index=0;cursorReset=true}
+  if(cursor.snapshotHash===normalized.snapshotHash){if(cursor.nextIndex>targets.length||cursor.nextIndex>0&&targets[cursor.nextIndex-1].retailerSku!==cursor.lastSku)throw failure("aldi-price-cursor-invalid");index=cursor.nextIndex;gaps=new Map(cursorGaps(cursor,targets).map(gap=>[gap.retailerSku,gap]));if(!targets.length&&gaps.size)throw failure("aldi-price-cursor-invalid")}
+  else{cursorGaps(cursor,[]);cursorReset=true}
  }
- while(index<targets.length){const target=targets[index];let response;
-  try{response=await s.request(target.sourceUrl,{current:true})}catch(error){if(error.status===404||error.status===410){rejected.push({target,reasons:["aldi-current-product-missing"]});processed++;index++;continue}if(/budget-exhausted/.test(error.code||""))break;if(!processed)throw error;partialError={code:error.code||"aldi-source-network-failed",status:error.status||null,retryAfterMs:error.retryAfterMs??null};break}
-  let extracted;try{extracted=extractProducts(response.raw)}catch(error){if(error.code==="aldi-native-source-unavailable"){if(!processed)throw error;partialError={code:error.code,status:null,retryAfterMs:null};break}rejected.push({target,reasons:[error.code||"aldi-product-page-schema-invalid"]});processed++;index++;continue}
-  if(extracted.requestedProductIds&&(!Array.isArray(extracted.requestedProductIds)||extracted.requestedProductIds.length!==1||sku(extracted.requestedProductIds[0])!==target.retailerSku)){rejected.push({target,reasons:["aldi-native-request-identity-conflict"]});processed++;index++;continue}
-  const candidates=extracted.products.filter(p=>sku(p?.objectID)===target.retailerSku);
-  if(candidates.length!==1){rejected.push({target,reasons:["aldi-native-product-identity-conflict"]});processed++;index++;continue}
-  const parsed=parseProduct(candidates[0],{...target,capturedAt:response.capturedAt,sourceResponseHash:response.sourceResponseHash,sourceResponseDate:response.sourceResponseDate,sourceAgeSeconds:response.sourceAgeSeconds});
-  if(parsed.ok){products.push(parsed.product);if(parsed.offer)offers.push(parsed.offer)}if(parsed.reasons.length)rejected.push({target,reasons:parsed.reasons});processed++;index++;
+ const attemptedGaps=new Set(),gapOrder=(a,b)=>Date.parse(a.retryAfter)-Date.parse(b.retryAfter)||compareSku(a.retailerSku,b.retailerSku);
+ function confirm(target,status,kind,response=null){confirmedTargets.push({retailerSku:target.retailerSku,sourceUrl:target.sourceUrl,status,kind,capturedAt:response?.capturedAt||timestamp(now()),sourceResponseHash:response?.sourceResponseHash??null,sourceResponseDate:response?.sourceResponseDate??null,sourceAgeSeconds:response?.sourceAgeSeconds??null});processed++;durableProgress=true}
+ function recordGap(target,code,response){const old=gaps.get(target.retailerSku);gaps.set(target.retailerSku,{retailerSku:target.retailerSku,sourceUrl:target.sourceUrl,code,attempts:old?old.attempts+1:1,capturedAt:response.capturedAt,sourceResponseHash:response.sourceResponseHash,sourceResponseDate:response.sourceResponseDate,sourceAgeSeconds:response.sourceAgeSeconds,retryAfter:new Date(Date.parse(response.capturedAt)+GAP_RETRY_MS).toISOString()});attemptedGaps.add(target.retailerSku);if(!old)gapAttempts++;durableProgress=true}
+ while(s.requests<s.maxRequests){
+  const retryingGap=index>=targets.length,due=retryingGap?[...gaps.values()].filter(gap=>!attemptedGaps.has(gap.retailerSku)&&Date.parse(gap.retryAfter)<=Date.parse(timestamp(now()))).sort(gapOrder)[0]:null;
+  if(retryingGap&&!due)break;
+  const target=retryingGap?targetForUrl(due.sourceUrl):targets[index],beforeRequests=s.requests;let response;
+  try{response=await s.request(target.sourceUrl,{current:true});if(retryingGap){gapAttempts++;attemptedGaps.add(target.retailerSku)}}catch(error){
+   const requestStarted=s.requests>beforeRequests;if(retryingGap&&requestStarted){gapAttempts++;attemptedGaps.add(target.retailerSku)}
+   if(error.status===404||error.status===410){rejected.push({target,reasons:["aldi-current-product-missing"]});gaps.delete(target.retailerSku);confirm(target,error.status,"missing");if(!retryingGap)index++;continue}
+   if(/budget-exhausted/.test(error.code||"")&&!requestStarted)break;
+   if(!durableProgress&&!retryingGap&&error.code!=="aldi-total-body-budget-exhausted")throw error;
+   partialError={code:error.code||"aldi-source-network-failed",status:error.status||null,retryAfterMs:error.retryAfterMs??null,retryingGap,requestStarted,retailerSku:target.retailerSku,sourceUrl:target.sourceUrl};break;
+  }
+  let parsed=null,reasons=[];
+  try{
+   const extracted=extractProducts(response.raw);
+   if(extracted.requestedProductIds&&(!Array.isArray(extracted.requestedProductIds)||extracted.requestedProductIds.length!==1||sku(extracted.requestedProductIds[0])!==target.retailerSku))reasons=["aldi-native-request-identity-conflict"];
+   else{const candidates=extracted.products.filter(p=>sku(p?.objectID)===target.retailerSku);if(candidates.length!==1)reasons=["aldi-native-product-identity-conflict"];else{parsed=parseProduct(candidates[0],{...target,...response});reasons=parsed.reasons}}
+  }catch(error){reasons=[error.code||"aldi-product-page-schema-invalid"]}
+  if(parsed?.ok){products.push(parsed.product);if(parsed.offer)offers.push(parsed.offer);gaps.delete(target.retailerSku);confirm(target,200,"detail",response)}
+  else if(retryingGap||reasons.includes("aldi-native-source-unavailable")){
+   const code=reasons.find(reason=>GAP_CODES.includes(reason));if(!code)throw failure("aldi-gap-retry-proof-invalid");recordGap(target,code,response);
+  }else confirm(target,200,"rejected",response);
+  if(reasons.length)rejected.push({target,reasons});if(!retryingGap)index++;
  }
- const complete=index>=targets.length;return{offers,products,rejected,processed,requests:s.requests,bytes:s.bytes,complete,partialError,cursorReset,cursor:complete?null:{snapshotHash:normalized.snapshotHash,nextIndex:index,lastSku:index>0?targets[index-1].retailerSku:null},snapshotHash:normalized.snapshotHash,targetCount:targets.length,sourceId:SOURCE,scopeCountry:"DE",scopeChannel:"assortment-publication",truthEligible:false};
+ const unresolvedTargets=[...gaps.values()].sort(gapOrder),complete=index===targets.length&&!unresolvedTargets.length,clock=Date.parse(timestamp(now())),deferredUntil=index===targets.length&&unresolvedTargets.length&&unresolvedTargets.every(gap=>Date.parse(gap.retryAfter)>clock)?unresolvedTargets[0].retryAfter:null;
+ return{offers,products,rejected,confirmedTargets,processed,nextIndex:index,unresolvedTargets,gapAttempts,deferredUntil,requests:s.requests,bytes:s.bytes,complete,partialError,cursorReset,cursor:complete?null:{snapshotHash:normalized.snapshotHash,nextIndex:index,lastSku:index>0?targets[index-1].retailerSku:null,unresolvedTargets},snapshotHash:normalized.snapshotHash,targetCount:targets.length,sourceId:SOURCE,scopeCountry:"DE",scopeChannel:"assortment-publication",truthEligible:false};
 }
-module.exports={SOURCE,ORIGIN,SITEMAP_URL,targetForUrl,allowedUrl,stableTargets,parseSitemap,extractProducts,exactPack,parseProduct,responseFreshness,discoverTargets,fetchProducts};
+module.exports={SOURCE,ORIGIN,SITEMAP_URL,GAP_CODES,GAP_RETRY_MS,targetForUrl,allowedUrl,stableTargets,parseSitemap,extractProducts,exactPack,parseProduct,responseFreshness,discoverTargets,fetchProducts};
