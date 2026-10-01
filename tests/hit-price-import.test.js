@@ -23,9 +23,22 @@ function fakePool({conflictPack=false,storeConflict=false,failRow=false,failComm
  }
  return{query,connect:async()=>({query,release(){released=true}}),queries,records,get released(){return released}};
 }
+function assertQuarantineScope(call){
+ assert.deepEqual(call.args,[Import.SOURCE,1775,"258","1775"]);assert.match(call.sql,/^UPDATE price_observations po SET truth_eligible=false,status='unsupported-weight-sale-unit' FROM hit_price_import_evidence evidence WHERE /);
+ for(const predicate of["po.id=evidence.observation_id","evidence.source_id=$1","evidence.native_store_id=$2","evidence.native_store_number=$3","evidence.retailer_sku~'^[0-9]+KG$'","po.source=$1","po.source_id=$1","po.store_id=evidence.store_id","po.product_id=evidence.product_id","po.gtin=evidence.gtin","po.external_location_id=$4","po.external_product_id=('hit:store:'||$4||':sku:'||evidence.retailer_sku)","po.truth_eligible=true"])assert(call.sql.includes(predicate),"Legacy quarantine must retain the exact identity/source boundary: "+predicate);
+ assert.equal(call.sql.split(";").filter(text=>text.trim()).length,1,"Quarantine performs one observation update");assert(!/\b(?:INSERT|DELETE|TRUNCATE)\b/i.test(call.sql));assert(!/\bUPDATE\s+(?:products|stores|external_product_mappings|external_store_mappings|hit_price_import_evidence)\b/i.test(call.sql),"Evidence history and canonical identities are retained");
+}
+async function quarantineCases(){
+ for(const rowCount of[3,0,undefined,null,-1,1.5,"2"]){const calls=[],pool={query:async(sql,args)=>{calls.push({sql,args});return{rowCount}}},count=await Import.quarantineUnsupportedWeight(pool);assert.equal(count,rowCount===3?3:0);assert.equal(calls.length,1);assertQuarantineScope(calls[0]);}
+ const events=[],queries=[];let fail=true,releases=0;
+ const pool={query:async()=>{throw Error("Quarantine must execute on its acquired transaction")},connect:async()=>({release(){releases++},query:async(sql,args=[])=>{queries.push({sql,args});if(sql==="BEGIN"||sql==="COMMIT"||sql==="ROLLBACK")events.push(sql);else if(sql.includes("CREATE TABLE IF NOT EXISTS "+Import.TABLE))events.push("schema");else if(sql.startsWith("UPDATE price_observations po")){events.push("quarantine");assertQuarantineScope({sql,args});if(fail)throw Object.assign(Error("quarantine write outage"),{code:"XX000"});return{rowCount:2}}else throw Error("Unexpected schema/quarantine mutation: "+sql);return{rows:[],rowCount:0}}})};
+ await assert.rejects(Import.ensure(pool),error=>error.code==="XX000");assert.deepEqual(events,["BEGIN","schema","quarantine","ROLLBACK"],"Failed quarantine cannot commit schema/admission preparation");assert.equal(releases,1);assert(!queries.some(q=>/\b(?:INSERT INTO|UPDATE)\s+(?:products|stores|external_product_mappings|external_store_mappings)\b/i.test(q.sql)));
+ fail=false;events.length=0;await Import.ensure(pool);assert.deepEqual(events,["BEGIN","schema","quarantine","COMMIT"],"Legacy quarantine is committed after schema creation on the same transaction");assert.equal(releases,2,"A failed schema job can be retried without retaining a rejected cached promise");
+}
 async function main(){
  const previous=Date.now;Date.now=()=>at;
  try{
+  await quarantineCases();
   const good=candidate(),original=clone(good),result=checked(good);assert.equal(result.ok,true);assert.deepEqual(result.pack,{amount:1000,unit:"ml",count:1});assert.equal(result.strictPack,"1000 ml");assert.equal(result.date,"2026-10-01");assert.equal(result.externalLocationId,"1775");assert.equal(result.externalProductId,"hit:store:1775:sku:"+sku);assert.equal(result.candidate.brand,null,"No brand is invented from ja! in the native name");assert.match(result.observationId,/^[a-f0-9]{8}-[a-f0-9]{4}-5[a-f0-9]{3}-a[a-f0-9]{3}-[a-f0-9]{12}$/);assert.deepEqual(good,original);
   for(const change of[{sourceId:"HIT published store assortment"},{merchant:"REWE"},{nativeStoreId:1776},{nativeStoreNumber:"259"},{storeId:"canonical-guess"},{truthEligible:true},{physicalStorePriceVerified:true},{locationScope:"country"},{country:"AT"}])reject({...clone(good),...change},"hit-import-native-source-scope-conflict");
   for(const field of["gtin","price","priceCents","packAmount","packCount","packUnit","brand","name","normalPriceEvidence","depositCents","proofHash","sourceUrl"]){const c=clone(good);c[field]=typeof c[field]==="number"?c[field]+1:"tampered";reject(c,"hit-import-reparsed-candidate-conflict");}

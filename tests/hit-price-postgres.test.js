@@ -46,8 +46,14 @@ async function main(){
   await pool.query("UPDATE price_observations SET external_product_id=$2 WHERE id=$1",[paidObservation,"hit:store:1775:sku:"+oldKilogramSku]);
   await pool.query("UPDATE hit_price_import_evidence SET retailer_sku=$2 WHERE observation_id=$1",[paidObservation,oldKilogramSku]);
   assert.equal((await Query.compareCurrentPrices(pool,input)).results.find(r=>r.merchant==="HIT").price,null,"Already stored kilogram prices are excluded from fixed pack queries");
-  const kilogramStatus=await Refresh.status(pool);assert.equal(kilogramStatus.currentProducts,0);assert.equal(kilogramStatus.currentPrices,0);assert.equal(kilogramStatus.unsupportedKilogramCaptures,1);assert.equal(kilogramStatus.historicalProducts,1,"Excluded observations remain historical evidence");
-  await pool.query("UPDATE price_observations SET external_product_id=$2 WHERE id=$1",[paidObservation,nativeId]);
+  assert.equal(await count(pool,"price_observations","id=$1 AND truth_eligible=true",[paidObservation]),1,"The isolated legacy fixture starts with the incorrect active truth flag");
+  const originalKilogramEvidence=(await pool.query("SELECT * FROM hit_price_import_evidence WHERE observation_id=$1",[paidObservation])).rows[0];
+  assert.equal(await Import.quarantineUnsupportedWeight(pool),1,"Deactivate only the matching legacy source/store/SKU weight observation");
+  assert.equal(await Import.quarantineUnsupportedWeight(pool),0,"The source repair is idempotent");
+  assert.deepEqual((await pool.query("SELECT truth_eligible,status FROM price_observations WHERE id=$1",[paidObservation])).rows[0],{truth_eligible:false,status:"unsupported-weight-sale-unit"});
+  assert.deepEqual((await pool.query("SELECT * FROM hit_price_import_evidence WHERE observation_id=$1",[paidObservation])).rows[0],originalKilogramEvidence,"Original native evidence, hashes, capture times and price remain unchanged");
+  const quarantinedStatus=await Refresh.status(pool);assert.equal(quarantinedStatus.truthEligibleKilogramCaptures,0);assert.equal(quarantinedStatus.unsupportedKilogramCaptures,1);assert.equal(quarantinedStatus.currentPrices,0);assert.equal(quarantinedStatus.currentProducts,0);assert.equal(quarantinedStatus.historicalProducts,1,"Excluded observations remain historical evidence");
+  await pool.query("UPDATE price_observations SET external_product_id=$2,truth_eligible=true,status='observed' WHERE id=$1",[paidObservation,nativeId]);
   await pool.query("UPDATE hit_price_import_evidence SET retailer_sku=$2 WHERE observation_id=$1",[paidObservation,sku]);
   assert.equal((await Refresh.status(pool)).unsupportedKilogramCaptures,0);
   const coverageColumn=(await pool.query("SELECT data_type FROM information_schema.columns WHERE table_name=$1 AND column_name='scan_coverage'",[Refresh.TABLE])).rows[0];assert.equal(coverageColumn.data_type,"jsonb","The persisted category coverage schema is real PostgreSQL DDL");
