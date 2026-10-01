@@ -1016,6 +1016,22 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
 /* v7.270 remove low-quality retailer strip */
 .market-strip-v264{display:none!important}
 .hero-v264{margin-bottom:16px!important}
+</style><style>
+/* v7.271 local photoreal hero asset */
+.hero-basket,.grocery-photo{display:none!important}
+.hero-v264{min-height:290px!important;padding:30px 25px 22px!important;background:radial-gradient(circle at 82% 35%,#0a7b4d 0,#05623f 27%,#004b35 68%,#003d2e 100%)!important;margin-bottom:16px!important}
+.hero-v264 .hero-copy{width:67%!important;position:relative!important;z-index:5!important}
+.hero-v264 h1{font-size:42px!important;line-height:.94!important;max-width:360px!important}
+.hero-v264 p{font-size:13px!important;max-width:225px!important;margin-top:18px!important}
+.hero-photo-real{position:absolute;right:-15px;bottom:-11px;width:51%;z-index:3;pointer-events:none}
+.hero-photo-real img{display:block;width:100%;height:auto;filter:drop-shadow(0 14px 15px rgba(0,0,0,.24))}
+@media(max-width:430px){
+ .hero-v264{min-height:270px!important;padding:26px 22px 20px!important}
+ .hero-v264 .hero-copy{width:68%!important}
+ .hero-v264 h1{font-size:39px!important;max-width:325px!important}
+ .hero-v264 p{font-size:12px!important;max-width:205px!important}
+ .hero-photo-real{width:52%!important;right:-18px!important;bottom:-7px!important}
+}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
 <div class="top"><div class="brand"><span class="brand-word">Sparkorb</span><span class="spark-mark" aria-hidden="true"><svg viewBox="0 0 40 48"><path d="M20 2.8C10.6 2.8 3.8 9.8 3.8 18.7c0 11.7 16.2 26.1 16.2 26.1s16.2-14.4 16.2-26.1C36.2 9.8 29.4 2.8 20 2.8Z"/><path class="basket" d="M11.8 18h16.4l-2.2 9.2H14L11.8 18Zm3.2 0 2.1-4.5m7.9 4.5-2.1-4.5"/><circle class="basket" cx="16.2" cy="30.7" r="1.25"/><circle class="basket" cx="24.2" cy="30.7" r="1.25"/></svg></span><span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
@@ -1024,35 +1040,7 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
     <h1>Wissen, wo’s<br>günstiger ist.</h1>
     <p>Dein Einkauf. Preise in deiner Nähe vergleichen.</p>
   </div>
-  <div class="hero-basket" aria-hidden="true">
-  <svg viewBox="0 0 310 260" role="presentation">
-    <defs>
-      <linearGradient id="basketG" x1="0" x2="1"><stop stop-color="#0a4d36"/><stop offset=".55" stop-color="#087048"/><stop offset="1" stop-color="#06452f"/></linearGradient>
-      <linearGradient id="breadG" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f1c16e"/><stop offset=".55" stop-color="#b96f2d"/><stop offset="1" stop-color="#8d4b1f"/></linearGradient>
-      <linearGradient id="leafG" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b7e95b"/><stop offset=".55" stop-color="#54a92d"/><stop offset="1" stop-color="#1f742b"/></linearGradient>
-      <radialGradient id="tomG" cx=".35" cy=".25"><stop stop-color="#ff6651"/><stop offset=".55" stop-color="#e52f23"/><stop offset="1" stop-color="#a81718"/></radialGradient>
-      <filter id="shadow"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-opacity=".3"/></filter>
-    </defs>
-    <g filter="url(#shadow)">
-      <path d="M215 28c21-13 43-5 48 13l30 116-33 8-30-99-17 5z" fill="url(#breadG)"/>
-      <path d="M229 45l17-7m-12 27l18-7m-11 28l18-7" stroke="#f7d89d" stroke-width="5" stroke-linecap="round" opacity=".8"/>
-      <g fill="url(#leafG)">
-        <circle cx="129" cy="67" r="36"/><circle cx="162" cy="54" r="32"/><circle cx="191" cy="78" r="39"/><circle cx="105" cy="94" r="31"/><circle cx="156" cy="91" r="42"/>
-      </g>
-      <path d="M81 137c-21-38-12-70 10-76 1 31 14 50 34 68z" fill="#f5d348"/>
-      <path d="M101 140c-10-44 5-71 27-72-9 30-2 53 15 70z" fill="#ffd85a"/>
-      <path d="M187 63h38l9 18v69h-56V81z" fill="#f5f1dd"/><path d="M192 50h25v17h-25z" fill="#1b65a6"/>
-      <g fill="url(#tomG)"><circle cx="150" cy="125" r="30"/><circle cx="190" cy="129" r="31"/><circle cx="221" cy="145" r="28"/></g>
-      <g stroke="#348132" stroke-width="5" fill="none" stroke-linecap="round"><path d="M150 94l2 17m-13-8l13 7 13-8M190 98l0 17m-13-8l13 7 14-9M221 116l0 15m-12-8l12 7 12-8"/></g>
-      <path d="M248 91c22-17 36 3 26 29l-20 54-24-8 15-58z" fill="#226c42"/>
-      <path d="M48 140h235l-24 103H73z" fill="url(#basketG)" stroke="#083c2b" stroke-width="5"/>
-      <path d="M74 163h183M68 192h195M91 143l9 91m40-91l3 94m44-94-3 94m44-94-9 91" stroke="#8dbba4" stroke-width="6" opacity=".75"/>
-      <path d="M67 150C80 72 238 61 272 151" fill="none" stroke="#1b1f1d" stroke-width="13" stroke-linecap="round"/>
-      <path d="M70 150C84 82 235 70 268 151" fill="none" stroke="#818984" stroke-width="4" opacity=".8"/>
-    </g>
-  </svg>
-</div>
-</section>
+  <div class="hero-photo-real" aria-hidden="true"><img src="assets/sparkorb-grocery-hero.webp" alt=""></div></section>
 
 <div class="homeactions coreactions home-main-actions">
 <button class="homeaction" id="homePlan" type="button"><span class="ep-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 5h2l1.8 9.2h10.9l1.8-6.5H6.1"/><circle cx="9" cy="18.5" r="1.2"/><circle cx="17" cy="18.5" r="1.2"/></svg></span><span class="homeaction-copy"><b>Einkauf planen</b><small>Preise vergleichen &amp; sparen</small></span><i class="ep-chevron" aria-hidden="true"></i></button>
