@@ -1,20 +1,23 @@
 "use strict";
-const Client=require("./wolt-retailer-price-client"),Published=require("./wolt-retailer-price-service");
-const SOURCE=Client.SOURCE,REFRESH_MS=15*60*1000,CONTINUATION_MS=60*1000;
+const Clients=require("./wolt-retailer-price-client"),PublishedServices=require("./wolt-retailer-price-service");
+const REFRESH_MS=15*60*1000,CONTINUATION_MS=60*1000,runningSources=new Set();
 // The former HTML cache timestamp gate is replaced by a fresh native venue response.
 // Only its local validation error may retry with the new proof; source denials stay paused.
 const LEGACY_VENUE_CACHE_ERROR="wolt-native-venue-stale-or-future";
-let running=false;
+function createRefresh(profileKey="edekaBerlin"){
+if(arguments.length>1)throw Object.assign(new Error("wolt-venue-profile-not-approved"),{code:"wolt-venue-profile-not-approved"});
+const Client=Clients.createClient(profileKey),Published=PublishedServices.createService(profileKey),SOURCE=Client.SOURCE;
+const legacyCacheFailure=state=>profileKey==="edekaBerlin"&&state.lastError===LEGACY_VENUE_CACHE_ERROR;
 async function ensure(pool){
  if(!pool)throw new Error("database-required");
  await pool.query(`CREATE TABLE IF NOT EXISTS wolt_retailer_catalog_state(source_id text PRIMARY KEY,cursor jsonb,last_completed_at timestamptz,completed_cycles int NOT NULL DEFAULT 0,category_count int NOT NULL DEFAULT 0,categories_completed int NOT NULL DEFAULT 0,pages_fetched int NOT NULL DEFAULT 0,received_cumulative int NOT NULL DEFAULT 0,assortment_hash text,last_error text,retry_after timestamptz,updated_at timestamptz NOT NULL DEFAULT now());`);
 }
 async function load(pool){await ensure(pool);return(await pool.query('SELECT cursor,last_completed_at AS "lastCompletedAt",completed_cycles AS "completedCycles",category_count AS "categoryCount",categories_completed AS "categoriesCompleted",pages_fetched AS "pagesFetched",received_cumulative AS "receivedCumulative",assortment_hash AS "assortmentHash",last_error AS "lastError",retry_after AS "retryAfter",updated_at AS "updatedAt" FROM wolt_retailer_catalog_state WHERE source_id=$1',[SOURCE])).rows[0]||{};}
 async function refresh({pool,maxRequests=24,now=Date.now}={},deps={}){
- if(!pool)throw new Error("database-required");if(running)return{received:0,accepted:0,skipped:"already-running"};running=true;
+ if(!pool)throw new Error("database-required");if(runningSources.has(SOURCE))return{received:0,accepted:0,skipped:"already-running"};runningSources.add(SOURCE);
  try{
   const state=await load(pool),time=now();
-  if(state.retryAfter&&time<new Date(state.retryAfter).getTime()&&state.lastError!==LEGACY_VENUE_CACHE_ERROR)return{received:0,accepted:0,skipped:"source-cooldown",retryAfter:state.retryAfter};
+  if(state.retryAfter&&time<new Date(state.retryAfter).getTime()&&!legacyCacheFailure(state))return{received:0,accepted:0,skipped:"source-cooldown",retryAfter:state.retryAfter};
   let collected;
   try{collected=await(deps.fetchOffers||Client.fetchOffers)({cursor:state.cursor||null,maxRequests:Math.max(3,Math.min(64,Math.floor(Number(maxRequests)||24))),now:()=>new Date(now()).toISOString()});}
   catch(error){
@@ -32,8 +35,10 @@ async function refresh({pool,maxRequests=24,now=Date.now}={},deps={}){
   // Only completed native pages advance the cursor, and only after their quotes are saved.
   await pool.query(`INSERT INTO wolt_retailer_catalog_state(source_id,cursor,last_completed_at,completed_cycles,category_count,categories_completed,pages_fetched,received_cumulative,assortment_hash,last_error,retry_after) VALUES($1,$2::jsonb,CASE WHEN $3 THEN $4::timestamptz ELSE NULL END,CASE WHEN $3 THEN 1 ELSE 0 END,$5,$6,$7,$8,$9,NULL,NULL) ON CONFLICT(source_id) DO UPDATE SET cursor=EXCLUDED.cursor,last_completed_at=CASE WHEN $3 THEN EXCLUDED.last_completed_at ELSE wolt_retailer_catalog_state.last_completed_at END,completed_cycles=wolt_retailer_catalog_state.completed_cycles+CASE WHEN $3 THEN 1 ELSE 0 END,category_count=EXCLUDED.category_count,categories_completed=EXCLUDED.categories_completed,pages_fetched=EXCLUDED.pages_fetched,received_cumulative=EXCLUDED.received_cumulative,assortment_hash=EXCLUDED.assortment_hash,last_error=NULL,retry_after=NULL,updated_at=now()`,[SOURCE,JSON.stringify(collected.complete?null:collected.nextCursor),collected.complete,new Date(now()).toISOString(),collected.categoryCount,collected.categoriesCompleted,Number(collected.pagesFetched)||0,Number(collected.receivedCumulative??collected.received)||0,collected.assortmentHash||null]);
   return{...saved,sourceId:SOURCE,sourceRejected:collected.rejected?.length||0,requests:collected.requests,nextAttemptAt:collected.complete?null:new Date(now()+CONTINUATION_MS).toISOString(),catalog:{publishedAssortmentComplete:collected.complete,physicalStoreAssortmentVerified:false,categoryCount:collected.categoryCount,categoriesCompleted:collected.categoriesCompleted,pagesFetched:collected.pagesFetched,receivedCumulative:collected.receivedCumulative??collected.received,nextCursor:collected.complete?null:collected.nextCursor},scope:{country:"DE",channel:"online",city:"Berlin",nativeVenueId:Client.VENUE_ID},independentOfUserReceipts:true};
- }finally{running=false}
+ }finally{runningSources.delete(SOURCE)}
 }
-async function resumeAt(pool,now=Date.now()){const state=await load(pool);if(state.lastError===LEGACY_VENUE_CACHE_ERROR)return new Date(now).toISOString();const retry=state.retryAfter?new Date(state.retryAfter).getTime():NaN;if(Number.isFinite(retry)&&retry>now)return new Date(retry).toISOString();const updated=state.updatedAt?new Date(state.updatedAt).getTime():NaN;return state.cursor&&!state.lastError&&Number.isFinite(updated)?new Date(updated+CONTINUATION_MS).toISOString():null;}
+async function resumeAt(pool,now=Date.now()){const state=await load(pool);if(legacyCacheFailure(state))return new Date(now).toISOString();const retry=state.retryAfter?new Date(state.retryAfter).getTime():NaN;if(Number.isFinite(retry)&&retry>now)return new Date(retry).toISOString();const updated=state.updatedAt?new Date(state.updatedAt).getTime():NaN;return state.cursor&&!state.lastError&&Number.isFinite(updated)?new Date(updated+CONTINUATION_MS).toISOString():null;}
 async function status(pool){const state=await load(pool);return{sourceId:SOURCE,...state,publishedAssortmentComplete:!state.cursor&&!!state.lastCompletedAt&&!state.lastError&&state.categoryCount>0&&state.categoriesCompleted===state.categoryCount,physicalStoreAssortmentVerified:false,normalPriceClassificationVerified:false,independentOfUserReceipts:true,refreshIntervalMinutes:15,continuationIntervalMinutes:1,nativeVenueId:Client.VENUE_ID,scopeCountry:"DE",scopeChannel:"online",city:"Berlin"};}
-module.exports={SOURCE,REFRESH_MS,CONTINUATION_MS,ensure,refresh,status,resumeAt};
+return{SOURCE,REFRESH_MS,CONTINUATION_MS,ensure,load,refresh,status,resumeAt};
+}
+module.exports={...createRefresh(),createRefresh};

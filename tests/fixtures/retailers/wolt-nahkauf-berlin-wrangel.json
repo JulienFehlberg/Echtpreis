@@ -1,0 +1,5303 @@
+{
+  "fixturePurpose": "Captured anonymous native public responses for parser regressions only; never production price input.",
+  "profileKey": "nahkaufWrangelBerlin",
+  "capturedAt": "2026-10-01T12:30:40.935Z",
+  "venue": {
+    "venue": {
+      "id": "657acc4eba505a018fb31b05",
+      "image_url": "https://imageproxy.wolt.com/assets/673208ab308c8149ae82e6f2",
+      "image_blurhash": "jaRc6P;sX4neTuPbJz8yF2cyh4KY",
+      "brand_logo_image_url": "https://imageproxy.wolt.com/assets/6ab6774f67e2b790c646f417",
+      "brand_logo_image_blurhash": "j1MRRqKp8hkPkPplGXll00tCX;Pt",
+      "brand_slug": "nahcity",
+      "brand_name": "Nahcity",
+      "name": "Nahkauf Wrangelstraße",
+      "description": "nahkauf ist Ihr Supermarkt in der Wrangelstraße. Mit einer ausgewählten Auswahl an Waren des täglichen Bedarfs, frischen Produkten und Grundnahrungsmitteln machen wir das Einkaufen bequem und für jeden zugänglich. Unsere freundliche, lokale Atmosphäre lädt Sie zu einem schnellen und einfachen Einkaufserlebnis ein. Besuchen Sie \"nahkauf\" für Ihren Lebensmittelbedarf, gleich hier in der App.\n\nVerkäufer\nFirma: Oguz GbR\nAnschrift: Wrangelstraße 75, 10997 Berlin\nVertretungsberechtigter: Tuncay Oguz\nE-Mail: support@wolt.com",
+      "rating": {
+        "rating": 3,
+        "score": "8.8",
+        "score_raw": 8.8,
+        "volume": 50
+      },
+      "opening_times_schedule": [
+        {
+          "day": "Montag",
+          "formatted_times": "09:00–20:00"
+        },
+        {
+          "day": "Dienstag",
+          "formatted_times": "09:00–20:00"
+        },
+        {
+          "day": "Mittwoch",
+          "formatted_times": "09:00–20:00"
+        },
+        {
+          "day": "Donnerstag",
+          "formatted_times": "09:00–20:00"
+        },
+        {
+          "day": "Freitag",
+          "formatted_times": "09:00–20:00"
+        },
+        {
+          "day": "Samstag",
+          "formatted_times": "Geschlossen"
+        },
+        {
+          "day": "Sonntag",
+          "formatted_times": "Geschlossen"
+        }
+      ],
+      "delivery_times_schedule": [
+        {
+          "day": "Montag",
+          "formatted_times": "09:00–20:00"
+        },
+        {
+          "day": "Dienstag",
+          "formatted_times": "09:00–20:00"
+        },
+        {
+          "day": "Mittwoch",
+          "formatted_times": "09:00–20:00"
+        },
+        {
+          "day": "Donnerstag",
+          "formatted_times": "09:00–20:00"
+        },
+        {
+          "day": "Freitag",
+          "formatted_times": "09:00–20:00"
+        },
+        {
+          "day": "Samstag",
+          "formatted_times": "Geschlossen"
+        },
+        {
+          "day": "Sonntag",
+          "formatted_times": "Geschlossen"
+        }
+      ],
+      "group_order_enabled": true,
+      "share_url": "https://wolt.com/de/deu/berlin/venue/nahcity-wrangelstrae",
+      "delivery_methods": [
+        "takeaway",
+        "homedelivery"
+      ],
+      "currency": "EUR",
+      "active_menu": "6596759852c6b1193b975ad3",
+      "address": "Wrangelstraße 75",
+      "city": "Berlin",
+      "country": "DEU",
+      "type": "purchase",
+      "website": null,
+      "substitutions_enabled": true,
+      "post_code": "10997",
+      "product_line": "grocery",
+      "secondary_product_line": "supermarket",
+      "phone": "+49306125187",
+      "self_delivery": false,
+      "timezone": "Europe/Berlin",
+      "delivery_base_price": 99,
+      "delivery_geo_range": {
+        "bbox": null,
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              13.459596527585965,
+              52.54646881632283
+            ],
+            [
+              13.474852854950733,
+              52.543651085839336
+            ],
+            [
+              13.48890939824622,
+              52.53907572513766
+            ],
+            [
+              13.501224844241376,
+              52.532919078021095
+            ],
+            [
+              13.511325524558474,
+              52.525418348297144
+            ],
+            [
+              13.518823677667124,
+              52.5168623914455
+            ],
+            [
+              13.523432288031778,
+              52.50758052156719
+            ],
+            [
+              13.524975942016967,
+              52.49792977788677
+            ],
+            [
+              13.523397310268956,
+              52.48828115203423
+            ],
+            [
+              13.518759047165847,
+              52.479005313221435
+            ],
+            [
+              13.511241080694205,
+              52.47045838250241
+            ],
+            [
+              13.50113344280405,
+              52.46296829983588
+            ],
+            [
+              13.488824954276076,
+              52.45682229978547
+            ],
+            [
+              13.474788224299717,
+              52.45225596523747
+            ],
+            [
+              13.459561549717247,
+              52.44944426584053
+            ],
+            [
+              13.443728400000003,
+              52.448494911674466
+            ],
+            [
+              13.427895250282734,
+              52.44944426584053
+            ],
+            [
+              13.412668575700291,
+              52.45225596523747
+            ],
+            [
+              13.39863184572393,
+              52.45682229978547
+            ],
+            [
+              13.386323357195955,
+              52.46296829983588
+            ],
+            [
+              13.376215719305776,
+              52.47045838250241
+            ],
+            [
+              13.368697752834159,
+              52.479005313221435
+            ],
+            [
+              13.36405948973105,
+              52.48828115203423
+            ],
+            [
+              13.362480857983014,
+              52.49792977788677
+            ],
+            [
+              13.364024511968204,
+              52.50758052156719
+            ],
+            [
+              13.368633122332882,
+              52.5168623914455
+            ],
+            [
+              13.376131275441534,
+              52.525418348297144
+            ],
+            [
+              13.38623195575863,
+              52.532919078021095
+            ],
+            [
+              13.398547401753786,
+              52.53907572513766
+            ],
+            [
+              13.412603945049273,
+              52.543651085839336
+            ],
+            [
+              13.42786027241404,
+              52.54646881632283
+            ],
+            [
+              13.443728400000003,
+              52.54742028832552
+            ],
+            [
+              13.459596527585965,
+              52.54646881632283
+            ]
+          ]
+        ]
+      },
+      "service_fee_short_description": null,
+      "service_fee_estimate": {
+        "min": 99,
+        "max": 359,
+        "percentage": 8
+      },
+      "feature_croatia_currency_selection_enabled": false,
+      "show_eco_packaging": false,
+      "is_pickup_friendly": false,
+      "age_verification_method": "age_verification",
+      "trader_information": null,
+      "show_delivery_preestimate_by_time": false,
+      "merchant": {
+        "id": "657ac4eaba505a018fb31af6",
+        "name": "GbR Turgay Oguz und Tüncay Oguz",
+        "business_id": "-",
+        "street_address": "Wrangelstraße 75",
+        "city": "Berlin",
+        "post_code": "10997",
+        "country": "Deutschland"
+      },
+      "digital_services_act_information": {
+        "name": null,
+        "business_id": null,
+        "address": null,
+        "self_certification": "Der Partner verpflichtet sich, nur Produkte und/oder Dienstleistungen in Übereinstimmung mit den geltenden Gesetzen anzubieten.",
+        "report_item_url": "https://www.surveymonkey.com/r/VHFTCJX"
+      },
+      "slug": "nahcity-wrangelstrae",
+      "venue_supports_wolt_pay": false,
+      "group_order_id": null,
+      "info": {
+        "venue_info_service_fee_description": null,
+        "venue_info_order_minimum": "€25.00",
+        "venue_info_base_delivery_price": "€0.99"
+      },
+      "zero_distance_fees": {
+        "delivery_price": 99
+      },
+      "return_policy_display": null
+    },
+    "venue_raw": {
+      "id": "657acc4eba505a018fb31b05",
+      "name": "Nahkauf Wrangelstraße",
+      "image_url": "https://imageproxy.wolt.com/assets/673208ab308c8149ae82e6f2",
+      "image_blurhash": "jaRc6P;sX4neTuPbJz8yF2cyh4KY",
+      "brand_logo_image_url": "https://imageproxy.wolt.com/assets/6ab6774f67e2b790c646f417",
+      "brand_logo_image_blurhash": "j1MRRqKp8hkPkPplGXll00tCX;Pt",
+      "description": "nahkauf ist Ihr Supermarkt in der Wrangelstraße. Mit einer ausgewählten Auswahl an Waren des täglichen Bedarfs, frischen Produkten und Grundnahrungsmitteln machen wir das Einkaufen bequem und für jeden zugänglich. Unsere freundliche, lokale Atmosphäre lädt Sie zu einem schnellen und einfachen Einkaufserlebnis ein. Besuchen Sie \"nahkauf\" für Ihren Lebensmittelbedarf, gleich hier in der App.\n\nVerkäufer\nFirma: Oguz GbR\nAnschrift: Wrangelstraße 75, 10997 Berlin\nVertretungsberechtigter: Tuncay Oguz\nE-Mail: support@wolt.com",
+      "group_order_enabled": true,
+      "share_url": "https://wolt.com/de/deu/berlin/venue/nahcity-wrangelstrae",
+      "delivery_methods": [
+        "takeaway",
+        "homedelivery"
+      ],
+      "currency": "EUR",
+      "opening_times": {
+        "monday": [
+          {
+            "type": "open",
+            "value": 32400
+          },
+          {
+            "type": "close",
+            "value": 72000
+          }
+        ],
+        "tuesday": [
+          {
+            "type": "open",
+            "value": 32400
+          },
+          {
+            "type": "close",
+            "value": 72000
+          }
+        ],
+        "wednesday": [
+          {
+            "type": "open",
+            "value": 32400
+          },
+          {
+            "type": "close",
+            "value": 72000
+          }
+        ],
+        "thursday": [
+          {
+            "type": "open",
+            "value": 32400
+          },
+          {
+            "type": "close",
+            "value": 72000
+          }
+        ],
+        "friday": [
+          {
+            "type": "open",
+            "value": 32400
+          },
+          {
+            "type": "close",
+            "value": 72000
+          }
+        ],
+        "saturday": [],
+        "sunday": []
+      },
+      "preorder_config": null,
+      "preorder_specs": null,
+      "ncd_allowed": true,
+      "tipping": {
+        "currency": "EUR",
+        "tip_amounts": [
+          100,
+          200,
+          500
+        ],
+        "max_amount": 10000,
+        "min_amount": 50,
+        "type": "pre_tipping_amount"
+      },
+      "delivery_note": null,
+      "public_visible": true,
+      "bag_fee": null,
+      "comment_disabled": false,
+      "short_description": "nahcity - Ihr lokaler Grocery Stop",
+      "city_id": "5eea1cefe4dfc5412595a1f2",
+      "merchant": "657ac4eaba505a018fb31af6",
+      "show_allergy_disclaimer_on_menu": false,
+      "price_range": 2,
+      "item_cards_enabled": true,
+      "service_fee_description": null,
+      "food_tags": [
+        "Lebensmittel",
+        "Supermarkt"
+      ],
+      "allowed_payment_methods": [
+        "card"
+      ],
+      "food_safety_reports": null,
+      "is_wolt_plus": true,
+      "categories": [
+        {
+          "primary": true,
+          "name": "Lebensmittel",
+          "link_slug": "category-grocery:berlin",
+          "slug": "grocery"
+        },
+        {
+          "primary": false,
+          "name": "Supermärkte",
+          "link_slug": "category-supermarkets:berlin",
+          "slug": "supermarkets"
+        }
+      ],
+      "rating": {
+        "rating": 3,
+        "score": "8.8",
+        "score_raw": 8.8,
+        "volume": 50
+      },
+      "location": {
+        "bbox": null,
+        "type": "Point",
+        "coordinates": [
+          13.4437284,
+          52.4979576
+        ]
+      },
+      "string_overrides": {
+        "weighted_items_popup_disclaimer": null,
+        "restricted_item_bottom_sheet_title": "Altersnachweis erforderlich",
+        "restricted_item_bottom_sheet_info": "Deine Bestellung beinhaltet Artikel mit Altersbeschränkung. Bitte bestätige, dass du und der/die Empfänger*in rechtlich dazu befugt seid, sie zu kaufen. Bei der Übergabe musst du einen gültigen LichtbildausweisID vorweisen.\n\nBist du berechtigt, diese Artikel zu kaufen?",
+        "restricted_item_bottom_sheet_confirm": "Ja, darf ich"
+      }
+    },
+    "order_minimum": 2500
+  },
+  "listing": {
+    "assortment_id": "6596759852c6b1193b975ad3",
+    "loading_strategy": "partial",
+    "primary_language": "de",
+    "selected_language": "de",
+    "available_languages": [
+      {
+        "autotranslated": false,
+        "language": "de",
+        "name": "Deutsch"
+      },
+      {
+        "autotranslated": true,
+        "language": "en",
+        "name": "Englisch"
+      },
+      {
+        "autotranslated": true,
+        "language": "tr",
+        "name": "Türkisch"
+      }
+    ],
+    "compliance_info": {
+      "badges": [],
+      "disclaimers": {
+        "caffeine": "*Weitere Informationen über den Koffeingehalt erhältst du in den Produktinformationen oder im Warenkorb"
+      },
+      "how_search_works": {
+        "url": "https://explore.wolt.com/de/deu/how-search-works",
+        "type": "text"
+      },
+      "lowest_price_calculation_interval_in_days": 30,
+      "should_display_original_price_for_unit_price": false,
+      "should_display_price_by_subtracting_deposit": true
+    },
+    "categories": [
+      {
+        "id": "ec3b0d47d9616102baeac4cd",
+        "description": "Fruchtige Ernte 🍌🍏🍊 Ob für den Snack zwischendurch, das Frühstück oder den Smoothie – hier wird’s süß & saftig.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e463f070793ad1fdfb46",
+            "blurhash": null
+          }
+        ],
+        "name": "Obst",
+        "slug": "obst-1",
+        "subcategories": [
+          {
+            "id": "f783131cb30339b92733e4c3",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/ce795e2c-4776-11f0-a934-facf5b4a06cf_2080000006989.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Äpfel & Birnen",
+            "slug": "apfel-birnen-2",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "837f3d90b1d06e6577b5cae8",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/c9d1ad98-4776-11f0-88a2-2af28d2f654b_94001112.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Bananen & Exotische Früchte",
+            "slug": "bananen-exotische-fruchte-3",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "cae36ed24bc49be6e9fb4ce1",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/ce6cf9f2-4776-11f0-b342-1a60abd023f2_4007601174655.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Trauben & Beeren",
+            "slug": "trauben-beeren-4",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "c7984b2e1e250ac5c31fc4fa",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/d4b7394e-4776-11f0-b4cf-8afa933a68b9_4251003525007.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Melonen",
+            "slug": "melonen-5",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "49b6edd282e644f4b992dcbd",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6868ca14e7272b281acc03a3",
+                "blurhash": null
+              }
+            ],
+            "name": "Pfirsiche & Steinfrüchte",
+            "slug": "pfirsiche-steinfruchte-6",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "7d5d89dce839af4593c912ea",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/680f9192ccc5d896a408e60e",
+                "blurhash": null
+              }
+            ],
+            "name": "Zitronen, Orangen & Zitrusfrüchte",
+            "slug": "zitronen-orangen-zitrusfruchte-7",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "c9d921b9d5be7d38b9c255c5",
+            "description": ".",
+            "images": [],
+            "name": "Tiefkühl-Obst & Beeren",
+            "slug": "tiefkuhl-obst-beeren-8",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "f5624cc2dc56599d13a167e2",
+        "description": "Gemüse zum Kochen, Snacken & Verfeinern 🍅🥦🌽 Frisch, bunt und voll Vitamine – direkt bereit für dein Rezept.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e4bfcd0321dabf32db6a",
+            "blurhash": null
+          }
+        ],
+        "name": "Gemüse",
+        "slug": "gemuse-9",
+        "subcategories": [
+          {
+            "id": "5216812caf76678f358c2790",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/6bb47f8a-4a99-11f0-8a0f-2a7e641280d5_2010030785745.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Kartoffeln & Wurzelgemüse",
+            "slug": "kartoffeln-wurzelgemuse-10",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "6ca4d5fb6d22dbe9abf86ac8",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/6e425f88-4a99-11f0-ac68-b21915f04067_2010031575857.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Tomaten, Gurke & Paprika",
+            "slug": "tomaten-gurke-paprika-11",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "51c38476b6039996496257e6",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/6ba252a6-4a99-11f0-8b9f-0a9fba53ea5d_2010005021816.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Kohl & Staudengemüse",
+            "slug": "kohl-staudengemuse-12",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "77c474dd3c8acac2e5fe1930",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/4dae547c-4a9c-11f0-aca8-36cb40df41e2_3182340511211.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Zucchini, Aubergine, Kürbis & Mais",
+            "slug": "zucchini-aubergine-kurbis-mais-13",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "8301e781c49b1d95111257a8",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/4aff9088-4a9c-11f0-a032-ceaf2df734b7_2010033032297.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Zwiebeln, Lauch & Knoblauch",
+            "slug": "zwiebeln-lauch-knoblauch-14",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "bb6304a1c894e0b6ae2487bb",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/4aeac73e-4a9c-11f0-9a4a-f6602b5a2e1f_2010026669950.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Pilze",
+            "slug": "pilze-15",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "e27433d2c952c3c1bca0b0ed",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/6e42a510-4a99-11f0-aabc-b21915f04067_4010420899036.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Salat & Grünes",
+            "slug": "salat-grunes-16",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "4337a124ac6ad701737fba56",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/5021f4ac-4a9c-11f0-bce9-caa7c8d6453f_4038813006953.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Kräuter & Sprossen",
+            "slug": "krauter-sprossen-17",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "da69f406f1f519efa89597f8",
+            "description": ".",
+            "images": [],
+            "name": "Tiefkühl-Gemüse & Kräuter",
+            "slug": "tiefkuhl-gemuse-krauter-18",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "19b0aa622060e9f4c6bd1a40",
+        "description": "Backwaren, den ganzen Tag, jeden Tag 🍞🥐 Von Brot über Baguette bis zum süßen Gebäck – zum Aufbacken oder direkt genießen.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e48ef070793ad1fdfb5d",
+            "blurhash": null
+          }
+        ],
+        "name": "Backwaren",
+        "slug": "backwaren-19",
+        "subcategories": [
+          {
+            "id": "7c9c51ad6d3557bcabd6eb80",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6aa78a9cdff3479d56047e11",
+                "blurhash": null
+              }
+            ],
+            "name": "Frische Backwaren",
+            "slug": "frische-backwaren-20",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "43ea5f5b5f9c7acd068fb1df",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d1e9f26a83156918e11db",
+                "blurhash": null
+              }
+            ],
+            "name": "Brötchen, Baguette & Ciabatta",
+            "slug": "brotchen-baguette-ciabatta-21",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "851c18e927167f4cfb92175b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d224d26a83156918e166d",
+                "blurhash": null
+              }
+            ],
+            "name": "Geschnittenes Brot & Toast",
+            "slug": "geschnittenes-brot-toast-22",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "7c4477fee9ede6f687568d25",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/683daec16d01a12fb3c0174f",
+                "blurhash": null
+              }
+            ],
+            "name": "Wraps & Buns",
+            "slug": "wraps-buns-23",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "08803416aed813939368efd9",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/68811168494117b965bf8c4b",
+                "blurhash": null
+              }
+            ],
+            "name": "Spezialbrote",
+            "slug": "spezialbrote-24",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "42d9fe538a5fba14b2a8c5da",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/667942307cb0090848aca1e5",
+                "blurhash": null
+              }
+            ],
+            "name": "Gebäck & Kuchen",
+            "slug": "geback-kuchen-25",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "1e3c396f47acc5131b37cf3b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d276a6155cf1e5116984f",
+                "blurhash": null
+              }
+            ],
+            "name": "Zwieback & Knäckebrot",
+            "slug": "zwieback-knackebrot-26",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "b3b26a8e477974b3a58c4a6c",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/677f127b950e5960fc4e9984",
+                "blurhash": null
+              }
+            ],
+            "name": "Glutenfrei",
+            "slug": "glutenfrei-27",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "8327d29ef0f899b18a45d182",
+        "description": "Zart, deftig, frisch 🍖🐟 Hier findest du alles für dein Hauptgericht – vom Schnitzel bis zum Lachsfilet.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68d502ffb79b92e0a85408a2",
+            "blurhash": null
+          }
+        ],
+        "name": "Fleisch & Fisch",
+        "slug": "fleisch-fisch-28",
+        "subcategories": [
+          {
+            "id": "8acf4f35c7f691188fdc1f05",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d1cac26a83156918e1127",
+                "blurhash": null
+              }
+            ],
+            "name": "Rind & Kalb",
+            "slug": "rind-kalb-31",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "0c54a97eaebac8848e118963",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d215a26a83156918e1423",
+                "blurhash": null
+              }
+            ],
+            "name": "Würstchen",
+            "slug": "wurstchen-32",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "b4bbadb647dfc462bd4f78ea",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66cd349c0b604a7eaa2b680e",
+                "blurhash": null
+              }
+            ],
+            "name": "Fisch & Meeresfrüchte",
+            "slug": "fisch-meeresfruchte-34",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f7a4cc91301660757af1b86c",
+            "description": ".",
+            "images": [],
+            "name": "Tofu & Fleischalternativen",
+            "slug": "tofu-fleischalternativen-35",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "0662c745b05c954b07719d84",
+        "description": "Perfekt fürs Frühstück oder Abendbrot 🥪✨ Ob Salami, Schinken oder vegetarische Snacks – direkt aufs Brot.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e47cf070793ad1fdfb51",
+            "blurhash": null
+          }
+        ],
+        "name": "Aufschnitt",
+        "slug": "aufschnitt-36",
+        "subcategories": [
+          {
+            "id": "abb2574a35742515ed61dffb",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d1d5026a83156918e1163",
+                "blurhash": null
+              }
+            ],
+            "name": "Salami",
+            "slug": "salami-37",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "757e9ee3f76104742635b1c4",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/670fbaf73d9a2e601bb9d774",
+                "blurhash": null
+              }
+            ],
+            "name": "Schinken & Speck",
+            "slug": "schinken-speck-39",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "364746c8d9a57ef18f30b8bb",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d219626a83156918e153a",
+                "blurhash": null
+              }
+            ],
+            "name": "Fleischwurst & Mortadella",
+            "slug": "fleischwurst-mortadella-40",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "139fe5d01b0d5799e40e7952",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/667934bc35e1b1789b0408c8",
+                "blurhash": null
+              }
+            ],
+            "name": "Streichwurst & Pasteten",
+            "slug": "streichwurst-pasteten-41",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "b369cbc1537a9cda666791db",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679423654b6864072b16ad4",
+                "blurhash": null
+              }
+            ],
+            "name": "Würstchen & Snacks",
+            "slug": "wurstchen-snacks-42",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "4c0a556d562fb58b906e8950",
+            "description": ".",
+            "images": [],
+            "name": "Wurst & Käsealternativen",
+            "slug": "wurst-kasealternativen-43",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "7c8b0f45cdd308b06cf108c3",
+        "description": "Basics für jeden Tag 🥚🥛 Von Eiern über Milch bis Butter – frisch & unverzichtbar für die Küche.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e4ed52f5fcdd085a8e85",
+            "blurhash": null
+          }
+        ],
+        "name": "Eier & Molkerei",
+        "slug": "eier-molkerei-44",
+        "subcategories": [
+          {
+            "id": "d1640d12a73f471cbf47cec5",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/688100d502a50c046d199edf",
+                "blurhash": null
+              }
+            ],
+            "name": "Butter & Margarine",
+            "slug": "butter-margarine-45",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "dff52b2b813eadf6741b7958",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6881027d494117b965bf8a6d",
+                "blurhash": null
+              }
+            ],
+            "name": "Eier",
+            "slug": "eier-46",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "9af3c734d9ac1a156aaab6f4",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/68ac75c92f2683b7eadfe591",
+                "blurhash": null
+              }
+            ],
+            "name": "Milch",
+            "slug": "milch-47",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "ed2c3b4f14f76fa843583f7e",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6720cfa70d03032c8b442b81",
+                "blurhash": null
+              }
+            ],
+            "name": "Milchgetränke & Trinkjoghurt",
+            "slug": "milchgetranke-trinkjoghurt-48",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "c5c5aec365181ea50437b0b9",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d182a26a83156918e0fe4",
+                "blurhash": null
+              }
+            ],
+            "name": "Sahne & Schmand",
+            "slug": "sahne-schmand-49",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "576bda9584d9428ee5ec330f",
+            "description": ".",
+            "images": [],
+            "name": "Milch- & Sahnealternativen",
+            "slug": "milch-sahnealternativen-50",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "a9e60e6d01b6d13d45a56c62",
+        "description": "Cremiger Genuss zum Löffeln 🍓🍮 Joghurt, Skyr, Quark & Desserts für den süßen Moment.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e53852f5fcdd085a8ea3",
+            "blurhash": null
+          }
+        ],
+        "name": "Joghurt & Desserts",
+        "slug": "joghurt-desserts-51",
+        "subcategories": [
+          {
+            "id": "65898b51da51ecd6f35658d3",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/68810e3302a50c046d19a079",
+                "blurhash": null
+              }
+            ],
+            "name": "Naturjoghurt & Skyr",
+            "slug": "naturjoghurt-skyr-52",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "8dde781c550272c75dc09c9d",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880fd8602a50c046d199e70",
+                "blurhash": null
+              }
+            ],
+            "name": "Fruchtjoghurt",
+            "slug": "fruchtjoghurt-53",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "2141898de89374c5e6cee1f0",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67b1715ac03d2d30f98598ac",
+                "blurhash": null
+              }
+            ],
+            "name": "Skyr & Quark",
+            "slug": "skyr-quark-54",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "37e3ef7900dc534b33b21e39",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/680f939b4135616ae81a9d71",
+                "blurhash": null
+              }
+            ],
+            "name": "Pudding & Milchreis",
+            "slug": "pudding-milchreis-55",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "86de3cde01789e9b0f20a0d0",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d17d026a83156918e0fca",
+                "blurhash": null
+              }
+            ],
+            "name": "Desserts",
+            "slug": "desserts-56",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f513144965fe32fc6fddcae3",
+            "description": ".",
+            "images": [],
+            "name": "Joghurt- & Dessertalternativen",
+            "slug": "joghurt-dessertalternativen-57",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "3a225b74d68904d94dcaa2dc",
+        "description": "Käse geht immer 🧀💛 Von Mozzarella über Reibekäse bis hin zur Spezialität – mild, würzig, streichzart.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e54652f5fcdd085a8ea9",
+            "blurhash": null
+          }
+        ],
+        "name": "Käse",
+        "slug": "kase-58",
+        "subcategories": [
+          {
+            "id": "27255ac94dd9053b5edeeb66",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66793a66bfc2441871a6677e",
+                "blurhash": null
+              }
+            ],
+            "name": "Schnittkäse",
+            "slug": "schnittkase-60",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "c4d54d656ea4e721e064c826",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d193526a83156918e105a",
+                "blurhash": null
+              }
+            ],
+            "name": "Stück- & Reibekäse",
+            "slug": "stuck-reibekase-61",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "85e97100e0486ce1ee95c16b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66b7ca4ea857d479f51e2e41",
+                "blurhash": null
+              }
+            ],
+            "name": "Frischkäse",
+            "slug": "frischkase-62",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "38024502af7e055bf68e777d",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d1cc926a83156918e1131",
+                "blurhash": null
+              }
+            ],
+            "name": "Mozzarella & Feta",
+            "slug": "mozzarella-feta-63",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "af169abe718d31722b2fcd2c",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d181c26a83156918e0fdf",
+                "blurhash": null
+              }
+            ],
+            "name": "Weichkäse",
+            "slug": "weichkase-64",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "980b0229b717a9fd4497456a",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67332cec61b626cee865ff0d/27c79010-0010-11f0-8acb-be948e90d1bc_67d2c75934d7db09bfee99e4.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Käsespezialitäten",
+            "slug": "kasespezialitaten-65",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "364f0c0964f5aedeea89bfb1",
+            "description": ".",
+            "images": [],
+            "name": "Käse & Wurstalternativen",
+            "slug": "kase-wurstalternativen-66",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "a8ef14f9ce7b62fce01b0187",
+        "description": "Frisch, schnell & lecker 🥙⏱️ Bowls, Wraps, Salate und mehr – ready to eat, ohne Aufwand.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e576cd0321dabf32db93",
+            "blurhash": null
+          }
+        ],
+        "name": "Frisch & Fertig",
+        "slug": "frisch-fertig-67",
+        "subcategories": [
+          {
+            "id": "ece0f70ad32b26839bf69acd",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/683dafd93d7fb86430ed56c9",
+                "blurhash": null
+              }
+            ],
+            "name": "Sushi & Co.",
+            "slug": "sushi-co-69",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "3ee78f7b4e17c5d26816fe5e",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66793ec7a1ccf454349a2468",
+                "blurhash": null
+              }
+            ],
+            "name": "Sandwiches & Wraps",
+            "slug": "sandwiches-wraps-70",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "6b2ed48dd265a9fabcda58c8",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a61a10e7dc307a2305e762",
+                "blurhash": null
+              }
+            ],
+            "name": "Salate & Feinkost",
+            "slug": "salate-feinkost-71",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "b8102a29b79ab5024ba47a3c",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d214d26a83156918e13e7",
+                "blurhash": null
+              }
+            ],
+            "name": "Schnelle Küche",
+            "slug": "schnelle-kuche-72",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "042982a90d6324fa82f7a51f",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d257126a83156918e1771",
+                "blurhash": null
+              }
+            ],
+            "name": "Frische Nudeln",
+            "slug": "frische-nudeln-73",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "349a510e4ab0e9ca8c4ac659",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d218126a83156918e14d8",
+                "blurhash": null
+              }
+            ],
+            "name": "Frische Aufstriche",
+            "slug": "frische-aufstriche-76",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "04b360454c1252266ecfcda4",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880f4f6494117b965bf8512",
+                "blurhash": null
+              }
+            ],
+            "name": "Gekühlte Säfte & Smoothies",
+            "slug": "gekuhlte-safte-smoothies-77",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "d69e7cdaeded8a330ae1f627",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a47e2d72bb8011bfb2c19f",
+                "blurhash": null
+              }
+            ],
+            "name": "Kaffeegetränke",
+            "slug": "kaffeegetranke-78",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f48b55c937a41b159ba23dac",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d39ec6155cf1e51169f45",
+                "blurhash": null
+              }
+            ],
+            "name": "Salatdressing",
+            "slug": "salatdressing-79",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "5e137cf1986258ccb21ed152",
+            "description": ".",
+            "images": [],
+            "name": "Vegetarische Fertiggerichte",
+            "slug": "vegetarische-fertiggerichte-80",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "64cc2ce8bc8f763b8cd2084d",
+        "description": "Pflanzlich genießen 🌿🌍 Milch-, Fleisch- & Käsealternativen sowie vegane Snacks & mehr.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/6a5a3126de79d3eb0c379154",
+            "blurhash": null
+          }
+        ],
+        "name": "Vegan & Vegetarisch",
+        "slug": "vegan-vegetarisch-81",
+        "subcategories": [
+          {
+            "id": "d98c2a98fc552f18585828d1",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/68810273494117b965bf8a5e",
+                "blurhash": null
+              }
+            ],
+            "name": "Milch- & Sahnealternativen",
+            "slug": "milch-sahnealternativen-82",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "fce45a23e04815c875714f22",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679433636d8a70a94115707",
+                "blurhash": null
+              }
+            ],
+            "name": "Joghurt- & Dessertalternativen",
+            "slug": "joghurt-dessertalternativen-83",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "9d2de3068fba18ad579afed1",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686e53b50d7dfa13e6d94de0",
+                "blurhash": null
+              }
+            ],
+            "name": "Tofu & Fleischalternativen",
+            "slug": "tofu-fleischalternativen-84",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "e469295c6bfe6b780fb880fc",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/667935a4ad16d3049c1b217e",
+                "blurhash": null
+              }
+            ],
+            "name": "Käse & Wurstalternativen",
+            "slug": "kase-wurstalternativen-85",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "65a7c7fee4e3847a58c848b8",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6881026e494117b965bf8a56",
+                "blurhash": null
+              }
+            ],
+            "name": "Aufstrichalternativen",
+            "slug": "aufstrichalternativen-86",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "3ccd286a99205f31724a7d18",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d218b26a83156918e1508",
+                "blurhash": null
+              }
+            ],
+            "name": "Fertiggerichte",
+            "slug": "fertiggerichte-87",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "43eca25c81d8b20659951b41",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6a044efa5fc8cc4e14516172",
+                "blurhash": "LtRfg}j[_4j[oefQWEaztRfQRPj?"
+              }
+            ],
+            "name": "Tiefkühlkost",
+            "slug": "tiefkuhlkost-88",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "46cd7dfbee0ff07317dd6a87",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6904887e7891327c0fe83b9d",
+                "blurhash": "LrQmF#a}~qocj^j?bEWXtSj?RPWX"
+              }
+            ],
+            "name": "Süße & Salzige Snacks",
+            "slug": "sue-salzige-snacks-89",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "869f85820792e9d7229037cd",
+        "description": "",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/69b912507c9c9b060ee5c2b5",
+            "blurhash": null
+          }
+        ],
+        "name": "Bio",
+        "slug": "bio-90",
+        "subcategories": [
+          {
+            "id": "a1ce60d91f13da535231a363",
+            "description": ".",
+            "images": [],
+            "name": "Obst",
+            "slug": "obst-91",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "a8e5bf97850cd29c68d90791",
+            "description": ".",
+            "images": [],
+            "name": "Gemüse",
+            "slug": "gemuse-92",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "1410228698849cf54c9b47e1",
+            "description": ".",
+            "images": [],
+            "name": "Backwaren",
+            "slug": "backwaren-93",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "a8573a089a96fc2dc1846424",
+            "description": ".",
+            "images": [],
+            "name": "Fleisch & Fisch",
+            "slug": "fleisch-fisch-94",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f48a64a50896a13ee07b3977",
+            "description": ".",
+            "images": [],
+            "name": "Aufschnitt",
+            "slug": "aufschnitt-95",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "e91e97d1f998be7335064c62",
+            "description": ".",
+            "images": [],
+            "name": "Eier & Molkerei",
+            "slug": "eier-molkerei-96",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "ea2a39e17a6b8b2d0a10b107",
+            "description": ".",
+            "images": [],
+            "name": "Joghurt & Desserts",
+            "slug": "joghurt-desserts-97",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "749bead66c9dc367ae8d646d",
+            "description": ".",
+            "images": [],
+            "name": "Käse",
+            "slug": "kase-98",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "01ad2a8e2a4e75d803792e38",
+            "description": ".",
+            "images": [],
+            "name": "Frisch & Fertig",
+            "slug": "frisch-fertig-99",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "8da12df70f9989c71d942dff",
+            "description": ".",
+            "images": [],
+            "name": "Vegan & Vegetarisch",
+            "slug": "vegan-vegetarisch-100",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "b6650acb27e794f926880389",
+            "description": ".",
+            "images": [],
+            "name": "Wasser & Getränke",
+            "slug": "wasser-getranke-101",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "6343dfbf771f95ff3fdb7b95",
+            "description": ".",
+            "images": [],
+            "name": "Kaffee, Tee & Kakao",
+            "slug": "kaffee-tee-kakao-102",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "ec23c028662ba3c2f4182dc1",
+            "description": ".",
+            "images": [],
+            "name": "Bier & Cider",
+            "slug": "bier-cider-103",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f0e65285025d5f72cd25f027",
+            "description": ".",
+            "images": [],
+            "name": "Wein & Sekt",
+            "slug": "wein-sekt-104",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "48afcac1291f28e26cd23798",
+            "description": ".",
+            "images": [],
+            "name": "Spirituosen",
+            "slug": "spirituosen-105",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "4e9c216863c2305eed3ef3a3",
+            "description": ".",
+            "images": [],
+            "name": "Schokolade & Süßigkeiten",
+            "slug": "schokolade-suigkeiten-106",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "df4c8591e4c95936c3964f5c",
+            "description": ".",
+            "images": [],
+            "name": "Snacks & Chips",
+            "slug": "snacks-chips-107",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "46035cd8dba3d0faf99a216a",
+            "description": ".",
+            "images": [],
+            "name": "Nüsse & Trockenobst",
+            "slug": "nusse-trockenobst-108",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "4e922c2ec9087821ce2236fc",
+            "description": ".",
+            "images": [],
+            "name": "Tiefkühl",
+            "slug": "tiefkuhl-109",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "dc970bd7268e3ca727a7220b",
+            "description": ".",
+            "images": [],
+            "name": "Eiscremes & Desserts",
+            "slug": "eiscremes-desserts-110",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f8a5028c59b586876851c6be",
+            "description": ".",
+            "images": [],
+            "name": "Vorratsschrank",
+            "slug": "vorratsschrank-111",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "b5e6770c4dcbb928d1b072d4",
+            "description": ".",
+            "images": [],
+            "name": "Cerealien & Süße Aufstriche",
+            "slug": "cerealien-sue-aufstriche-112",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "3905e450800c0c8b82bdb876",
+            "description": ".",
+            "images": [],
+            "name": "Konserven & Gläser",
+            "slug": "konserven-glaser-113",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "311d1d200421b440b5bc9ab1",
+            "description": ".",
+            "images": [],
+            "name": "Saucen, Öle & Gewürze",
+            "slug": "saucen-ole-gewurze-114",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "9ccb07bd6ce9503510d534df",
+            "description": ".",
+            "images": [],
+            "name": "Backen",
+            "slug": "backen-115",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "36a2b375cf1f64247348a46d",
+            "description": ".",
+            "images": [],
+            "name": "Fitness",
+            "slug": "fitness-117",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "8ed9267c1815268588e4a984",
+            "description": ".",
+            "images": [],
+            "name": "Papier & Reinigung",
+            "slug": "papier-reinigung-118",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "40d08c9dbd2241b23c6212ad",
+            "description": ".",
+            "images": [],
+            "name": "Körperhygiene",
+            "slug": "korperhygiene-120",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "02cb654894ee11a45bfa2219",
+            "description": ".",
+            "images": [],
+            "name": "Pflege & Beauty",
+            "slug": "pflege-beauty-121",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "8bf859f07a96016d6bd855d2",
+            "description": ".",
+            "images": [],
+            "name": "Baby",
+            "slug": "baby-123",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "653083cd72b8d96fdf91126b",
+            "description": ".",
+            "images": [],
+            "name": "Tierbedarf",
+            "slug": "tierbedarf-124",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "7cb9c6157ad1f758f1c89723",
+        "description": "Erfrischung für jeden Geschmack 💧🥤 Von Wasser bis Limo, Eistee bis Energydrink – einfach cool bleiben.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e5c7cd0321dabf32dbad",
+            "blurhash": null
+          }
+        ],
+        "name": "Wasser & Getränke",
+        "slug": "wasser-getranke-126",
+        "subcategories": [
+          {
+            "id": "ba952b682c59ddc98f5483c1",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/680f939bccc5d896a408edf6",
+                "blurhash": null
+              }
+            ],
+            "name": "Wasser",
+            "slug": "wasser-127",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "5c029a108aafbe5a764190bf",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66794b707fc2644ad076ac03",
+                "blurhash": null
+              }
+            ],
+            "name": "Wasser mit Geschmack",
+            "slug": "wasser-mit-geschmack-128",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f9e6ad6a1bbc5b33d603b7f3",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a61e63426b3705e96f4b06",
+                "blurhash": null
+              }
+            ],
+            "name": "Cola & Cola-Mix",
+            "slug": "cola-cola-mix-129",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "4ed2b8cbd483d4796713d3a0",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880ff258f90c33b87984240",
+                "blurhash": null
+              }
+            ],
+            "name": "Limonaden",
+            "slug": "limonaden-130",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "220025026777820e5e40c343",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a618cb72bb8011bfb2f572",
+                "blurhash": null
+              }
+            ],
+            "name": "Säfte & Schorlen",
+            "slug": "safte-schorlen-131",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "6d57067151b359c8c3522d65",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/688119e802a50c046d19a170",
+                "blurhash": null
+              }
+            ],
+            "name": "Eistee",
+            "slug": "eistee-134",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "8fea2a457401cd9d88d2b218",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/676a245a4a7264440b84b0fc",
+                "blurhash": null
+              }
+            ],
+            "name": "Sirup",
+            "slug": "sirup-135",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "df0436620b74eeee318222e8",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/688119ed02a50c046d19a177",
+                "blurhash": null
+              }
+            ],
+            "name": "Mate & Kombucha",
+            "slug": "mate-kombucha-136",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "bdb229b9b764fa3ae395b095",
+        "description": "Wach, warm oder wohlig ☕🍫 Alles für deine Tasse – ob morgens, abends oder zwischendurch.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e5d652f5fcdd085a8efd",
+            "blurhash": null
+          }
+        ],
+        "name": "Kaffee, Tee & Kakao",
+        "slug": "kaffee-tee-kakao-138",
+        "subcategories": [
+          {
+            "id": "adad377b21b321218524817a",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a0ccb572bb8011bfb26fa1",
+                "blurhash": null
+              }
+            ],
+            "name": "Kaffeebohnen & -kapseln",
+            "slug": "kaffeebohnen-kapseln-139",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "086bc19c479e79dfe5099771",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d229e26a83156918e1689",
+                "blurhash": null
+              }
+            ],
+            "name": "Gemahlener Kaffee",
+            "slug": "gemahlener-kaffee-140",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "dd2cf7ab127b31d99e83395a",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66794348a81b944655217b00",
+                "blurhash": null
+              }
+            ],
+            "name": "Instant-Kaffee",
+            "slug": "instant-kaffee-141",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "6c4c8ba6f738dcf11aa7c2f4",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679430c1ddf225f482ba006",
+                "blurhash": null
+              }
+            ],
+            "name": "Schwarz- & Grüntee",
+            "slug": "schwarz-gruntee-142",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "aad0381843f425281ac024f2",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66aafb668e8a4b571cdb4aa1",
+                "blurhash": null
+              }
+            ],
+            "name": "Früchte- & Kräutertee",
+            "slug": "fruchte-krautertee-143",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "d627b44c411b34a5b4b65a7d",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679427f36d8a70a941146fa",
+                "blurhash": null
+              }
+            ],
+            "name": "Kakao",
+            "slug": "kakao-144",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "a29826b6e8e7c827f019290f",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/68811edd02a50c046d19a1e2",
+                "blurhash": null
+              }
+            ],
+            "name": "Kaffee- & Teefilter",
+            "slug": "kaffee-teefilter-145",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "1f2c2399d4aac029b16fe6ed",
+        "description": "Malzig, spritzig oder fruchtig 🍺🍏 Für Feierabend, Grillabend oder einfach so – Prost!",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e5ed52f5fcdd085a8f03",
+            "blurhash": null
+          }
+        ],
+        "name": "Bier & Cider",
+        "slug": "bier-cider-146",
+        "subcategories": [
+          {
+            "id": "da4d48a1ec76f83b41b1b2df",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/688b976ca3eb62eeb95c1670",
+                "blurhash": null
+              }
+            ],
+            "name": "Helles & Pils",
+            "slug": "helles-pils-147",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "bf7faac0bb3542832c6856ea",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/680f9190ccc5d896a408e608",
+                "blurhash": null
+              }
+            ],
+            "name": "Weizen",
+            "slug": "weizen-148",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "1055b7f86f4dea24fa46bef9",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a56e1be7dc307a2305d485",
+                "blurhash": null
+              }
+            ],
+            "name": "Biermischgetränke",
+            "slug": "biermischgetranke-149",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "8705f95f59dcf02b0a4934cf",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679383934063d58fe459c75",
+                "blurhash": null
+              }
+            ],
+            "name": "Bierspezialitäten",
+            "slug": "bierspezialitaten-150",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "7fbb900bc277db2881606b72",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66793d3dad16d3049c1bcc49",
+                "blurhash": null
+              }
+            ],
+            "name": "Apfelwein & Cider",
+            "slug": "apfelwein-cider-151",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "5a3453b2068b0f8e2256622c",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/667941fdaafb6a54ed7eb152",
+                "blurhash": null
+              }
+            ],
+            "name": "Alkoholfreies Bier",
+            "slug": "alkoholfreies-bier-152",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "91b25b5322b2d8a26e7ca927",
+        "description": "Für besondere Momente 🥂🍇 Weiß, Rot, Rosé oder prickelnd – fein ausgewählt & gut gekühlt.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e618cd0321dabf32dbc7",
+            "blurhash": null
+          }
+        ],
+        "name": "Wein & Sekt",
+        "slug": "wein-sekt-153",
+        "subcategories": [
+          {
+            "id": "008bda65e06eca902152516c",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880f029494117b965bf8366",
+                "blurhash": null
+              }
+            ],
+            "name": "Weißwein",
+            "slug": "weiwein-154",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "ca67266e4a03d6055e87d750",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/667f5d88e6bb346a02910c91",
+                "blurhash": null
+              }
+            ],
+            "name": "Roséwein",
+            "slug": "rosewein-155",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "ed74846248b6d95917539fa1",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66b7c5dd80df1f6b5677f61a",
+                "blurhash": null
+              }
+            ],
+            "name": "Rotwein",
+            "slug": "rotwein-156",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "cac4facc0c3323d7718e4360",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/68811b658f90c33b8798453a",
+                "blurhash": null
+              }
+            ],
+            "name": "Champagner & Schaumwein",
+            "slug": "champagner-schaumwein-157",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "61d88b62f90fbf34b560b960",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66a17b5708dfbf3143808241",
+                "blurhash": null
+              }
+            ],
+            "name": "Fruchtwein & Schorlen",
+            "slug": "fruchtwein-schorlen-158",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "a59411c670b0e1c641d91a47",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66793598bfc2441871a5f44d",
+                "blurhash": null
+              }
+            ],
+            "name": "Alkoholfreier Wein",
+            "slug": "alkoholfreier-wein-159",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "db95dab516f340e66ab0af4c",
+        "description": "Für die Hausbar 🍸🔥 Whiskey, Gin, Rum & mehr – pur, gemixt oder als Geschenk.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e636cd0321dabf32dbd1",
+            "blurhash": null
+          }
+        ],
+        "name": "Spirituosen",
+        "slug": "spirituosen-160",
+        "subcategories": [
+          {
+            "id": "5a706bf8d8414256bb46961b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a61272426b3705e96f42ea",
+                "blurhash": null
+              }
+            ],
+            "name": "Aperitif",
+            "slug": "aperitif-161",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "c0d01b0ed431cae6c667b80a",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880d26402a50c046d1990b8",
+                "blurhash": null
+              }
+            ],
+            "name": "Cocktails & Mischgetränke",
+            "slug": "cocktails-mischgetranke-162",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "fdb6dd59242311aefc2b051b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679453b418d9b2485544806",
+                "blurhash": null
+              }
+            ],
+            "name": "Gin",
+            "slug": "gin-163",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "49834fda1b94000162e386a2",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d17a726a83156918e0fbc",
+                "blurhash": null
+              }
+            ],
+            "name": "Liköre",
+            "slug": "likore-164",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "3d9359d0d233d42689120202",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a6143e426b3705e96f445b",
+                "blurhash": null
+              }
+            ],
+            "name": "Rum",
+            "slug": "rum-165",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "be125e6561b586f0ba3bbb9d",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d1ca626a83156918e1125",
+                "blurhash": null
+              }
+            ],
+            "name": "Whiskey",
+            "slug": "whiskey-166",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "81a2157493dcd56d816a8e12",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/688b969ca3eb62eeb95c09ba",
+                "blurhash": null
+              }
+            ],
+            "name": "Wodka",
+            "slug": "wodka-167",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "700513e6753be9c9b8200024",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/68810e3302a50c046d19a072",
+                "blurhash": null
+              }
+            ],
+            "name": "Anis & Brand",
+            "slug": "anis-brand-168",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "99d6c61b8aea733b5de7392a",
+        "description": "Zum Naschen, Teilen oder Verstecken 🍫🍭 Von Schoki bis Fruchtgummi – süße Auswahl für jede Stimmung.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e690f070793ad1fdfc1b",
+            "blurhash": null
+          }
+        ],
+        "name": "Schokolade & Süßigkeiten",
+        "slug": "schokolade-suigkeiten-169",
+        "subcategories": [
+          {
+            "id": "e85bdddc1f1591878d604bb3",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/683daea36d01a12fb3c016e2",
+                "blurhash": null
+              }
+            ],
+            "name": "Knabbereien",
+            "slug": "knabbereien-170",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "4083c1c97424cccfbea2fba0",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67c0705b427daf1868912ba6",
+                "blurhash": null
+              }
+            ],
+            "name": "Schokoriegel",
+            "slug": "schokoriegel-171",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "26f191202952e09361ee9cd8",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6779250a489e6f2df71e213d",
+                "blurhash": null
+              }
+            ],
+            "name": "Schokoladentafeln",
+            "slug": "schokoladentafeln-172",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "3912fdb26c11119f339c5545",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679411faafb6a54ed7e9ed9",
+                "blurhash": null
+              }
+            ],
+            "name": "Fruchtgummi & Lakritz",
+            "slug": "fruchtgummi-lakritz-173",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "ee0163d56272d8d7965bc903",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880de1b494117b965bf7de6",
+                "blurhash": null
+              }
+            ],
+            "name": "Kekse & Waffeln",
+            "slug": "kekse-waffeln-174",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "40c86a900bef4e5749a3ff9b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/683daea36d01a12fb3c016e0",
+                "blurhash": null
+              }
+            ],
+            "name": "Pralinen & Schokoladenboxen",
+            "slug": "pralinen-schokoladenboxen-176",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "0c6be39e9252940c69255f3d",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679430f49babc11baa720db",
+                "blurhash": null
+              }
+            ],
+            "name": "Bonbons & Lutscher",
+            "slug": "bonbons-lutscher-177",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "6a2fa1cdd4519ee826246851",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d177926a83156918e0fb1",
+                "blurhash": null
+              }
+            ],
+            "name": "Kaugummi & Minzbonbons",
+            "slug": "kaugummi-minzbonbons-178",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "0e8be850b16eb42e0e5d3d6f",
+            "description": ".",
+            "images": [],
+            "name": "Veggie & Vegane Snacks",
+            "slug": "veggie-vegane-snacks-179",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "43f1bbd40b9ec298d7d7db2e",
+        "description": "Knuspern erlaubt 🎬🥜 Für den Serienabend oder unterwegs – Chips, Nüsse & Co. für den kleinen Hunger.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e6aaf070793ad1fdfc24",
+            "blurhash": null
+          }
+        ],
+        "name": "Snacks & Chips",
+        "slug": "snacks-chips-180",
+        "subcategories": [
+          {
+            "id": "c51cd034d6c72bf5c8355244",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679369fbfc2441871a60b8c",
+                "blurhash": null
+              }
+            ],
+            "name": "Chips & Flips",
+            "slug": "chips-flips-181",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "1b55644eecac44876f15fe5b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67c0711c427daf1868912d74",
+                "blurhash": null
+              }
+            ],
+            "name": "Laugengebäck & Crackers",
+            "slug": "laugengeback-crackers-182",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "b90509627af669b1c59c8c9d",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d25ba26a83156918e178e",
+                "blurhash": null
+              }
+            ],
+            "name": "Dips",
+            "slug": "dips-183",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "9e4253258fab36c5cc81fb68",
+            "description": ".",
+            "images": [],
+            "name": "Veggie & Vegane Snacks",
+            "slug": "veggie-vegane-snacks-185",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "4398b385a057379e29b9b364",
+        "description": "Natürlich snacken 🥜🍇 Crunchige Nüsse & süßes Trockenobst – perfekt für Zwischendurch oder als Topping.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e6c2cd0321dabf32dc01",
+            "blurhash": null
+          }
+        ],
+        "name": "Nüsse & Trockenobst",
+        "slug": "nusse-trockenobst-186",
+        "subcategories": [
+          {
+            "id": "fc514db608e39c4da7acc82a",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880fa3e02a50c046d199d5a",
+                "blurhash": null
+              }
+            ],
+            "name": "Studentenfutter & Mischungen",
+            "slug": "studentenfutter-mischungen-187",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "6ff7530db6d7b06b84fd500f",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6745021906781b0d324d15d7",
+                "blurhash": null
+              }
+            ],
+            "name": "Gewürzte Nüsse",
+            "slug": "gewurzte-nusse-188",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "d0814f13fc64d74977f39bc7",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6881117e494117b965bf8c66",
+                "blurhash": null
+              }
+            ],
+            "name": "Nüsse & Kerne",
+            "slug": "nusse-kerne-189",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "bed723c0392ba76e66164bbc",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67d2c58b05fb2689ac7c7c56/c9d499b8-4776-11f0-8704-ba8454be5a93_2010030820309.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Trockenfrüchte & Beeren",
+            "slug": "trockenfruchte-beeren-190",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "58d4666d3ddc3dd7953250ee",
+        "description": "Frisch eingefroren & jederzeit bereit 🍕🥦 Ob Pizza, Gemüse oder Fertiggericht – einfach aufwärmen & genießen.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e6f952f5fcdd085a8f40",
+            "blurhash": null
+          }
+        ],
+        "name": "Tiefkühl",
+        "slug": "tiefkuhl-191",
+        "subcategories": [
+          {
+            "id": "4e5471ea7fd1da787260d352",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880f36d494117b965bf847e",
+                "blurhash": null
+              }
+            ],
+            "name": "Tiefkühl-Pizza & Baguettes",
+            "slug": "tiefkuhl-pizza-baguettes-192",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "36e143c647aff07867546ff6",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d1caa26a83156918e1126",
+                "blurhash": null
+              }
+            ],
+            "name": "Tiefkühl-Fertiggerichte & Snacks",
+            "slug": "tiefkuhl-fertiggerichte-snacks-193",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "5704363d5089591193778aba",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/667937b2bfc2441871a62565",
+                "blurhash": null
+              }
+            ],
+            "name": "Tiefkühl-Fisch & Meeresfrüchte",
+            "slug": "tiefkuhl-fisch-meeresfruchte-194",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "ae2500a4f1408997db500ace",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d21a926a83156918e1592",
+                "blurhash": null
+              }
+            ],
+            "name": "Tiefkühl-Fleisch & Geflügel",
+            "slug": "tiefkuhl-fleisch-geflugel-195",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "af72867d680bb911a534e0a7",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/670a65163d9a2e601bb9903c",
+                "blurhash": null
+              }
+            ],
+            "name": "Tiefkühl-Gemüse & Kräuter",
+            "slug": "tiefkuhl-gemuse-krauter-196",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "b441459e41bf882d137abaa9",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a615eb426b3705e96f4516",
+                "blurhash": null
+              }
+            ],
+            "name": "Tiefkühl-Kartoffeln & Pommes",
+            "slug": "tiefkuhl-kartoffeln-pommes-197",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f7bdaf8a80ceef20c4400255",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d1ea226a83156918e11dc",
+                "blurhash": null
+              }
+            ],
+            "name": "Tiefkühl-Backwaren",
+            "slug": "tiefkuhl-backwaren-198",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "49fab1918f1100d3e5dc06e5",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67c5cbfb4bbb747afc3ee1d7",
+                "blurhash": null
+              }
+            ],
+            "name": "Tiefkühl-Obst & Beeren",
+            "slug": "tiefkuhl-obst-beeren-199",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "3e10a05f60e0db066bde1b44",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686e4fb10d7dfa13e6d94bb3",
+                "blurhash": null
+              }
+            ],
+            "name": "Eiswürfel",
+            "slug": "eiswurfel-200",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "a1cb4ceed51bf5a914edf8d1",
+            "description": ".",
+            "images": [],
+            "name": "Vegetarische Tiefkühlkost",
+            "slug": "vegetarische-tiefkuhlkost-201",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "4180e0edf89d834c1e554bbc",
+        "description": "Eiszeit ist immer 🍦✨ Cremig, fruchtig oder crunchy – Lieblingssorten zum Löffeln & Schlecken.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e70552f5fcdd085a8f42",
+            "blurhash": null
+          }
+        ],
+        "name": "Eiscremes & Desserts",
+        "slug": "eiscremes-desserts-202",
+        "subcategories": [
+          {
+            "id": "c7e3bdb0eb1de2dcbf177b83",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d1ea726a83156918e11de",
+                "blurhash": null
+              }
+            ],
+            "name": "Eisbecher",
+            "slug": "eisbecher-203",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "caf399e930aecd4e0441eb05",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a618c372bb8011bfb2f557",
+                "blurhash": null
+              }
+            ],
+            "name": "Frucht- & Wassereis",
+            "slug": "frucht-wassereis-204",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "035cddbdc4abd264552caf1a",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686e5e576155cf1e5116d77f",
+                "blurhash": null
+              }
+            ],
+            "name": "Stiel- & Waffeleis",
+            "slug": "stiel-waffeleis-205",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f0437b42696299d538856327",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/667941e63cbd30437db40d06",
+                "blurhash": null
+              }
+            ],
+            "name": "Tiefkühl-Desserts & Kuchen",
+            "slug": "tiefkuhl-desserts-kuchen-206",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f4ae72210cc21a3a0217313c",
+            "description": ".",
+            "images": [],
+            "name": "Eiswürfel",
+            "slug": "eiswurfel-207",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "5932e82b92f8f8d0351c1b4a",
+        "description": "Gut auf Vorrat 🍚🍝 Pasta, Reis, Hülsenfrüchte & mehr – praktisch, haltbar & immer griffbereit.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e74acd0321dabf32dc24",
+            "blurhash": null
+          }
+        ],
+        "name": "Vorratsschrank",
+        "slug": "vorratsschrank-208",
+        "subcategories": [
+          {
+            "id": "b60b7c2235b46924b8f138be",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880e80602a50c046d199794",
+                "blurhash": null
+              }
+            ],
+            "name": "Pasta & Nudeln",
+            "slug": "pasta-nudeln-209",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "1400b78e9c3b68689ad58bb4",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d1edc26a83156918e11ec",
+                "blurhash": null
+              }
+            ],
+            "name": "Reis",
+            "slug": "reis-210",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "9efe28ac9b61e9b126291d22",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67c06f76427daf1868912916",
+                "blurhash": null
+              }
+            ],
+            "name": "Getreide & Hülsenfrüchte",
+            "slug": "getreide-hulsenfruchte-211",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "3826c295097791abbcec5322",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/680f9205af6eccea210dddad",
+                "blurhash": null
+              }
+            ],
+            "name": "Samen & Kleie",
+            "slug": "samen-kleie-212",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "e4e145f80fb37a04cd3e50f5",
+        "description": "Für Frühstücksfreunde & Spätaufsteher 🥐🍯 Ob knusprig oder cremig – hier wird der Start in den Tag lecker.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9ea09f070793ad1fdfd6f",
+            "blurhash": null
+          }
+        ],
+        "name": "Cerealien & Süße Aufstriche",
+        "slug": "cerealien-sue-aufstriche-213",
+        "subcategories": [
+          {
+            "id": "52813c388f2c2839bc9f7651",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880ff2e8f90c33b87984247",
+                "blurhash": null
+              }
+            ],
+            "name": "Cerealien & Granola",
+            "slug": "cerealien-granola-214",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f1ad93fc2f5962b1211a3f5b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679353d34063d58fe45565d",
+                "blurhash": null
+              }
+            ],
+            "name": "Haferflocken & Porridge",
+            "slug": "haferflocken-porridge-215",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "59967c12daae9f1cd7679e46",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d183c26a83156918e0feb",
+                "blurhash": null
+              }
+            ],
+            "name": "Honig & Sirup",
+            "slug": "honig-sirup-216",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "c2b6d495a43a6841a0f46d57",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d183c26a83156918e0feb",
+                "blurhash": null
+              }
+            ],
+            "name": "Marmelade & Fruchtaufstrich",
+            "slug": "marmelade-fruchtaufstrich-217",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "3b20ab54e4fa4c0957e8d603",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880ff0d494117b965bf89e3",
+                "blurhash": null
+              }
+            ],
+            "name": "Nuss- & Schokoaufstriche",
+            "slug": "nuss-schokoaufstriche-218",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "49e8a6b8c3ff733d31ffcea6",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880ecc2494117b965bf8271",
+                "blurhash": null
+              }
+            ],
+            "name": "Müsli- & Müsliriegel",
+            "slug": "musli-musliriegel-219",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "29b8242cf656eb76e9be489e",
+            "description": ".",
+            "images": [],
+            "name": "Vegetarische Aufstriche",
+            "slug": "vegetarische-aufstriche-220",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "d04ab1ec7fbab4b31feb02ba",
+        "description": "Lange haltbar, schnell serviert 🥫🍲 Für spontane Mahlzeiten, Suppen & Vorratsliebe.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e777f070793ad1fdfc95",
+            "blurhash": null
+          }
+        ],
+        "name": "Konserven & Gläser",
+        "slug": "konserven-glaser-221",
+        "subcategories": [
+          {
+            "id": "d7922db0c2949ae8afdffa01",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d176526a83156918e0faa",
+                "blurhash": null
+              }
+            ],
+            "name": "Antipasti & Eingelegtes",
+            "slug": "antipasti-eingelegtes-222",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "6143ef34463e94f74d3182ac",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880eb248f90c33b87983b36",
+                "blurhash": null
+              }
+            ],
+            "name": "Fertiggerichte & Instant",
+            "slug": "fertiggerichte-instant-223",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "9206df0ef066e613c84cfdb5",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/68811b858f90c33b87984550",
+                "blurhash": null
+              }
+            ],
+            "name": "Suppen & Eintöpfe",
+            "slug": "suppen-eintopfe-224",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "e8ef3502b6319fd31c767d3d",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d176b26a83156918e0fac",
+                "blurhash": null
+              }
+            ],
+            "name": "Gemüsekonserven",
+            "slug": "gemusekonserven-225",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "7e8120d98bc66da0a94f83c1",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/667934b1ad16d3049c1b0ac2",
+                "blurhash": null
+              }
+            ],
+            "name": "Tomatenkonserven",
+            "slug": "tomatenkonserven-226",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "17bbe3d48b26defddf92f1c8",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66793cdc35e1b1789b04c21a",
+                "blurhash": null
+              }
+            ],
+            "name": "Obstkonserven",
+            "slug": "obstkonserven-227",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "13a4a27c90dd5bfa3384254d",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880dadd494117b965bf7cda",
+                "blurhash": null
+              }
+            ],
+            "name": "Fleisch- & Fischkonserven",
+            "slug": "fleisch-fischkonserven-228",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "10add4801376c8aaf41be87a",
+        "description": "Für mehr Geschmack in der Küche 🧄🌶️ Hier findest du alles zum Würzen, Verfeinern & Verlieben.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e945f070793ad1fdfd45",
+            "blurhash": null
+          }
+        ],
+        "name": "Saucen, Öle & Gewürze",
+        "slug": "saucen-ole-gewurze-229",
+        "subcategories": [
+          {
+            "id": "99692a4d2fef5edf528e8618",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66794363cd8400238820903c",
+                "blurhash": null
+              }
+            ],
+            "name": "Essig & Öl",
+            "slug": "essig-ol-230",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "0b0bafb352f36a221a9233dc",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679354a1e3f1c4c3a0097c3",
+                "blurhash": null
+              }
+            ],
+            "name": "Ketchup & Mayo",
+            "slug": "ketchup-mayo-231",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "0d4d621d67431fbcd663bbee",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d174e26a83156918e0fa2",
+                "blurhash": null
+              }
+            ],
+            "name": "Senf & Grillsaucen",
+            "slug": "senf-grillsaucen-232",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "89134a5e95b2e60ae09c743e",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d171f26a83156918e0f96",
+                "blurhash": null
+              }
+            ],
+            "name": "Pastasaucen & Pesto",
+            "slug": "pastasaucen-pesto-233",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "5f798ae2763334f86fd3ab04",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/667943393cbd30437db428d9",
+                "blurhash": null
+              }
+            ],
+            "name": "Fixprodukte",
+            "slug": "fixprodukte-234",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "7c420528a1ef64359565e4b8",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/683db1473d7fb86430ed5b36",
+                "blurhash": null
+              }
+            ],
+            "name": "Koch- & Rahmsaucen",
+            "slug": "koch-rahmsaucen-235",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "ee2bd5a7f6d15ad659fbd22a",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/685c14d3cbaa72e0d7ca88a0",
+                "blurhash": null
+              }
+            ],
+            "name": "Brühen & Fonds",
+            "slug": "bruhen-fonds-236",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "84de3c4f3db2d323dbe05442",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d260726a83156918e17b2",
+                "blurhash": null
+              }
+            ],
+            "name": "Salz & Pfeffer",
+            "slug": "salz-pfeffer-237",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "2c8a6f9a55711a7a75f06baf",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/689b4c92f18c6aaa80308435",
+                "blurhash": null
+              }
+            ],
+            "name": "Gewürze & getrocknete Kräuter",
+            "slug": "gewurze-getrocknete-krauter-238",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "77b3aee4096767b12f502bc0",
+        "description": "Ein Ofen, ein Plan – los geht’s 🧁🍰 Alles für Kuchen, Muffins, Brote & süße Ideen.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e798f070793ad1fdfc9c",
+            "blurhash": null
+          }
+        ],
+        "name": "Backen",
+        "slug": "backen-239",
+        "subcategories": [
+          {
+            "id": "d9ba791497f9cfe14cd19b8f",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a612b5426b3705e96f4367",
+                "blurhash": null
+              }
+            ],
+            "name": "Mehl- & Bindemittel",
+            "slug": "mehl-bindemittel-240",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "5cdc0027449475d21569bd5f",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67214e67a2f22b4b43203e3a",
+                "blurhash": null
+              }
+            ],
+            "name": "Zucker & Süßungsmittel",
+            "slug": "zucker-suungsmittel-241",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "8f0731b128beeb183a09f9f1",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66e92d5ec659d05cc6a69942",
+                "blurhash": null
+              }
+            ],
+            "name": "Backzutaten",
+            "slug": "backzutaten-242",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "15338b1c21a09a7376f57636",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66793efc35e1b1789b04f37d",
+                "blurhash": null
+              }
+            ],
+            "name": "Backmischungen",
+            "slug": "backmischungen-243",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "c0f5435df84f781b4e6f3b3f",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679436f54b6864072b1861f",
+                "blurhash": null
+              }
+            ],
+            "name": "Backdekoration",
+            "slug": "backdekoration-244",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "6fe28039dd42d35b03243e9f",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a617eb426b3705e96f46dd",
+                "blurhash": null
+              }
+            ],
+            "name": "Dessertpulver & -mischungen",
+            "slug": "dessertpulver-mischungen-245",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "eb6033cdb5b514e5ca42d968",
+        "description": "Einmal um die Welt 🌍🍛 Spezialitäten & Zutaten aus Fern & Nah – für authentischen Genuss zuhause.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e7a8f070793ad1fdfca2",
+            "blurhash": null
+          }
+        ],
+        "name": "Internationale Küche",
+        "slug": "internationale-kuche-246",
+        "subcategories": [
+          {
+            "id": "dcae4f1804d6daa5cad0d5c8",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66a83cf68d127c47a0c19b3b",
+                "blurhash": null
+              }
+            ],
+            "name": "Asiatisch",
+            "slug": "asiatisch-247",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "03f5d6150ed3f0993588e072",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67a4d3fe426b3705e96f1a04",
+                "blurhash": null
+              }
+            ],
+            "name": "Osteuropäisch",
+            "slug": "osteuropaisch-250",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "c016a56239417d82df645bb1",
+        "description": "Proteinreich & funktional 🏋️‍♂️🥤 Snacks & Shakes für Energie, Sport & aktive Tage.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e7cdcd0321dabf32dc64",
+            "blurhash": null
+          }
+        ],
+        "name": "Fitness",
+        "slug": "fitness-252",
+        "subcategories": [
+          {
+            "id": "a60cbaea7d5d621b2666d3ea",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/676a6b114a7264440b84b3a9",
+                "blurhash": null
+              }
+            ],
+            "name": "Proteinriegel & Snacks",
+            "slug": "proteinriegel-snacks-253",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "face24955cce80838e37a2c0",
+        "description": "Sauber & sortiert 🧼🧻 Von Klopapier bis Allzweckreiniger – für Bad, Küche & überall dazwischen.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e7e0cd0321dabf32dc65",
+            "blurhash": null
+          }
+        ],
+        "name": "Papier & Reinigung",
+        "slug": "papier-reinigung-257",
+        "subcategories": [
+          {
+            "id": "fed19e908a71e4df2a3f7c6b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880ecd58f90c33b87983be6",
+                "blurhash": null
+              }
+            ],
+            "name": "Waschmittel",
+            "slug": "waschmittel-258",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "ac868f1456e13bd181f76ce1",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66a45704ece2691c4f4b5ede",
+                "blurhash": null
+              }
+            ],
+            "name": "Reinigungsmittel",
+            "slug": "reinigungsmittel-259",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "00333ef1355d828591a2765b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880dac38f90c33b8798345f",
+                "blurhash": null
+              }
+            ],
+            "name": "Reinigungszubehör",
+            "slug": "reinigungszubehor-260",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "9bf7ac298f81a221b2471a0e",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66793939bfc2441871a64ab1",
+                "blurhash": null
+              }
+            ],
+            "name": "Geschirrreinigung",
+            "slug": "geschirrreinigung-261",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "37d5a1b9235c082c0974f7b3",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880eb3e494117b965bf820c",
+                "blurhash": null
+              }
+            ],
+            "name": "Badezimmer",
+            "slug": "badezimmer-262",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "7d16cd8290e83d5116de593e",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d1f3626a83156918e1205",
+                "blurhash": null
+              }
+            ],
+            "name": "Papier- & Hygieneartikel",
+            "slug": "papier-hygieneartikel-263",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "01528eb2eb7796a4fc7acec0",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880de1b494117b965bf7de5",
+                "blurhash": null
+              }
+            ],
+            "name": "Folien & Beutel",
+            "slug": "folien-beutel-264",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "7cd703d087a5a60a44bcc6d4",
+        "description": "Gut ausgestattet für alles 💡🖊️ Von Batterien bis Schreibblock – kleine Helfer für Alltag & Arbeit.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e85c52f5fcdd085a8fd1",
+            "blurhash": null
+          }
+        ],
+        "name": "Haushalt & Büro",
+        "slug": "haushalt-buro-265",
+        "subcategories": [
+          {
+            "id": "4c37626907060721fba879fb",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66a84be34fa2980388aa1f57",
+                "blurhash": null
+              }
+            ],
+            "name": "Haushaltshelfer & Zubehör",
+            "slug": "haushaltshelfer-zubehor-266",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "942d91b0875773cb261f5638",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67332cec61b626cee865ff0d/78378a5a-0010-11f0-9a2a-de3aef0c6f65_67d2c75a34d7db09bfeea2c6.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Büro- & Schulbedarf",
+            "slug": "buro-schulbedarf-267",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "968bd33a786e4471d78c12ec",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/689b4cadf18c6aaa80308492",
+                "blurhash": null
+              }
+            ],
+            "name": "Glühlampen & Batterien",
+            "slug": "gluhlampen-batterien-268",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "29335629bd399aee061a6935",
+        "description": "Frisch & gepflegt von Kopf bis Fuß 🚿🧴 Alles für deine tägliche Routine – sanft, sauber & gut duftend.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e88652f5fcdd085a8fdd",
+            "blurhash": null
+          }
+        ],
+        "name": "Körperhygiene",
+        "slug": "korperhygiene-270",
+        "subcategories": [
+          {
+            "id": "7b827876bc93add6d2b6c6bb",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67332cec61b626cee865ff0d/91c68f34-0010-11f0-a043-0a2bdaa6cc50_67d2c7261784c089aa8e7548.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Duschgel & Bad",
+            "slug": "duschgel-bad-271",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "e698f871d875b2f1bebbbb8c",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/66794d9a8cf5dc22349da85d",
+                "blurhash": null
+              }
+            ],
+            "name": "Shampoo",
+            "slug": "shampoo-272",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "095766cc24cd5277c3235cf9",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/683db21f8ec535b9e6fc216d",
+                "blurhash": null
+              }
+            ],
+            "name": "Mund- & Zahnpflege",
+            "slug": "mund-zahnpflege-273",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "282bd590e57daae85379b3be",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880f69802a50c046d199c1b",
+                "blurhash": null
+              }
+            ],
+            "name": "Deodorant & Parfüm",
+            "slug": "deodorant-parfum-274",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "b3d33b8ca13a8393c2610af9",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679488b54b6864072b1b557",
+                "blurhash": null
+              }
+            ],
+            "name": "Handseife",
+            "slug": "handseife-275",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "49d18d59c5531adecfa3bd61",
+        "description": "Verwöhnen, pflegen, entspannen 🛁💄 Alles für Haut, Haar & Wohlgefühl zuhause.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e8aecd0321dabf32dcaa",
+            "blurhash": null
+          }
+        ],
+        "name": "Pflege & Beauty",
+        "slug": "pflege-beauty-277",
+        "subcategories": [
+          {
+            "id": "88a63b7ff11e783d90946227",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679430354b6864072b17cb3",
+                "blurhash": null
+              }
+            ],
+            "name": "Körperpflege",
+            "slug": "korperpflege-278",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "66ed0a63f02bc252bd2c7c71",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d2fdd6155cf1e51169b5a",
+                "blurhash": null
+              }
+            ],
+            "name": "Gesichtspflege",
+            "slug": "gesichtspflege-279",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "41b2d7e410d4e29e24b1148c",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/671a2a124f832e7eceeb2903",
+                "blurhash": null
+              }
+            ],
+            "name": "Haarpflege",
+            "slug": "haarpflege-280",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "7accadb6f3439f3b65fe2591",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686e63420d7dfa13e6d953b9",
+                "blurhash": null
+              }
+            ],
+            "name": "Haarstyling",
+            "slug": "haarstyling-281",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "f565f3d82cd8646295e3bc44",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/667942167a690b684afa0643",
+                "blurhash": null
+              }
+            ],
+            "name": "Rasur & Haarentfernung",
+            "slug": "rasur-haarentfernung-283",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "44aa98d7392baaabe2196658",
+            "description": "",
+            "images": [
+              {
+                "url": "https://wolt-menu-images-cdn.wolt.com/menu-images/67332cec61b626cee865ff0d/230560d4-0010-11f0-884b-3e8a6d4fffe9_67d2c7261784c089aa8e73a4.jpg",
+                "blurhash": null
+              }
+            ],
+            "name": "Watte & Tücher",
+            "slug": "watte-tucher-284",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "b8ea0df88ea42bc6dd9d6fbc",
+        "description": "Diskret & verlässlich 🩹🩺 Für die sensible Seite des Alltags – von Erste Hilfe bis Intimpflege.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e8c6cd0321dabf32dcb5",
+            "blurhash": null
+          }
+        ],
+        "name": "Gesundheit & Intimität",
+        "slug": "gesundheit-intimitat-285",
+        "subcategories": [
+          {
+            "id": "85ccdb0a3986d54f64ee3f3e",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880f866494117b965bf86ee",
+                "blurhash": null
+              }
+            ],
+            "name": "Erste Hilfe & Gesundheit",
+            "slug": "erste-hilfe-gesundheit-286",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "843dbc452cdf8df4aa254457",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67210855a2f22b4b43203664",
+                "blurhash": null
+              }
+            ],
+            "name": "Erkältung",
+            "slug": "erkaltung-287",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "451e175960b48ec60ac3b256",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d2a106155cf1e5116992e",
+                "blurhash": null
+              }
+            ],
+            "name": "Kondome, Gleitmittel & Erotik",
+            "slug": "kondome-gleitmittel-erotik-288",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "0db58dc5b88a217ae0c6552e",
+        "description": "Alles fürs kleine Glück 🍼🧸 Nahrung, Pflege & Windeln – praktisch & sanft.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e8e4cd0321dabf32dcbf",
+            "blurhash": null
+          }
+        ],
+        "name": "Baby",
+        "slug": "baby-289",
+        "subcategories": [
+          {
+            "id": "e85dc6dcd7ffc4ea0f03220d",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679479965e31436d80aecc3",
+                "blurhash": null
+              }
+            ],
+            "name": "Breie",
+            "slug": "breie-290",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "11b4144c991201871989aaf6",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686e5a206155cf1e5116d598",
+                "blurhash": null
+              }
+            ],
+            "name": "Quetschies",
+            "slug": "quetschies-292",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "ba58ac4c840550b0cb397eff",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6679432e1ddf225f482ba326",
+                "blurhash": null
+              }
+            ],
+            "name": "Windeln",
+            "slug": "windeln-294",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "1f10e9815e2de5feebdf416b",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880fd6a8f90c33b879841a7",
+                "blurhash": null
+              }
+            ],
+            "name": "Babypflege & -reinigung",
+            "slug": "babypflege-reinigung-295",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      },
+      {
+        "id": "cb4a0603a049555166893c65",
+        "description": "Für deinen tierischen Mitbewohner 🐕🐈 Futter, Pflege & Zubehör für glückliche Haustiere.",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68f9e913cd0321dabf32dcca",
+            "blurhash": null
+          }
+        ],
+        "name": "Tierbedarf",
+        "slug": "tierbedarf-296",
+        "subcategories": [
+          {
+            "id": "193ca0c068b553e38fe066e4",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/686d333f6155cf1e51169c5a",
+                "blurhash": null
+              }
+            ],
+            "name": "Hundenahrung",
+            "slug": "hundenahrung-297",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "e38d849ac6cd218a3fe0a705",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/67c0714d427daf1868912de2",
+                "blurhash": null
+              }
+            ],
+            "name": "Katzennahrung",
+            "slug": "katzennahrung-298",
+            "subcategories": [],
+            "item_ids": []
+          },
+          {
+            "id": "a0baff77c81e5788191b36a6",
+            "description": "",
+            "images": [
+              {
+                "url": "https://imageproxy.wolt.com/assets/6880e7da8f90c33b87983806",
+                "blurhash": null
+              }
+            ],
+            "name": "Tierfutter & Pflege",
+            "slug": "tierfutter-pflege-299",
+            "subcategories": [],
+            "item_ids": []
+          }
+        ],
+        "item_ids": []
+      }
+    ],
+    "items": [],
+    "options": [],
+    "variant_groups": []
+  },
+  "pages": [
+    {
+      "category": {
+        "id": "9af3c734d9ac1a156aaab6f4",
+        "description": "",
+        "images": [
+          {
+            "url": "https://imageproxy.wolt.com/assets/68ac75c92f2683b7eadfe591",
+            "blurhash": null
+          }
+        ],
+        "name": "Milch",
+        "slug": "milch-47"
+      },
+      "categories": [
+        {
+          "id": "9af3c734d9ac1a156aaab6f4",
+          "item_ids": [
+            "5e23cc80e2d380d9cd1590df",
+            "0deca035c837d797e84f3888",
+            "4f86129cd08129cd57f595d0",
+            "3eee2f2f24f182f67cea6c6c",
+            "e1d737d9cad30509e3bfeb67",
+            "f9708308616edc7e6c58ad7b",
+            "b99f3048b79f0c7ba6fbd6c4",
+            "73bbe3e16bc8484306fe2414",
+            "82cccabbd440f1658bfc04db",
+            "06322268a15ee2debb88ecdb",
+            "d46c935fa397157aa1027c04",
+            "98334233b3106b1b5da37fea",
+            "078f791218d38ebc6ac33b2d",
+            "89871793a98bb4cdeefe601d",
+            "626ca795e900d14b34e930e1",
+            "9085835ffd416390f6595fbd",
+            "5fb92e3e8f5d8dbe6ec9ea30"
+          ]
+        },
+        {
+          "id": "e91e97d1f998be7335064c62",
+          "item_ids": [
+            "3eee2f2f24f182f67cea6c6c",
+            "f9708308616edc7e6c58ad7b",
+            "626ca795e900d14b34e930e1",
+            "9085835ffd416390f6595fbd"
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "5e23cc80e2d380d9cd1590df",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4260055880033",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "714b57cb0824c241ad21bf2028cd02e1",
+          "description": "Aus der Region. Für die Region. Ohne Gentechnik.",
+          "deposit": null,
+          "dietary_preferences": [],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/6a50f77213b9d669673fa526",
+              "blurhash": "LSS6Suof~pWBf,fQjYj[-:WBD*t7"
+            },
+            {
+              "url": "https://imageproxy.wolt.com/assets/688b9da423fa16f725afbcc6",
+              "blurhash": "LqQv:%of~VWBo#ayW9oLt5WCRmof"
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "Hemme Vollmilch 3,7%, 1 l",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 256,
+          "net_price": null,
+          "product_hierarchy_level_id": "097c7877-b3e1-4045-bdd2-51b2ea09e145",
+          "product_hierarchy_tags": [
+            "PERISHABLE"
+          ],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "1 l",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 256,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "0deca035c837d797e84f3888",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4046700026519",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "a8d6e8ea1658272efb6886ef6ece3637",
+          "description": "Für Milchliebhaber als purer Trinkgenuss oder für den Kaffee und fürs Müsli wird unsere Landliebe Landmilch in der Glasflasche mit viel Liebe in bewährter Landliebe Qualität hergestellt. 3,8% Fett",
+          "deposit": {
+            "amount": 15,
+            "label": "MEHRWEG"
+          },
+          "dietary_preferences": [],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/67ac63846f6133276925cf7d",
+              "blurhash": "LKSigPof_NWB%2ayM|ofa}azj?j["
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "Landliebe Frische Landmilch 3,8%, 1 l",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 271,
+          "net_price": null,
+          "product_hierarchy_level_id": "097c7877-b3e1-4045-bdd2-51b2ea09e145",
+          "product_hierarchy_tags": [
+            "PERISHABLE"
+          ],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "1 l",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 256,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "4f86129cd08129cd57f595d0",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4337256176330",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "cb2f46d17fab0bf5cdcdd112c5983e82",
+          "description": "Laktosefreie fettarme H-Milch ultrahocherhitzt und homogenisiert!",
+          "deposit": null,
+          "dietary_preferences": [
+            "lactose_free"
+          ],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/68f21ae10626145e31f0b4aa",
+              "blurhash": "LMSY{qof~qj[xvfQNFj@tQfPRja}"
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "REWE frei von H-Milch 1,5%, 1 l",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 151,
+          "net_price": null,
+          "product_hierarchy_level_id": "097c7877-b3e1-4045-bdd2-51b2ea09e145",
+          "product_hierarchy_tags": [
+            "PERISHABLE"
+          ],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "1 l",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 151,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "e1d737d9cad30509e3bfeb67",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4046700026779",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "6c70f74ff9f5df36e85a5742e52be18d",
+          "description": "SWM BL Heu Frischmilch 3,8% 1L FL",
+          "deposit": {
+            "amount": 15,
+            "label": "MEHRWEG"
+          },
+          "dietary_preferences": [],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/6723f1d6a2f22b4b43209973",
+              "blurhash": "LnRfh1j[_Nj[oga|aej@t7fQRjfQ"
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "Schwarzwaldmilch frische Heumilch 3,8% Fett, 1 l",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 306,
+          "net_price": null,
+          "product_hierarchy_level_id": "097c7877-b3e1-4045-bdd2-51b2ea09e145",
+          "product_hierarchy_tags": [
+            "PERISHABLE"
+          ],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "1 l",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 291,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "b99f3048b79f0c7ba6fbd6c4",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4260418865196",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "5aed4bce95cb33838874845c9f06eb43",
+          "description": "Vegetarisch. EU-Landwirtschaft, Kontrollstelle DE-ÖKO-001. EU Bio Qualität. Diese haltbare Bio-Milch stammt von ökologisch arbeitenden Landwirtschaftsbetrieben. Die Kühe werden dort artgerecht gehalten, ihr Futter biologisch angebaut. Denn gesunder Boden, gesunde Pflanzen, und gesunde Tiere bilden eine Einheit und bedingen einander.",
+          "deposit": null,
+          "dietary_preferences": [
+            "vegetarian"
+          ],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/68adb7b54a03596d2722bb3b",
+              "blurhash": "LFSimft8~WoeNNR%-noLW=s;V=ax"
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "Terra Naturkost Handels KG fettarme H-Milch 1,5% Fett, 1 l",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 221,
+          "net_price": null,
+          "product_hierarchy_level_id": "097c7877-b3e1-4045-bdd2-51b2ea09e145",
+          "product_hierarchy_tags": [
+            "PERISHABLE"
+          ],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "1 l",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 221,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "73bbe3e16bc8484306fe2414",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4008452027602",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "67492e692ac078e7e02befe0b9f8c8c6",
+          "description": "3,5% Fett.",
+          "deposit": null,
+          "dietary_preferences": [],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/686d35626155cf1e51169d18",
+              "blurhash": "LYR:NYa#~Vt6Rjj[t7ay%Lj@IVay"
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "Weihenstephan Haltbare Milch 3,5%, 1 l",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 209,
+          "net_price": null,
+          "product_hierarchy_level_id": "097c7877-b3e1-4045-bdd2-51b2ea09e145",
+          "product_hierarchy_tags": [
+            "PERISHABLE"
+          ],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "1 l",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 209,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "82cccabbd440f1658bfc04db",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4008452033986",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "7a5734d5c452c89ff9ff1354a6f81b61",
+          "description": "3,5% Fett.",
+          "deposit": null,
+          "dietary_preferences": [],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/690bed0a882cd16148917e47",
+              "blurhash": "LvQJo_az~Vs:Rjj[t7WBxtj@M|a#"
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "Weihenstephan Haltbare Milch 3,5%, 500 ml",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 151,
+          "net_price": null,
+          "product_hierarchy_level_id": "097c7877-b3e1-4045-bdd2-51b2ea09e145",
+          "product_hierarchy_tags": [
+            "PERISHABLE"
+          ],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "500 ml",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 302,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "06322268a15ee2debb88ecdb",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4032549001770",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "627ac2ff22e3f435d5458763e822b0b6",
+          "description": "Wärmebehandelt, dickflüssig - Zum Backen, zum Verfeinern von Desserts und Waffeln!",
+          "deposit": null,
+          "dietary_preferences": [],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/686e5e546155cf1e5116d77e",
+              "blurhash": "LoR3KIWX_Lt3oIfPbIf8%Gj?IuWE"
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "Dovgan Gezuckerte Kondensmilch, 397 g",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 256,
+          "net_price": null,
+          "product_hierarchy_level_id": "39bbe306-c5f4-4584-b9ba-db500fcabf21",
+          "product_hierarchy_tags": [],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "397 g",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 645,
+            "net_price": null,
+            "unit": "kilogram"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "d46c935fa397157aa1027c04",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4337256087872",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "eeaed9279e625770c3e97366173e84e7",
+          "description": "Kaffeesahne, wärmebehandelt, mit 10 % Fett. Portionspackung mit 20 Einzelportionen à 10 g.",
+          "deposit": null,
+          "dietary_preferences": [],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/6a2a63a0834e58a736c28fd1",
+              "blurhash": "LLSr_xof?vofofa|jsjs_Nf6Diay"
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "ja! Kaffeesahne, 20 x 10 g",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 116,
+          "net_price": null,
+          "product_hierarchy_level_id": "39bbe306-c5f4-4584-b9ba-db500fcabf21",
+          "product_hierarchy_tags": [],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "200 g",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 580,
+            "net_price": null,
+            "unit": "kilogram"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "98334233b3106b1b5da37fea",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4337256626040",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "50c043d85039710e5762b280906db162",
+          "description": "Kondensmilch mit 7,5% Fett.",
+          "deposit": null,
+          "dietary_preferences": [],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "Ja! Kondensmilch 7,5% Fett, 340 g",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 104,
+          "net_price": null,
+          "product_hierarchy_level_id": "39bbe306-c5f4-4584-b9ba-db500fcabf21",
+          "product_hierarchy_tags": [],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "340 g",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 306,
+            "net_price": null,
+            "unit": "kilogram"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "078f791218d38ebc6ac33b2d",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4337256561419",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "b5e10fd37172331049a18b6eb4398505",
+          "description": "H-Vollmilch ultrahocherhitzt und homogenisiert.",
+          "deposit": null,
+          "dietary_preferences": [
+            "lactose_free"
+          ],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/67c813155522eb19503e6736",
+              "blurhash": "LFS$lokC_Mt6aif7oxbGxuj[M|af"
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "REWE frei von H-Vollmilch 3,5%, 1 l",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 163,
+          "net_price": null,
+          "product_hierarchy_level_id": "097c7877-b3e1-4045-bdd2-51b2ea09e145",
+          "product_hierarchy_tags": [
+            "PERISHABLE"
+          ],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "1 l",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 163,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "89871793a98bb4cdeefe601d",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4337256215442",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "f05f2263bff77fa27e53ad4b432249a1",
+          "description": "",
+          "deposit": null,
+          "dietary_preferences": [],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": false,
+          "images": [],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "ja! Fettarme H-Milch 1,5%, 1 l",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 116,
+          "net_price": null,
+          "product_hierarchy_level_id": "097c7877-b3e1-4045-bdd2-51b2ea09e145",
+          "product_hierarchy_tags": [
+            "PERISHABLE"
+          ],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": null,
+          "unit_price": null,
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        },
+        {
+          "id": "5fb92e3e8f5d8dbe6ec9ea30",
+          "advertising_info": null,
+          "alcohol_permille": 0,
+          "allowed_delivery_methods": [
+            "homedelivery",
+            "takeaway",
+            "eatin"
+          ],
+          "available_times": [
+            {
+              "days": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "start_time": 0,
+              "end_time": 86400000
+            }
+          ],
+          "barcode_gtin": "4260026430007",
+          "caffeine_info": null,
+          "can_be_promoted": {
+            "basket": true,
+            "venue": true,
+            "credits": true
+          },
+          "checksum": "936919638fa0c1960b8b86096272ebef",
+          "description": "Frische Bio-Vollmilch mit 3,8% Fett, traditionell pasteurisiert und homogenisiert.",
+          "deposit": null,
+          "dietary_preferences": [
+            "vegetarian"
+          ],
+          "disabled_info": null,
+          "fulfillment_lead_time": null,
+          "has_extra_info": true,
+          "images": [
+            {
+              "url": "https://imageproxy.wolt.com/assets/68ac74ea2f2683b7eadfe522",
+              "blurhash": "LWSF*2t8?wWCs;R%t7a{t7ogM_of"
+            }
+          ],
+          "videos": [],
+          "is_cutlery": false,
+          "is_no_contact_delivery_allowed": true,
+          "is_wolt_plus_only": false,
+          "lowest_price": null,
+          "lowest_price_v2": null,
+          "max_quantity_per_purchase": 10,
+          "min_quantity_per_purchase": null,
+          "name": "Terra Bio frische Vollmilch 3,8%, 1 l",
+          "options": [],
+          "original_price": null,
+          "original_net_price": null,
+          "item_price_discount_validity_period": null,
+          "price": 233,
+          "net_price": null,
+          "product_hierarchy_level_id": "097c7877-b3e1-4045-bdd2-51b2ea09e145",
+          "product_hierarchy_tags": [
+            "PERISHABLE"
+          ],
+          "purchasable_balance": null,
+          "restrictions": [],
+          "return_policy": null,
+          "sell_by_weight_config": null,
+          "should_display_purchasable_balance": false,
+          "tags": [],
+          "unit_info": "1 l",
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 233,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "variant": null,
+          "vat_category_code": "DEU-5",
+          "vat_percentage": 7,
+          "vat_percentage_decimal": "7.0",
+          "external_compliance_link": null,
+          "consent_info": {
+            "ask_consent": false,
+            "blur_image": false
+          }
+        }
+      ],
+      "options": [],
+      "variant_groups": [],
+      "metadata": {
+        "next_page_token": null,
+        "page": 1
+      }
+    }
+  ],
+  "sourceProofs": {
+    "venue": {
+      "slug": "nahcity-wrangelstrae",
+      "url": "https://consumer-api.wolt.com/order-xp/web/v1/pages/venue/slug/nahcity-wrangelstrae/static",
+      "capturedAt": "2026-10-01T12:29:42.801Z",
+      "status": 200,
+      "date": "Thu, 01 Oct 2026 12:29:43 GMT",
+      "age": null,
+      "contentType": "application/json",
+      "responseHash": "c5b71bc2a12ff31be7d21cbe1972d7716e54e5841fb91a8ec7a82b6207e9b31c",
+      "responseBytes": 7743
+    },
+    "listing": {
+      "url": "https://consumer-api.wolt.com/consumer-api/consumer-assortment/v1/venues/slug/nahcity-wrangelstrae/assortment",
+      "capturedAt": "2026-10-01T12:30:18.869Z",
+      "status": 200,
+      "date": "Thu, 01 Oct 2026 12:30:19 GMT",
+      "age": null,
+      "contentType": "application/json",
+      "responseHash": "273e5b0da85d3edaa7fb4cb5e3cf83acc7a8050e31ba333c0af18c7af93ad842",
+      "responseBytes": 65921
+    },
+    "milk": {
+      "url": "https://consumer-api.wolt.com/consumer-api/consumer-assortment/v1/venues/slug/nahcity-wrangelstrae/assortment/categories/slug/milch-47",
+      "capturedAt": "2026-10-01T12:30:40.935Z",
+      "status": 200,
+      "date": "Thu, 01 Oct 2026 12:30:41 GMT",
+      "age": null,
+      "contentType": "application/json",
+      "responseHash": "b2ab386bbcf2adfd0e060a014d87396cbf09b1c4f1abb9136116828670f975a0",
+      "responseBytes": 22502
+    }
+  }
+}
