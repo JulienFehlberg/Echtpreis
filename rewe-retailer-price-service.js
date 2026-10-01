@@ -1,4 +1,5 @@
 "use strict";
+const SearchFilters=require("./retailer-product-search-filters");
 
 const crypto=require("crypto"),Identity=require("./product-identity"),Inventory=require("./canonical-inventory-import");
 const {matchesProductQuery}=require("./published-price-service");
@@ -142,6 +143,8 @@ function querySpec(options={}){
  if(options.gtin!=null){const gtin=String(options.gtin).trim();if(!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(gtin)||!Identity.gtinValid(gtin))throw fail("invalid-gtin");where.push("gtin="+param(gtin));}
  if(options.search!=null){const search=text(options.search);if(search){const p=param("%"+search.replace(/[\\%_]/g,"\\$&")+"%");where.push("(name ILIKE "+p+" ESCAPE '\\' OR brand ILIKE "+p+" ESCAPE '\\')");}}
  if(options.today!=null){const today=String(options.today);if(!/^\d{4}-\d{2}-\d{2}$/.test(today)||!Number.isFinite(Date.parse(today))||new Date(today).toISOString().slice(0,10)!==today)throw fail("invalid-date");where.push("(captured_at AT TIME ZONE 'Europe/Berlin')::date<="+param(today)+"::date");}
+ const requestedChannel=SearchFilters.channel(options.scopeChannel);if(requestedChannel&&requestedChannel!=="pickup")where.push("false");
+ const packClause=SearchFilters.sqlPack(options.pack,param);if(packClause)where.push(packClause);
  const requested=Number(options.limit??50),limit=Number.isFinite(requested)?Math.max(1,Math.min(200,Math.floor(requested))):50;
  return{sql:"SELECT "+FIELDS+" FROM "+TABLE+" WHERE "+where.join(" AND ")+" ORDER BY captured_at DESC,native_market_id,retailer_sku LIMIT "+param(limit),params};
 }
@@ -150,7 +153,7 @@ function published(record){
  const deposit=record.deposit==null?null:Number(record.deposit),price=Number(record.price),displayedPrice=Number(record.displayedPrice);
  return{...record,price,deposit,displayedPrice,capturedAt:new Date(record.capturedAt).toISOString(),expiresAt:new Date(record.expiresAt).toISOString(),nativePromotionValidTo:record.nativePromotionValidTo==null?null:new Date(record.nativePromotionValidTo).toISOString(),nativePriceEUR:displayedPrice,nativePriceIncludesDeposit:false,depositIncludedInDisplayedPrice:deposit===null?null:false,payablePackPrice:deposit===null?null:(Math.round(price*100)+Math.round(deposit*100))/100,fulfillmentChannel:"pickup",serviceType:"PICKUP",state:"published",current:true,priceBasis:"pack",shippingIncluded:false,serviceFeesIncluded:false,truthEligible:false,identityStatus:record.gtin?"native-gtin":"native-retailer-sku"};
 }
-async function search(pool,options={}){if(!pool)throw fail("database-required");const query=querySpec(options);await ensure(pool);const result=await pool.query(query.sql,query.params);return{items:result.rows.map(published),scopeCountry:"DE",scopeChannel:"pickup",fulfillmentChannel:"pickup",maxAgeHours:24,truthEligible:false};}
+async function search(pool,options={}){if(!pool)throw fail("database-required");const query=querySpec(options);if(options.scopeChannel!==undefined&&options.scopeChannel!=="pickup")return{items:[],scopeCountry:"DE",scopeChannel:"pickup",maxAgeHours:24,truthEligible:false};await ensure(pool);const result=await pool.query(query.sql,query.params);return{items:result.rows.map(published),scopeCountry:"DE",scopeChannel:"pickup",fulfillmentChannel:"pickup",maxAgeHours:24,truthEligible:false};}
 async function status(pool,options={}){
  if(!pool)throw fail("database-required");const now=new Date(clock(options)).toISOString();await ensure(pool);
  const result=await pool.query(`SELECT count(*)::int AS "storedPrices",count(*) FILTER(WHERE ${fresh})::int AS "currentPrices",count(DISTINCT gtin) FILTER(WHERE ${fresh})::int AS "productsWithCurrentPublishedPrices",count(DISTINCT native_market_id) FILTER(WHERE ${fresh})::int AS "marketsWithCurrentPublishedPrices",count(*) FILTER(WHERE ${fresh} AND availability='available')::int AS "availableCurrentPrices",MAX(captured_at) AS "lastCapturedAt" FROM ${TABLE} WHERE source_id=$2 AND scope_country='DE' AND scope_channel='pickup'`,[now,SOURCE]);

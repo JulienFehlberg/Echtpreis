@@ -9,6 +9,9 @@ async function main(){
   const exists=async table=>!!(await pool.query("SELECT to_regclass($1) AS name",["public."+table])).rows[0].name;
   const baseline={};for(const table of["products","stores","price_observations","receipts","retailer_published_prices","wolt_retailer_published_prices"]){baseline[table]=await exists(table)?(await pool.query("SELECT count(*)::int AS count FROM "+table)).rows[0].count:null;}
   const fixtures=Array.from({length:501},(_,index)=>fixture(index)),saved=await Service.persist(pool,fixtures,{now});assert.equal(saved.accepted,501);assert.equal(saved.rejected,0);assert.equal(saved.upserted,501);
+  assert.equal((await Service.search(pool,{...{gtin:gtin(0),now,limit:1},pack:"1 l"})).items.length,1,"Real SQL selects an equivalent normalized single pack before its cap");
+  assert.equal((await Service.search(pool,{...{gtin:gtin(0),now,limit:1},pack:"2 x 500 ml"})).items.length,0,"Equal total volume must not admit a different sales pack");
+  assert.equal((await Service.search(pool,{...{gtin:gtin(0),now,limit:1},pack:"500 ml"})).items.length,0);
   const stored=(await pool.query("SELECT count(*)::int AS total,count(*) FILTER(WHERE scope_country='DE' AND scope_channel='pickup' AND currency='EUR' AND pack_amount=1000 AND pack_unit='ml' AND pack_count=1 AND price=1.29 AND deposit=.25 AND displayed_price=1.29)::int AS exact FROM rewe_retailer_published_prices WHERE retailer_sku=ANY($1::text[])",[fixtures.map(row=>row.retailerSku)])).rows[0];assert.equal(stored.total,501);assert.equal(stored.exact,501);
   assert.equal((await Service.persist(pool,fixtures,{now})).unchanged,501);
   assert.equal((await Service.persist(pool,[fixture(0,{price:1.59,displayedPrice:1.59,nativePriceEUR:1.59,payablePackPrice:1.84})],{now})).rejected,1);

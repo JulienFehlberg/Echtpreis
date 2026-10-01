@@ -1,4 +1,5 @@
 "use strict";
+const SearchFilters=require("./retailer-product-search-filters");
 
 const crypto=require("node:crypto"),Client=require("./aldi-assortment-client"),Identity=require("./product-identity");
 const SOURCE=Client.SOURCE,MERCHANT="ALDI Nord",TABLE="aldi_assortment_published_prices",DAY_MS=86400000,CHANNEL="assortment-publication";
@@ -68,11 +69,13 @@ function querySpec(options={}){
  if(options.retailerSku!=null){const v=String(options.retailerSku).trim();if(!/^[1-9]\d{0,14}$/.test(v))throw fail("invalid-retailer-sku");where.push("retailer_sku="+param(v));}
  if(options.search!=null){const v=text(options.search);if(v){const p=param("%"+v.replace(/[\\%_]/g,"\\$&")+"%");where.push("(name ILIKE "+p+" ESCAPE '\\' OR brand ILIKE "+p+" ESCAPE '\\')");}}
  if(options.today!=null){const v=String(options.today);if(!/^\d{4}-\d{2}-\d{2}$/.test(v)||!Number.isFinite(Date.parse(v))||new Date(v).toISOString().slice(0,10)!==v)throw fail("invalid-date");where.push("(captured_at AT TIME ZONE 'Europe/Berlin')::date<="+param(v)+"::date");}
+ const requestedChannel=SearchFilters.channel(options.scopeChannel);if(requestedChannel&&requestedChannel!=="assortment-publication")where.push("false");
+ const packClause=SearchFilters.sqlPack(options.pack,param);if(packClause)where.push(packClause);
  const n=Number(options.limit??50),limit=Number.isFinite(n)?Math.max(1,Math.min(200,Math.floor(n))):50;
  return{sql:"SELECT "+FIELDS+" FROM "+TABLE+" WHERE "+where.join(" AND ")+" ORDER BY captured_at DESC,retailer_sku LIMIT "+param(limit),params};
 }
 function published(r){return{...r,capturedAt:new Date(r.capturedAt).toISOString(),expiresAt:new Date(r.expiresAt).toISOString(),nativeValidFrom:new Date(r.nativeValidFrom).toISOString(),nativeValidUntil:new Date(r.nativeValidUntil).toISOString(),sourceResponseDate:new Date(r.sourceResponseDate).toISOString(),sourceResponseUrl:r.sourceUrl,priceBasis:"pack",priceType:"unknown",regularPrice:null,depositIncluded:r.deposit===0?false:null,payablePackPrice:r.deposit===0?r.price:null,state:"published",current:true,truthEligible:false,physicalStorePriceVerified:false,identityStatus:"native-retailer-sku",shippingIncluded:false,serviceFeesIncluded:false};}
-async function search(pool,options={}){if(!pool)throw fail("database-required");const q=querySpec(options);await ensure(pool);const result=await pool.query(q.sql,q.params);return{items:result.rows.map(published),scopeCountry:"DE",scopeChannel:CHANNEL,maxAgeHours:24,truthEligible:false};}
+async function search(pool,options={}){if(!pool)throw fail("database-required");const q=querySpec(options);if(options.scopeChannel!==undefined&&options.scopeChannel!=="assortment-publication")return{items:[],scopeCountry:"DE",scopeChannel:"assortment-publication",maxAgeHours:24,truthEligible:false};await ensure(pool);const result=await pool.query(q.sql,q.params);return{items:result.rows.map(published),scopeCountry:"DE",scopeChannel:CHANNEL,maxAgeHours:24,truthEligible:false};}
 async function status(pool,options={}){
  if(!pool)throw fail("database-required");await ensure(pool);const now=new Date(clock(options)).toISOString(),fresh="captured_at<=$1::timestamptz AND captured_at>=$1::timestamptz-interval '24 hours' AND expires_at>$1::timestamptz AND native_valid_from<=$1::timestamptz AND native_valid_until>$1::timestamptz";
  const result=await pool.query(`SELECT count(*)::int AS "storedPrices",count(*) FILTER(WHERE ${fresh})::int AS "currentPrices",count(DISTINCT gtin) FILTER(WHERE ${fresh})::int AS "productsWithCurrentPublishedPrices",MAX(captured_at) AS "lastCapturedAt" FROM ${TABLE} WHERE source_id=$2`,[now,SOURCE]);

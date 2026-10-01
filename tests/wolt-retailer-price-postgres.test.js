@@ -16,6 +16,9 @@ async function main(){
   resumed=(await RefreshStore.loadAll(pool))[stateName];assert.equal(new Date(resumed.lastSuccessAt).getTime(),now);assert.equal(resumed.consecutiveFailures,1);assert.equal(SourceRefresh.due(Sources[Service.SOURCE],resumed,now+3600000),false);assert.equal(SourceRefresh.due(Sources[Service.SOURCE],resumed,now+7200000),true);
   await pool.query("DELETE FROM price_source_refresh_state WHERE source_name=$1",[stateName]);
   const fixtures=Array.from({length:501},(_,index)=>fixture(index)),saved=await Service.persist(pool,fixtures,{now});assert.equal(saved.accepted,501);assert.equal(saved.rejected,0);assert.equal(saved.upserted,501);
+  assert.equal((await Service.search(pool,{...{gtin:gtin(0),now,limit:1},pack:"1 l"})).items.length,1,"Real SQL selects an equivalent normalized single pack before its cap");
+  assert.equal((await Service.search(pool,{...{gtin:gtin(0),now,limit:1},pack:"2 x 500 ml"})).items.length,0,"Equal total volume must not admit a different sales pack");
+  assert.equal((await Service.search(pool,{...{gtin:gtin(0),now,limit:1},pack:"500 ml"})).items.length,0);
   const stored=(await pool.query("SELECT count(*)::int AS total,count(*) FILTER(WHERE scope_country='DE' AND scope_channel='online' AND currency='EUR' AND pack_amount=1000 AND pack_unit='ml' AND pack_count=1 AND price=1.29 AND deposit=0.25 AND displayed_price=1.54)::int AS exact FROM wolt_retailer_published_prices WHERE retailer_sku=ANY($1::text[])",[fixtures.map(row=>row.retailerSku)])).rows[0];assert.equal(stored.total,501);assert.equal(stored.exact,501);
   assert.equal((await Service.persist(pool,fixtures,{now})).unchanged,501);
   assert.equal((await Service.persist(pool,[fixture(0,{price:1.59,displayedPrice:1.84,nativePriceEUR:1.84,payablePackPrice:1.84})],{now})).rejected,1,"Contradictory stored captures are rejected");

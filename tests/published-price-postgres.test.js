@@ -10,6 +10,9 @@ async function main(){
   const existingTables=[];for(const table of["products","stores","price_observations"])if(await exists(table))existingTables.push(table);
   const counts=async()=>{const result={};for(const table of existingTables)result[table]=(await pool.query("SELECT count(*)::int AS count FROM "+table)).rows[0].count;return result};const baseline=await counts();
   await Service.ensure(pool);const fixtures=Array.from({length:501},(_,index)=>offer(index)),saved=await Service.persist(pool,fixtures,{now});assert.equal(saved.accepted,501);assert.equal(saved.upserted,501);assert.equal(saved.rejected,0);
+  assert.equal((await Service.search(pool,{...{gtin:gtin(0),now,limit:1},pack:"1 l"})).items.length,1,"Real SQL selects an equivalent normalized single pack before its cap");
+  assert.equal((await Service.search(pool,{...{gtin:gtin(0),now,limit:1},pack:"2 x 500 ml"})).items.length,0,"Equal total volume must not admit a different sales pack");
+  assert.equal((await Service.search(pool,{...{gtin:gtin(0),now,limit:1},pack:"500 ml"})).items.length,0);
   const stored=(await pool.query("SELECT count(*)::int AS total,count(*) FILTER(WHERE scope_country='DE' AND scope_channel='online' AND currency='EUR' AND pack_amount=1000 AND pack_unit='ml' AND pack_count=1)::int AS exact FROM retailer_published_prices WHERE retailer_sku=ANY($1::text[])",[fixtures.map(row=>row.retailerSku)])).rows[0];assert.equal(stored.total,501);assert.equal(stored.exact,501);
   const repeat=await Service.persist(pool,fixtures,{now});assert.equal(repeat.upserted,0);assert.equal(repeat.unchanged,501);
   await Service.persist(pool,[offer(0,{price:99,capturedAt:new Date(now-2000).toISOString()})],{now});assert.equal((await Service.search(pool,{gtin:gtin(0),now})).items[0].price,1.29);

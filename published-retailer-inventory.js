@@ -1,11 +1,13 @@
 "use strict";
 const Dm=require("./published-price-service"),Wolt=require("./wolt-retailer-price-service"),Rewe=require("./rewe-retailer-price-service"),Aldi=require("./aldi-assortment-price-service");
 const Nahkauf=Wolt.createService("nahkaufWrangelBerlin"),deps={dm:Dm,wolt:Wolt,woltNahkauf:Nahkauf,rewe:Rewe,aldi:Aldi};
+const Filters=require("./retailer-product-search-filters");
 const ledgers=[{key:"dm",table:"retailer_published_prices",channel:"online",sourceId:"dm online"},{key:"wolt",table:"wolt_retailer_published_prices",channel:"online",sourceId:Wolt.SOURCE},{key:"woltNahkauf",table:"wolt_retailer_published_prices",channel:"online",sourceId:Nahkauf.SOURCE},{key:"rewe",table:"rewe_retailer_published_prices",channel:"pickup",sourceId:Rewe.SOURCE},{key:"aldi",table:"aldi_assortment_published_prices",channel:"assortment-publication",sourceId:Aldi.SOURCE}];
 function scope(channels){const scopeChannels=[...new Set(channels)].sort();return{scopeChannels,scopeChannel:scopeChannels.length===1?scopeChannels[0]:scopeChannels.length?"mixed":"unknown"};}
 async function search(pool,options={},services=deps){
  const requested=Number(options.limit??50),limit=Number.isFinite(requested)?Math.max(1,Math.min(200,Math.floor(requested))):50;
- const results=await Promise.all(ledgers.filter(x=>services[x.key]).map(x=>services[x.key].search(pool,{...options,limit})));
+ const channel=Filters.channel(options.scopeChannel);Filters.salesPack(options.pack);
+ const results=await Promise.all(ledgers.filter(x=>services[x.key]&&(!channel||x.channel===channel)).map(x=>services[x.key].search(pool,{...options,limit})));
  const items=results.flatMap(x=>x.items).sort((a,b)=>Date.parse(b.capturedAt)-Date.parse(a.capturedAt)||String(a.sourceId).localeCompare(String(b.sourceId))||String(a.nativeMarketId||a.nativeVenueId||"").localeCompare(String(b.nativeMarketId||b.nativeVenueId||""))||String(a.retailerSku).localeCompare(String(b.retailerSku))).slice(0,limit);
  return{items,scopeCountry:"DE",...scope(items.map(x=>x.scopeChannel)),maxAgeHours:24,physicalStorePrices:false};
 }
