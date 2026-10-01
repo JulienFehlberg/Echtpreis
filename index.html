@@ -1427,6 +1427,35 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
 #results .price-detail-row small{display:block!important;margin-top:2px!important;font-size:9.5px!important;line-height:1.3!important;color:#78847e!important}
 #results .price-detail-value{font-size:12px!important;white-space:nowrap!important;color:#52645b!important}
 </style><style>
+/* v7.303 compact receipt-like expanded price details */
+#results .compare-details[open]{margin-top:2px!important}
+#results .compare-details[open]>summary{margin-bottom:5px!important}
+#results .compare-detail-summary{padding:7px 9px!important;font-size:9.5px!important;line-height:1.3!important}
+#results .price-detail-list{margin-top:3px!important}
+#results .price-detail-row{padding:6px 0!important;gap:9px!important;align-items:center!important}
+#results .price-detail-name{font-size:11px!important;line-height:1.15!important}
+#results .price-detail-row small{font-size:8.7px!important;line-height:1.2!important;margin-top:1px!important}
+#results .price-detail-value{font-size:11px!important;font-weight:900!important}
+#results .compare-market-actions:has(.compare-details[open]){
+ grid-template-columns:auto auto 1fr!important;
+ column-gap:8px!important;
+}
+#results .compare-market-actions:has(.compare-details[open])>.route-link{grid-column:1!important;grid-row:1!important}
+#results .compare-market-actions:has(.compare-details[open])>.compare-details{
+ grid-column:2 / -1!important;
+ grid-row:1 / span 2!important;
+ margin-top:0!important;
+}
+#results .compare-details[open]>summary{margin:5px 0 7px auto!important}
+#results .compare-details[open]>*:not(summary){margin-left:calc(-1 * (var(--route-open-offset, 0px)))!important}
+@media(max-width:430px){
+ #results .compare-market-actions:has(.compare-details[open]){display:block!important}
+ #results .compare-market-actions:has(.compare-details[open])>.route-link{float:left!important;margin:0 8px 4px 0!important}
+ #results .compare-market-actions:has(.compare-details[open])>.compare-details{display:block!important;width:100%!important}
+ #results .compare-details[open]>summary{margin:4px 0 8px auto!important}
+ #results .compare-details[open]>*:not(summary){clear:both!important;width:100%!important}
+}
+</style><style>
 /* v7.286 denser product rows */
 .shopping .list{margin-top:8px!important}
 .shopping .item,.shopping .list-item,.shopping [data-list-item]{min-height:58px!important;padding-top:8px!important;padding-bottom:8px!important}
