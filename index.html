@@ -885,18 +885,76 @@ html[data-app-health="error"] .version:after{content:" · Check";color:#a45b18}
  .market-strip{margin-top:8px!important;margin-bottom:9px!important}
  .market-strip-label{font-size:8px!important;margin-left:1px!important}
 }
+</style><style>
+/* v7.264 clean consumer home */
+.brand{display:flex!important;align-items:center;gap:7px!important}
+.brand-word{font-size:29px!important;font-weight:950!important;letter-spacing:-.045em!important;text-transform:none!important}
+.brand .spark-mark{order:2;width:20px!important;height:24px!important;margin:0 1px!important;transform:none!important}
+.brand .alpha-badge{order:3;margin-left:1px!important}
+.hero-v264{min-height:285px!important;padding:31px 27px 24px!important;display:flex!important;position:relative!important;overflow:hidden!important}
+.hero-v264:after{display:none!important}
+.hero-v264 .hero-copy{width:64%;z-index:3}
+.hero-v264 h1{font-size:45px!important;line-height:.94!important;letter-spacing:-.055em!important;margin:0!important}
+.hero-v264 p{font-size:14px;line-height:1.35;color:rgba(255,255,255,.72);font-weight:650;max-width:240px;margin:19px 0 0}
+.grocery-art{position:absolute;right:-22px;bottom:-12px;width:55%;height:auto;z-index:2;filter:drop-shadow(0 14px 16px rgba(0,0,0,.18))}
+.grocery-art svg{display:block;width:100%;height:auto}
+.grocery-art .basketbody{fill:#126744;stroke:#dcebdc;stroke-width:3}
+.grocery-art .basketline{fill:none;stroke:#dcebdc;stroke-width:4;opacity:.55}
+.grocery-art .handle{fill:none;stroke:#f0ead7;stroke-width:9;stroke-linecap:round}
+.grocery-art .leaf{fill:#64a846}.grocery-art .baguette{fill:#dba85e}.grocery-art .banana{fill:#f2cf55}
+.grocery-art .tomato{fill:#df5541}.grocery-art .milk{fill:#f4f0df}.grocery-art .milkcap{fill:#1b7b53}
+.market-strip-v264{margin:13px 2px 15px!important;padding:0!important}
+.market-strip-head{display:flex;justify-content:space-between;align-items:center;padding:0 4px 7px}
+.market-strip-v264 .market-strip-label{margin:0!important}
+.market-strip-head>span{font-size:9px;color:#96a29c;font-weight:700}
+.market-strip-v264 .market-strip-scroll{gap:8px!important;padding:1px 3px 5px!important}
+.market-strip-v264 .market-strip-scroll>span{width:58px!important;height:47px!important;padding:0 6px!important;border-radius:14px!important;font-size:10px!important;background:#fff!important;box-shadow:0 4px 13px rgba(19,52,39,.06)!important}
+.market-strip-v264 .m-aldi{color:#174a7e!important}.market-strip-v264 .m-lidl{color:#174b91!important}
+.market-strip-v264 .m-edeka{color:#164f91!important}.market-strip-v264 .m-rewe{color:#c8282e!important}
+.market-strip-v264 .m-kaufland{color:#bd2832!important;font-size:8px!important}.market-strip-v264 .m-netto{color:#d89c00!important}
+.market-strip-v264 .m-penny{color:#c92d31!important}
+.home-main-actions .homeaction,.home-main-actions #homePlan,.home-main-actions #homeReceipt,.home-main-actions #homeStats{background:#fff!important;color:#0b0d0c!important;border-color:#edf1ef!important;min-height:82px!important}
+.home-main-actions #homePlan .homeaction-copy small,.home-main-actions #homeReceipt .homeaction-copy small,.home-main-actions #homeStats .homeaction-copy small{color:#718079!important}
+.home-main-actions #homePlan .ep-icon,.home-main-actions #homeReceipt .ep-icon,.home-main-actions #homeStats .ep-icon{background:#eff8f3!important;border-color:#d7e9df!important}
+.home-main-actions #homePlan .ep-icon svg,.home-main-actions #homeReceipt .ep-icon svg,.home-main-actions #homeStats .ep-icon svg{stroke:#0b4f38!important}
+.home-main-actions #homePlan .ep-chevron,.home-main-actions #homeReceipt .ep-chevron,.home-main-actions #homeStats .ep-chevron{border-color:#8b9992!important}
+@media(max-width:430px){
+ .brand-word{font-size:25px!important}.brand .spark-mark{width:18px!important;height:22px!important}
+ .hero-v264{min-height:258px!important;padding:27px 23px 20px!important}
+ .hero-v264 .hero-copy{width:68%}.hero-v264 h1{font-size:39px!important}
+ .hero-v264 p{font-size:12px;max-width:205px;margin-top:15px}
+ .grocery-art{width:57%;right:-29px;bottom:-7px}
+ .market-strip-v264 .market-strip-scroll{margin-right:-18px!important;padding-right:18px!important}
+ .market-strip-v264 .market-strip-scroll>span{width:55px!important;height:43px!important;border-radius:13px!important}
+ .home-main-actions .homeaction,.home-main-actions #homePlan,.home-main-actions #homeReceipt,.home-main-actions #homeStats{min-height:72px!important}
+}
 </style></head>
 <body><div id="sharingWelcome" class="sharing-welcome" role="dialog" aria-modal="true" aria-labelledby="sharingWelcomeTitle" style="display:none"><div class="sharing-welcome-card"><div class="smallcap">SPARKORB</div><h2 id="sharingWelcomeTitle">Deine Belege. Deine Entscheidung.</h2><p>Du kannst Belege nur für dich speichern oder mit deinen erkannten Belegpreisen die gemeinsame Preisdatenbank verbessern.</p><p>Beim Teilen übertragen wir Händler, Datum, Belegsumme und erkannte Artikel mit Preisen. Das Foto wird nicht hochgeladen. <a href="privacy.html">Datenschutz lesen</a></p><button class="green" id="welcomeShare" type="button">Belege künftig automatisch teilen</button><button class="ghost" id="welcomePrivate" type="button">Ohne Teilen nutzen</button><div class="detail">Du kannst das später unter „Meine Belege & Privatsphäre“ ändern.</div></div></div><main class="app">
-<div class="top"><div class="brand"><span class="spark-mark" aria-hidden="true"><svg viewBox="0 0 40 48"><path d="M20 2.8C10.6 2.8 3.8 9.8 3.8 18.7c0 11.7 16.2 26.1 16.2 26.1s16.2-14.4 16.2-26.1C36.2 9.8 29.4 2.8 20 2.8Z"/><path class="basket" d="M11.8 18h16.4l-2.2 9.2H14L11.8 18Zm3.2 0 2.1-4.5m7.9 4.5-2.1-4.5"/><circle class="basket" cx="16.2" cy="30.7" r="1.25"/><circle class="basket" cx="24.2" cy="30.7" r="1.25"/></svg></span><span class="brand-word">SPARKORB</span> <span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
-<section class="hero"><div class="hero-copy"><h1>Wissen, wo’s<br>günstiger ist.</h1><div class="receipt-scene" aria-label="Beispiel: derselbe Einkauf bei drei Märkten">
-  <div class="mini-receipt receipt-a"><span class="receipt-brand">MARKT A</span><i></i><i></i><i></i><small>SUMME</small><b>38,40 €</b></div>
-  <div class="mini-receipt receipt-b"><span class="receipt-brand">MARKT B</span><i></i><i></i><i></i><small>SUMME</small><b>40,15 €</b></div>
-  <div class="mini-receipt receipt-c"><span class="receipt-brand">MARKT C</span><i></i><i></i><i></i><small>SUMME</small><b>47,20 €</b></div>
-</div><div class="receipt-caption">GLEICHER EINKAUF. ANDERER PREIS.</div></div></section>
-<div class="market-strip" aria-label="Unterstützte Märkte">
-  <div class="market-strip-label">PREISE VERGLEICHEN BEI</div>
+<div class="top"><div class="brand"><span class="brand-word">Sparkorb</span><span class="spark-mark" aria-hidden="true"><svg viewBox="0 0 40 48"><path d="M20 2.8C10.6 2.8 3.8 9.8 3.8 18.7c0 11.7 16.2 26.1 16.2 26.1s16.2-14.4 16.2-26.1C36.2 9.8 29.4 2.8 20 2.8Z"/><path class="basket" d="M11.8 18h16.4l-2.2 9.2H14L11.8 18Zm3.2 0 2.1-4.5m7.9 4.5-2.1-4.5"/><circle class="basket" cx="16.2" cy="30.7" r="1.25"/><circle class="basket" cx="24.2" cy="30.7" r="1.25"/></svg></span><span class="alpha-badge">ALPHA</span></div><span class="version">v7.220.0 RC</span></div>
+<section class="hero hero-v264">
+  <div class="hero-copy">
+    <h1>Wissen, wo’s<br>günstiger ist.</h1>
+    <p>Dein Einkauf. Preise in deiner Nähe vergleichen.</p>
+  </div>
+  <div class="grocery-art" aria-hidden="true">
+    <svg viewBox="0 0 250 190">
+      <g class="food">
+        <path class="leaf" d="M121 80c-25-37 6-61 25-42 11-29 43-18 39 9 27-7 38 25 15 39z"/>
+        <path class="baguette" d="M186 91c14-48 29-70 42-64 13 7-3 38-27 71z"/>
+        <path class="banana" d="M68 91c-20-23-13-52 9-58-5 28 8 38 24 47-7 8-20 14-33 11z"/>
+        <circle class="tomato" cx="158" cy="91" r="19"/><circle class="tomato" cx="188" cy="98" r="17"/>
+        <path class="milk" d="M105 49h31l10 18v45h-49V67z"/><path class="milkcap" d="M114 40h17v11h-17z"/>
+      </g>
+      <path class="basketbody" d="M42 91h174l-18 82H59z"/>
+      <path class="basketline" d="M69 108l8 51m34-51 2 51m35-51-3 51m35-51-8 51M48 119h162m-157 27h151"/>
+      <path class="handle" d="M63 99C68 35 191 25 207 99"/>
+    </svg>
+  </div>
+</section>
+<div class="market-strip market-strip-v264" aria-label="Unterstützte Märkte">
+  <div class="market-strip-head"><div class="market-strip-label">PREISE VERGLEICHEN BEI</div><span>und weiteren Märkten</span></div>
   <div class="market-strip-scroll">
-    <span>ALDI</span><span>Lidl</span><span>EDEKA</span><span>REWE</span><span>Kaufland</span><span>Netto</span><span>PENNY</span><em>+ weitere</em>
+    <span class="m-aldi">ALDI</span><span class="m-lidl">Lidl</span><span class="m-edeka">EDEKA</span><span class="m-rewe">REWE</span><span class="m-kaufland">Kaufland</span><span class="m-netto">Netto</span><span class="m-penny">PENNY</span>
   </div>
 </div>
 <div class="homeactions coreactions home-main-actions">
