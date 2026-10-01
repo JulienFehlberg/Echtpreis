@@ -22,4 +22,10 @@ The broad search has a 10,000-result ceiling. The collector instead enumerates e
 
 The central published-price search and exact-product alternatives combine dm, Wolt/EDEKA and REWE without changing each quote's channel: `online` or `pickup`. Combined metadata lists `scopeChannels` and reports `mixed` when both are present. Distinct GTIN coverage is computed by a real SQL union across all three ledgers; multiple retailer quotes do not inflate the product count. Full published assortment completion and physical-store assortment verification remain separate.
 
+## Wolt venue proof and price freshness
+
+The official public app fetches venue identity from `https://consumer-api.wolt.com/order-xp/web/v1/pages/venue/slug/edeka-hilbrecht/static`. The collector uses this documented anonymous JSON response to verify the exact Berliner venue, address, coordinates and active assortment. It no longer depends on a hydrated HTML query-cache timestamp as if that were a price publication time. Venue, assortment and every product page require a real HTTP Date within 15 minutes; a reported Age above 15 minutes, malformed/future timestamps and stale price pages still fail before persistence.
+
+The previous local `wolt-native-venue-stale-or-future` metadata error may resume the saved cursor once through the new native proof. Genuine 403/429 denials and actual response-freshness failures retain their cooldowns. Success and quote freshness change only after a real successful fetch and database write.
+
 PostgreSQL 18 integration checks exercise real source constraints, idempotent/newer-only batch writes, expiry, pickup scope, overlapping GTIN counts and preservation of canonical products, stores and receipts. The current free Render service can sleep, so its process timer cannot guarantee continuous collection.
