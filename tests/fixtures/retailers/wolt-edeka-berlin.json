@@ -1,0 +1,322 @@
+{
+  "description": "Captured native public Wolt customer responses; prices are test fixtures, never production imports.",
+  "capturedAt": "2026-10-01T05:07:41.852Z",
+  "venueState": {
+    "queries": [
+      {
+        "queryKey": [
+          "venue",
+          "static",
+          "edeka-hilbrecht",
+          "de"
+        ],
+        "state": {
+          "dataUpdatedAt": 1790831261852,
+          "data": {
+            "venue": {
+              "id": "67ebb70ed3581534a525c522",
+              "slug": "edeka-hilbrecht",
+              "name": "EDEKA Hilbrecht",
+              "brand_name": "Edeka",
+              "country": "DEU",
+              "currency": "EUR",
+              "city": "Berlin",
+              "post_code": "10969",
+              "address": " Ritterstr. 38 -40",
+              "share_url": "https://wolt.com/de/deu/berlin/venue/edeka-hilbrecht",
+              "active_menu": "6810b7d20d945a9a0ae9797f",
+              "delivery_base_price": 99,
+              "merchant": {
+                "name": " Frank Hilbrecht e.K.",
+                "city": "Berlin",
+                "post_code": "10969",
+                "street_address": " Ritterstr. 38 -40"
+              }
+            },
+            "venue_raw": {
+              "location": {
+                "bbox": null,
+                "type": "Point",
+                "coordinates": [
+                  13.40365335,
+                  52.50354421
+                ]
+              }
+            },
+            "order_minimum": 2500
+          }
+        }
+      }
+    ]
+  },
+  "listing": {
+    "assortment_id": "6810b7d20d945a9a0ae9797f",
+    "loading_strategy": "partial",
+    "primary_language": "de",
+    "selected_language": "de",
+    "available_languages": [
+      {
+        "autotranslated": false,
+        "language": "de",
+        "name": "Deutsch"
+      },
+      {
+        "autotranslated": true,
+        "language": "en",
+        "name": "Englisch"
+      },
+      {
+        "autotranslated": true,
+        "language": "tr",
+        "name": "Türkisch"
+      }
+    ],
+    "compliance_info": {
+      "badges": [],
+      "disclaimers": {
+        "caffeine": "*Weitere Informationen über den Koffeingehalt erhältst du in den Produktinformationen oder im Warenkorb"
+      },
+      "how_search_works": {
+        "url": "https://explore.wolt.com/de/deu/how-search-works",
+        "type": "text"
+      },
+      "lowest_price_calculation_interval_in_days": 30,
+      "should_display_original_price_for_unit_price": false,
+      "should_display_price_by_subtracting_deposit": true
+    },
+    "categories": [
+      {
+        "id": "1367e9bb47bc7f6b34ff6a34",
+        "name": "Butter & Margarine",
+        "slug": "butter-margarine-44",
+        "subcategories": [],
+        "item_ids": []
+      },
+      {
+        "id": "8fd9b314758bd33b085f3027",
+        "name": "Cola & Cola-Mix",
+        "slug": "cola-cola-mix-127",
+        "subcategories": [],
+        "item_ids": []
+      }
+    ],
+    "items": [],
+    "options": [],
+    "variant_groups": []
+  },
+  "pages": [
+    {
+      "category": {
+        "id": "1367e9bb47bc7f6b34ff6a34",
+        "name": "Butter & Margarine",
+        "slug": "butter-margarine-44"
+      },
+      "categories": [],
+      "items": [
+        {
+          "id": "e4be508b5caa1252bd746419",
+          "name": "Arla Kærgården Butter gesalzen, 200 g",
+          "barcode_gtin": "4100290068608",
+          "description": "Arla Kærgården ist eine herrliche Mischung aus bester Butter und wertvollem Rapsöl. So ist Arla Kærgården immer wunderbar streichfähig – auch direkt aus dem Kühlschrank. Arla Kærgården Gesalzen eignet sich hervorragend unter herzhaften Aufschnitten, als Basis für selbst zubereitete Aufstriche und natürlich pur sowie zum Kochen und Backen.",
+          "unit_info": "200 g",
+          "price": 319,
+          "deposit": null,
+          "original_price": null,
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 1595,
+            "net_price": null,
+            "unit": "kilogram"
+          },
+          "sell_by_weight_config": null,
+          "variant": null,
+          "options": [],
+          "is_wolt_plus_only": false,
+          "purchasable_balance": null,
+          "disabled_info": null,
+          "min_quantity_per_purchase": null
+        },
+        {
+          "id": "134440f9c36e0a550f7dcd6e",
+          "name": "Arla Kærgården ungesalzen, 200 g",
+          "barcode_gtin": "4100290068615",
+          "description": "Arla Kærgården ist eine herrliche Mischung aus bester Butter und wertvollem Rapsöl. So ist Arla Kærgården immer wunderbar streichfähig – auch direkt aus dem Kühlschrank. Arla Kærgården Ungesalzen eignet sich hervorragend zum Backen, Braten sowie Kochen und ist natürlich auch als Brotaufstrich ein Genuss.",
+          "unit_info": "200 g",
+          "price": 319,
+          "deposit": null,
+          "original_price": null,
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 1595,
+            "net_price": null,
+            "unit": "kilogram"
+          },
+          "sell_by_weight_config": null,
+          "variant": null,
+          "options": [],
+          "is_wolt_plus_only": false,
+          "purchasable_balance": null,
+          "disabled_info": null,
+          "min_quantity_per_purchase": null
+        }
+      ],
+      "options": [],
+      "variant_groups": [],
+      "metadata": {
+        "next_page_token": null,
+        "page": 1
+      }
+    },
+    {
+      "category": {
+        "id": "8fd9b314758bd33b085f3027",
+        "name": "Cola & Cola-Mix",
+        "slug": "cola-cola-mix-127"
+      },
+      "categories": [],
+      "items": [
+        {
+          "id": "1dc18e85145be6774701f54d",
+          "name": "Coca-Cola, 1 l",
+          "barcode_gtin": "5449000017888",
+          "description": "enthält Koffein 10,0 mg/100 ml\nKoffeinhaltiges Erfrischungsgetränk mit Pflanzenextrakten",
+          "unit_info": "1 l",
+          "price": 204,
+          "deposit": {
+            "amount": 15,
+            "label": "MEHRWEG"
+          },
+          "original_price": null,
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 189,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "sell_by_weight_config": null,
+          "variant": null,
+          "options": [],
+          "is_wolt_plus_only": false,
+          "purchasable_balance": null,
+          "disabled_info": null,
+          "min_quantity_per_purchase": null
+        },
+        {
+          "id": "973452090ac135f371bae063",
+          "name": "Coca-Cola, 330 ml",
+          "barcode_gtin": "5000112602029",
+          "description": "Enthält Koffein 10,0 mg/100 ml koffeinhaltiges Erfrischungsgetränk mit Pflanzenextrakten.",
+          "unit_info": "330 ml",
+          "price": 144,
+          "deposit": {
+            "amount": 25,
+            "label": "EINWEG"
+          },
+          "original_price": null,
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 361,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "sell_by_weight_config": null,
+          "variant": null,
+          "options": [],
+          "is_wolt_plus_only": false,
+          "purchasable_balance": 0,
+          "disabled_info": {
+            "disable_text": "Ausverkauft",
+            "disable_reason": null
+          },
+          "min_quantity_per_purchase": null
+        }
+      ],
+      "options": [],
+      "variant_groups": [],
+      "metadata": {
+        "next_page_token": "eyJsYXN0X251bSI6IjUyLjU2ODQyMTA1MjYzMTU3ODk0NzM2ODQyMTA1MjYzMTU4IiwicGFnZSI6Mn0=",
+        "page": 1
+      }
+    },
+    {
+      "category": {
+        "id": "8fd9b314758bd33b085f3027",
+        "name": "Cola & Cola-Mix",
+        "slug": "cola-cola-mix-127"
+      },
+      "categories": [],
+      "items": [
+        {
+          "id": "128778ee56426d42d87c5a45",
+          "name": "Knabe Mix Null Zucker Kola & Orange, 330 ml",
+          "barcode_gtin": "4250616686068",
+          "description": "Kalorienarmes, koffeinhaltiges Erfrischungsgetränk mit Kola-Orangen-Geschmack und Süßungsmitteln. Knabe Mix Null Zucker ist vegan und wird in einer 0,33-l-Dose angeboten.",
+          "unit_info": "330 ml",
+          "price": 174,
+          "deposit": {
+            "amount": 25,
+            "label": "EINWEG"
+          },
+          "original_price": null,
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 452,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "sell_by_weight_config": null,
+          "variant": null,
+          "options": [],
+          "is_wolt_plus_only": false,
+          "purchasable_balance": null,
+          "disabled_info": null,
+          "min_quantity_per_purchase": null
+        },
+        {
+          "id": "ac5de2aff00155d743ab4fd0",
+          "name": "Krombacher Spezi Cola-Orange, 500 ml",
+          "barcode_gtin": "4008287949681",
+          "description": "Erfrischend prickelnd und besonders lecker: Krombacher Spezi® vereint fruchtigen Orangensaft und prickelnde Cola zu einem echten Geschmackserlebnis. Spezi® neu interpretiert, natürlich alkoholfrei und fruchtig-prickelnd. Der beliebte Cola-Orange Geschmack, jetzt von Krombacher.",
+          "unit_info": "500 ml",
+          "price": 127,
+          "deposit": {
+            "amount": 8,
+            "label": "MEHRWEG"
+          },
+          "original_price": null,
+          "unit_price": {
+            "base": 1,
+            "original_price": null,
+            "original_net_price": null,
+            "price": 238,
+            "net_price": null,
+            "unit": "litre"
+          },
+          "sell_by_weight_config": null,
+          "variant": null,
+          "options": [],
+          "is_wolt_plus_only": false,
+          "purchasable_balance": null,
+          "disabled_info": null,
+          "min_quantity_per_purchase": null
+        }
+      ],
+      "options": [],
+      "variant_groups": [],
+      "metadata": {
+        "next_page_token": null,
+        "page": 2
+      }
+    }
+  ]
+}
