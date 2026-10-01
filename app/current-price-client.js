@@ -129,7 +129,7 @@ function normalizeDecision(raw,ctx={}){
  const state=raw.state==="verified"&&firstParty&&!verifiedFirstParty?"observed":raw.state;
  return{
   merchant,state,kind:text(raw.kind)||null,status:text(raw.status)||null,identityVerified:raw.identityVerified===true,proofVerified:raw.proofVerified===true,truthEligible:raw.truthEligible!==false,sourceEligibility:raw.sourceEligibility&&typeof raw.sourceEligibility==="object"&&!Array.isArray(raw.sourceEligibility)?clone(raw.sourceEligibility):null,price,payablePrice:payable,...checkoutContext(raw,price),currency:"EUR",priceType:type,conditional:CONDITIONAL_TYPES.has(type),minQuantity:number(raw.minQuantity??raw.quantityRequired),
-  publicReferencePrice:positive(raw.publicReferencePrice),regularPrice:positive(raw.regularPrice),product:text(raw.product),productId:text(raw.productId)||null,brand:text(raw.brand)||null,pack:text(raw.pack)||null,gtin:gtin||null,
+  publicReferencePrice:positive(raw.publicReferencePrice),regularPrice:positive(raw.regularPrice),priceBasis:text(raw.priceBasis)||null,product:text(raw.product),productId:text(raw.productId)||null,externalProductId:text(raw.externalProductId)||null,brand:text(raw.brand)||null,pack:text(raw.pack)||null,gtin:gtin||null,
   storeId:storeId||null,region:region||null,locationLevel:locationLevel||null,scopeWarning:text(raw.scopeWarning)||null,comparisonOnly:raw.comparisonOnly===true,match:text(raw.match)||null,queryMode:text(raw.queryMode)||null,
   observedAt:text(raw.observedAt),date:observed,validFrom:from,validTo:to,source:text(raw.source)||null,sourceType:text(raw.sourceType)||null,sourceId:text(raw.sourceId)||null,sourceUrl:text(raw.sourceUrl)||null,
   proof:text(raw.proof)||null,proofHash:text(raw.proofHash)||null,mediaHash:text(raw.mediaHash)||null,contentHash:text(raw.contentHash)||null,proofActor:text(raw.proofActor)||null,proofType:text(raw.proofType)||null,
@@ -185,7 +185,7 @@ function create(options={}){
  function failure(payload,reason){return{ok:false,product:payload.product,today:payload.today,results:payload.merchants.map(m=>unknown(m,reason)),publishedAlternatives:[],reason}}
  async function compare(query,ctx={}){
   const time=now(),today=day(ctx.today)||localDay(time),payload=requestQuery(query,ctx,today);
-  if(ctx.today&&!day(ctx.today)||!payload.product||!payload.merchants.length||!Number.isSafeInteger(payload.quantity)||payload.quantity<1||payload.gtin&&!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(payload.gtin))return failure(payload,"invalid-query");
+  if(ctx.today&&!day(ctx.today)||!(payload.product||payload.gtin||payload.productId)||!payload.merchants.length||!Number.isSafeInteger(payload.quantity)||payload.quantity<1||payload.gtin&&!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(payload.gtin))return failure(payload,"invalid-query");
   const apiBase=text(ctx.apiBase??options.apiBase).replace(/\/+$/,""),fetchImpl=ctx.fetchImpl||defaultFetch;
   if(typeof fetchImpl!=="function")return failure(payload,"unavailable");
   if(!fetchIds.has(fetchImpl))fetchIds.set(fetchImpl,nextFetchId++);

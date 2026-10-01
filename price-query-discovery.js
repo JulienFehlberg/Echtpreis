@@ -4,7 +4,7 @@ const Identity=require("./product-identity");
 const Compatibility=require("./product-compatibility");
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PRODUCT_FIELDS='id,canonical_key AS "canonicalKey",gtin,name,brand,variant,pack_amount::float AS "packAmount",pack_unit AS "packUnit",pack_count::float AS "packCount",identity_status AS "identityStatus"';
-const STORE_FIELDS='s.id,m.name AS merchant,m.normalized_name AS "merchantKey",s.address,s.postal_code AS "postalCode",s.city,s.region,s.latitude::float AS latitude,s.longitude::float AS longitude,s.active,m.active AS "merchantActive"';
+const STORE_FIELDS='s.id,m.name AS merchant,m.normalized_name AS "merchantKey",s.address,s.postal_code AS "postalCode",s.city,s.region,s.country,s.external_id AS "externalId",s.latitude::float AS latitude,s.longitude::float AS longitude,s.active,m.active AS "merchantActive"';
 const text=(value,limit=200)=>String(value??"").trim().slice(0,limit);
 const limit=(value,fallback=20,max=50)=>Math.max(1,Math.min(max,Math.floor(Number(value)||fallback)));
 function validGtin(value){const code=text(value,32);return /^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(code)&&Identity.gtinValid(code)}

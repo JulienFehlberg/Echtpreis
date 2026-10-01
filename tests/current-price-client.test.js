@@ -121,5 +121,8 @@ const normalizePublished=raw=>Client.normalizePublishedAlternative(raw,query,pub
  let clearRelease;const clearing=Client.create({fetchImpl:()=>new Promise(resolve=>{clearRelease=()=>resolve(response())})});const old=clearing.compare(query,ctx);await Promise.resolve();clearing.clearCache();clearRelease();await old;assert.strictEqual(clearing.cacheInfo().entries,0,"clearing during a request prevents its old result repopulating the cache");
  const noRequest=Client.create({fetchImpl:()=>{throw new Error("should not fetch")}});for(const invalid of [{...ctx,quantity:0},{...ctx,quantity:Infinity},{...ctx,today:"2026-02-30"}])assert.strictEqual((await noRequest.compare(query,invalid)).reason,"invalid-query");
  let refreshBody;const refreshing=Client.create({fetchImpl:async(_,options)=>{refreshBody=JSON.parse(options.body);return response()}});await refreshing.compare(query,{...ctx,refresh:true});assert.strictEqual(refreshBody.refresh,true);
- console.log("current-price-client: ok");
+ let identityBody;const identityClient=Client.create({fetchImpl:async(_,options)=>{identityBody=JSON.parse(options.body);return response()}});
+await identityClient.compare({...query,product:""},ctx);assert.equal(identityBody.product,"");assert.equal(identityBody.gtin,query.gtin,"An explicit GTIN and pack can be queried without retailer marketing wording");
+assert.equal((await noRequest.compare({...query,product:"",gtin:null,productId:null},ctx)).reason,"invalid-query");
+console.log("current-price-client: ok");
 })().catch(error=>{console.error(error);process.exitCode=1});
