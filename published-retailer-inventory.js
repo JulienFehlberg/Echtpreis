@@ -1,7 +1,7 @@
 "use strict";
-const Dm=require("./published-price-service"),Wolt=require("./wolt-retailer-price-service"),Rewe=require("./rewe-retailer-price-service");
-const deps={dm:Dm,wolt:Wolt,rewe:Rewe};
-const ledgers=[{key:"dm",table:"retailer_published_prices",channel:"online"},{key:"wolt",table:"wolt_retailer_published_prices",channel:"online"},{key:"rewe",table:"rewe_retailer_published_prices",channel:"pickup"}];
+const Dm=require("./published-price-service"),Wolt=require("./wolt-retailer-price-service"),Rewe=require("./rewe-retailer-price-service"),Aldi=require("./aldi-assortment-price-service");
+const deps={dm:Dm,wolt:Wolt,rewe:Rewe,aldi:Aldi};
+const ledgers=[{key:"dm",table:"retailer_published_prices",channel:"online"},{key:"wolt",table:"wolt_retailer_published_prices",channel:"online"},{key:"rewe",table:"rewe_retailer_published_prices",channel:"pickup"},{key:"aldi",table:"aldi_assortment_published_prices",channel:"assortment-publication"}];
 function scope(channels){const scopeChannels=[...new Set(channels)].sort();return{scopeChannels,scopeChannel:scopeChannels.length===1?scopeChannels[0]:scopeChannels.length?"mixed":"unknown"};}
 async function search(pool,options={},services=deps){
  const requested=Number(options.limit??50),limit=Number.isFinite(requested)?Math.max(1,Math.min(200,Math.floor(requested))):50;
@@ -17,7 +17,7 @@ async function status(pool,options={},services=deps){
  const unions=selected.map(x=>`SELECT gtin FROM ${x.table} WHERE captured_at<=$1::timestamptz AND captured_at>=$1::timestamptz-interval '24 hours' AND expires_at>$1::timestamptz`).join(" UNION ");
  const unique=await pool.query(`SELECT count(DISTINCT gtin)::int AS "productsWithCurrentPublishedPrices" FROM (${unions}) p`,[new Date(time).toISOString()]);
  const captures=results.map(x=>x.lastCapturedAt).filter(Boolean).sort((a,b)=>Date.parse(b)-Date.parse(a)),sum=field=>results.reduce((total,x)=>total+Number(x[field]||0),0);
- return{ok:true,storedPrices:sum("storedPrices"),currentPrices:sum("currentPrices"),productsWithCurrentPublishedPrices:Number(unique.rows[0].productsWithCurrentPublishedPrices),availableCurrentPrices:sum("availableCurrentPrices"),lastCapturedAt:captures[0]||null,merchants:results.flatMap(x=>x.markets||x.merchants||[]),retailers:{...(dm?{dm}:{}),...(wolt?{woltEdekaBerlin:wolt}:{}),...(rewe?{reweBerlinPickup:rewe}:{})},scopeCountry:"DE",...scope(selected.filter((x,i)=>Number(results[i].currentPrices)>0).map(x=>x.channel)),maxAgeHours:24,state:"published",note:"Veröffentlichte Liefer-, Online- und Abholpreise mit Quellen, Marktbezug und eigener Abrufzeit. Filialpreise und zusätzliche Gebühren bleiben getrennt."};
+ return{ok:true,storedPrices:sum("storedPrices"),currentPrices:sum("currentPrices"),productsWithCurrentPublishedPrices:Number(unique.rows[0].productsWithCurrentPublishedPrices),availableCurrentPrices:sum("availableCurrentPrices"),lastCapturedAt:captures[0]||null,merchants:results.flatMap(x=>x.markets||x.merchants||[]),retailers:{...(dm?{dm}:{}),...(wolt?{woltEdekaBerlin:wolt}:{}),...(rewe?{reweBerlinPickup:rewe}:{}),...(byKey.aldi?{aldiNordAssortment:byKey.aldi}:{})},scopeCountry:"DE",...scope(selected.filter((x,i)=>Number(results[i].currentPrices)>0).map(x=>x.channel)),maxAgeHours:24,state:"published",note:"Veröffentlichte Liefer-, Online-, Abhol- und Sortimentspreise mit Quellen, belegtem Standortumfang und eigener Abrufzeit. Filialpreise und zusätzliche Gebühren bleiben getrennt."};
 }
 function matchesRequestedProductQuery(offer,query={},request={}){
  // Exact GTIN/pack prove identity. A catalog-filled brand is not an extra caller constraint.

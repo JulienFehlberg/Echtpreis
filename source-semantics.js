@@ -39,7 +39,7 @@ const SOURCE_OVERRIDES={
 };
 function registeredName(x={}){for(const v of [x.source,x.sourceId,x.id]){const k=canonicalName(v);if(k&&Sources.SOURCES[k])return k}return null}
 function sourceName(x={}){return registeredName(x)||canonicalName(x.source||x.sourceId||x.id)}
-function sourceType(x={}){const name=sourceName(x),registered=Sources.SOURCES[name];return String(x.sourceType||x.type||registered?.type||"unknown").toLowerCase()}
+function sourceType(x={}){const name=sourceName(x),registered=Sources.SOURCES[name];return String(registered?.type||x.sourceType||x.type||"unknown").toLowerCase()}
 function policy(x={}){
  const name=sourceName(x),registered=Sources.SOURCES[name]||null,type=sourceType(x),purposes=[...(SOURCE_OVERRIDES[name]||TYPE_PURPOSES[type]||TYPE_PURPOSES.unknown)];
  const approved=registered?Sources.canImport(name):true;

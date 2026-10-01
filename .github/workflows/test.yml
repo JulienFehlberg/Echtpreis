@@ -61,3 +61,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
         run: node tests/rewe-retailer-price-postgres.test.js
+      - name: Run PostgreSQL ALDI published assortment price integration test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
+        run: node tests/aldi-assortment-price-postgres.test.js
