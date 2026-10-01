@@ -81,6 +81,61 @@ function extractRows(html){
  const rows=[],errors=[];for(const [index,value]of leaflets.entries()){try{rows.push(JSON.parse(decode(value)))}catch{errors.push({index,retailerSku:null,reasons:["hit-native-row-json-invalid"]})}}
  return{rows,pagination:null,params:null,kind:"product-leaflet",errors};
 }
+function categoryLocation(value,base,market=null){
+ if(typeof value!=="string"||value!==value.trim()||value.length>1000||/[\\%\r\n\t]/.test(value)||/(?:^|\/)\.{1,2}(?:\/|$)/.test(value)||!(value.startsWith("/sortiment/")||/^https:\/\/(?:www\.)?hit\.de\//.test(value)))throw fail("hit-native-category-url-not-allowed");
+ let url;try{url=new URL(value,base)}catch{throw fail("hit-native-category-url-not-allowed")}
+ const match=url.pathname.match(/^\/sortiment\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/)*[a-z0-9]+(?:-[a-z0-9]+)*-([1-9]\d{0,11})\/?$/);
+ if(url.protocol!=="https:"||!["www.hit.de","hit.de"].includes(url.hostname)||url.port||url.username||url.password||url.hash||!match||[...url.searchParams.keys()].some(key=>key!=="markt")||url.searchParams.getAll("markt").length>1||url.searchParams.has("markt")&&(!/^[1-9]\d{0,5}$/.test(url.searchParams.get("markt"))||market==null||url.searchParams.get("markt")!==market))throw fail("hit-native-category-url-not-allowed");
+ return{id:match[1],url:url.href,topLevel:url.pathname.split("/").filter(Boolean).length===2};
+}
+function extractCategories(html,source){
+ if(typeof html!=="string"||Buffer.byteLength(html)>MAX_BYTES)throw fail("hit-page-body-invalid-or-too-large");
+ if(typeof source!=="string"||source!==source.trim()||/[\\\r\n\t]/.test(source))throw fail("hit-category-source-url-not-allowed");
+ let base;try{base=new URL(source)}catch{throw fail("hit-category-source-url-not-allowed")}
+ if(base.protocol!=="https:"||!["www.hit.de","hit.de"].includes(base.hostname)||base.port||base.username||base.password||base.hash||!/^\/sortiment(?:\/[a-zA-Z0-9_-]+)*\/?$/.test(base.pathname)||/-\d+[A-Z]{1,3}\/?$/.test(base.pathname)||[...base.searchParams.keys()].some(key=>!["markt","page"].includes(key))||base.searchParams.getAll("markt").length>1||base.searchParams.getAll("page").length>1||base.searchParams.has("markt")&&!/^[1-9]\d{0,5}$/.test(base.searchParams.get("markt"))||base.searchParams.has("page")&&!/^\d{1,5}$/.test(base.searchParams.get("page")))throw fail("hit-category-source-url-not-allowed");
+ const extracted=extractRows(html),cleaned=html.replace(/<!--[\s\S]*?-->/g,"").replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi,"");
+ const rejected=[],filters=[],navigation=[];let data=null;
+ for(const tag of cleaned.matchAll(/<([a-z][a-z\d:-]*)\b((?:"[^"]*"|'[^']*'|[^'">])*)>/gi)){
+  const attrs=new Map();let duplicate=false;for(const attr of tag[2].matchAll(/([a-z_:][a-z\d_:.-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)){const key=attr[1].toLowerCase();if(attrs.has(key))duplicate=true;attrs.set(key,attr[2]??attr[3]);}
+  if(attrs.get("data-component")==="assortment/list"){if(duplicate)throw fail("hit-duplicate-native-attribute");try{data=JSON.parse(decode(attrs.get("data-data")))}catch{throw fail("hit-native-category-filters-schema-invalid")}}
+ }
+ if(data?.filters!=null&&(!object(data.filters)||data.filters.categories!=null&&!Array.isArray(data.filters.categories)))throw fail("hit-native-category-filters-schema-invalid");
+ const rawCategories=data?.filters?.categories??[];if(rawCategories.length>MAX_ROWS)throw fail("hit-native-category-bound-exceeded");
+ let nativeStoreId=null,currentCategoryId=null;
+ if(extracted.kind==="assortment-list"){
+  if(extracted.params?.for_store!=null){if(!Number.isSafeInteger(extracted.params.for_store)||extracted.params.for_store<=0)throw fail("hit-native-category-store-context-conflict");nativeStoreId=extracted.params.for_store}
+  if(extracted.params?.for_category!=null){const id=String(extracted.params.for_category);if(!/^[1-9]\d{0,11}$/.test(id))throw fail("hit-native-category-context-conflict");currentCategoryId=id}
+  if(data.meta?.category!=null){const meta=data.meta.category,id=String(meta?.id);if(!object(meta)||!/^[1-9]\d{0,11}$/.test(id)||currentCategoryId&&id!==currentCategoryId)throw fail("hit-native-category-context-conflict");currentCategoryId=id}
+  const sourceId=base.pathname.match(/-([1-9]\d{0,11})\/?$/)?.[1];if(sourceId&&currentCategoryId&&sourceId!==currentCategoryId)throw fail("hit-native-category-context-conflict");
+ }
+ const nativeMarkets=[...new Set(extracted.rows.map(row=>row?.storeNumber).filter(value=>typeof value==="string"&&/^[1-9]\d{0,5}$/.test(value)))],sourceMarket=base.searchParams.get("markt");
+ if(sourceMarket&&nativeMarkets.length===1&&sourceMarket!==nativeMarkets[0])throw fail("hit-native-category-store-context-conflict");
+ const market=sourceMarket??(nativeMarkets.length===1?nativeMarkets[0]:null),stack=[];
+ for(const [index,raw]of rawCategories.entries()){
+  const level=raw?.level;for(let n=Number.isInteger(level)&&level>=1&&level<=3?level:1;n<stack.length;n++)delete stack[n];
+  try{
+   const id=typeof raw?.id==="number"&&Number.isSafeInteger(raw.id)?String(raw.id):raw?.id,name=text(raw?.name),count=raw?.count??null,order=raw?.order??null;
+   if(!object(raw)||typeof id!=="string"||!/^[1-9]\d{0,11}$/.test(id)||!name||/[\u0000-\u001f\u007f\ufffd<>]/.test(name)||![1,2,3].includes(level)||count!==null&&(!Number.isSafeInteger(count)||count<0)||order!==null&&(!Number.isSafeInteger(order)||order<0))throw fail("hit-native-category-metadata-invalid");
+   const location=categoryLocation(raw.url,base.href,market);if(location.id!==id)throw fail("hit-native-category-url-id-conflict");
+   const parent=stack[level-1],entry={id,name,url:location.url,level,count,order,parentId:parent&&parent.order!==null&&order!==null&&parent.order<order?parent.id:null,observedChildIds:[],evidence:"native-assortment-filters"};filters.push(entry);stack[level]=entry;
+  }catch(error){rejected.push({index,id:raw?.id??null,reasons:[error.code||"hit-native-category-metadata-invalid"]})}
+ }
+ for(const [index,tag]of [...cleaned.matchAll(/<a\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/a\s*>/gi)].entries()){
+  const attrs=new Map();let duplicate=false;for(const attr of tag[1].matchAll(/([a-z_:][a-z\d_:.-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)){const key=attr[1].toLowerCase();if(attrs.has(key))duplicate=true;attrs.set(key,attr[2]??attr[3]);}
+  if(!(attrs.get("class")||"").split(/\s+/).includes("ga_filter_assortment_category"))continue;
+  try{
+   if(duplicate)throw fail("hit-duplicate-native-attribute");const location=categoryLocation(decode(attrs.get("href")||""),base.href,market),labels=[...tag[2].matchAll(/<span\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/span\s*>/gi)].filter(match=>/\bhit-font-h5\b/.test(match[1])),label=labels.length===1?labels[0][2]:tag[2],name=text(decode(label.replace(/<[^>]*>/g," ")));
+   if(!location.topLevel||!name||/[\u0000-\u001f\u007f\ufffd<>]/.test(name))throw fail("hit-native-category-navigation-invalid");
+   navigation.push({id:location.id,name,url:location.url,level:1,count:null,order:null,parentId:null,observedChildIds:[],evidence:"native-navigation-link"});
+   if(filters.length+navigation.length>MAX_ROWS)throw fail("hit-native-category-bound-exceeded");
+  }catch(error){if(error.code==="hit-native-category-bound-exceeded")throw error;rejected.push({index,id:null,reasons:[error.code||"hit-native-category-navigation-invalid"]})}
+ }
+ const groups=new Map();for(const entry of filters){const entries=groups.get(entry.id)||[];entries.push(entry);groups.set(entry.id,entries)}const conflicts=new Set([...groups].filter(([,entries])=>new Set(entries.map(e=>JSON.stringify([e.name,e.url,e.level,e.count,e.order,e.parentId]))).size>1).map(([id])=>id));
+ const byId=new Map();for(const entry of filters){if(conflicts.has(entry.id)){rejected.push({id:entry.id,index:null,reasons:["hit-conflicting-native-category-metadata"]});continue}if(!byId.has(entry.id))byId.set(entry.id,entry)}
+ for(const entry of navigation)if(!conflicts.has(entry.id)&&!byId.has(entry.id))byId.set(entry.id,entry);
+ for(const entry of byId.values()){const parent=entry.parentId&&byId.get(entry.parentId);if(parent)parent.observedChildIds.push(entry.id);else entry.parentId=null}
+ return{categories:[...byId.values()],rejected,nativePagination:extracted.pagination,currentCategoryId,nativeStoreId,categoryTreeComplete:false,assortmentComplete:false};
+}
 function parseNativeRow(raw,p){
  const reasons=[];
  if(!object(raw))return{ok:false,retailerSku:null,reasons:["hit-native-row-schema-invalid"]};
@@ -137,4 +192,4 @@ function parsePage(html,meta){
  if(!extracted.rows.length&&extracted.kind!=="assortment-list")rejected.push({retailerSku:null,reasons:["hit-page-native-offers-required"]});
  return{accepted,rejected,rowCount:extracted.rows.length,emptyPage:extracted.kind==="assortment-list"&&extracted.rows.length===0,extractionKind:extracted.kind,nativePagination:extracted.pagination,assortmentComplete:false};
 }
-module.exports={SOURCE,parsePage,parseRow,extractRows,exactPack};
+module.exports={SOURCE,parsePage,parseRow,extractRows,extractCategories,exactPack};
