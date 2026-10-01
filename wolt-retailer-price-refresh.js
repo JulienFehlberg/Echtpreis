@@ -1,0 +1,32 @@
+"use strict";
+const Client=require("./wolt-retailer-price-client"),Published=require("./wolt-retailer-price-service");
+const SOURCE=Client.SOURCE,REFRESH_MS=15*60*1000;
+let running=false;
+async function ensure(pool){
+ if(!pool)throw new Error("database-required");
+ await pool.query(`CREATE TABLE IF NOT EXISTS wolt_retailer_catalog_state(source_id text PRIMARY KEY,cursor jsonb,last_completed_at timestamptz,completed_cycles int NOT NULL DEFAULT 0,category_count int NOT NULL DEFAULT 0,categories_completed int NOT NULL DEFAULT 0,pages_fetched int NOT NULL DEFAULT 0,received_cumulative int NOT NULL DEFAULT 0,assortment_hash text,last_error text,retry_after timestamptz,updated_at timestamptz NOT NULL DEFAULT now());`);
+}
+async function load(pool){await ensure(pool);return(await pool.query('SELECT cursor,last_completed_at AS "lastCompletedAt",completed_cycles AS "completedCycles",category_count AS "categoryCount",categories_completed AS "categoriesCompleted",pages_fetched AS "pagesFetched",received_cumulative AS "receivedCumulative",assortment_hash AS "assortmentHash",last_error AS "lastError",retry_after AS "retryAfter",updated_at AS "updatedAt" FROM wolt_retailer_catalog_state WHERE source_id=$1',[SOURCE])).rows[0]||{};}
+async function refresh({pool,maxRequests=24,now=Date.now}={},deps={}){
+ if(!pool)throw new Error("database-required");if(running)return{received:0,accepted:0,skipped:"already-running"};running=true;
+ try{
+  const state=await load(pool),time=now();
+  if(state.retryAfter&&time<new Date(state.retryAfter).getTime())return{received:0,accepted:0,skipped:"source-cooldown",retryAfter:state.retryAfter};
+  let collected;
+  try{collected=await(deps.fetchOffers||Client.fetchOffers)({cursor:state.cursor||null,maxRequests:Math.max(3,Math.min(64,Math.floor(Number(maxRequests)||24))),now:()=>new Date(now()).toISOString()});}
+  catch(error){
+   const code=String(error.code||error.message||error).slice(0,300),retry=Number(error.retryAfterMs),cooldown=Math.max(REFRESH_MS,Number.isFinite(retry)&&retry>0?retry:3600000);
+   // A changed native catalog invalidates its paging cursor; start a new scan after cooldown.
+   const reset=/continuation-cursor-conflict|native-assortment-conflict/.test(code);
+   await pool.query(`INSERT INTO wolt_retailer_catalog_state(source_id,last_error,retry_after) VALUES($1,$2,$3) ON CONFLICT(source_id) DO UPDATE SET last_error=EXCLUDED.last_error,retry_after=EXCLUDED.retry_after,cursor=CASE WHEN $4 THEN NULL ELSE wolt_retailer_catalog_state.cursor END,last_completed_at=CASE WHEN $4 THEN NULL ELSE wolt_retailer_catalog_state.last_completed_at END,categories_completed=CASE WHEN $4 THEN 0 ELSE wolt_retailer_catalog_state.categories_completed END,updated_at=now()`,[SOURCE,code,new Date(time+cooldown).toISOString(),reset]);
+   throw error;
+  }
+  if(!collected||!Array.isArray(collected.offers)||typeof collected.complete!=="boolean"||(!collected.complete&&!collected.nextCursor)||!Number.isSafeInteger(collected.categoryCount)||collected.categoryCount<1||!Number.isSafeInteger(collected.categoriesCompleted)||collected.categoriesCompleted<0||collected.categoriesCompleted>collected.categoryCount||collected.complete!==(collected.categoriesCompleted===collected.categoryCount)||!Number.isSafeInteger(collected.pagesFetched)||collected.pagesFetched<1||!Number.isSafeInteger(collected.receivedCumulative??collected.received)||(collected.receivedCumulative??collected.received)<0)throw new Error("wolt-catalog-progress-unconfirmed");
+  const saved=await(deps.persist||Published.persist)(pool,collected.offers,{now:now()});
+  // Only completed native pages advance the cursor, and only after their quotes are saved.
+  await pool.query(`INSERT INTO wolt_retailer_catalog_state(source_id,cursor,last_completed_at,completed_cycles,category_count,categories_completed,pages_fetched,received_cumulative,assortment_hash,last_error,retry_after) VALUES($1,$2::jsonb,CASE WHEN $3 THEN $4::timestamptz ELSE NULL END,CASE WHEN $3 THEN 1 ELSE 0 END,$5,$6,$7,$8,$9,NULL,NULL) ON CONFLICT(source_id) DO UPDATE SET cursor=EXCLUDED.cursor,last_completed_at=CASE WHEN $3 THEN EXCLUDED.last_completed_at ELSE wolt_retailer_catalog_state.last_completed_at END,completed_cycles=wolt_retailer_catalog_state.completed_cycles+CASE WHEN $3 THEN 1 ELSE 0 END,category_count=EXCLUDED.category_count,categories_completed=EXCLUDED.categories_completed,pages_fetched=EXCLUDED.pages_fetched,received_cumulative=EXCLUDED.received_cumulative,assortment_hash=EXCLUDED.assortment_hash,last_error=NULL,retry_after=NULL,updated_at=now()`,[SOURCE,JSON.stringify(collected.complete?null:collected.nextCursor),collected.complete,new Date(now()).toISOString(),collected.categoryCount,collected.categoriesCompleted,Number(collected.pagesFetched)||0,Number(collected.receivedCumulative??collected.received)||0,collected.assortmentHash||null]);
+  return{...saved,sourceId:SOURCE,sourceRejected:collected.rejected?.length||0,requests:collected.requests,catalog:{publishedAssortmentComplete:collected.complete,physicalStoreAssortmentVerified:false,categoryCount:collected.categoryCount,categoriesCompleted:collected.categoriesCompleted,pagesFetched:collected.pagesFetched,receivedCumulative:collected.receivedCumulative??collected.received,nextCursor:collected.complete?null:collected.nextCursor},scope:{country:"DE",channel:"online",city:"Berlin",nativeVenueId:Client.VENUE_ID},independentOfUserReceipts:true};
+ }finally{running=false}
+}
+async function status(pool){const state=await load(pool);return{sourceId:SOURCE,...state,publishedAssortmentComplete:!state.cursor&&!!state.lastCompletedAt&&!state.lastError&&state.categoryCount>0&&state.categoriesCompleted===state.categoryCount,physicalStoreAssortmentVerified:false,normalPriceClassificationVerified:false,independentOfUserReceipts:true,refreshIntervalMinutes:15,nativeVenueId:Client.VENUE_ID,scopeCountry:"DE",scopeChannel:"online",city:"Berlin"};}
+module.exports={SOURCE,REFRESH_MS,ensure,refresh,status};
