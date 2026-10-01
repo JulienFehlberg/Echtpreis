@@ -24,6 +24,69 @@ function parsePack(raw){
  if(multi){const count=Number(multi[1]);if(!Number.isSafeInteger(count)||count<1)return null;const p=packAmount(count*Number(multi[2]),multi[3]);return p&&Number.isFinite(p.amount)?p:null}
  const single=s.match(/(\d+(?:\.\d+)?)\s*(kg|g|ml|cl|l|piece|stk|stuck|stück)\b/);return single?packAmount(single[1],single[2]):null;
 }
+// Published checkout channels remain separate from physical-store decisions.
+function exactPublishedPack(raw){
+ const match=text(raw).toLowerCase().match(/^(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*(kg|g|ml|cl|l|piece|stk|stuck|stück)$/);
+ if(!match)return null;
+ const count=Number(match[1]||1),single=packAmount(Number(match[2].replace(",",".")),match[3]);
+ return Number.isSafeInteger(count)&&count>0&&single&&Number.isFinite(single.amount*count)?{...single,amount:single.amount*count,count}:null;
+}
+function isoTime(raw){
+ if(typeof raw!=="string"||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(raw))return null;
+ const value=Date.parse(raw);return Number.isFinite(value)&&new Date(value).toISOString().slice(0,19)===raw.slice(0,19)?value:null;
+}
+function publishedSource(raw){
+ try{
+  const url=new URL(raw.sourceUrl);
+  if(url.protocol!=="https:"||url.username||url.password||url.port||url.hash||url.search)return null;
+  const sources={
+   "Wolt EDEKA Berlin":{merchant:"EDEKA",channel:"online",venue:"67ebb70ed3581534a525c522",path:"/de/deu/berlin/venue/edeka-hilbrecht",postalCode:"10969",addresses:["Ritterstr. 38-40","Ritterstraße 38-40"]},
+   "Wolt nahkauf Berlin Wrangelstraße":{merchant:"nahkauf",channel:"online",venue:"657acc4eba505a018fb31b05",path:"/de/deu/berlin/venue/nahcity-wrangelstrae",postalCode:"10997",addresses:["Wrangelstraße 75"]},
+   "REWE Berlin pickup":{merchant:"REWE",channel:"pickup",market:"8321066",postalCode:"10963",addresses:["Hallesches Ufer 40"]},
+   "dm online":{merchant:"dm",channel:"online"}
+  },source=sources[raw.sourceId];
+  if(!source||raw.merchant!==source.merchant||raw.scopeChannel!==source.channel)return null;
+  if(source.venue){if(url.hostname!=="wolt.com"||url.pathname.replace(/\/$/,"")!==source.path||raw.nativeVenueId!==source.venue)return null;}
+  else if(source.market){if(url.hostname!=="www.rewe.de"||!/^\/shop\/p\/[a-z0-9-]+\/[1-9]\d{0,11}\/?$/.test(url.pathname)||String(raw.nativeMarketId)!==source.market)return null;}
+  else if(!["www.dm.de","dm.de"].includes(url.hostname)||!(new RegExp("^/p/d/"+String(raw.retailerSku).replace(/[^0-9]/g,"!")+"/[^/]+/?$").test(url.pathname)||url.pathname.endsWith("-p"+raw.gtin+".html")))return null;
+  return{...source,url:url.href};
+ }catch(_){return null;}
+}
+function normalizePublishedAlternative(raw,query={},ctx={}){
+ if(!raw||typeof raw!=="object"||Array.isArray(raw)||raw.state!=="published"||raw.current!==true||raw.scopeCountry!=="DE"||raw.currency!=="EUR"||raw.priceBasis!=="pack")return null;
+ if(raw.truthEligible===true||raw.physicalStorePriceVerified===true||raw.storeId!=null||raw.store_id!=null||raw.locationLevel==="store"||raw.shippingIncluded!==false||raw.serviceFeesIncluded===true)return null;
+ const source=publishedSource(raw),requested=exactPublishedPack(query.pack),pack=exactPublishedPack(raw.pack),gtin=text(raw.gtin),proofHash=text(raw.proofHash);
+ if(!source||!text(raw.name)||!text(raw.retailerSku)||!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(gtin)||gtin!==text(query.gtin)||!requested||!pack||requested.unit!==pack.unit||Math.abs(requested.amount-pack.amount)>1e-9||requested.count!==pack.count||!/^[a-f0-9]{64}$/i.test(proofHash))return null;
+ let sum=0;for(let i=gtin.length-2,weight=3;i>=0;i--,weight=weight===3?1:3)sum+=Number(gtin[i])*weight;
+ if((10-sum%10)%10!==Number(gtin.at(-1)))return null;
+ const nativePack=packAmount(raw.packAmount,raw.packUnit),nativeCount=number(raw.packCount);
+ if(!nativePack||!Number.isSafeInteger(nativeCount)||nativeCount!==pack.count||nativePack.unit!==pack.unit||Math.abs(nativePack.amount*nativeCount-pack.amount)>1e-9)return null;
+ const time=ctx.now===undefined?Date.now():Number(ctx.now),captured=isoTime(raw.capturedAt),expiry=isoTime(raw.expiresAt);
+ if(!Number.isFinite(time)||captured===null||expiry===null||captured>time||time-captured>DAY||expiry<=time||expiry>captured+DAY)return null;
+ const cents=value=>typeof value==="number"&&Number.isFinite(value)&&value>=0&&value<=10000&&Math.abs(value*100-Math.round(value*100))<.000001?Math.round(value*100):null;
+ const goods=cents(raw.price),deposit=raw.deposit==null?null:cents(raw.deposit),displayed=raw.displayedPrice==null?null:cents(raw.displayedPrice),payable=deposit===null||goods===null?null:goods+deposit;
+ if(goods===null||goods<=0||raw.deposit!=null&&deposit===null||raw.displayedPrice!=null&&displayed===null)return null;
+ if(raw.payablePackPrice!=null&&(payable===null||cents(raw.payablePackPrice)!==payable))return null;
+ if(displayed!==null){const included=raw.nativePriceIncludesDeposit;if(typeof included!=="boolean"||displayed!==goods+(included&&deposit!==null?deposit:0))return null;}
+ let shop=null;
+ if(source.venue||source.market){
+  const input=raw.shop;
+  const addressKey=value=>text(value).normalize("NFKC").toLowerCase().replace(/ß/g,"ss").replace(/[^a-z0-9]/g,"");
+  if(!input||typeof input!=="object"||Array.isArray(input)||input.country!=="DE"||input.city!=="Berlin"||text(input.postalCode)!==source.postalCode||!text(input.name)||!source.addresses.some(value=>addressKey(value)===addressKey(input.address))||source.venue&&input.nativeVenueId!==source.venue||source.market&&String(input.nativeMarketId)!==source.market)return null;
+  shop={name:text(input.name),address:text(input.address),postalCode:text(input.postalCode),city:text(input.city),country:"DE"};
+ }
+ return{sourceId:raw.sourceId,merchant:source.merchant,retailerSku:text(raw.retailerSku),nativeVenueId:source.venue||null,nativeMarketId:source.market||null,name:text(raw.name),brand:text(raw.brand)||null,gtin,pack:text(raw.pack),price:goods/100,deposit:deposit===null?null:deposit/100,displayedPrice:displayed===null?null:displayed/100,payablePackPrice:payable===null?null:payable/100,currency:"EUR",priceBasis:"pack",capturedAt:new Date(captured).toISOString(),expiresAt:new Date(expiry).toISOString(),sourceUrl:source.url,proofHash,shop,scopeCountry:"DE",scopeChannel:source.channel,state:"published",current:true,truthEligible:false,physicalStorePriceVerified:false,shippingIncluded:false,serviceFeesIncluded:false,availability:["available","unavailable","unknown"].includes(raw.availability)?raw.availability:"unknown",priceType:text(raw.priceType)||"unknown",promotionStatus:text(raw.promotionStatus)||"unknown"};
+}
+function publishedAlternatives(raw,query,ctx){
+ const rows=new Map(),conflicts=new Set();
+ for(const input of Array.isArray(raw)?raw.slice(0,20):[]){
+  const value=normalizePublishedAlternative(input,query,ctx);if(!value)continue;
+  const key=JSON.stringify([value.sourceId,value.nativeVenueId,value.nativeMarketId,value.retailerSku]),previous=rows.get(key);
+  if(previous&&JSON.stringify(previous)!==JSON.stringify(value))conflicts.add(key);else rows.set(key,value);
+ }
+ return[...rows].filter(([key])=>!conflicts.has(key)).map(([,value])=>value);
+}
+function currentResponse(value,time){return{...clone(value),publishedAlternatives:(value.publishedAlternatives||[]).filter(row=>Date.parse(row.expiresAt)>time&&Date.parse(row.capturedAt)<=time&&time-Date.parse(row.capturedAt)<=DAY).map(clone)};}
 function conditionalEligible(raw,ctx,type){
  if(PUBLIC_TYPES.has(type))return true;
  if(!CONDITIONAL_TYPES.has(type))return false;
@@ -67,12 +130,12 @@ function normalizeDecision(raw,ctx={}){
  };
 }
 function normalizeResponse(raw,query,ctx={}){
- const merchants=query.merchants||[],today=day(ctx.today)||localDay(Date.now()),fallback=reason=>({ok:false,product:query.product,today,results:merchants.map(m=>unknown(m,reason)),reason});
+ const merchants=query.merchants||[],today=day(ctx.today)||localDay(Date.now()),fallback=reason=>({ok:false,product:query.product,today,results:merchants.map(m=>unknown(m,reason)),publishedAlternatives:[],reason});
  if(!raw||raw.ok!==true||!Array.isArray(raw.results))return fallback("invalid-response");
  if(raw.today&&day(raw.today)!==today)return fallback("invalid-response");
  const rows=new Map(),duplicates=new Set();
  for(const row of raw.results){const key=merchantKey(row&&row.merchant);if(!key)continue;if(rows.has(key))duplicates.add(key);rows.set(key,row)}
- return{ok:true,product:query.product,today,results:merchants.map(merchant=>{
+ return{ok:true,product:query.product,today,publishedAlternatives:publishedAlternatives(raw.publishedAlternatives,query,ctx),results:merchants.map(merchant=>{
   const key=merchantKey(merchant);if(duplicates.has(key))return unknown(merchant,"ambiguous-response");
   const value=normalizeDecision(rows.get(key),{...ctx,today,merchant,query,storeId:mappedValue(ctx.storeIds,merchant)||ctx.storeId,region:mappedValue(ctx.regions,merchant)||ctx.region});value.merchant=merchant;return value;
  })};
@@ -109,7 +172,7 @@ function create(options={}){
  const cache=new Map(),pending=new Map(),fetchIds=new WeakMap();let nextFetchId=1,generation=0;const now=typeof options.now==="function"?options.now:Date.now;
  const defaultFetch=options.fetchImpl||(root&&typeof root.fetch==="function"?root.fetch.bind(root):null);
  function expired(time){for(const [key,value]of cache)if(value.until<=time)cache.delete(key)}
- function failure(payload,reason){return{ok:false,product:payload.product,today:payload.today,results:payload.merchants.map(m=>unknown(m,reason)),reason}}
+ function failure(payload,reason){return{ok:false,product:payload.product,today:payload.today,results:payload.merchants.map(m=>unknown(m,reason)),publishedAlternatives:[],reason}}
  async function compare(query,ctx={}){
   const time=now(),today=day(ctx.today)||localDay(time),payload=requestQuery(query,ctx,today);
   if(ctx.today&&!day(ctx.today)||!payload.product||!payload.merchants.length||!Number.isSafeInteger(payload.quantity)||payload.quantity<1||payload.gtin&&!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(payload.gtin))return failure(payload,"invalid-query");
@@ -117,8 +180,8 @@ function create(options={}){
   if(typeof fetchImpl!=="function")return failure(payload,"unavailable");
   if(!fetchIds.has(fetchImpl))fetchIds.set(fetchImpl,nextFetchId++);
   const key=JSON.stringify([apiBase,fetchIds.get(fetchImpl),payload]);expired(time);
-  if(cache.has(key)){const saved=cache.get(key);cache.delete(key);cache.set(key,saved);return clone(saved.value)}
-  if(pending.has(key))return clone(await pending.get(key));
+  if(cache.has(key)){const saved=cache.get(key);cache.delete(key);cache.set(key,saved);return currentResponse(saved.value,time)}
+  if(pending.has(key))return currentResponse(await pending.get(key),now());
   if(pending.size>=maxEntries)return failure(payload,"unavailable");
   const configured=number(ctx.timeoutMs??options.timeoutMs??8000),timeoutMs=configured!=null&&configured>0?Math.min(configured,60000):8000;
   const requestGeneration=generation,task=(async()=>{
@@ -128,18 +191,18 @@ function create(options={}){
      Promise.resolve().then(async()=>{const res=await fetchImpl(apiBase+"/v1/current-prices",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload),signal:controller?controller.signal:undefined});if(!res||res.ok!==true)throw new Error("unavailable");return res.json()}),
      new Promise((_,reject)=>{timer=setTimeout(()=>{if(controller)controller.abort();reject(new Error("unavailable"))},timeoutMs)})
     ]);
-    const value=normalizeResponse(response,payload,payload);
+    const value=normalizeResponse(response,payload,{...payload,now:now()});
     if(value.ok&&ttlMs>0&&requestGeneration===generation){cache.set(key,{until:now()+ttlMs,value:clone(value)});while(cache.size>maxEntries)cache.delete(cache.keys().next().value)}
     return value;
    }catch(_){return failure(payload,"unavailable")}
    finally{clearTimeout(timer)}
   })();
   pending.set(key,task);
-  try{return clone(await task)}finally{pending.delete(key)}
+  try{return currentResponse(await task,now())}finally{pending.delete(key)}
  }
  return Object.freeze({compare,clearCache(){generation++;cache.clear()},cacheInfo(){expired(now());return{entries:cache.size,inflight:pending.size,ttlMs,maxEntries}}});
 }
-const api=Object.freeze({create,normalizeDecision,normalizeResponse,toComparablePrice,parsePack});
+const api=Object.freeze({create,normalizeDecision,normalizeResponse,normalizePublishedAlternative,toComparablePrice,parsePack});
 if(root)root.SparkorbCurrentPriceClient=api;
 if(typeof module==="object"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);

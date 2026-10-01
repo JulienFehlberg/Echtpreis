@@ -1,11 +1,37 @@
 "use strict";
 const assert=require("assert"),Client=require("../app/current-price-client");
-const today="2026-09-30",ctx={today,storeId:"store-1",region:"Berlin"},query={product:"Butter",brand:"Testbrand",pack:"250 g",gtin:"4008400401627",merchants:["REWE"]};
+const today="2026-09-30",ctx={today,storeId:"store-1",region:"Berlin"},query={product:"Butter",brand:"Testbrand",pack:"250 g",gtin:"4008400401621",merchants:["REWE"]};
 const base={merchant:"REWE",state:"verified",kind:"receipt",status:"verified",identityVerified:true,proofVerified:true,sourceEligibility:{receiptReview:true},price:1.99,payablePrice:1.99,currency:"EUR",priceType:"regular",product:"Testbrand Butter 250 g",productId:"butter-1",brand:"Testbrand",pack:"250 g",gtin:query.gtin,storeId:"store-1",region:"Berlin",locationLevel:"store",observedAt:today,confidence:92,queryMode:"exact",match:"ground-truth",proof:"receipt-1",proofHash:"file-hash",proofActor:"actor-1",source:"SPARKORB receipt",sourceType:"receipt",per:"piece",unit:"kg",unitPrice:7.96,packParsed:{amount:250,unit:"g",base:"kg",factor:1000},publicReferencePrice:2.49,truth:{state:"supported",independentEvidence:2,verifiedEvidence:2,sourceTypes:["receipt"],strength:.92}};
 const answer=(rows=[base])=>({ok:true,today,results:rows});
 const response=(value=answer())=>({ok:true,json:async()=>value});
 const normalize=raw=>Client.normalizeDecision(raw,{...ctx,query});
 function checkUnknown(value,message){assert.strictEqual(value.state,"unknown",message);assert.strictEqual(value.price,null,message)}
+const publishedNow=Date.parse(today+"T12:00:00Z"),publishedContext={...ctx,now:publishedNow};
+const online={sourceId:"Wolt nahkauf Berlin Wrangelstraße",merchant:"nahkauf",nativeVenueId:"657acc4eba505a018fb31b05",retailerSku:"657acc4eba505a018fb31b06",name:"Testbrand Butter",brand:"Testbrand",gtin:query.gtin,pack:"250 g",packAmount:250,packUnit:"g",packCount:1,price:1.99,deposit:.15,displayedPrice:2.14,nativePriceIncludesDeposit:true,payablePackPrice:2.14,currency:"EUR",priceBasis:"pack",capturedAt:today+"T11:59:00Z",expiresAt:"2026-10-01T11:59:00Z",sourceUrl:"https://wolt.com/de/deu/berlin/venue/nahcity-wrangelstrae",proofHash:"a".repeat(64),scopeCountry:"DE",scopeChannel:"online",state:"published",current:true,truthEligible:false,shippingIncluded:false,serviceFeesIncluded:false,availability:"unknown",shop:{nativeVenueId:"657acc4eba505a018fb31b05",name:"Nahkauf Wrangelstraße",address:"Wrangelstraße 75",postalCode:"10997",city:"Berlin",country:"DE"}};
+const normalizePublished=raw=>Client.normalizePublishedAlternative(raw,query,publishedContext);
+
+{
+ const unknownRows=[{merchant:"REWE",state:"unknown",price:null,reason:"no-current-evidence"}],result=Client.normalizeResponse({...answer(unknownRows),publishedAlternatives:[online]},query,publishedContext);
+ assert.strictEqual(result.publishedAlternatives.length,1,"a valid provider outside the requested physical merchant list stays visible");checkUnknown(result.results[0],"online evidence cannot fill an unknown physical-store decision");
+ const value=result.publishedAlternatives[0];assert.strictEqual(value.merchant,"nahkauf");assert.strictEqual(value.price,1.99);assert.strictEqual(value.deposit,.15);assert.strictEqual(value.payablePackPrice,2.14);assert.strictEqual(value.shop.address,"Wrangelstraße 75");assert.strictEqual(value.proofHash,online.proofHash);assert.strictEqual(value.expiresAt,"2026-10-01T11:59:00.000Z");assert.strictEqual(value.truthEligible,false);assert.strictEqual(value.physicalStorePriceVerified,false);assert.strictEqual(value.shippingIncluded,false);assert.strictEqual(value.serviceFeesIncluded,false);
+ assert.strictEqual(Client.toComparablePrice(value,"kg"),null,"a published channel quote is never a physical comparable decision");checkUnknown(Client.normalizeDecision(value,{...publishedContext,query}),"a published channel quote cannot become verified evidence");
+ const pickup={...online,sourceId:"REWE Berlin pickup",merchant:"REWE",scopeChannel:"pickup",nativeVenueId:undefined,nativeMarketId:"8321066",sourceUrl:"https://www.rewe.de/shop/p/testbrand-butter/1234567",displayedPrice:1.99,nativePriceIncludesDeposit:false,shop:{nativeMarketId:"8321066",name:"REWE Steven Horn oHG",address:"Hallesches Ufer 40",postalCode:"10963",city:"Berlin",country:"DE"}};
+ assert.strictEqual(normalizePublished(pickup).payablePackPrice,2.14,"REWE displayed goods price excludes the separately known deposit");assert.strictEqual(normalizePublished(pickup).displayedPrice,1.99);
+ const dm={...online,sourceId:"dm online",merchant:"dm",nativeVenueId:undefined,retailerSku:"1234567",sourceUrl:"https://www.dm.de/p/d/1234567/testbrand-butter",shop:undefined,truthEligible:undefined,serviceFeesIncluded:undefined,deposit:undefined,displayedPrice:undefined,nativePriceIncludesDeposit:undefined,payablePackPrice:undefined};
+ const dmValue=normalizePublished(dm);assert(dmValue,"legacy dm public contract does not contain Wolt-only price fields");assert.strictEqual(dmValue.deposit,null);assert.strictEqual(dmValue.payablePackPrice,null,"a missing native deposit stays unknown");assert.strictEqual(dmValue.shop,null);
+ assert.strictEqual(normalizePublished({...online,deposit:null,payablePackPrice:null,displayedPrice:1.99}).payablePackPrice,null,"unknown Wolt deposits never become zero");
+ for(const patch of [
+  {scopeCountry:"AT"},{scopeChannel:"physical"},{scopeChannel:"assortment-publication"},{state:"verified"},{current:false},{truthEligible:true},{physicalStorePriceVerified:true},{storeId:"invented-branch"},{locationLevel:"store"},{shippingIncluded:true},{serviceFeesIncluded:true},
+  {gtin:"4008400401628"},{pack:"500 g",packAmount:500},{pack:"ca. 250 g"},{pack:"250 g / kg"},{pack:"2 x 125 g",packAmount:125,packCount:2},{packAmount:37},{packCount:5},{proofHash:"unproven"},
+  {capturedAt:"bad"},{capturedAt:"2026-02-30T11:59:00Z"},{capturedAt:today+"T12:00:01Z"},{capturedAt:"2026-09-29T11:59:00Z"},{expiresAt:today+"T12:00:00Z"},{expiresAt:"2026-10-02T11:59:00Z"},{expiresAt:"bad"},
+  {currency:"USD"},{price:-1},{price:1.991},{deposit:-.15},{deposit:.155},{displayedPrice:1.99},{payablePackPrice:1.99},{nativePriceIncludesDeposit:undefined},
+  {sourceId:"Other retailer"},{sourceUrl:"javascript:alert(1)"},{sourceUrl:"https://attacker.example/item"},{sourceUrl:"https://user:password@wolt.com/de/deu/berlin/venue/nahcity-wrangelstrae"},{sourceUrl:"https://wolt.com/de/deu/berlin/venue/edeka-hilbrecht"},{nativeVenueId:"67ebb70ed3581534a525c522"},{shop:{...online.shop,address:"Other Street 12"}}
+ ])assert.strictEqual(normalizePublished({...online,...patch}),null,"unsafe publication rejected: "+JSON.stringify(patch));
+ assert.strictEqual(Client.normalizePublishedAlternative(online,{...query,gtin:null},publishedContext),null,"the exact requested GTIN must be known");assert.strictEqual(Client.normalizePublishedAlternative(online,{...query,pack:null},publishedContext),null,"the requested pack cannot be inferred from an alternative");
+ const duplicate=Client.normalizeResponse({...answer(unknownRows),publishedAlternatives:[online,{...online}]},query,publishedContext);assert.strictEqual(duplicate.publishedAlternatives.length,1);
+ const conflict=Client.normalizeResponse({...answer(unknownRows),publishedAlternatives:[online,{...online,price:2.09,displayedPrice:2.24,payablePackPrice:2.24}]},query,publishedContext);assert.deepStrictEqual(conflict.publishedAlternatives,[],"contradictory same-provider/SKU publications cannot choose a convenient price");
+ assert.deepStrictEqual(Client.normalizeResponse({...answer(unknownRows),publishedAlternatives:"bad"},query,publishedContext).publishedAlternatives,[]);
+}
 
 {
  const value=normalize(base);assert.strictEqual(value.state,"verified");assert.strictEqual(value.price,1.99);assert.strictEqual(value.proofHash,"file-hash");assert.strictEqual(value.proofActor,"actor-1");assert.strictEqual(value.productId,"butter-1");assert.strictEqual(value.locationLevel,"store");assert.strictEqual(value.unitPrice,7.96);assert.strictEqual(value.publicReferencePrice,2.49);
@@ -61,6 +87,12 @@ function checkUnknown(value,message){assert.strictEqual(value.state,"unknown",me
 }
 
 (async()=>{
+ {
+  let clock=publishedNow,requests=0;const client=Client.create({now:()=>clock,fetchImpl:async()=>{requests++;return response({...answer([{merchant:"REWE",state:"unknown",price:null}]),publishedAlternatives:[{...online,expiresAt:today+"T12:00:10Z"}]})}});
+  const first=await client.compare(query,ctx);assert.strictEqual(first.publishedAlternatives.length,1);first.publishedAlternatives[0].price=99;
+  assert.strictEqual((await client.compare(query,ctx)).publishedAlternatives[0].price,1.99,"caller mutations cannot corrupt cached published evidence");clock+=10000;
+  const expired=await client.compare(query,ctx);assert.strictEqual(requests,1);assert.deepStrictEqual(expired.publishedAlternatives,[],"a source expiry must beat the longer browser cache TTL");checkUnknown(expired.results[0]);
+ }
  let calls=0,time=Date.parse(today+"T12:00:00Z"),captured;
  const client=Client.create({apiBase:"https://sparkorb.example/",now:()=>time,fetchImpl:async(url,options)=>{calls++;captured={url,options};return response()}});
  const first=await client.compare(query,ctx);assert.strictEqual(first.results[0].price,1.99);assert.strictEqual(captured.url,"https://sparkorb.example/v1/current-prices");assert.strictEqual(captured.options.method,"POST");

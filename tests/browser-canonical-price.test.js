@@ -1,16 +1,21 @@
 "use strict";
 const assert=require("assert"),fs=require("fs"),{JSDOM,VirtualConsole}=require("jsdom");
-const ids={product:"11111111-1111-4111-8111-111111111111",rewe:"22222222-2222-4222-8222-222222222222",penny:"33333333-3333-4333-8333-333333333333"},gtin="4008400401627";
+const ids={product:"11111111-1111-4111-8111-111111111111",rewe:"22222222-2222-4222-8222-222222222222",penny:"33333333-3333-4333-8333-333333333333"},gtin="4008400401621";
 const product={id:ids.product,name:"Testbrand Butter",brand:"Testbrand",gtin,pack:"250 g",packAmount:250,packUnit:"g",packCount:1,canonicalKey:"butter",canonical:true,matchType:"exact"};
 const stores=[{id:ids.rewe,merchant:"REWE",merchantKey:"rewe",address:"Teststraße 1",city:"Berlin",region:"Berlin",latitude:52.52,longitude:13.40,distanceKm:.1,canonical:true,matchType:"candidate"},{id:ids.penny,merchant:"PENNY",merchantKey:"penny",address:"Teststraße 2",city:"Berlin",region:"Berlin",latitude:52.521,longitude:13.40,distanceKm:.2,canonical:true,matchType:"candidate"}];
-function discovery(mode){const found=mode==="eggs"?{...product,name:"Testbrand Eier",pack:"6 Stück",packAmount:6,packUnit:"piece"}:mode==="nutella"?{...product,name:"Nutella",brand:"Ferrero",pack:"450 g",packAmount:450}:product;return{ok:true,productResolution:{state:"exact",mode:"gtin",reason:"canonical-gtin"},products:[found],product:found,storeResolution:{state:"candidate",mode:"nearby",reason:"store-selection-required"},stores,refreshTargets:[],requiresProductSelection:false,requiresStoreSelection:true}}
+function discovery(mode){const found=mode==="eggs"?{...product,name:"Testbrand Eier",pack:"6 Stück",packAmount:6,packUnit:"piece"}:mode==="nutella"?{...product,name:"Nutella",brand:"Ferrero",pack:"450 g",packAmount:450}:mode==="typed-milk"?{...product,name:"Landliebe Milch",brand:"Landliebe",gtin:"4046700026519",pack:"1 l",packAmount:1,packUnit:"l",canonicalKey:"milch"}:product;return{ok:true,productResolution:{state:"exact",mode:"gtin",reason:"canonical-gtin"},products:[found],product:found,storeResolution:{state:"candidate",mode:"nearby",reason:"store-selection-required"},stores,refreshTargets:[],requiresProductSelection:false,requiresStoreSelection:true}}
 function row(merchant,today,mode){
  const store=stores.find(x=>x.merchant===merchant),price=merchant==="REWE"?1.99:2.49;
- if(mode==="unknown")return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",truth:{state:"conflict"}};
+ if(mode==="unknown"||mode==="published"||mode==="typed-milk")return{merchant,state:"unknown",price:null,reason:"conflicting-current-evidence",truth:{state:"conflict"}};
  const quote={merchant,state:mode==="observed"?"observed":"verified",kind:"receipt",status:mode==="observed"?"observed":"verified",identityVerified:mode!=="unreviewed",proofVerified:mode!=="unreviewed",price,payablePrice:price,currency:"EUR",priceType:mode==="app"?"app":mode==="multi"?"multi_buy":"regular",conditional:mode==="app"||mode==="multi",minQuantity:mode==="multi"?3:null,product:"Testbrand Butter 250 g",productId:mode==="wrong-product"?ids.penny:ids.product,brand:"Testbrand",pack:"250 g",gtin,storeId:mode==="wrong-store"?ids.product:store&&store.id,region:"Berlin",locationLevel:"store",observedAt:today,confidence:93,queryMode:"exact",match:"ground-truth",proof:"receipt:"+merchant,proofHash:"hash:"+merchant,proofActor:"actor",source:"SPARKORB receipt",sourceType:"receipt",truthTier:3,priceAuthority:"observed-evidence",per:"piece",unitPrice:price*4,unit:"kg",packParsed:{amount:250,unit:"g",base:"kg",factor:1000},publicReferencePrice:2.99,truth:{state:mode==="observed"?"observed":"supported",independentEvidence:mode==="observed"?1:2,sourceTypes:1,strength:1.8}};
  if(mode==="eggs")Object.assign(quote,{product:"Testbrand Eier 6 Stück",pack:"6 Stück",unit:"piece",unitPrice:price/6,packParsed:{amount:6,unit:"piece",base:"piece",factor:1}});
  if(mode==="nutella")Object.assign(quote,{product:"Nutella 450 g",brand:"Ferrero",pack:"450 g",unitPrice:price/.45,packParsed:{amount:450,unit:"g",base:"kg",factor:1000}});
  return quote;
+}
+function publishedQuotes(){
+ const capturedAt=new Date(Date.now()-1000).toISOString(),expiresAt=new Date(Date.now()+3600000).toISOString();
+ const offer={sourceId:"Wolt nahkauf Berlin Wrangelstraße",merchant:"nahkauf",nativeVenueId:"657acc4eba505a018fb31b05",retailerSku:"657acc4eba505a018fb31b06",gtin,name:"Testbrand Butter",brand:"Testbrand",pack:"250 g",packAmount:250,packUnit:"g",packCount:1,price:2.56,deposit:.15,displayedPrice:2.71,nativePriceIncludesDeposit:true,payablePackPrice:2.71,currency:"EUR",priceBasis:"pack",capturedAt,expiresAt,proofHash:"c".repeat(64),sourceUrl:"https://wolt.com/de/deu/berlin/venue/nahcity-wrangelstrae",shop:{nativeVenueId:"657acc4eba505a018fb31b05",name:"Nahkauf Wrangelstraße",address:"Wrangelstraße 75",postalCode:"10997",city:"Berlin",country:"DE"},scopeCountry:"DE",scopeChannel:"online",state:"published",current:true,truthEligible:false,shippingIncluded:false,serviceFeesIncluded:false,availability:"unknown"};
+ return[offer,{...offer,sourceId:"Wolt EDEKA Berlin",merchant:"EDEKA",nativeVenueId:"67ebb70ed3581534a525c522",sourceUrl:"https://wolt.com/de/deu/berlin/venue/edeka-hilbrecht",shop:{nativeVenueId:"67ebb70ed3581534a525c522",name:"EDEKA Hilbrecht",address:"Ritterstr. 38-40",postalCode:"10969",city:"Berlin",country:"DE"},price:2.04,deposit:0,displayedPrice:2.04,payablePackPrice:2.04},{...offer,sourceId:"REWE Berlin pickup",merchant:"REWE",nativeVenueId:undefined,nativeMarketId:"8321066",sourceUrl:"https://www.rewe.de/shop/p/testbrand-butter/1234567",shop:{nativeMarketId:"8321066",name:"REWE Steven Horn oHG",address:"Hallesches Ufer 40",postalCode:"10963",city:"Berlin",country:"DE"},scopeChannel:"pickup",price:2.29,deposit:null,displayedPrice:2.29,nativePriceIncludesDeposit:false,payablePackPrice:null}];
 }
 async function fixture(mode){
  const requests=[],errors=[],vc=new VirtualConsole();let release;
@@ -24,6 +29,8 @@ async function fixture(mode){
     const body=JSON.parse(options.body);requests.push({path,body});
     if(mode==="unreachable")throw new Error("connection unavailable");
     const result={ok:true,today:body.today,results:body.merchants.map(m=>row(m,body.today,mode))};
+    if(mode==="published")result.publishedAlternatives=publishedQuotes();
+    if(mode==="typed-milk")result.publishedAlternatives=[{...publishedQuotes()[0],name:"Landliebe Milch",brand:"Landliebe",gtin:"4046700026519",pack:"1 l",packAmount:1,packUnit:"l"}];
     if(mode==="hold")return new Promise(resolve=>{release=()=>resolve({ok:true,json:async()=>result})});
     return{ok:true,json:async()=>result};
    }
@@ -42,11 +49,33 @@ async function fixture(mode){
  if(mode==="no-location")w.eval("verifiedPriceLocation=null;");
  if(mode==="eggs")w.eval("Object.assign(basket[0],{key:'eier',label:'6 Eier',unit:'piece',packUnit:'piece',packLabel:'6 Stück',packAmount:6,amount:6,calcAmount:6});");
  if(mode==="nutella")w.eval("Object.assign(basket[0],{key:'nutella',label:'Nutella 450 g',unit:'kg',packUnit:'kg',packLabel:'450 g',packAmount:.45,amount:.45,calcAmount:.45,exactBrand:'Ferrero'});");
+ if(mode==="typed-milk")w.eval("basket=[parseWish('Landliebe Milch 1 l 4046700026519')];comparisonRevision++;");
  return{dom,w,requests,errors,release:()=>release&&release()};
 }
 async function waitFor(predicate){for(let i=0;i<100;i++){if(predicate())return;await new Promise(resolve=>setTimeout(resolve,5))}throw new Error("expected canonical request was not issued")}
 
 (async()=>{
+ {
+  const f=await fixture("typed-milk");try{
+   const wish=f.w.eval("basket[0]");assert.strictEqual(wish.ean,"4046700026519","only the explicitly typed, checksum-valid EAN becomes the exact identity");assert.strictEqual(wish.key,"milch");assert.strictEqual(wish.packLabel,"1 l");assert.strictEqual(wish.calcAmount,1);assert.strictEqual(wish.matchMode,"exact");
+   assert.strictEqual(f.w.parseWish("Landliebe Milch 1 l 4046700026518").ean,undefined,"an invalid checksum cannot create a SKU query");assert.strictEqual(f.w.parseWish("Milch 4046700026519 3017620422003").ean,undefined,"ambiguous explicit codes cannot choose an arbitrary product");assert.strictEqual(f.w.parseWish("Landliebe Milch 1 l").ean,undefined,"brand and title alone never invent a GTIN");
+   await f.w.compare({skipLocation:true,scroll:false});const lookup=f.requests.find(request=>request.path==="/v1/current-prices"),discovered=f.requests.find(request=>request.path==="/v1/price-query");assert.strictEqual(discovered.body.gtin,"4046700026519");assert.strictEqual(lookup.body.gtin,"4046700026519");assert.strictEqual(lookup.body.pack,"1 l");assert(f.w.document.getElementById("publishedComparisonItems").textContent.includes("Landliebe Milch"));assert.strictEqual(f.w.document.getElementById("winnerPrice").textContent,"—");
+   f.w.saveBasketState();const restored=f.w.restoreBasketItem(JSON.parse(f.w.localStorage.getItem("sparkorb_basket_state_v1"))[0]);assert.strictEqual(restored.ean,wish.ean);assert.strictEqual(restored.key,"milch","reloading typed EAN products preserves their existing quantity/category context");assert.strictEqual(restored.unit,"l");assert.strictEqual(restored.packLabel,"1 l");assert.strictEqual(restored.calcAmount,1);
+  }finally{f.dom.window.close()}
+ }
+ {
+  const f=await fixture("published");try{
+   await f.w.compare({skipLocation:true,scroll:false});const d=f.w.document,section=d.getElementById("publishedComparison"),shown=section.textContent;
+   assert.strictEqual(section.style.display,"block","published exact alternatives must reach the shopping-list view");assert.strictEqual(section.querySelectorAll("article").length,3,"independent EDEKA, nahkauf and pickup evidence stays separate");
+   for(const detail of ["nahkauf","Wrangelstraße 75","EDEKA Hilbrecht","Ritterstr. 38-40","REWE Steven Horn oHG","Hallesches Ufer 40","Abholung","Warenpreis je Packung","2,56","0,15","2,71","Pfand unbekannt","gebühren unbekannt","Abruf","Gültig bis"])assert(shown.includes(detail),"published view missing decision detail: "+detail);
+   assert.strictEqual(section.querySelectorAll('a[href^="https://wolt.com/"]').length,2,"both online sources have real source links");assert.strictEqual(d.getElementById("winnerPrice").textContent,"—","online prices cannot produce a cheapest physical basket");assert.strictEqual(d.getElementById("verifiedSavings").style.display,"none");
+   const physical=f.w.activePrice("butter","REWE",f.w.eval("basket[0]"));assert(!physical||physical.reference,"the unknown physical decision remains unknown despite published prices");
+   f.w.eval("selected=new Set(['dm']);comparisonRevision++;");await f.w.compare({skipLocation:true,scroll:false});assert(d.getElementById("publishedComparisonItems").textContent.includes("nahkauf"),"a legacy physical merchant filter cannot hide another online provider");
+   f.w.eval("selected=new Set();comparisonRevision++;");assert.strictEqual(await f.w.compare({skipLocation:true,scroll:false}),true);assert(d.getElementById("publishedComparisonItems").textContent.includes("nahkauf"),"online alternatives remain usable without any selected physical market");assert.strictEqual(d.getElementById("winnerPrice").textContent,"—");
+   f.w.eval("for(const offers of canonicalPublishedAlternatives.values())for(const offer of offers)offer.expiresAt=new Date(Date.now()-1).toISOString();renderPublishedComparison(basket);");assert.strictEqual(section.style.display,"none","rendering cannot keep showing source-expired offers");assert.strictEqual(section.querySelectorAll("article").length,0);
+   assert.deepStrictEqual(f.errors,[],"the published shopping-list integration has no DOM/script errors");
+  }finally{f.dom.window.close()}
+ }
  {
   const f=await fixture("success");try{
    assert.strictEqual(await f.w.compare({skipLocation:true,scroll:false}),true);
