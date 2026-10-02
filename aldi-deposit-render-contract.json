@@ -1,0 +1,58 @@
+{
+  "contractId": "aldi-nord-pdp-deposit-exclusive-v1",
+  "buildId": "Fj3ub-94bBCVyGJQMzOQX",
+  "depositPriceBasis": "excluded",
+  "depositAmountBasis": "sales-pack-total",
+  "depositLabel": "zzgl. Pfand",
+  "observedAt": "2026-10-02T23:12:38.809Z",
+  "modules": [
+    {
+      "file": "module-2.js",
+      "sourceUrl": "https://www.aldi-nord.de/_next/static/chunks/pages/product-detail/%5Bproduct%5D-51c210556f32ed9e.js",
+      "sourceResponseHash": "643cf9c0e919695d4350ed89d69e0625b7aaf2e8d411c3229a19c73e00f78925",
+      "capturedAt": "2026-10-02T23:07:07.946Z",
+      "status": 200,
+      "bytes": 3121
+    },
+    {
+      "file": "module-1.js",
+      "sourceUrl": "https://www.aldi-nord.de/_next/static/chunks/78186-465e46d10bfd276f.js",
+      "sourceResponseHash": "04a263f429a685be5afc30cb055a0ab016ec6d4aaea5cb7a92aa26deec449085",
+      "capturedAt": "2026-10-02T23:07:06.936Z",
+      "status": 200,
+      "bytes": 14317
+    },
+    {
+      "file": "webpack-module.js",
+      "sourceUrl": "https://www.aldi-nord.de/_next/static/chunks/webpack-ed83aec7aee5f9e2.js",
+      "sourceResponseHash": "47f68e7821e64160ab48a6afa9c1723c5da792cbabef9877d55c85a018ccee28",
+      "capturedAt": "2026-10-02T23:08:54.112Z",
+      "status": 200,
+      "bytes": 18535
+    },
+    {
+      "file": "observed-config.js",
+      "sourceUrl": "https://www.aldi-nord.de/_next/static/chunks/78781.5d6fd8c2e0093a2a.js",
+      "sourceResponseHash": "89584a05e33028588f765e763c457170ee5e0f81f4b0ec3f9356f7bf0ac04f06",
+      "capturedAt": "2026-10-02T23:18:02.879Z",
+      "status": 200,
+      "bytes": 54634
+    },
+    {
+      "file": "observed-product-presenter.js",
+      "sourceUrl": "https://www.aldi-nord.de/_next/static/chunks/18346.e4daeb619d345729.js",
+      "sourceResponseHash": "59452c53af58d305ca39b344838e86bd2b8ced22808a30bff86c51dab37c0804",
+      "capturedAt": "2026-10-02T23:22:35.278Z",
+      "status": 200,
+      "bytes": 319186
+    },
+    {
+      "file": "observed-detail-prices.js",
+      "sourceUrl": "https://www.aldi-nord.de/_next/static/chunks/62903-2185e131bc432b84.js",
+      "sourceResponseHash": "fc1f6c0b1e4f58d3b5ca2a8e97fcdad6998e2747df81da36738b971a5f32d66e",
+      "capturedAt": "2026-10-02T23:22:03.963Z",
+      "status": 200,
+      "bytes": 21322
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 "use strict";
 const assert=require("node:assert/strict"),{Pool}=require("pg"),Service=require("../aldi-assortment-price-service"),Refresh=require("../aldi-assortment-refresh"),Inventory=require("../published-retailer-inventory"),Client=require("../aldi-assortment-client");
+const fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto"),DepositProof=require("../aldi-deposit-proof"),Schema=require("../retailer-schema-lifecycle");
 function gtin(index){const body=String(950000000000+index),sum=[...body].reduce((n,d,i)=>n+Number(d)*(i%2?3:1),0);return body+(10-sum%10)%10;}
 async function main(){
- const connectionString=process.env.DATABASE_URL;assert(connectionString,"DATABASE_URL is required");const database=new URL(connectionString);assert.equal(database.hostname,"localhost");assert(database.pathname.endsWith("_test"),"Only a dedicated local test database is allowed");
+ const connectionString=process.env.DATABASE_URL;assert(connectionString,"DATABASE_URL is required");const database=new URL(connectionString);assert(["localhost","127.0.0.1"].includes(database.hostname));assert(!database.search&&!database.hash&&/^\/[a-z][a-z0-9_]*_test$/.test(database.pathname),"Only an explicitly named dedicated loopback test database is allowed");
  const pool=new Pool({connectionString,ssl:false,connectionTimeoutMillis:5000}),now=Date.now();let api;
  const fixture=(index,patch={})=>{const sku=String(960000000+index),capturedAt=new Date(now-1000).toISOString();return{sourceId:Service.SOURCE,merchant:"ALDI Nord",retailerSku:sku,gtin:null,name:"POSTGRES TEST ALDI product "+index,brand:"POSTGRES TEST",variant:"fixed native variant",pack:"1-L-Packung",packAmount:1,packUnit:"l",packCount:1,price:1.29,deposit:0,depositIncluded:false,currency:"EUR",priceBasis:"pack",priceKind:"published-current",regularPrice:null,promotionStatus:"unknown",availability:"unknown",publicationAvailable:true,capturedAt,nativeValidFrom:new Date(now-86400000).toISOString(),nativeValidUntil:new Date(now+2*86400000).toISOString(),expiresAt:new Date(now+7*86400000).toISOString(),proofHash:"d".repeat(64),sourceResponseHash:"c".repeat(64),sourceResponseDate:capturedAt,sourceAgeSeconds:0,sourceUrl:"https://www.aldi-nord.de/produkt/postgres-test-aldi-product-"+sku+".html",scopeCountry:"DE",scopeChannel:"assortment-publication",locationScope:"unknown",truthEligible:false,...patch};};
  try{
@@ -29,6 +30,58 @@ async function main(){
   for(const update of["gtin='3017620422003'","scope_channel='store'","expires_at=captured_at+interval '25 hours'","source_response_date=captured_at-interval '6 minutes'"]){await assert.rejects(()=>pool.query(`UPDATE ${Service.TABLE} SET ${update} WHERE retailer_sku=$1`,[updated.retailerSku]),error=>error.code==="23514","Database constraints must reject inadmissible identities/scopes/expiry/freshness even outside the JS validator");}
   await assert.rejects(()=>pool.query(`UPDATE ${Service.TABLE} SET expires_at=native_valid_until+interval '1 minute' WHERE retailer_sku=$1`,[short.retailerSku]),error=>error.code==="23514","Expiry within 24 hours must still respect its earlier native deadline");
   let status=await Service.status(pool,{now});assert.equal(status.storedPrices,504);assert.equal(status.currentPrices,503);assert.equal(status.productsWithCurrentPublishedPrices,0);assert.equal(status.availableCurrentPrices,0);assert.equal(status.physicalStorePriceVerified,false);assert.equal(status.normalPriceClassificationVerified,false);assert.equal(status.independentOfUserReceipts,true);assert.equal(status.scopeChannel,"assortment-publication");
+  // Fresh timestamps below describe synthetic SQL fixtures only. Original byte
+  // fixtures are unchanged; no archived capture is imported into production.
+  function depositFixture(name){
+   const original=fs.readFileSync(path.join(__dirname,"fixtures/retailers/aldi-deposit",name+".html"),"utf8"),response=JSON.parse(fs.readFileSync(path.join(__dirname,"fixtures/retailers/aldi-deposit",name+"-response.json"),"utf8"));assert.equal(crypto.createHash("sha256").update(original).digest("hex"),response.sourceResponseHash);
+   const marker=/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/,match=original.match(marker);assert(match);const outer=JSON.parse(match[1]);outer.props.pageProps.syntheticSqlDepositFixture=true;
+   const raw=original.replace(marker,'<script id="__NEXT_DATA__" type="application/json">'+JSON.stringify(outer)+'<\/script>'),capturedAt=new Date(now-1000).toISOString(),meta={...response,raw,capturedAt,sourceResponseHash:crypto.createHash("sha256").update(raw).digest("hex"),sourceResponseDate:capturedAt,sourceAgeSeconds:0};assert.notEqual(meta.sourceResponseHash,response.sourceResponseHash);
+   const product=Client.extractProducts(raw).products[0],parsed=Client.parseProduct(product,meta);assert(parsed.offer,JSON.stringify(parsed));assert.equal(DepositProof.validateProof(parsed.offer),true);return parsed.offer;
+  }
+  const depositTx=await pool.connect();let depositGroups=0;try{
+   await depositTx.query("BEGIN");
+   const before=(await depositTx.query(`SELECT count(*)::int AS total,sum(price) AS prices,max(captured_at) AS captured FROM ${Service.TABLE}`)).rows[0];
+   // Recreate the previous released zero-only schema in this rollback-only
+   // transaction, then run the real additive migration over its existing rows.
+   await depositTx.query(`ALTER TABLE ${Service.TABLE} DROP CONSTRAINT aldi_assortment_deposit_proof_check;ALTER TABLE ${Service.TABLE} DROP COLUMN deposit_basis_proof;ALTER TABLE ${Service.TABLE} ADD CONSTRAINT aldi_assortment_published_prices_deposit_check CHECK(deposit=0)`);
+   assert.equal((await depositTx.query("SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 AND column_name='deposit_basis_proof'",[Service.TABLE])).rowCount,0);
+   await Service.ensure(depositTx);
+   assert.equal((await depositTx.query("SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 AND column_name='deposit_basis_proof' AND data_type='jsonb'",[Service.TABLE])).rowCount,1);
+   assert.deepEqual((await depositTx.query(`SELECT count(*)::int AS total,sum(price) AS prices,max(captured_at) AS captured FROM ${Service.TABLE}`)).rows[0],before,"Migration retains every historical price and original timestamp");
+   assert.equal((await depositTx.query("SELECT conname FROM pg_constraint WHERE conrelid=$1::regclass AND conname='aldi_assortment_published_prices_deposit_check'",[Service.TABLE])).rowCount,0);depositGroups++;
+   const water=depositFixture("classic-1026202"),cola=depositFixture("original-taste-4039"),input=[water,cola],saved=await Service.persist(depositTx,input,{now});assert.equal(saved.accepted,2);assert.equal(saved.upserted,2);depositGroups++;
+   const stored=(await depositTx.query(`SELECT deposit::float,pack_count,deposit_basis_proof AS proof,source_response_hash,captured_at,expires_at FROM ${Service.TABLE} WHERE retailer_sku=$1`,[water.retailerSku])).rows[0];assert.equal(stored.deposit,2.25);assert.equal(stored.pack_count,9);assert.deepEqual(stored.proof,water.depositBasisProof);assert.equal(stored.source_response_hash,water.sourceResponseHash);assert.equal(new Date(stored.captured_at).toISOString(),water.capturedAt);assert.equal(new Date(stored.expires_at).getTime(),Date.parse(water.capturedAt)+Service.DAY_MS);depositGroups++;
+   const found=(await Service.search(depositTx,{retailerSku:water.retailerSku,pack:"9 x 500 ml",now})).items;assert.equal(found.length,1);assert.equal(found[0].price,1.35);assert.equal(found[0].deposit,2.25);assert.equal(found[0].depositIncluded,false);assert.equal(found[0].payablePackPrice,3.60,"Native total-pack deposit must not be multiplied by its nine bottles");assert.equal(found[0].packCount,9);assert.equal(found[0].packAmount,500);assert.equal(DepositProof.validateProof(found[0]),true);assert.equal(found[0].gtin,null);assert.equal(found[0].locationScope,"unknown");assert.equal(found[0].physicalStorePriceVerified,false);assert.equal(found[0].priceType,"unknown");depositGroups++;
+   assert.equal((await Service.search(depositTx,{retailerSku:water.retailerSku,pack:"4.5 l",now})).items.length,0,"Matching total volume cannot replace an exact nine-bottle sales pack");assert.equal((await Service.search(depositTx,{retailerSku:cola.retailerSku,now})).items[0].payablePackPrice,1.84);assert.equal((await Service.persist(depositTx,found,{now})).unchanged,1,"A PostgreSQL JSONB roundtrip keeps duplicate capture idempotency");depositGroups++;
+   assert.equal((await Service.persist(depositTx,[{...water,depositBasisProof:{...water.depositBasisProof,depositCents:25}}],{now})).accepted,0);depositGroups++;
+   for(const [name,sql,params] of[
+    ["missing proof","deposit_basis_proof=NULL",[]],
+    ["empty proof","deposit_basis_proof='{}'::jsonb",[]],
+    ["nonobject proof","deposit_basis_proof='[]'::jsonb",[]],
+    ["changed native pfand","deposit=0.25",[]],
+    ["noncent pfand","deposit=2.251",[]],
+    ["negative pfand","deposit=-0.25",[]],
+    ["excessive pfand","deposit=10000.01",[]],
+    ["NaN pfand","deposit='NaN'::numeric",[]],
+    ["infinite pfand","deposit='Infinity'::numeric",[]],
+    ["negative infinite pfand","deposit='-Infinity'::numeric",[]],
+    ["wrong SKU","deposit_basis_proof=jsonb_set(deposit_basis_proof,'{retailerSku}',to_jsonb('4039'::text))",[]],
+    ["wrong original hash","deposit_basis_proof=jsonb_set(deposit_basis_proof,'{sourceResponseHash}',to_jsonb(repeat('0',64)))",[]],
+    ["wrong capture","deposit_basis_proof=jsonb_set(deposit_basis_proof,'{capturedAt}',to_jsonb('2020-01-01T00:00:00.000Z'::text))",[]],
+    ["wrong salespack","deposit_basis_proof=jsonb_set(deposit_basis_proof,'{pack}',to_jsonb('4.5 l'::text))",[]],
+    ["unknown proof version","deposit_basis_proof=jsonb_set(deposit_basis_proof,'{version}','2'::jsonb)",[]],
+    ["included pfand","deposit_basis_proof=jsonb_set(deposit_basis_proof,'{depositPriceBasis}',to_jsonb('included'::text))",[]],
+    ["per-bottle pfand","deposit_basis_proof=jsonb_set(deposit_basis_proof,'{depositAmountBasis}',to_jsonb('per-container'::text))",[]],
+    ["unknown renderer manifest","deposit_basis_proof=jsonb_set(deposit_basis_proof,'{rendererManifestHash}',to_jsonb(repeat('0',64)))",[]],
+    ["extraneous authority","deposit_basis_proof=deposit_basis_proof||'{\"currentBerlinShelf\":true}'::jsonb",[]]
+   ]){await depositTx.query("SAVEPOINT rejected_deposit");await assert.rejects(()=>depositTx.query(`UPDATE ${Service.TABLE} SET ${sql} WHERE retailer_sku=$1`,[water.retailerSku,...params]),error=>error.code==="23514",name);await depositTx.query("ROLLBACK TO SAVEPOINT rejected_deposit");depositGroups++;}
+   // The SQL boundary authenticates the closed shape and row bindings. Reads
+   // additionally verify the ordered proof hash instead of trusting JSONB.
+   await depositTx.query("SAVEPOINT bad_proof_hash");await depositTx.query(`UPDATE ${Service.TABLE} SET deposit_basis_proof=jsonb_set(deposit_basis_proof,'{proofHash}',to_jsonb(repeat('0',64))) WHERE retailer_sku=$1`,[water.retailerSku]);assert.equal((await Service.search(depositTx,{retailerSku:water.retailerSku,now})).items.length,0);await depositTx.query("ROLLBACK TO SAVEPOINT bad_proof_hash");depositGroups++;
+   await depositTx.query("SAVEPOINT shorter_native_expiry");const shorterExpiry=new Date(now+60000).toISOString();await depositTx.query(`UPDATE ${Service.TABLE} SET expires_at=$2::timestamptz WHERE retailer_sku=$1`,[water.retailerSku,shorterExpiry]);assert.equal((await Service.search(depositTx,{retailerSku:water.retailerSku,now})).items[0].expiresAt,shorterExpiry,"The actual DTO preserves a shorter SQL deadline instead of recalculating a longer TTL");await depositTx.query("ROLLBACK TO SAVEPOINT shorter_native_expiry");depositGroups++;
+   assert.equal((await Service.search(depositTx,{retailerSku:water.retailerSku,now:Date.parse(water.expiresAt)+1})).items.length,0);depositGroups++;
+  }finally{await depositTx.query("ROLLBACK");Schema.reset(depositTx,Service.TABLE);depositTx.release();}
+  assert.deepEqual(await Service.status(pool,{now}),status,"Rollback-only migration and positive-pfand cases leave the original coverage baseline unchanged");assert.equal((await Service.search(pool,{retailerSku:"1026202",now})).items.length,0);depositGroups++;
   // Exercise the actual persistent cursor SQL and admission writes together in a rollback-only transaction.
   const checkpoint=await pool.connect();try{
    await checkpoint.query("BEGIN");await Refresh.ensure(checkpoint);await checkpoint.query("ALTER TABLE aldi_assortment_catalog_state DROP COLUMN price_refresh_state");await Refresh.ensure(checkpoint);assert((await checkpoint.query("SELECT 1 FROM information_schema.columns WHERE table_name='aldi_assortment_catalog_state' AND column_name='price_refresh_state'")).rowCount===1,"Existing catalog tables receive the additive regular-refresh state column");await checkpoint.query("DELETE FROM aldi_assortment_catalog_state WHERE source_id=$1",[Service.SOURCE]);
@@ -99,7 +152,7 @@ async function main(){
   const noExactMatch=await get("/v1/published-prices?merchant=ALDI%20Nord&gtin="+gtin(0));assert.equal(noExactMatch.status,200);assert.equal(noExactMatch.body.items.length,0);
   const comparedResponse=await fetch(base+"/v1/current-prices",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gtin:gtin(0),pack:"1 l",merchants:["ALDI Nord"]}),signal:AbortSignal.timeout(10000)}),compared=await comparedResponse.json();assert.equal(comparedResponse.status,200,JSON.stringify(compared));assert(compared.results.every(row=>row.state==="unknown"&&row.price===null));assert(!compared.publishedAlternatives.some(row=>row.sourceId===Service.SOURCE),"An ALDI article name cannot answer an exact GTIN comparison");
   for(const[table,count]of Object.entries(baseline)){if(count===null)assert.equal(await exists(table),false,"Separate ALDI evidence must not create "+table);else assert.equal((await pool.query("SELECT count(*)::int AS count FROM "+table)).rows[0].count,count,"Separate ALDI evidence must not mutate "+table);}
-  console.log("aldi-assortment-price-postgres: actual SQL migration/constraints, durable native gaps, fair regular-refresh/retry alternation, fresh captures beyond 24-hour expiry despite permanent gaps, multiple restart-safe refresh passes, global cooldown and unchanged physical/receipt ledgers OK");
+  console.log("aldi-assortment-price-postgres: actual SQL migration/constraints, durable native gaps, fair regular-refresh/retry alternation, fresh captures beyond 24-hour expiry despite permanent gaps, multiple restart-safe refresh passes, global cooldown and unchanged physical/receipt ledgers OK ("+depositGroups+" deposit groups)");
  }finally{if(api){if(api.server.listening)await new Promise((resolve,reject)=>api.server.close(error=>error?reject(error):resolve()));await api.closeDb();}await pool.end();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

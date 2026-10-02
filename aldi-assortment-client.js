@@ -1,6 +1,6 @@
 "use strict";
 
-const crypto=require("node:crypto"),Inventory=require("./canonical-inventory-import");
+const crypto=require("node:crypto"),Inventory=require("./canonical-inventory-import"),DepositProof=require("./aldi-deposit-proof");
 const SOURCE="ALDI Nord published assortment",ORIGIN="https://www.aldi-nord.de",SITEMAP_URL=ORIGIN+"/sitemaps/.aldi-nord-sitemap-products.xml";
 const GAP_RETRY_MS=60*60*1000,GAP_CODES=Object.freeze(["aldi-native-source-unavailable","aldi-product-page-schema-invalid","aldi-native-request-identity-conflict","aldi-native-product-identity-conflict","aldi-native-product-name-required","aldi-exact-sales-pack-required","aldi-drained-weight-unresolved","aldi-product-variant-unresolved"]);
 const hash=value=>crypto.createHash("sha256").update(value).digest("hex"),sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -90,11 +90,12 @@ function parseProduct(raw={},meta={}){
  else if(from*1000>clock||until*1000<=clock)reasons.push("aldi-current-price-outside-native-validity");
  if(raw.isAvailable!==true||raw.isComingSoon===true||raw.isRecall===true)reasons.push("aldi-product-not-currently-published");
  if(raw.isDepositProduct!=null&&typeof raw.isDepositProduct!=="boolean")reasons.push("aldi-native-deposit-flag-invalid");
- if(raw.isDepositProduct===true){if(money(raw.depositValue)===null)reasons.push("aldi-deposit-unresolved");reasons.push("aldi-deposit-price-basis-unresolved")}
+ const depositBasisProof=raw.isDepositProduct===true?DepositProof.proofForProduct(raw,meta):null;
+ if(raw.isDepositProduct===true){if(money(raw.depositValue)===null||raw.depositValue<=0)reasons.push("aldi-deposit-unresolved");if(!depositBasisProof)reasons.push("aldi-deposit-price-basis-unresolved")}
  if(raw.isDepositProduct===false&&raw.depositValue!=null&&money(raw.depositValue)!==0)reasons.push("aldi-native-deposit-conflict");
  if(reasons.length)return{ok:true,product,offer:null,reasons,retailerSku:nativeSku};
  const proofHash=hash(JSON.stringify({sourceUrl:target.sourceUrl,sourceResponseHash:meta.sourceResponseHash,product:raw}));
- const offer={...common,price,currency:"EUR",priceBasis:"pack",priceKind:"published-current",regularPrice:null,promotionStatus:"unknown",capturedAt,nativeValidFrom:new Date(from*1000).toISOString(),nativeValidUntil:new Date(until*1000).toISOString(),expiresAt:new Date(Math.min(clock+24*60*60*1000,until*1000)).toISOString(),sourceResponseHash:meta.sourceResponseHash,sourceResponseDate,sourceAgeSeconds:meta.sourceAgeSeconds??null,proofHash,availability:"unknown",publicationAvailable:true,state:"published",deposit:raw.isDepositProduct===false?0:null,depositIncluded:raw.isDepositProduct===false?false:null};
+ const offer={...common,price,currency:"EUR",priceBasis:"pack",priceKind:"published-current",regularPrice:null,promotionStatus:"unknown",capturedAt,nativeValidFrom:new Date(from*1000).toISOString(),nativeValidUntil:new Date(until*1000).toISOString(),expiresAt:new Date(Math.min(clock+24*60*60*1000,until*1000)).toISOString(),sourceResponseHash:meta.sourceResponseHash,sourceResponseDate,sourceAgeSeconds:meta.sourceAgeSeconds??null,proofHash,availability:"unknown",publicationAvailable:true,state:"published",deposit:depositBasisProof?money(raw.depositValue):raw.isDepositProduct===false?0:null,depositIncluded:depositBasisProof||raw.isDepositProduct===false?false:null,depositBasisProof};
  return{ok:true,product,offer,reasons:[],retailerSku:nativeSku};
 }
 function session(options={}){
