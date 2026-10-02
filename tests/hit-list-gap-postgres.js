@@ -1,10 +1,25 @@
 "use strict";
 // Called only by the existing localhost *_test PostgreSQL integration gate.
 // All category bodies and HTTP responses below are synthetic, never production evidence.
-const assert=require("node:assert/strict"),Refresh=require("../hit-price-refresh"),Import=require("../hit-price-import"),Gap=require("../hit-native-list-gap"),Store=require("../hit-list-gap-store"),Fixture=require("./fixtures/hit-list-gap"),Batches=require("./fixtures/hit-list-gap-refresh");
+const assert=require("node:assert/strict"),Refresh=require("../hit-price-refresh"),Import=require("../hit-price-import"),Gap=require("../hit-native-list-gap"),Store=require("../hit-list-gap-store"),Fixture=require("./fixtures/hit-list-gap"),Batches=require("./fixtures/hit-list-gap-refresh"),Clock=require("../current-price-query-service");
 const copy=structuredClone,iso=n=>new Date(n).toISOString();
+// The synthetic two-hour recovery sequence tests same-day continuation. Keep
+// its original captures in the past and its real one-hour pauses intact; an
+// actual Berlin-day rollover correctly starts a new traversal instead.
+function recoveryTime(wall=Date.now()){
+ for(let hours=3;hours<=5;hours++){const start=wall-hours*3600000;if(Clock.today(new Date(start))===Clock.today(new Date(start+7200000)))return start;}
+ throw Error("Synthetic listing-gap recovery requires a same-Berlin-day window");
+}
+function verifyRecoveryClock(){
+ for(const wallTime of["2026-10-02T23:39:09.094Z","2026-10-02T21:59:59.999Z","2026-10-02T22:00:00.000Z","2026-10-03T00:59:59.999Z","2026-03-29T00:59:59.999Z","2026-03-29T21:59:59.999Z","2026-10-25T01:00:00.000Z","2026-10-25T22:59:59.999Z"]){
+  const wall=Date.parse(wallTime),start=recoveryTime(wall),day=Clock.today(new Date(start));assert(wall-start>=10800000&&wall-start<=18000000,"Synthetic originals remain three to five hours in the past");for(const offset of[0,3599999,3600000,7200000])assert.equal(Clock.today(new Date(start+offset)),day);
+ }
+ // Native proof still uses its actual clock: future DST boundary samples above
+ // test date arithmetic only, never future captures or a replaced global Date.
+ const start=recoveryTime(),last=Batches.batch(start,{terminal:true}),terminal=Gap.terminal(copy(last.result.cursor),{now:start+7200000,retryAfter:iso(start+7200000),archivedRecords:[last.record]});assert.equal(terminal.requests,0);assert.equal(terminal.terminalOnly,true);assert.equal(last.record.original.meta.capturedAt,iso(start),"Recovery never renews the original capture");
+}
 module.exports=async function test(pool){
- const now=Date.now()-3*3600000,source=Refresh.SOURCE;let cases=0;
+ verifyRecoveryClock();const now=recoveryTime(),source=Refresh.SOURCE;let cases=0;
  const count=async table=>Number((await pool.query("SELECT count(*)::int AS n FROM "+table)).rows[0].n),originals=async()=> (await pool.query("SELECT * FROM "+Store.TABLE+" ORDER BY gap_id")).rows;
  await Refresh.ensure(pool);assert.equal(await count(Store.TABLE),0,"This integration uses its isolated new diagnostic ledger");
  const captures=await count(Import.TABLE),observations=await count("price_observations"),receipts=await count("receipt_submissions"),availability=await count("availability_observations");
