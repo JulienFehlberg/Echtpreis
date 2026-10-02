@@ -68,4 +68,4 @@ function candidateFor(states, handlers, options, name) {
   // a new first-run source. The ordinary fallback handles that initial state.
   return inspect(states, handlers, options).candidates.find(candidate => candidate.name === name && candidate.hasRecordedDeadline) || null;
 }
-module.exports = Object.freeze({ decision, candidateFor, timestamp, MIN_WAKE_MS });
+module.exports = Object.freeze({ inspect, decision, candidateFor, timestamp, MIN_WAKE_MS });
