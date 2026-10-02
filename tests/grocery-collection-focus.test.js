@@ -1,7 +1,7 @@
 "use strict";
 const assert=require("node:assert/strict"),Focus=require("../grocery-collection-focus"),Runner=require("../price-refresh-runner"),Sources=require("../price-sources").SOURCES;
 (async()=>{const before=Object.fromEntries(Object.keys(Sources).map(name=>[name,{nextAttemptAt:"2099-01-01T00:00:00.000Z"}])),states=structuredClone(before),seen=[];
- const enabled=["Wolt EDEKA Berlin","ALDI Nord published assortment","REWE Berlin pickup"],paused=["HIT Berlin store assortment","dm online","Wolt nahkauf Berlin Wrangelstraße"];
+ const enabled=["Wolt EDEKA Berlin","ALDI Nord published assortment","REWE Berlin pickup","PENNY Berlin regional price publications"],paused=["HIT Berlin store assortment","dm online","Wolt nahkauf Berlin Wrangelstraße"];
  for(const name of [...enabled,...paused])states[name]={nextAttemptAt:"2026-10-02T00:00:00.000Z"};
  const originals=structuredClone(states),handlers=Object.fromEntries([...enabled,...paused].map(name=>[name,async()=>{assert(enabled.includes(name));seen.push(name);return{received:1,accepted:1,nextAttemptAt:"2099-01-01T00:00:00.000Z"};}]));
  handlers.official_retailer=()=>assert.fail("A generic fallback must not restart a paused retailer");assert.equal(Focus.apply(handlers),handlers);assert.deepEqual(Object.keys(handlers).sort(),enabled.slice().sort());

@@ -2,6 +2,7 @@
 "use strict";
 const Current=typeof module==="object"&&module.exports?require("./current-price-client"):root.SparkorbCurrentPriceClient;
 const Products=typeof module==="object"&&module.exports?require("./published-product-client"):root.SparkorbPublishedProductClient;
+const Penny=typeof module==="object"&&module.exports?require("./penny-reference-client"):root.CaddyPennyReferenceClient;
 const retailers=Object.freeze(["ALDI","PENNY","REWE","Lidl","Kaufland","EDEKA"]),text=v=>typeof v==="string"?v.trim():"";
 function candidate(input,options={}){
  const offer=Current?.normalizePublishedReference(input?.offer,options),r=input?.reference;
@@ -17,16 +18,17 @@ function candidate(input,options={}){
 function normalizeResponse(raw,options={}){
  if(!raw||raw.ok!==true||raw.city!=="Berlin"||raw.country!=="DE"||!Array.isArray(raw.items)||raw.items.length>200)return{ok:false,items:[],reason:"invalid-berlin-reference-response"};
  const groups=new Map(),conflicts=new Set();for(const input of raw.items){const row=candidate(input,options);if(!row)continue;const key=row.reference.key;if(groups.has(key)){conflicts.add(key);continue;}groups.set(key,row);}
- return{ok:true,city:"Berlin",country:"DE",items:[...groups].filter(([key])=>!conflicts.has(key)).map(([,row])=>row),coverageComplete:false,truncated:raw.truncated===true};
+ const publications=Penny?.normalizeResponse(raw,options).publications||[];
+ return{ok:true,city:"Berlin",country:"DE",items:[...groups].filter(([key])=>!conflicts.has(key)).map(([,row])=>row),publications,coverageComplete:false,truncated:raw.truncated===true};
 }
 function request(raw){
  if(!raw||typeof raw!=="object"||Array.isArray(raw)||Object.keys(raw).some(k=>!["search","gtin","pack","merchant","scopeChannel","limit"].includes(k)))throw Error("invalid-reference-search");
  if(raw.search!==undefined&&typeof raw.search!=="string"||raw.gtin!==undefined&&typeof raw.gtin!=="string"||raw.merchant!==undefined&&(typeof raw.merchant!=="string"||!retailers.includes(raw.merchant.trim())))throw Error("invalid-reference-search");
- const search=text(raw.search),gtin=text(raw.gtin),filters=Products.searchFilters(raw);if(!filters.ok)throw Error(filters.reason);
+ const regional=raw.scopeChannel==='retailer-price-publication',search=text(raw.search),gtin=text(raw.gtin),filters=Products.searchFilters(regional?{...raw,scopeChannel:undefined}:raw);if(!filters.ok)throw Error(filters.reason);
  if(gtin&&!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(gtin)||!gtin&&(search.length<2||search.length>120)||search.length>120)throw Error("invalid-reference-search");
  if(gtin){let sum=0;for(let i=gtin.length-2,w=3;i>=0;i--,w=w===3?1:3)sum+=Number(gtin[i])*w;if((10-sum%10)%10!==Number(gtin.at(-1)))throw Error("invalid-reference-gtin");}
  const merchant=raw.merchant===undefined?null:text(raw.merchant),limit=raw.limit??20;if(merchant&&!retailers.includes(merchant)||!Number.isSafeInteger(limit)||limit<1||limit>200)throw Error("invalid-reference-search");
- return{...(search?{search}:{}),...(gtin?{gtin}:{}),...(filters.pack?{pack:filters.pack}:{}),...(merchant?{merchant}:{}),...(filters.scopeChannel?{scopeChannel:filters.scopeChannel}:{}),limit};
+ return{...(search?{search}:{}),...(gtin?{gtin}:{}),...(filters.pack?{pack:filters.pack}:{}),...(merchant?{merchant}:{}),...(regional?{scopeChannel:'retailer-price-publication'}:filters.scopeChannel?{scopeChannel:filters.scopeChannel}:{}),limit};
 }
 function create(config={}){
  const apiBase=text(config.apiBase).replace(/\/+$/,""),fetchImpl=config.fetchImpl||root.fetch?.bind(root),now=typeof config.now==="function"?config.now:Date.now;
