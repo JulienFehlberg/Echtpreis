@@ -52,13 +52,17 @@ function publishedSource(raw){
   return{...source,url:url.href};
  }catch(_){return null;}
 }
-function normalizePublishedAlternative(raw,query={},ctx={}){
+function normalizePublishedQuote(raw,query={},ctx={},nativeReference=false){
  if(!raw||typeof raw!=="object"||Array.isArray(raw)||raw.state!=="published"||raw.current!==true||raw.scopeCountry!=="DE"||raw.currency!=="EUR"||raw.priceBasis!=="pack")return null;
  if(raw.truthEligible===true||raw.physicalStorePriceVerified===true||raw.storeId!=null||raw.store_id!=null||raw.locationLevel==="store"||raw.shippingIncluded!==false||raw.serviceFeesIncluded===true)return null;
  const source=publishedSource(raw),requested=exactPublishedPack(query.pack),pack=exactPublishedPack(raw.pack),gtin=text(raw.gtin),proofHash=text(raw.proofHash);
- if(!source||!text(raw.name)||!text(raw.retailerSku)||!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(gtin)||gtin!==text(query.gtin)||!requested||!pack||requested.unit!==pack.unit||Math.abs(requested.amount-pack.amount)>1e-9||requested.count!==pack.count||!/^[a-f0-9]{64}$/i.test(proofHash))return null;
- let sum=0;for(let i=gtin.length-2,weight=3;i>=0;i--,weight=weight===3?1:3)sum+=Number(gtin[i])*weight;
- if((10-sum%10)%10!==Number(gtin.at(-1)))return null;
+ if(!source||!text(raw.name)||!text(raw.retailerSku)||!requested||!pack||requested.unit!==pack.unit||Math.abs(requested.amount-pack.amount)>1e-9||requested.count!==pack.count||!/^[a-f0-9]{64}$/i.test(proofHash))return null;
+ if(!nativeReference||gtin){
+  if(!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(gtin)||gtin!==text(query.gtin))return null;
+  let sum=0;for(let i=gtin.length-2,weight=3;i>=0;i--,weight=weight===3?1:3)sum+=Number(gtin[i])*weight;
+  if((10-sum%10)%10!==Number(gtin.at(-1)))return null;
+ }
+ if(nativeReference&&(!["Wolt EDEKA Berlin","REWE Berlin pickup"].includes(raw.sourceId)||source.venue&&!/^[a-f0-9]{24}$/.test(raw.retailerSku)||source.market&&!/^[1-9]\d{0,4}-[A-Za-z0-9]{1,40}-7ae33841-fa98-3b7e-9ee5-8132f39c189c$/.test(raw.retailerSku)))return null;
  const nativePack=packAmount(raw.packAmount,raw.packUnit),nativeCount=number(raw.packCount);
  if(!nativePack||!Number.isSafeInteger(nativeCount)||nativeCount!==pack.count||nativePack.unit!==pack.unit||Math.abs(nativePack.amount*nativeCount-pack.amount)>1e-9)return null;
  const time=ctx.now===undefined?Date.now():Number(ctx.now),captured=isoTime(raw.capturedAt),expiry=isoTime(raw.expiresAt);
@@ -75,8 +79,10 @@ function normalizePublishedAlternative(raw,query={},ctx={}){
   if(!input||typeof input!=="object"||Array.isArray(input)||input.country!=="DE"||input.city!=="Berlin"||text(input.postalCode)!==source.postalCode||!text(input.name)||!source.addresses.some(value=>addressKey(value)===addressKey(input.address))||source.venue&&input.nativeVenueId!==source.venue||source.market&&String(input.nativeMarketId)!==source.market)return null;
   shop={name:text(input.name),address:text(input.address),postalCode:text(input.postalCode),city:text(input.city),country:"DE",nativeVenueId:source.venue||null,nativeMarketId:source.market||null};
  }
- return{sourceId:raw.sourceId,merchant:source.merchant,retailerSku:text(raw.retailerSku),nativeVenueId:source.venue||null,nativeMarketId:source.market||null,name:text(raw.name),brand:text(raw.brand)||null,gtin,pack:text(raw.pack),packAmount:nativePack.amount,packUnit:nativePack.unit,packCount:nativeCount,price:goods/100,deposit:deposit===null?null:deposit/100,displayedPrice:displayed===null?null:displayed/100,nativePriceIncludesDeposit:displayed===null?null:raw.nativePriceIncludesDeposit,payablePackPrice:payable===null?null:payable/100,currency:"EUR",priceBasis:"pack",capturedAt:new Date(captured).toISOString(),expiresAt:new Date(expiry).toISOString(),sourceUrl:source.url,proofHash,shop,scopeCountry:"DE",scopeChannel:source.channel,state:"published",current:true,truthEligible:false,physicalStorePriceVerified:false,shippingIncluded:false,serviceFeesIncluded:false,availability:["available","unavailable","unknown"].includes(raw.availability)?raw.availability:"unknown",priceType:text(raw.priceType)||"unknown",promotionStatus:text(raw.promotionStatus)||"unknown"};
+ return{sourceId:raw.sourceId,merchant:source.merchant,retailerSku:text(raw.retailerSku),nativeVenueId:source.venue||null,nativeMarketId:source.market||null,name:text(raw.name),brand:text(raw.brand)||null,gtin:gtin||null,pack:text(raw.pack),packAmount:nativePack.amount,packUnit:nativePack.unit,packCount:nativeCount,price:goods/100,deposit:deposit===null?null:deposit/100,displayedPrice:displayed===null?null:displayed/100,nativePriceIncludesDeposit:displayed===null?null:raw.nativePriceIncludesDeposit,payablePackPrice:payable===null?null:payable/100,currency:"EUR",priceBasis:"pack",capturedAt:new Date(captured).toISOString(),expiresAt:new Date(expiry).toISOString(),sourceUrl:source.url,proofHash,shop,scopeCountry:"DE",scopeChannel:source.channel,state:"published",current:true,truthEligible:false,physicalStorePriceVerified:false,shippingIncluded:false,serviceFeesIncluded:false,availability:["available","unavailable","unknown"].includes(raw.availability)?raw.availability:"unknown",priceType:text(raw.priceType)||"unknown",promotionStatus:text(raw.promotionStatus)||"unknown"};
 }
+function normalizePublishedAlternative(raw,query={},ctx={}){return normalizePublishedQuote(raw,query,ctx,false);}
+function normalizePublishedReference(raw,ctx={}){return normalizePublishedQuote(raw,{gtin:raw?.gtin,pack:raw?.pack},ctx,true);}
 function publishedAlternatives(raw,query,ctx){
  const rows=new Map(),conflicts=new Set();
  for(const input of Array.isArray(raw)?raw.slice(0,20):[]){
@@ -212,7 +218,7 @@ function create(options={}){
  }
  return Object.freeze({compare,clearCache(){generation++;cache.clear()},cacheInfo(){expired(now());return{entries:cache.size,inflight:pending.size,ttlMs,maxEntries}}});
 }
-const api=Object.freeze({create,normalizeDecision,normalizeResponse,normalizePublishedAlternative,toComparablePrice,parsePack});
+const api=Object.freeze({create,normalizeDecision,normalizeResponse,normalizePublishedAlternative,normalizePublishedReference,toComparablePrice,parsePack});
 if(root)root.SparkorbCurrentPriceClient=api;
 if(typeof module==="object"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
