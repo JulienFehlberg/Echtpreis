@@ -147,4 +147,4 @@ async function search(pool, rawOptions = {}, inventoryDeps = Inventory) {
   selected.truncated ||= result.items.length === QUERY_LIMIT || result.truncated === true;
   return selected;
 }
-module.exports = Object.freeze({ select, search, RETAILERS, QUERY_LIMIT });
+module.exports = Object.freeze({ select, search, options, RETAILERS, QUERY_LIMIT });

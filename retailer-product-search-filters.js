@@ -8,7 +8,7 @@ function salesPack(value){
 }
 function channel(value){
  if(value===undefined)return null;
- if(!["physical-store","online","pickup","assortment-publication"].includes(value))throw fail("invalid-scope-channel");return value;
+ if(!["physical-store","online","pickup","assortment-publication","retailer-price-publication"].includes(value))throw fail("invalid-scope-channel");return value;
 }
 function sqlPack(value,param,prefix=""){
  const parsed=salesPack(value);if(!parsed)return null;
