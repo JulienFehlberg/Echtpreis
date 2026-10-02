@@ -100,6 +100,41 @@ test("family words as ingredients or cosmetics do not confirm a staple", () => {
     assert.strictEqual(classify("eggs", {}, name).status, "contradicted");
   assert.strictEqual(classify("bread", {}, "Fleischwurst auf Brot").status, "contradicted");
 });
+test("observed cosmetic compounds cannot masquerade as milk headlines", () => {
+  for (const name of ["Elkos Body Cremeseife Milch & Honig 1 l", "Elkos Body Cremebad Milch & Honig 1 l",
+    "Sanfte Reinigungsmilch mit Milch", "Sonnenmilch Milch & Honig", "Bodymilk mit Milch", "Scheuermilch mit Milchduft"]) {
+    const result = classify("milk", {}, name);
+    assert.strictEqual(result.status, "contradicted", name);
+    assert(result.conflicts.some(row => row.field === "family"), name);
+    assert(!result.matched.includes("family"), name);
+  }
+});
+test("whole cosmetic tokens cover spelling/compound variants across food families", () => {
+  for (const name of ["Cremeseifen Milch & Honig", "Milch & Honig Handwaschseife", "Milch & Honig Flüssigseife",
+    "Milch & Honig Duschcreme", "Milch & Honig Cremebäder", "Reinigungs-Milch", "Sonnen-Milch", "Body-Milk",
+    "Körpermilch", "Scheuer-Milch", "Butter Cremeseife", "Brot Reinigungsmittel", "Eier Duschcreme"]) {
+    for (const family of ["milk", "butter", "bread", "eggs"]) assert.strictEqual(classify(family, {}, name).status, "contradicted", family + ": " + name);
+  }
+});
+test("ordinary milk and food cream words do not become cosmetic evidence", () => {
+  for (const name of ["ja! H-Milch 1,5%", "Landliebe Frische Milch 3,5%", "Milch mit Honig", "Bio Heumilch", "BODY Milch"]) {
+    assert.strictEqual(classify("milk", {}, name).status, "confirmed", name);
+  }
+  assert.strictEqual(classify("butter", {}, "Deutsche Markenbutter").status, "confirmed");
+  assert.strictEqual(classify("butter", {}, "Buttercreme").status, "unconfirmed", "A food cream is still not positively established as a butter sales pack, but must not be mislabeled cosmetic");
+  assert.strictEqual(classify("milk", {}, "Milch mit Buttercreme").status, "confirmed");
+});
+test("only an initial native non-food self-description can contradict a food headline", () => {
+  assert.strictEqual(classify("milk", {}, "Milch", "Produktart: Cremeseife Milch & Honig").status, "contradicted");
+  assert.strictEqual(classify("milk", {}, "Milch", "Reinigungsmilch mit Honig").status, "contradicted");
+  assert.strictEqual(classify("milk", {}, "H-Milch", "Für den Karton bitte keine Scheuermilch verwenden.").status, "confirmed");
+  assert.strictEqual(classify("milk", {}, "H-Milch", "Milch für Buttercreme und Pudding.").status, "confirmed");
+});
+test("non-food search tokens retain the existing explicit family conflict declaration", () => {
+  for (const search of ["Cremeseife Milch", "Cremebad Milch", "Reinigungsmilch", "Sonnenmilch", "Bodymilk", "Scheuermilch"]) {
+    throws("invalid-shopping-need-conflict", { search, constraints: { family: "milk" } });
+  }
+});
 test("explicit product family before other ingredients still matches", () => {
   assert.strictEqual(classify("milk", {}, "H-Milch für Kaffee").status, "confirmed");
   assert.strictEqual(classify("bread", {}, "Brot mit Milch").status, "confirmed");
