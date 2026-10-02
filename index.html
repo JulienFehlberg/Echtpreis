@@ -20,6 +20,7 @@ window.sparkorbHealthCheck=sparkorbSelfCheck;window.addEventListener("load",()=>
 <script src="app/price-engine.js"></script>
 <script src="app/current-price-client.js"></script>
 <script src="app/published-product-client.js"></script>
+<script src="app/berlin-reference-client.js"></script>
 <script src="shopping-need-matcher.js"></script>
 <script src="app/shopping-need-client.js"></script>
 <script src="app/price-source-adapters.js"></script>
@@ -1603,12 +1604,12 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
 
 <div class="card compare-action-card"><div id="listReadiness" class="list-readiness"></div><button class="green" id="compareBtn" type="button" onclick="window.sparkorbCompare&&window.sparkorbCompare()">Günstigste Einkaufsoption finden</button><div id="compareStatus" role="status" aria-live="polite" class="muted compare-status"></div><details style="margin-top:12px"><summary class="muted" style="cursor:pointer;text-align:center">Bediente Märkte & Preisdetails</summary><div class="chips" id="stores" style="margin-top:10px"></div><div id="dataMachineStatus" class="muted" style="margin-top:8px">Preisquellen werden geprüft …</div></details></div>
 
-<section class="results" id="results"><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div><div id="winnerRoute"></div></div>
+<section class="results" id="results"><div class="card" id="berlinReferenceComparison" style="display:none"><h2>Berliner Preisreferenzen</h2><div class="detail">Belegte Artikelpreise bei ALDI, PENNY, REWE, Lidl, Kaufland und EDEKA. Herkunftsmarkt und Preisstand stehen dabei. Ein belegter Berliner Markt genügt als Referenz; Abholung und Lieferung sind gekennzeichnet.</div><div id="berlinReferenceItems"></div></div><details class="card" id="storeComparisonDetails"><summary style="font-weight:800;cursor:pointer">Weitere Preisdetails &amp; bisheriger Filialvergleich</summary><div class="winner"><div class="smallcap" id="winnerLabel">Vollständiger Warenkorb · 1 Markt</div><div id="winnerName" style="font-size:18px;font-weight:800;margin-top:8px"></div><div class="big" id="winnerPrice"></div><div id="winnerCoverage" style="font-size:13px;opacity:.85"></div><div id="winnerRoute"></div></div>
 <div class="card" id="personalBasketVerdict" style="display:none"><div class="smallcap">🧠 Gegen dein Preisgedächtnis</div><h2 id="personalBasketVerdictTitle"></h2><div id="personalBasketVerdictDetail" class="detail"></div></div><div class="card savings-card" id="verifiedSavings" style="display:none"><h2>Belegter Preisunterschied</h2><div class="split"><strong id="splitTitle"></strong><div class="detail" id="splitDetail"></div><div class="save" id="splitSave"></div></div></div>
 <div class="card"><h2>Was kostet dein Einkauf?</h2><div id="compareQualitySummary" class="compare-quality-summary" style="display:none"></div><div id="merchantResults"></div></div>
 <div class="card" id="physicalComparison" style="display:none"><h2>Beobachtete Filialpreise</h2><div class="detail">Exakte Produkte und Verkaufspackungen aus dem genannten Markt. Ein unbekannter Pfandbetrag bleibt offen und zählt nicht als zahlbare Warenkorbsumme.</div><div id="physicalComparisonItems"></div></div>
 <div class="card" id="publishedComparison" style="display:none"><h2>Online- und Abholpreise</h2><div class="detail">Gleiche Produkte und Packungsgrößen aus deiner Liste. Preise je Packung; zusätzliche Gebühren sind noch offen. Diese Angebote zählen separat vom Filialvergleich.</div><div id="publishedComparisonItems"></div></div>
-<details class="card"><summary style="font-weight:800;cursor:pointer">Vergleichsmethode & Datenqualität</summary><div class="muted" style="margin-top:10px"><b>Rangfolge:</b> Ein Händler kann nur dann als günstigster erscheinen, wenn für den vollständigen verglichenen Warenkorb belastbare Preisbelege vorliegen. Diese belegten Warenkörbe werden ausschließlich nach dem berechneten Gesamtpreis der gewählten Mengen sortiert; Entfernung oder Händlername beeinflussen die Preisrangfolge nicht.<br><br><b>Referenzwerte:</b> Modellierte Richtwerte, Marken-Schätzungen und historische Preise dürfen keinen Händler zum Gewinner oder Verlierer machen. Liegen nur solche Werte vor, erscheinen Händler ohne Preis-Rangfolge. „ca.“ kennzeichnet Orientierungswerte und ist keine Behauptung eines aktuellen Filialpreises oder einer Verfügbarkeit.<br><br><b>Vergleichbarkeit:</b> Packungs- und Mengeneinheiten werden soweit möglich normalisiert. Fehlende, unklare oder nicht vergleichbare Artikel verhindern einen vollständig belegten Vergleich. Die verwendeten Einzelquellen, Aktualität und Schätzstatus stehen bei jedem Markt unter „Preisdetails“.<br><br><b>Spar-Aussagen:</b> Ein konkreter Preisvorteil wird nur aus ausreichend aktuellen, nicht bloß historischen oder modellierten Preisen abgeleitet. Tatsächliche Preise und Filialbestände können sich ändern.</div></details>
+</details><details class="card"><summary style="font-weight:800;cursor:pointer">Vergleichsmethode & Datenqualität</summary><div class="muted" style="margin-top:10px"><b>Rangfolge:</b> Ein Händler kann nur dann als günstigster erscheinen, wenn für den vollständigen verglichenen Warenkorb belastbare Preisbelege vorliegen. Diese belegten Warenkörbe werden ausschließlich nach dem berechneten Gesamtpreis der gewählten Mengen sortiert; Entfernung oder Händlername beeinflussen die Preisrangfolge nicht.<br><br><b>Referenzwerte:</b> Modellierte Richtwerte, Marken-Schätzungen und historische Preise dürfen keinen Händler zum Gewinner oder Verlierer machen. Liegen nur solche Werte vor, erscheinen Händler ohne Preis-Rangfolge. „ca.“ kennzeichnet Orientierungswerte und ist keine Behauptung eines aktuellen Filialpreises oder einer Verfügbarkeit.<br><br><b>Vergleichbarkeit:</b> Packungs- und Mengeneinheiten werden soweit möglich normalisiert. Fehlende, unklare oder nicht vergleichbare Artikel verhindern einen vollständig belegten Vergleich. Die verwendeten Einzelquellen, Aktualität und Schätzstatus stehen bei jedem Markt unter „Preisdetails“.<br><br><b>Spar-Aussagen:</b> Ein konkreter Preisvorteil wird nur aus ausreichend aktuellen, nicht bloß historischen oder modellierten Preisen abgeleitet. Tatsächliche Preise und Filialbestände können sich ändern.</div></details>
 
 </section>
 </section>
@@ -2052,6 +2053,8 @@ function confidenceLabel(m){return !m.key?"unsicher":m.score>=.95?"sehr sicher":
 const API_BASE=window.SPARKORB_CONFIG?.apiBase||("https://echt"+"preis-api.onrender.com");
 
 const canonicalPriceClient=window.SparkorbCurrentPriceClient?.create({apiBase:API_BASE,fetchImpl:(...args)=>fetch(...args),timeoutMs:10000});
+const berlinReferenceClient=window.CaddyBerlinReferenceClient?.create({apiBase:API_BASE,fetchImpl:(...args)=>fetch(...args),timeoutMs:8000});
+let berlinComparisonReferences=new Map();
 const publishedProductClient=window.SparkorbPublishedProductClient?.create({apiBase:API_BASE,fetchImpl:(...args)=>fetch(...args),timeoutMs:8000});
 const shoppingNeedClient=window.SparkorbShoppingNeedClient?.create({apiBase:API_BASE,fetchImpl:(...args)=>fetch(...args),timeoutMs:8000});
 let canonicalComparisonPrices=new Map(),canonicalComparisonBranches=new Map(),canonicalPublishedAlternatives=new Map(),canonicalPhysicalDecisions=new Map();
@@ -2102,6 +2105,25 @@ function renderPhysicalComparison(items){
   return '<article class="merchant"><div><b>HIT · Filialpreis</b><div class="detail">'+escHtml(offer.product)+' · '+escHtml(offer.pack)+'</div><div class="detail">'+escHtml([branch.name,branch.address,branch.postalCode,branch.city].join(" · "))+'</div></div><div style="text-align:right"><b class="price">'+eur(offer.goodsPrice)+'</b><div class="detail">Warenpreis je Packung</div></div><div class="detail" style="grid-column:1 / -1">'+escHtml(deposit)+'<br>Beobachteter Preis · Bestand im Markt noch offen<br>Abruf '+escHtml(stamp(offer.capturedAt))+' · Gültig bis '+escHtml(stamp(offer.expiresAt))+'<br><a href="'+escHtml(offer.sourceUrl)+'" target="_blank" rel="noopener noreferrer">Quelle: '+escHtml(offer.sourceId)+'</a></div></article>';
  }).join("")+'</div>').join("");
 }
+async function loadBerlinReferenceComparison(items,revision,runId){
+ const fresh=new Map();if(!berlinReferenceClient)return;let next=0;
+ async function worker(){while(next<items.length){const wish=items[next++],identity=window.SparkorbPublishedProductClient?.selection(wish.selectedProduct),filters=window.SparkorbPublishedProductClient?.searchFilters({pack:wish.packLabel}),pack=filters?.ok&&filters.pack?filters.pack:null,query=identity?{gtin:identity.gtin,pack:identity.pack,limit:20}:wish.ean?{gtin:wish.ean,...(pack?{pack}:{}),limit:20}:{search:catalog[wish.key]?.label||wish.label||wish.raw,...(pack?{pack}:{}),limit:20};
+  const result=await berlinReferenceClient.search(query);if(runId!==compareRunId||revision!==comparisonRevision)return;fresh.set(priceWishSignature(wish),result);
+ }}await Promise.all(Array.from({length:Math.min(4,items.length)},()=>worker()));
+ if(runId===compareRunId&&revision===comparisonRevision){berlinComparisonReferences=fresh;renderBerlinReferenceComparison(items);$("results").style.display="block";}
+}
+function renderBerlinReferenceComparison(items){
+ const section=$("berlinReferenceComparison"),target=$("berlinReferenceItems");if(!section||!target)return;section.style.display=items.length?"block":"none";
+ const api=window.CaddyBerlinReferenceClient,now=Date.now(),stamp=v=>new Date(v).toLocaleString("de-DE",{dateStyle:"short",timeStyle:"short"});
+ target.innerHTML=items.map(wish=>{const saved=berlinComparisonReferences.get(priceWishSignature(wish)),rows=(saved?.items||[]).map(row=>api?.candidate(row,{now})).filter(Boolean),represented=new Set(rows.map(row=>row.offer.merchant)),missing=(api?.retailers||[]).filter(m=>!represented.has(m));
+  const title='<h3 style="margin:18px 0 8px">'+escHtml(wish.label||wish.raw||catalog[wish.key]?.label||"Artikel")+'</h3>';
+  if(!rows.length)return title+'<div class="detail">'+(saved?.ok===false?'Berliner Preisabruf gerade nicht verfügbar.':'Für diesen Artikel liegt noch kein passender Berliner Preisbeleg vor.')+'</div>';
+  return title+rows.map(({offer,reference})=>{const shop=reference.sourceMarket,channel=offer.scopeChannel==='pickup'?'Abholung':'Lieferung',range=reference.knownPriceRange,variance=range&&range.min!==range.max?' · Weitere belegte Märkte: '+eur(range.min)+'–'+eur(range.max):'',deposit=offer.deposit===null?'Pfand unbekannt':'Pfand '+eur(offer.deposit),priceKind=offer.priceType==='regular'?'Normalpreis':offer.priceType==='promotion'?'Aktionspreis':'Preisart offen';
+   return '<article class="merchant"><div><b>'+escHtml(offer.merchant)+' · Berlin</b><div class="detail">'+escHtml(offer.name)+' · '+escHtml(offer.pack)+'</div><div class="detail">'+escHtml(shop.name)+' · '+escHtml(shop.address)+' · '+escHtml(shop.postalCode+' '+shop.city)+'</div></div><div style="text-align:right"><b class="price">'+eur(offer.price)+'</b><div class="detail">je Packung · '+channel+'</div></div><div class="detail" style="grid-column:1 / -1">Berliner Referenz · Stand '+escHtml(stamp(reference.observedAt))+escHtml(variance)+'<br>'+escHtml(priceKind)+' · '+escHtml(deposit)+' · zusätzliche Gebühren offen'+(offer.availability==='unavailable'?' · derzeit als nicht verfügbar veröffentlicht':'')+'<br><a href="'+escHtml(offer.sourceUrl)+'" target="_blank" rel="noopener noreferrer">Quelle: '+escHtml(offer.sourceId)+'</a></div></article>';
+  }).join('')+(saved?.truncated?'<div class="detail">Weitere Artikel vorhanden; grenze deine Suche über ein konkretes Produkt ein.</div>':'')+(missing.length?'<div class="detail" style="margin-top:8px">Noch kein passender Berliner Preisbeleg: '+escHtml(missing.join(', '))+'.</div>':'')+(!wish.selectedProduct?'<div class="detail" style="margin-top:8px">Die genannten Artikel sind einzelne Varianten. Wähle ein konkretes Produkt für deinen Warenkorb.</div>':'');
+ }).join('');
+}
+
 function renderPublishedComparison(items){
  const section=$("publishedComparison"),target=$("publishedComparisonItems");if(!section||!target)return;
  const now=Date.now(),groups=items.map(wish=>({wish,offers:(canonicalPublishedAlternatives.get(priceWishSignature(wish))||[]).filter(offer=>Date.parse(offer.expiresAt)>now&&Date.parse(offer.capturedAt)<=now&&now-Date.parse(offer.capturedAt)<=86400000)})).filter(group=>group.offers.length);
@@ -2632,6 +2654,8 @@ function comparisonQuality(row,totalItems){
 }
 let compareRunId=0;
 window.compare=async function compare({skipLocation=false,scroll=true,backgroundRefresh=false}={}){
+ $("storeComparisonDetails").style.display="none";
+ renderBerlinReferenceComparison([]);
  renderPublishedComparison([]);
  renderPhysicalComparison([]);
  const runId=++compareRunId;hasCompared=true;resetPriceLookupMemo();const revision=comparisonRevision;$("compareStatus").textContent=backgroundRefresh?"":!navigator.onLine?"Offline · gespeicherte Preise dienen als Orientierung …":skipLocation?"Vergleich wird aktualisiert …":"Vergleich wird geladen …";
@@ -2646,8 +2670,10 @@ window.compare=async function compare({skipLocation=false,scroll=true,background
  if(revision!==comparisonRevision)return false;
  if(!basket.length){$("results").style.display="none";$("compareStatus").textContent="Schreib zuerst deinen Einkauf auf.";if(!skipLocation)appNotice("Schreib zuerst deinen Einkauf auf.","warn");return false}
  const excluded=basket.filter(w=>w.customItem||!w.key||w.needsClarification||w.needsQuantity),compareBasket=basket.filter(w=>!w.customItem&&w.key&&!w.needsClarification&&!w.needsQuantity),partialNote=excluded.length?"Teilvergleich: "+compareBasket.length+" von "+basket.length+" Artikeln. Ohne sicheren Preis: "+excluded.map(w=>w.label||w.raw||"Eigener Artikel").join(", ")+". Für diese Artikel wird kein Preis behauptet.":"";if(!compareBasket.length){$("results").style.display="none";$("compareStatus").textContent="Für eigene Freitextartikel gibt es noch keinen Preisvergleich.";return false}
- await loadCanonicalComparison(compareBasket,(selected.size?[...selected]:storeNames).map(canonicalStoreName),revision,runId);
+ await Promise.all([loadCanonicalComparison(compareBasket,(selected.size?[...selected]:storeNames).map(canonicalStoreName),revision,runId),loadBerlinReferenceComparison(compareBasket,revision,runId)]);
  if(runId!==compareRunId||revision!==comparisonRevision)return false;
+ $("storeComparisonDetails").style.display="block";
+ renderBerlinReferenceComparison(compareBasket);
  renderPublishedComparison(compareBasket);
  renderPhysicalComparison(compareBasket);
  let rows=[...selected].map(store=>{let total=0,known=0,missing=[],sources=[],referenceCount=0,confirmedCount=0;compareBasket.forEach(w=>{let p=w.key?activePrice(w.key,store,w):null;if(p){total+=p.price*w.calcAmount;known++;sources.push({...p,valuePrice:normalizedValuePrice(w.key,p.price,p.product||"")});p.reference?referenceCount++:confirmedCount++}else missing.push(w.label)});return{store,total,known,missing,sources,referenceCount,confirmedCount,coverage:known/compareBasket.length}});

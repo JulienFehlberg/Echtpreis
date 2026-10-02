@@ -12,6 +12,8 @@ function apply(handlers) {
 function status() {
   return { city: "Berlin", country: "DE", retailers: [...retailers], retailerSources: [...retailerSources],
     supportingSources: [...supportingSources], otherRetailerCollectionPaused: true, coverageComplete: false,
+    coverageUnit: "retailer-product", referenceCity: "Berlin", allStoresRequired: false,
+    rolloutOrder: ["Berlin retailer assortment and price references", "Other German states", "Individual stores"],
     note: "Priority retailers only. Each source keeps its actual online, pickup or published-assortment scope. Registered connectors do not prove complete physical-store price coverage." };
 }
 module.exports = Object.freeze({ apply, status });

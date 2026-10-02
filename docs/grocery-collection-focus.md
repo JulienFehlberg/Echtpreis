@@ -4,6 +4,15 @@ Caddy prioritizes PENNY, EDEKA, Lidl, ALDI, Kaufland and REWE in Berlin.
 The goal is each retailer's accessible full assortment and current prices,
 including normal prices. Offers alone do not meet that goal.
 
+The first rollout measures retailer-product coverage in Berlin. One evidenced
+Berlin source market per exact product and retailer is sufficient for a city
+reference; full per-branch coverage is not a prerequisite. The app names the
+source market and original sales channel next to the price. A single quote is
+the last observed reference, not a calculated Berlin average. Next come other
+German states, followed by more specific individual-store coverage.
+See [Berliner Händlerreferenzen](berlin-reference-prices.md) for the API and
+the exact identity, source, deposit and original-capture boundaries.
+
 `grocery-collection-focus.js` allows the automatic retailer collectors for
 REWE Berlin pickup, Wolt EDEKA Berlin and ALDI Nord published assortment.
 These are the implemented priority connectors, not proof of complete store
@@ -28,6 +37,7 @@ products do not establish live shelf availability. Unknown GTIN, deposits,
 sales packs and dates remain unknown rather than inferred.
 
 `GET /v1/admin/price-sources/status` exposes the collection focus alongside
-actual source state. `coverageComplete` remains false until store,
-assortment and current price coverage can be demonstrated. A registered
+actual source state. `coverageComplete` remains false until accessible
+assortment and current retailer-product price coverage can be demonstrated.
+Unknown assortment denominators prevent a claimed completion percentage. A registered
 handler alone never counts as full coverage.

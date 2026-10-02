@@ -74,3 +74,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
         run: node tests/hit-price-postgres.test.js
+
+      - name: Run PostgreSQL Berliner retailer reference integration test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
+        run: node tests/berlin-reference-postgres.test.js
