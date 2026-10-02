@@ -1,5 +1,7 @@
 # Berliner Händlerreferenzen
 
+Die Einkaufslistenansicht prüft generische Milch-, Butter-, Brot- und Eierpositionen zusätzlich mit dem vorhandenen Bedarfsmatcher anhand der nativen Artikelüberschrift. Widersprüchliche Familien (etwa Buttermilchquark bei Butter oder Hafermilch bei Milch) und ausdrücklich widersprechende Eigenschaften werden ausgeschlossen. Fehlende Eigenschaften bleiben offen; eine bewusste konkrete GTIN-/Packungsauswahl hat Vorrang. Die API bleibt eine Artikelsuche: Ein Namenssuchtreffer allein ist keine bestätigte Zuordnung zum Einkaufsbedarf.
+
 `berlin-reference-prices.js` liest vorhandene veröffentlichte Händlerangebote. Eine Berliner Referenz ist der zuletzt belegte Preis eines konkreten Artikels bei einem Händler in einem belegten Berliner Quellenmarkt. Sie ist weder ein statistischer Durchschnitt noch eine Aussage zum Preis jeder Berliner Filiale. Eine einzige belegte Filiale genügt; die Abdeckung aller Filialen ist keine Voraussetzung.
 
 ## API
