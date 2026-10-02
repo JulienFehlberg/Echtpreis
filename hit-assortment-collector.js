@@ -1,5 +1,5 @@
 "use strict";
-const crypto=require("node:crypto"),Client=require("./hit-assortment-client"),Identity=require("./product-identity"),Clock=require("./current-price-query-service");
+const crypto=require("node:crypto"),Client=require("./hit-assortment-client"),Identity=require("./product-identity"),Clock=require("./current-price-query-service"),BrandProbe=require("./hit-native-brand-probe");
 const SOURCE=Client.SOURCE,COOLDOWN_UNTIL="2026-10-01T19:51:16.522Z";
 const fail=code=>Object.assign(new Error(code),{code});
 const hash=body=>crypto.createHash("sha256").update(body).digest("hex");
@@ -54,9 +54,10 @@ async function collect(options={}){
  // A wrapper supplies one actual-clock day snapshot so a batch crossing midnight has a consistent checkpoint.
  const cursorDay=options.cursorDay??Clock.today(new Date(now())),state=cursorFor(options.cursor,store,cursorDay),jar=new Map(),seen=new Set(state.seenSkus),quarantined=new Set(state.conflictGtins);
  if(state.cursorDay!==cursorDay)throw fail("hit-continuation-day-conflict");
- const accepted=[],rejected=[],pages=[];let requests=0,lastRequest=0,error=null;
- async function read(input){
-  let url=allowedUrl(input,store);
+ const accepted=[],rejected=[],pages=[];let requests=0,lastRequest=0,error=null,brandFilterProbe=null;
+ async function read(input,probeControl=null){
+  if(probeControl!==null&&!BrandProbe.authorizeRequest(probeControl,input))throw fail("hit-brand-probe-request-not-authorized");
+  let url=probeControl===null?allowedUrl(input,store):input;const requestUrl=url,redirects=[];
   for(let redirect=0;redirect<4;redirect++){
    if(requests>=maxRequests)throw fail("hit-request-budget-exhausted");
    const wait=pauseMs-(now()-lastRequest);if(requests&&wait>0)await delay(wait);
@@ -75,13 +76,14 @@ async function collect(options={}){
     const expires=maxAge!==undefined&&/^-?\d+$/.test(maxAge)?now()+Number(maxAge)*1000:expiresRaw&&Number.isFinite(Date.parse(expiresRaw))?Date.parse(expiresRaw):Infinity,key=match[1]+"@"+path;
     if(expires<=now()||!match[2])jar.delete(key);else if(jar.size<20||jar.has(key))jar.set(key,{name:match[1],value:match[2],path,expires});
    }
-   if([301,302,303,307,308].includes(response.status)){const target=response.headers.get("location");if(!target)throw fail("hit-invalid-redirect");url=allowedUrl(new URL(target,url).href,store);continue;}
-   if(response.status===403||response.status===429){const e=fail("hit-source-http-"+response.status),retry=response.headers.get("retry-after"),wait=/^\d+$/.test(retry||"")?Number(retry)*1000:Date.parse(retry)-now();e.retryAfterMs=Math.max(3600000,Number.isFinite(wait)?wait:0);throw e;}
+   if([301,302,303,307,308].includes(response.status)){if(probeControl!==null)throw fail("hit-brand-probe-redirect-not-allowed");const target=response.headers.get("location");if(!target)throw fail("hit-invalid-redirect");const next=allowedUrl(new URL(target,url).href,store);redirects.push({status:response.status,url,target:next});url=next;continue;}
+   if(response.status===403||response.status===429){const e=fail("hit-source-http-"+response.status),retry=response.headers.get("retry-after"),wait=/^\d+$/.test(retry||"")?Number(retry)*1000:Date.parse(retry)-now();e.retryAfterMs=Math.max(3600000,Number.isFinite(wait)?wait:0);e.responseStatus=response.status;throw e;}
    if(response.status!==200)throw fail("hit-source-http-"+response.status);
    if(!/text\/html/i.test(response.headers.get("content-type")||""))throw fail("hit-response-html-required");
    const body=await response.text();if(Buffer.byteLength(body)>6*1024*1024)throw fail("hit-response-too-large");
    const capturedAt=new Date(now()).toISOString();
-   return{body,meta:{storeProfile:store,capturedAt,responseDate:response.headers.get("date"),responseAgeSeconds:response.headers.get("age")===null?null:Number(response.headers.get("age")),sourceResponseHash:hash(body),sourceResponseUrl:url}};
+   const meta={storeProfile:store,capturedAt,responseDate:response.headers.get("date"),responseAgeSeconds:response.headers.get("age")===null?null:Number(response.headers.get("age")),sourceResponseHash:hash(body),sourceResponseUrl:url};
+   return{body,meta,probeMeta:{...meta,requestUrl,responseStatus:response.status,responseContentType:response.headers.get("content-type"),responseBytes:Buffer.byteLength(body),responseAgeRaw:response.headers.get("age"),redirects,anonymous:true,retried:false}};
   }
   throw fail("hit-redirect-limit");
  }
@@ -149,6 +151,21 @@ async function collect(options={}){
     const node=state.pending[selectedIndex],page=await read(node.url);
     // Children append during processing; remove this exact node only after success.
     processPage(page,node);state.pending.splice(selectedIndex,1);
+    // Only an already processed, fresh native control can authorize one extra
+    // HTML GET. It never enters price parsing, deduplication or traversal state.
+    if(options.brandProbeEnabled===true&&brandFilterProbe===null&&requests<maxRequests){
+     let control=null;try{control=BrandProbe.prepareControl(page.body,page.probeMeta,{now})}catch{}
+     if(control!==null){
+      try{const filtered=await read(BrandProbe.proposal(control).requestedUrl,control);brandFilterProbe=BrandProbe.record(control,{filtered:{body:filtered.body,meta:filtered.probeMeta},error:null},{now});}
+      catch(e){
+       const code=typeof e.code==="string"&&/^hit-[a-z0-9-]+$/.test(e.code)?e.code:["AbortError","TimeoutError","TypeError"].includes(e.name)?e.name:"Error",retryAfterMs=Math.max(3600000,Number.isSafeInteger(e.retryAfterMs)?e.retryAfterMs:0);
+       brandFilterProbe=BrandProbe.record(control,{filtered:null,error:{code,retryAfterMs,responseStatus:[403,429].includes(e.responseStatus)?e.responseStatus:null}},{now});
+       // Real refusals retain the existing global pause; other diagnostic
+       // failures consume their one attempt but leave normal traversal running.
+       if([403,429].includes(e.responseStatus))throw e;
+      }
+     }
+    }
    }
    else break;
   }catch(e){error={code:e.code||e.message,retryAfterMs:Math.max(3600000,Number(e.retryAfterMs)||0),...(e.conflictGtins?{conflictGtins:e.conflictGtins}:{})};break;}
@@ -161,6 +178,6 @@ async function collect(options={}){
  }
  state.categoryCoverage=coverageFor(state);
  const complete=!error&&state.initialIndexLoaded&&state.overviewLoaded&&state.pending.length===0,nativePaginationComplete=complete&&state.total!==null&&state.received===state.total&&!state.categoryCoverage.truncatedLeaves.length&&!state.categoryCoverage.unresolvedNodes.length&&!state.conflictGtins.length;
- return{sourceId:SOURCE,cursorDay:state.cursorDay,accepted,rejected,pages,requests,complete,categoryTraversalCycleComplete:complete,nativePaginationComplete,publishedTraversalComplete:nativePaginationComplete,categoryCoverage:state.categoryCoverage,conflictGtins:[...state.conflictGtins],physicalStoreAssortmentComplete:false,cursor:complete?null:state,total:state.total,pagesFetched:state.pagesFetched,received:state.received,error};
+ return{sourceId:SOURCE,cursorDay:state.cursorDay,accepted,rejected,pages,requests,complete,categoryTraversalCycleComplete:complete,nativePaginationComplete,publishedTraversalComplete:nativePaginationComplete,categoryCoverage:state.categoryCoverage,conflictGtins:[...state.conflictGtins],physicalStoreAssortmentComplete:false,cursor:complete?null:state,total:state.total,pagesFetched:state.pagesFetched,received:state.received,error,brandFilterProbe};
 }
 module.exports={SOURCE,COOLDOWN_UNTIL,allowedUrl,validDay,validConflictGtins,cursorFor,coverageFor,collect};

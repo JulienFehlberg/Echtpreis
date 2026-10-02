@@ -277,4 +277,62 @@ test("offered category identifiers cannot be replaced with credentials, guessed 
  for(const url of ["https://www.hit.de/sortiment/uebersicht?page=1","https://www.hit.de/sortiment/uebersicht?for_q=milk","https://www.hit.de/sortiment/%6bilch-4261891","https://www.hit.de/maerkte/berlin-zoo?mein-markt=1","https://www.hit.de/maerkte/berlin-mitte?mein-markt=1&mein-markt=1","https://www.hit.de/sortiment/kaese-eier-molkerei-4261253?markt=054","https://www.hit.de:444/sortiment","https://www.hit.de/sortiment/../konto"])
   assert.throws(()=>Collector.allowedUrl(url,store),e=>errorIncludes(e,"url-not-allowed"),url);
 });
+function nativeProbePage(rows,filtered=false,edit=()=>{},transform=body=>body){
+ const node=milkParent,category={...node,id:String(node.id),count:rows.length},data={status:200,data:rows,pagination:{page:0,limit:40,total:rows.length},meta:{category:{id:String(node.id),name:node.name,url:node.url,count:rows.length}},filters:{categories:[dairy,category,milkLeaf],brands:[{id:"Synthetic A",key:"Synthetic A",label:"Synthetic A",count:1}]}},params={for_store:1775,for_category:String(node.id),limit:40,return_exact_match:"1",...(filtered?{for_brands:"Synthetic A"}:{})};edit(data,params);
+ return transform('<html><head data-store="258" data-store-id="1775" data-hit-konto="" data-hit-admin=""></head><body><div data-component="assortment/list" data-data="'+attr(data)+'" data-params="'+attr(params)+'"></div></body></html>');
+}
+function probeHarness(filtered={},options={}){
+ const routes=fixture();routes[new URL(milkParent.url).pathname]=options.controlBody||nativeProbePage([milk,ordinary]);
+ return harness(routes,{...options,route:(url,call,n,response)=>{
+  if(url.searchParams.has("for_brands")){if(options.probeError)throw options.probeError;return response(filtered.body??nativeProbePage([milk],true),filtered);}
+  if(url.pathname===new URL(store.officialUrl).pathname)return response(url.searchParams.has("mein-markt")?"Guest selected":choice(),url.searchParams.has("mein-markt")?options.selection||{}:options.market||{});
+  const spec=routes[url.pathname];assert.notEqual(spec,undefined,url.href);return typeof spec==="string"?response(spec):response(spec.body,spec);
+ }});
+}
+test("native brand probe defaults off and only one extra paced guest GET changes no price or traversal evidence",async()=>{
+ const baseline=await collect(probeHarness()),h=probeHarness({}, {selection:{cookies:["guest=synthetic; Path=/"]}}),result=await collect(h,{brandProbeEnabled:true});
+ assert.equal(baseline.brandFilterProbe,null);assert.equal(result.brandFilterProbe.outcome,"confirmed");assert.equal(result.brandFilterProbe.actualHTMLFilterVerified,true);assert.equal(result.requests,baseline.requests+1);
+ for(const key of ["accepted","rejected","total","pagesFetched","received","categoryCoverage","conflictGtins","complete","nativePaginationComplete","publishedTraversalComplete","physicalStoreAssortmentComplete"])if(["accepted","rejected"].includes(key))assert.deepEqual(result[key].map(row=>[row.gtin,row.priceCents,row.pack]),baseline[key].map(row=>[row.gtin,row.priceCents,row.pack]));else assert.deepEqual(result[key],baseline[key]);
+ assert.equal(result.pages.length,baseline.pages.length);assert(!result.pages.some(page=>new URL(page.sourceResponseUrl).searchParams.has("for_brands")));
+ const calls=h.calls.filter(call=>new URL(call.url).searchParams.has("for_brands"));assert.equal(calls.length,1);assert(calls[0].init.headers.Cookie.includes("guest=synthetic"));
+ for(let index=1;index<h.calls.length;index++)assert(h.calls[index].at-h.calls[index-1].at>=1000);
+ assert.throws(()=>Collector.allowedUrl(calls[0].url,store));for(const key of ["collectionEnabled","priceImportEnabled","complete"])assert.equal(result.brandFilterProbe[key],false);
+});
+test("probe budget exhaustion has no attempted record and leaves a valid normally advanced cursor",async()=>{
+ const h=probeHarness(),result=await collect(h,{brandProbeEnabled:true,maxRequests:6});assert.equal(result.requests,6);assert.equal(result.brandFilterProbe,null);assert(!h.calls.some(call=>new URL(call.url).searchParams.has("for_brands")));assert.equal(result.pagesFetched,3);
+ assert(!result.cursor.pending.some(node=>node.id===String(milkParent.id)));Collector.cursorFor(result.cursor,store,result.cursorDay);
+});
+test("refused filter has a durable diagnostic while the successfully processed pending node remains removed",async()=>{
+ for(const status of [403,429]){
+  const h=probeHarness({body:"Source refused",status,headers:{"retry-after":"7200"}}),result=await collect(h,{brandProbeEnabled:true});
+  assert.equal(h.calls.length,7);assert.equal(result.brandFilterProbe.outcome,"source-refused");assert.equal(result.brandFilterProbe.filtered,null);assert.equal(result.error.code,"hit-source-http-"+status);assert.equal(result.error.retryAfterMs,7200000);assert.equal(result.brandFilterProbe.error.retryAfterMs,7200000);
+  assert.equal(result.pagesFetched,3);assert.equal(result.received,2);assert.equal(result.pages.length,3);assert.equal(result.complete,false);assert(!result.cursor.pending.some(node=>node.id===String(milkParent.id)));assert(result.cursor.visited.some(node=>node.id===String(milkParent.id)));Collector.cursorFor(result.cursor,store,result.cursorDay);
+  const saved=clone(result.cursor),resumed=await collect(probeHarness(),{cursor:result.cursor});assert.deepEqual(result.cursor,saved);assert.equal(resumed.brandFilterProbe,null);assert.equal(resumed.complete,true);assert.equal(resumed.pagesFetched,6);
+ }
+});
+test("ignored HTML filters and bad native identities consume a single diagnostic attempt without importing response",async()=>{
+ for(const body of [nativeProbePage([milk,ordinary]),nativeProbePage([{...milk,storeId:1729}],true),nativeProbePage([milk],true,(_data,params)=>{delete params.for_brands}),nativeProbePage([milk],true,(_data,params)=>{params.for_brands="Other"}),nativeProbePage([{...milk,external_id:"999999ST"}],true)]){
+  const h=probeHarness({body}),result=await collect(h,{brandProbeEnabled:true});assert.equal(result.brandFilterProbe.outcome,"inconclusive");assert.equal(result.brandFilterProbe.filtered.body,body);assert.equal(result.error,null);assert.equal(result.complete,true);assert.equal(result.requests,10);assert.equal(result.received,3);assert.equal(result.pagesFetched,6);assert.equal(h.calls.filter(call=>new URL(call.url).searchParams.has("for_brands")).length,1);assert.equal(result.accepted.length,3);
+ }
+});
+test("redirect and non-HTML filter responses never trigger a second filter request",async()=>{
+ for(const spec of [{status:302,headers:{location:milkParent.url}},{headers:{"content-type":"application/json"}},{status:500}]){
+  const h=probeHarness({body:"Synthetic refusal",...spec}),result=await collect(h,{brandProbeEnabled:true});assert.equal(result.brandFilterProbe.outcome,"failed");assert.equal(result.brandFilterProbe.filtered,null);assert.equal(result.error,null);assert.equal(result.complete,true);assert.equal(result.requests,10);assert.equal(h.calls.filter(call=>new URL(call.url).searchParams.has("for_brands")).length,1);
+ }
+});
+test("DOM timeout/abort numeric codes and network errors still retain a single attempted diagnostic",async()=>{
+ for(const probeError of [new DOMException("Synthetic timeout","TimeoutError"),new DOMException("Synthetic abort","AbortError"),Object.assign(new TypeError("Sensitive transport detail"),{code:"ENOTFOUND"}),Object.assign(new Error("Sensitive transport detail"),{code:"ERR_INVALID_URL"})]){
+  const h=probeHarness({}, {probeError}),result=await collect(h,{brandProbeEnabled:true});assert.equal(result.brandFilterProbe.outcome,"failed");assert.equal(result.error,null);assert.equal(result.complete,true);assert.equal(result.requests,10);assert.equal(h.calls.filter(call=>new URL(call.url).searchParams.has("for_brands")).length,1);assert(!JSON.stringify(result.brandFilterProbe).includes("Sensitive transport detail"));
+ }
+});
+test("native filter cache/date defects preserve raw evidence and cannot renew source goods",async()=>{
+ for(const headers of [{age:"301"},{age:"broken"},{date:new Date(clock-600000).toUTCString()},{date:null}]){
+  const h=probeHarness({headers}),result=await collect(h,{brandProbeEnabled:true});assert.equal(result.brandFilterProbe.outcome,"inconclusive");assert.equal(result.error,null);assert.equal(result.complete,true);assert.equal(result.received,3);assert.equal(result.pagesFetched,6);assert.equal(result.accepted.length,3);assert(result.brandFilterProbe.filtered.body);
+ }
+});
+test("missing guest proof or malformed facets on a normal control cannot authorize extra requests",async()=>{
+ for(const controlBody of [nativeProbePage([milk,ordinary],false,()=>{},body=>body.replace('data-hit-konto=""','data-hit-konto="SYNTHETIC"')),nativeProbePage([milk,ordinary],false,data=>{data.filters.brands=[{id:"A",key:"A",label:"A",count:"1"}]}),nativeProbePage([milk,ordinary],false,data=>{data.filters.brands=[{id:"A,B",key:"A,B",label:"A,B",count:1}]})]){
+  const h=probeHarness({}, {controlBody}),result=await collect(h,{brandProbeEnabled:true});assert.equal(result.brandFilterProbe,null);assert.equal(result.error,null);assert.equal(result.complete,true);assert.equal(result.requests,9);
+ }
+});
 (async()=>{const failures=[];for(const {name,run}of cases)try{await run()}catch(e){failures.push(name+": "+e.stack)}if(failures.length){console.error(failures.join("\n\n"));process.exitCode=1}else console.log("hit-assortment-collector: OK ("+cases.length+" offline category and safety cases)")})().catch(e=>{console.error(e);process.exitCode=1});
