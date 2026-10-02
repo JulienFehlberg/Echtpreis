@@ -452,4 +452,10 @@ test("a malformed native percentage alongside an exact claim cannot confirm that
   }
 });
 
+test("explicit infant milk nutrition is not an ordinary drinking-milk choice", () => {
+  for (const name of ["TEST Aptamil Milchnahrung 1J 1+", "TEST Anfangsmilch PRE", "TEST Folgemilch 2", "TEST Säuglingsmilch", "TEST Babymilch"]) {
+    assert.strictEqual(classify("milk", {}, name).status, "contradicted", name);
+    assert.strictEqual(classify("milk", { processing: "uht", fatPercent: 1.5 }, name).status, "contradicted", name);
+  }
+});
 console.log(`shopping need matcher: ${count} passed`);

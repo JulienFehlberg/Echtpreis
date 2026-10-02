@@ -1,5 +1,6 @@
 "use strict";
 const assert=require("assert"),fs=require("fs"),{JSDOM,VirtualConsole}=require("jsdom");
+const NeedMatcher=require("../shopping-need-matcher");
 const ids={product:"11111111-1111-4111-8111-111111111111",rewe:"22222222-2222-4222-8222-222222222222",penny:"33333333-3333-4333-8333-333333333333",hit:"44444444-4444-4444-8444-444444444444"},gtin="4008400401621";
 const product={id:ids.product,name:"Testbrand Butter",brand:"Testbrand",gtin,pack:"250 g",packAmount:250,packUnit:"g",packCount:1,canonicalKey:"butter",canonical:true,matchType:"exact"};
 const stores=[{id:ids.rewe,merchant:"REWE",merchantKey:"rewe",address:"Teststraße 1",city:"Berlin",region:"Berlin",latitude:52.52,longitude:13.40,distanceKm:.1,canonical:true,matchType:"candidate"},{id:ids.penny,merchant:"PENNY",merchantKey:"penny",address:"Teststraße 2",city:"Berlin",region:"Berlin",latitude:52.521,longitude:13.40,distanceKm:.2,canonical:true,matchType:"candidate"}];
@@ -43,6 +44,22 @@ async function fixture(mode){
     if(mode==="product-search-hold"&&requests.filter(request=>request.path===path).length===1)return new Promise(resolve=>{releaseSearch=()=>resolve({ok:true,json:async()=>result});});
     return{ok:true,json:async()=>result};
    }
+   if(path==="/v1/shopping-need"){
+    const body=JSON.parse(options.body);requests.push({path,body,options});
+    if(mode==="product-need-invalid")return{ok:false,status:400,json:async()=>({error:"invalid-shopping-need-constraints"})};
+    const need=NeedMatcher.parse({search:body.search,constraints:body.constraints});
+    let items=productCandidatesFixture(mode,body.search);
+    for(const item of items){
+     for(const offer of item.offers){offer.name="TEST H-Milch 1,5%";}
+     for(const offer of item.physicalOffers||[])offer.nativeProof={headline:offer.name};
+     const matches=[...item.offers,...(item.physicalOffers||[])].map(offer=>({sourceId:offer.sourceId,scopeChannel:offer.scopeChannel,retailerSku:offer.retailerSku,storeId:offer.storeId||null,nativeVenueId:offer.nativeVenueId||null,nativeMarketId:offer.nativeMarketId||null,gtin:offer.gtin,pack:offer.pack,...NeedMatcher.classify(need,{name:offer.name})}));
+     item.needAssessment={selectionRequired:true,status:matches.some(match=>match.status==="confirmed")?"confirmed":"unconfirmed",offerMatches:matches};
+    }
+    items=items.filter(item=>item.needAssessment.offerMatches.every(match=>match.status!=="contradicted"));
+    const result={ok:true,scopeCountry:"DE",selectionRequired:true,automaticSelection:false,needCoverage:{complete:false},need,items};
+    if(mode==="product-need-hold"&&requests.filter(row=>row.path===path).length===1)return new Promise(resolve=>{releaseSearch=()=>resolve({ok:true,json:async()=>result});});
+    return{ok:true,json:async()=>result};
+   }
    if(path==="/v1/price-query"){const body=options.body?JSON.parse(options.body):{};requests.push({path,body});const value=discovery(mode);if(mode.startsWith("hit-")){const quote=hitQuote(mode);value.product={...product,name:quote.name,gtin:quote.gtin,pack:quote.pack,packAmount:quote.packAmount,packUnit:quote.packUnit,packCount:quote.packCount};value.products=[value.product];value.stores=body.storeId||body.merchants?.length===1?[hitBranch()]:Array.from({length:50},(_,i)=>({...stores[0],id:"20000000-0000-4000-8000-"+String(i+1).padStart(12,"0")}));if(mode==="hit-invalid-lookup")value.stores=value.stores.map(store=>({...store,country:"AT"}));}if(mode==="invalid-geo")value.stores=value.stores.map(x=>({...x,distanceKm:null,latitude:null,longitude:null}));return{ok:true,json:async()=>value}}
    if(path==="/v1/current-prices"){
     const body=JSON.parse(options.body);requests.push({path,body});
@@ -57,7 +74,7 @@ async function fixture(mode){
    }
    return{ok:false,status:503,json:async()=>({})};
   };
-  w.eval(fs.readFileSync("app/price-engine.js","utf8"));w.eval(fs.readFileSync("app/current-price-client.js","utf8"));w.eval(fs.readFileSync("app/published-product-client.js","utf8"));
+  w.eval(fs.readFileSync("app/price-engine.js","utf8"));w.eval(fs.readFileSync("app/current-price-client.js","utf8"));w.eval(fs.readFileSync("app/published-product-client.js","utf8"));w.eval(fs.readFileSync("shopping-need-matcher.js","utf8"));w.eval(fs.readFileSync("app/shopping-need-client.js","utf8"));
   w.alert=()=>{};w.confirm=()=>true;w.prompt=()=>null;w.scrollTo=()=>{};
   Object.defineProperty(w.navigator,"geolocation",{configurable:true,value:{getCurrentPosition:(_,fail)=>fail&&fail({code:1})}});
   w.HTMLElement.prototype.scrollIntoView=function(){};
@@ -244,5 +261,47 @@ async function waitFor(predicate){for(let i=0;i<100;i++){if(predicate())return;a
    f.w.eval("basket=[];comparisonRevision++;");assert.strictEqual(await f.w.compare({skipLocation:true,scroll:false}),false);f.release();assert.strictEqual(await first,false,"an older comparison cannot publish after the basket revision changes");assert.strictEqual(f.w.document.getElementById("results").style.display,"none","a stale response cannot resurrect the cleared comparison");
   }finally{f.dom.window.close()}
  }
- console.log("browser-canonical-price: canonical identity, branch scope, units, no revival and revision gates ok");
+ {
+  const f=await fixture("product-pick");try{
+   const wish=f.w.eval("basket[0]");wish.packCount=3;await f.w.openPublishedProductPicker(0);
+   const picker=f.w.document.getElementById("publishedProductPicker"),family=picker.querySelector('[data-product-family]'),form=picker.querySelector('form'),change=control=>control.dispatchEvent(new f.w.Event('change',{bubbles:true}));
+   assert.equal(family.value,'',"Opening the picker retains general keyword search");assert.equal(f.requests.filter(row=>row.path==='/v1/shopping-need').length,0);
+   family.value='milk';change(family);assert.equal(picker.querySelectorAll('[data-product-select]').length,0);assert.equal(picker.querySelector('[data-need-fields="milk"]').hidden,false);assert.equal(picker.querySelector('[data-need-fields="eggs"]').hidden,true);
+   form.dispatchEvent(new f.w.Event('submit',{bubbles:true,cancelable:true}));await waitFor(()=>picker.querySelector('[data-product-select]'));
+   let need=f.requests.filter(row=>row.path==='/v1/shopping-need').at(-1);assert.deepEqual(need.body.constraints,{family:'milk'},"Blank controls impose no fat, process or lactose defaults");assert.equal(need.body.limit,20);assert.equal(need.options.method,'POST');assert.equal(need.options.credentials,'omit');assert(picker.textContent.includes('Gewünschte Eigenschaften belegt'));assert(picker.textContent.includes('Online'));
+   const processing=picker.querySelector('[data-need-fields="milk"] [data-need-field="processing"]'),fat=picker.querySelector('[data-need-field="fatPercent"]'),lactose=picker.querySelector('[data-need-field="lactose"]');processing.value='uht';change(processing);fat.value='1,5';fat.dispatchEvent(new f.w.Event('input',{bubbles:true}));lactose.value='contains';change(lactose);
+   form.dispatchEvent(new f.w.Event('submit',{bubbles:true,cancelable:true}));await waitFor(()=>picker.querySelector('[data-product-select]'));
+   need=f.requests.filter(row=>row.path==='/v1/shopping-need').at(-1);assert.deepEqual(need.body.constraints,{family:'milk',processing:'uht',fatPercent:1.5,lactose:'contains'});assert(picker.textContent.includes('Noch offen: Laktose'),"Missing native evidence remains visible even when other traits match");assert.equal(wish.ean,undefined,"No confirmed or unconfirmed variant is selected automatically");
+   const button=picker.querySelector('[data-product-select]');fat.value='3,5';button.click();assert.equal(wish.ean,undefined,"Programmatic property changes invalidate a visible older choice without requiring an input event");assert.equal(picker.querySelectorAll('[data-product-select]').length,0);
+   fat.value='1,5';form.dispatchEvent(new f.w.Event('submit',{bubbles:true,cancelable:true}));await waitFor(()=>picker.querySelector('[data-product-select]'));picker.querySelector('[data-product-select]').click();assert.equal(wish.ean,'4046700026519');assert.equal(wish.packCount,3);assert.equal(f.w.document.getElementById('publishedProductPicker'),null);
+   const saved=JSON.parse(f.w.localStorage.getItem('sparkorb_basket_state_v1'))[0];assert(saved.selectedProduct);for(const field of['needAssessment','nativeProof','offers','physicalOffers','price'])assert.equal(saved.selectedProduct[field],undefined,"Persist only the consciously selected identity: "+field);assert.deepEqual(f.errors,[]);
+  }finally{f.dom.window.close()}
+ }
+ {
+  const f=await fixture("product-need-invalid");try{
+   await f.w.openPublishedProductPicker(0);const picker=f.w.document.getElementById('publishedProductPicker'),family=picker.querySelector('[data-product-family]'),fat=picker.querySelector('[data-need-field="fatPercent"]');family.value='milk';family.dispatchEvent(new f.w.Event('change',{bubbles:true}));
+   const getBefore=f.requests.filter(row=>row.path==='/v1/published-products').length;picker.querySelector('form').dispatchEvent(new f.w.Event('submit',{bubbles:true,cancelable:true}));await waitFor(()=>picker.textContent.includes('Bitte prüfe deinen Bedarf'));
+   assert.equal(f.requests.filter(row=>row.path==='/v1/published-products').length,getBefore,"HTTP400 never silently falls back to an unrestricted search");assert.equal(picker.querySelectorAll('[data-product-select]').length,0);
+   const posts=f.requests.filter(row=>row.path==='/v1/shopping-need').length;fat.value='1-3';picker.querySelector('form').dispatchEvent(new f.w.Event('submit',{bubbles:true,cancelable:true}));await waitFor(()=>picker.textContent.includes('Bitte prüfe deinen Bedarf'));assert.equal(f.requests.filter(row=>row.path==='/v1/shopping-need').length,posts,"Invalid numeric controls are rejected before API work");
+   assert.deepEqual(f.errors,[]);
+  }finally{f.dom.window.close()}
+ }
+ {
+  const f=await fixture("product-need-hold");try{
+   await f.w.openPublishedProductPicker(0);const picker=f.w.document.getElementById('publishedProductPicker'),family=picker.querySelector('[data-product-family]');family.value='milk';family.dispatchEvent(new f.w.Event('change',{bubbles:true}));picker.querySelector('form').dispatchEvent(new f.w.Event('submit',{bubbles:true,cancelable:true}));await waitFor(()=>f.requests.some(row=>row.path==='/v1/shopping-need'));
+   const held=f.requests.find(row=>row.path==='/v1/shopping-need');family.value='';family.dispatchEvent(new f.w.Event('change',{bubbles:true}));picker.querySelector('input').value='Butter';picker.querySelector('form').dispatchEvent(new f.w.Event('submit',{bubbles:true,cancelable:true}));await waitFor(()=>picker.textContent.includes('Butter Auswahl'));
+   assert.equal(held.options.signal.aborted,true,"Changing the family aborts the older bounded POST");f.releaseSearch();await new Promise(resolve=>setTimeout(resolve,30));assert(picker.textContent.includes('Butter Auswahl'));assert(!picker.textContent.includes('Gewünschte Eigenschaften belegt'));assert.equal(f.w.eval('basket[0].ean'),undefined);assert.deepEqual(f.errors,[]);
+  }finally{f.dom.window.close()}
+ }
+ {
+  const f=await fixture("product-pick");try{
+   await f.w.openPublishedProductPicker(0);const picker=f.w.document.getElementById('publishedProductPicker'),family=picker.querySelector('[data-product-family]'),form=picker.querySelector('form'),change=control=>control.dispatchEvent(new f.w.Event('change',{bubbles:true}));
+   family.value='milk';change(family);picker.querySelector('[data-need-field="fatPercent"]').value='1,5';
+   family.value='bread';change(family);picker.querySelector('input').value='Brot';const sliced=picker.querySelector('[data-need-field="sliced"]');assert.equal(sliced.value,'');sliced.value='false';change(sliced);form.dispatchEvent(new f.w.Event('submit',{bubbles:true,cancelable:true}));await waitFor(()=>f.requests.some(row=>row.path==='/v1/shopping-need'&&row.body.constraints.family==='bread'));
+   assert.deepEqual(f.requests.filter(row=>row.path==='/v1/shopping-need').at(-1).body.constraints,{family:'bread',sliced:false},"False remains an explicit requirement and hidden milk properties are excluded");
+   family.value='eggs';change(family);picker.querySelector('input').value='Eier';const raw=picker.querySelector('[data-need-field="raw"]');assert.equal(raw.value,'');raw.value='true';change(raw);form.dispatchEvent(new f.w.Event('submit',{bubbles:true,cancelable:true}));await waitFor(()=>f.requests.some(row=>row.path==='/v1/shopping-need'&&row.body.constraints.family==='eggs'));
+   assert.deepEqual(f.requests.filter(row=>row.path==='/v1/shopping-need').at(-1).body.constraints,{family:'eggs',raw:true});assert.deepEqual(f.errors,[]);
+  }finally{f.dom.window.close()}
+ }
+ console.log("browser-canonical-price: canonical identity, branch scope, units, optional typed needs, native traits, manual selection and revision gates ok");
 })().catch(error=>{console.error(error);process.exitCode=1});

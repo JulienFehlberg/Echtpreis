@@ -1,3 +1,4 @@
+(function(root){
 "use strict";
 
 // Semantic evidence only. Product identity, pack, source and price remain the
@@ -29,7 +30,7 @@ function familyEvidence(text, family) {
   const t = normalized(text);
   if (/\b(?:handcreme|bodylotion|lotion|duschgel|shampoo|seife|waschmittel|spulmittel|gesichtsmaske|hautpflege|kerze|spielzeug|dekoration|kostum|brotdose|eierbecher)\b/.test(t)) return "contradicted";
   const excluded = {
-    milk: /\b(?:buttermilch|milchreis|milchdrink\w*|milchmisch\w*|milchschokolad\w*|milchpulver|milchshake|kondensmilch|sauermilch|dickmilch|kefir|joghurt|quark|pudding|kakao|cappuccino|latte|hafermilch|sojamilch|mandelmilch|kokosmilch|reismilch|vanillemilch|schokomilch|erdbeermilch|bananenmilch|pflanzendrink|babymilch)\b|\b(?:hafer|soja|mandel|kokos|reis)[ -]?(?:milch|drink)\b|\b(?:vegan|pflanzlich)\w*\b/,
+    milk: /\b(?:buttermilch|milchreis|milchdrink\w*|milchmisch\w*|milchschokolad\w*|milchpulver|milchshake|kondensmilch|sauermilch|dickmilch|kefir|joghurt|quark|pudding|kakao|cappuccino|latte|hafermilch|sojamilch|mandelmilch|kokosmilch|reismilch|vanillemilch|schokomilch|erdbeermilch|bananenmilch|pflanzendrink|babymilch|milchnahrung|anfangsmilch|folgemilch|sauglingsmilch)\b|\b(?:hafer|soja|mandel|kokos|reis)[ -]?(?:milch|drink)\b|\b(?:vegan|pflanzlich)\w*\b/,
     bread: /\b\w*(?:backmischung|brotmischung|brotaufstrich|brotchips|brotcroutons|toast\w*|sandwich|paniermehl|semmelbrosel|pizzabrot)\b/,
     eggs: /\b(?:schoko\w*|schokolad\w*|marzipan\w*|uberraschungs?ei\w*|eierlikor|eiernudel\w*|eiersalat|eierteig\w*|nudeln?|pasta|spaghetti|spatzle|sauce|sosse|salat|quiche|omelett|ruhrei|eipulver|eierpulver|flussigei\w*|eiweiss\w*|eigelb\w*)\b|\bkinder\b.*\b(?:ei|eier|uberraschung)\b/
   };
@@ -60,7 +61,7 @@ function descriptionExcludesFamily(text, family) {
   const t = normalized(text).trim().replace(/^(?:produktbeschreibung|produktart|verkehrsbezeichnung|bezeichnung|dieses produkt ist|das produkt ist|es ist|dies ist)(?:\s*:\s*|\s+)/, "")
     .replace(/^(?:ein|eine|einer|eines|der|die|das)\s+/, "").replace(/\bbio[ -](?=(?:hafer|soja|mandel|kokos|reis)(?:milch|drink)\b)/g, "");
   const types = {
-    milk: /^(?:(?:pflanzlich|vegan|flavoured|aromatisiert)[a-z]*\s+)?(?:buttermilch|milchreis|milchdrink[a-z]*|milchmisch[a-z]*|milchschokolad[a-z]*|milchpulver|milchshake|kondensmilch|sauermilch|dickmilch|kefir|joghurt|quark|pudding|kakao|cappuccino|latte|hafermilch|sojamilch|mandelmilch|kokosmilch|reismilch|vanillemilch|schokomilch|erdbeermilch|bananenmilch|pflanzendrink|babymilch|(?:hafer|soja|mandel|kokos|reis)[ -]?(?:milch|drink)|brot|eier)\b|^(?:pflanzlich|vegan)[a-z]*\s+(?:[a-z]+[ -]){0,2}(?:milch|drink|alternative)\b/,
+    milk: /^(?:(?:pflanzlich|vegan|flavoured|aromatisiert)[a-z]*\s+)?(?:buttermilch|milchreis|milchdrink[a-z]*|milchmisch[a-z]*|milchschokolad[a-z]*|milchpulver|milchshake|kondensmilch|sauermilch|dickmilch|kefir|joghurt|quark|pudding|kakao|cappuccino|latte|hafermilch|sojamilch|mandelmilch|kokosmilch|reismilch|vanillemilch|schokomilch|erdbeermilch|bananenmilch|pflanzendrink|babymilch|milchnahrung|anfangsmilch|folgemilch|sauglingsmilch|(?:hafer|soja|mandel|kokos|reis)[ -]?(?:milch|drink)|brot|eier)\b|^(?:pflanzlich|vegan)[a-z]*\s+(?:[a-z]+[ -]){0,2}(?:milch|drink|alternative)\b/,
     bread: /^(?:[a-z]*backmischung|[a-z]*brotmischung|brotaufstrich|brotchips|brotcroutons|toast[a-z]*|sandwich|paniermehl|semmelbrosel|pizzabrot|milch|eier)\b/,
     eggs: /^(?:(?:flussig|pasteurisiert)[a-z]*\s+)?(?:schoko[a-z]*|schokolad[a-z]*|marzipan[a-z]*|uberraschungs?ei[a-z]*|eierlikor|eiernudel[a-z]*|eiersalat|eierteig[a-z]*|nudeln?|pasta|spaghetti|spatzle|sauce|sosse|salat|quiche|omelett|ruhrei|eipulver|eierpulver|flussigei[a-z]*|eiweiss[a-z]*|eigelb[a-z]*|milch|brot)\b/
   };
@@ -248,4 +249,7 @@ function classify(need, product) {
   return { status: conflicts.length ? "contradicted" : missing.length ? "unconfirmed" : "confirmed", matched, missing, conflicts, evidence };
 }
 
-module.exports = { parse, classify };
+const api = Object.freeze({ parse, classify });
+if (root) root.SparkorbShoppingNeedMatcher = api;
+if (typeof module === "object" && module.exports) module.exports = api;
+})(typeof window !== "undefined" ? window : globalThis);

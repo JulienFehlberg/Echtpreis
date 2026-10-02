@@ -60,6 +60,15 @@ function previous(patch={}){return{id:"old-run",since,until:today,status:"partia
   const nationwide=fakePool();const de=await Inventory.refresh(nationwide,{today,region:"DE",maxPages:1},{fetchImpl:async url=>{assert.equal(new URL(url).searchParams.get("lat"),null);return response([])}});assert.equal(de.scope.region,"DE");assert.equal(de.scan.worldwideTotal,0);
   const normalized=Client.normalizeInput({today,region:"Berlin"});assert.equal(Inventory.sameRunScope({result:{scope:{...Client.scopeMetadata("Berlin"),geo:{radiusKm:35,lon:13.405,lat:52.52}}}},normalized),true,"JSONB object key order cannot invalidate the persisted query");
   const status=await Inventory.status(pool,{today});assert.equal(status.scope.region,"Berlin");assert.equal(status.coverage.current_observations,3);assert.equal(status.berlinCoverage.current_observations,0);assert.equal(status.berlinCoverage.stores,1);assert.deepEqual(status.berlinSamples,[]);assert.equal(status.samples[0].city,"München");assert.equal(status.assortmentComplete,false);
+  for(const phase of["before-warmup","before-acquire","during-acquire","denied-acquire"]){
+   let allowed=phase!=="before-warmup",acquires=0,releases=0,fetches=0,leaseOwner;const stopped=fakePool(),query=stopped.query;
+   stopped.query=async(...args)=>{const result=await query(...args);if(args[0].startsWith("SELECT id,source,country")&&phase==="before-acquire")allowed=false;return result;};
+   State.acquire=async(_pool,name,owner,leaseMs)=>{assert.equal(name,Inventory.LEASE);assert.equal(leaseMs,900000);acquires++;leaseOwner=owner;allowed=false;return phase!=="denied-acquire";};
+   State.release=async(_pool,name,owner)=>{assert.equal(name,Inventory.LEASE);assert.equal(owner,leaseOwner);releases++;};
+   const result=await Inventory.refresh(stopped,{today,force:true},{shouldContinue:()=>allowed,fetchImpl:async()=>{fetches++;throw Error("A stopping inventory must not fetch");}});
+   assert.equal(result.skipped,phase==="denied-acquire"?"lease-held":"server-stopping");assert.equal(fetches,0);assert.equal(stopped.state.runs.length,0);assert.equal(stopped.state.last,null);
+   assert.equal(acquires,["during-acquire","denied-acquire"].includes(phase)?1:0);assert.equal(releases,phase==="during-acquire"?1:0);if(phase==="before-warmup")assert.equal(stopped.state.queries.length,0);
+  }
  }finally{Object.assign(Canonical,{prepare:original.prepare});Object.assign(Import,{persist:original.persist});Object.assign(State,{acquire:original.acquire,release:original.release})}
  console.log("price-inventory-service: Berlin-first native query, scope-bound cursors, preserved denial cadence, regional coverage and source dates OK");
 })().catch(error=>{console.error(error);process.exitCode=1});

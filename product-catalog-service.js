@@ -13,13 +13,15 @@ async function stapleCount(pool){return(await pool.query("SELECT count(*)::int A
 async function lastRun(pool){await ensure(pool);return(await pool.query('SELECT id,source,status,target_products AS "targetProducts",source_url AS "sourceUrl",result,error,started_at AS "startedAt",finished_at AS "finishedAt" FROM product_catalog_runs ORDER BY started_at DESC LIMIT 1')).rows[0]||null}
 function target(value){const n=Number(value);return Number.isSafeInteger(n)?Math.min(10000,Math.max(5000,n)):6000}
 async function refresh(pool,input={},deps={}){
- if(!pool)throw new Error("catalog-database-required");if(running)return{ok:false,skipped:"already-running"};running=true;
+ if(!pool)throw new Error("catalog-database-required");const allowed=()=>typeof deps.shouldContinue!=="function"||deps.shouldContinue();if(!allowed())return{ok:false,skipped:"server-stopping"};if(running)return{ok:false,skipped:"already-running"};running=true;
  const goal=target(input.targetProducts),owner="catalog-"+crypto.randomUUID(),started=Date.now();let leased=false,runId=null;
  try{
   const last=await lastRun(pool),before=await count(pool),staplesBefore=await stapleCount(pool),age=last?Date.now()-Date.parse(last.finishedAt||last.startedAt):Infinity;
   if(!input.force&&staplesBefore>=goal&&last?.status==="finished"&&age<7*86400000)return{ok:true,skipped:"catalog-current",totalProducts:before,stapleProducts:staplesBefore,minimumReached:staplesBefore>=5000,targetReached:staplesBefore>=goal};
   if(!input.force&&age<300000&&last?.status!=="finished")return{ok:false,skipped:"retry-backoff",totalProducts:before};
+  if(!allowed())return{ok:false,skipped:"server-stopping"};
   leased=await Lease.acquire(pool,LEASE,owner,900000);if(!leased)return{ok:false,skipped:"lease-held"};
+  if(!allowed())return{ok:false,skipped:"server-stopping"};
   runId=crypto.randomUUID();await pool.query("INSERT INTO product_catalog_runs(id,source,target_products) VALUES($1,$2,$3)",[runId,SOURCE,goal]);
   const scan=await(deps.collect||Snapshot.fetchCatalog)({limit:20000,maxBytes:300*1024*1024,maxDurationMs:180000});
   if(scan.ok===false&&!(scan.products?.length))throw new Error(scan.error||"catalog-export-unavailable");
