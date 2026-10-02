@@ -1,0 +1,11 @@
+{
+  "observedAt": "2026-10-02T23:12:38.809Z",
+  "evidenceKind": "rendered-public-product-dom",
+  "isProductionFallback": false,
+  "observations": [
+    {"sourceUrl":"https://www.aldi-nord.de/produkt/original-taste-4039.html","nativeProductId":"4039","depositMarkup":"<span class=\"tag__marker tag__marker--deposit\" data-testid=\"product-card-detail-tag-deposit-product\">zzgl. Pfand: 0.25</span>","salesUnit":"1,25-L-Flasche","basePriceText":"Liter = 1.27","priceText":"1.59"},
+    {"sourceUrl":"https://www.aldi-nord.de/produkt/classic-1026202.html","nativeProductId":"1026202","depositMarkup":"<span class=\"tag__marker tag__marker--deposit\" data-testid=\"product-card-detail-tag-deposit-product\">zzgl. Pfand: 2.25</span>","salesUnit":"9x0,5-Liter-Flasche","basePriceText":"l = 0.30","priceText":"1.35"}
+  ],
+  "rendererResourceUrl": "https://www.aldi-nord.de/_next/static/chunks/78781.5d6fd8c2e0093a2a.js",
+  "resourceObservedInPageAssetInventory": true
+}
