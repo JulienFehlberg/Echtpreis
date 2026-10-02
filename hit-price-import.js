@@ -39,6 +39,15 @@ async function quarantineUnsupportedWeight(pool){
  const result=await pool.query(`UPDATE price_observations po SET truth_eligible=false,status='unsupported-weight-sale-unit' FROM ${TABLE} evidence WHERE po.id=evidence.observation_id AND evidence.source_id=$1 AND evidence.native_store_id=$2 AND evidence.native_store_number=$3 AND evidence.retailer_sku~'^[0-9]+KG$' AND po.source=$1 AND po.source_id=$1 AND po.store_id=evidence.store_id AND po.product_id=evidence.product_id AND po.gtin=evidence.gtin AND po.external_location_id=$4 AND po.external_product_id=('hit:store:'||$4||':sku:'||evidence.retailer_sku) AND po.truth_eligible=true`,[SOURCE,STORE_PROFILE.storeId,STORE_PROFILE.storeNumber,String(STORE_PROFILE.storeId)]);
  return Number.isInteger(result.rowCount)&&result.rowCount>0?result.rowCount:0;
 }
+async function quarantineConflictingIdentities(tx,gtins){
+ if(!tx||typeof tx.query!=="function")throw fail("hit-quarantine-transaction-required");
+ if(!Array.isArray(gtins)||gtins.length>100000||gtins.some(gtin=>typeof gtin!=="string"||gtin.trim()!==gtin||!Discovery.validGtin(gtin)))throw fail("hit-quarantine-native-identities-required");
+ const unique=[...new Set(gtins)];if(!unique.length)return 0;
+ // Only admitted source/store/SKU evidence may lose eligibility. Its original
+ // price, capture, expiry and proof remain untouched; the caller owns the transaction.
+ const result=await tx.query(`UPDATE price_observations po SET truth_eligible=false,status='conflicting-source' FROM ${TABLE} evidence JOIN stores s ON s.id=evidence.store_id JOIN merchants m ON m.id=s.merchant_id WHERE po.id=evidence.observation_id AND evidence.source_id=$1 AND evidence.native_store_id=$2 AND evidence.native_store_number=$3 AND evidence.gtin=ANY($5::text[]) AND evidence.retailer_sku~'^[0-9]+ST$' AND po.source=$1 AND po.source_id=$1 AND po.store_id=evidence.store_id AND po.product_id=evidence.product_id AND po.gtin=evidence.gtin AND po.external_location_id=$4 AND po.external_product_id=('hit:store:'||$4||':sku:'||evidence.retailer_sku) AND s.external_id=('hit:store:'||$4) AND s.country='DE' AND s.city='Berlin' AND s.region='Berlin' AND s.address=$6 AND s.postal_code=$7 AND m.normalized_name='hit' AND m.name='HIT' AND po.truth_eligible=true`,[SOURCE,STORE_PROFILE.storeId,STORE_PROFILE.storeNumber,String(STORE_PROFILE.storeId),unique,STORE_PROFILE.address,STORE_PROFILE.postalCode]);
+ return Number.isInteger(result.rowCount)&&result.rowCount>0?result.rowCount:0;
+}
 async function repairValidityWindow(pool){
  // Dates describe the original capture's 24-hour window; no new observation or expiry is manufactured.
  const from="(evidence.captured_at AT TIME ZONE 'Europe/Berlin')::date",to="((evidence.expires_at-interval '1 millisecond') AT TIME ZONE 'Europe/Berlin')::date";
@@ -91,6 +100,7 @@ async function save(tx,row,store){
 }
 async function persist(pool,candidates,options={}){
  if(!pool||typeof pool.connect!=="function")throw fail("hit-import-transaction-pool-required");const store=profile(options.storeProfile),now=nowValue(options.now);
+ const supplied=options.transactionClient;if(supplied!==undefined&&(!supplied||typeof supplied.query!=="function"||typeof supplied.release!=="function"))throw fail("hit-import-transaction-client-required");
  if(!Array.isArray(candidates)||candidates.length>4000)throw fail("hit-import-bounded-candidate-array-required");
  const accepted=[],rejected=[],validated=[];let duplicates=0,productsCreated=0;
  for(const [index,candidate]of candidates.entries()){const checked=validateCandidate(candidate,{storeProfile:store,now});if(checked.ok)validated.push({...checked,index});else rejected.push({index,retailerSku:candidate?.retailerSku??null,reasons:checked.reasons})}
@@ -100,11 +110,11 @@ async function persist(pool,candidates,options={}){
  for(const group of productGroups.values())if(new Set(group.map(row=>JSON.stringify([row.candidate.priceCents,row.candidate.depositCents]))).size>1)for(const row of group)if(!conflicts.has(row.index))conflicts.set(row.index,"hit-import-conflicting-batch-product-quote");
  const rows=validated.filter(row=>{if(!conflicts.has(row.index))return true;rejected.push({index:row.index,retailerSku:row.candidate.retailerSku,reasons:[conflicts.get(row.index)]});return false});
  if(!rows.length)return{sourceId:SOURCE,received:candidates.length,accepted,rejected,duplicates,productsCreated,storeId:null,conservativeValidity:"original-capture-24-hours",captureValidity:"original-capture-24-hours"};
- await ensure(pool);const tx=await pool.connect();try{
-  await tx.query("BEGIN");await tx.query("SELECT pg_advisory_xact_lock(hashtext($1))",[SOURCE+":store:"+store.storeId]);let canonical;
-  try{canonical=await canonicalStore(tx,store)}catch(error){if(!error.code?.startsWith("hit-import-"))throw error;await tx.query("ROLLBACK");for(const row of rows)rejected.push({index:row.index,retailerSku:row.candidate.retailerSku,reasons:[error.code]});return{sourceId:SOURCE,received:candidates.length,accepted,rejected,duplicates,productsCreated,storeId:null,conservativeValidity:"original-capture-24-hours",captureValidity:"original-capture-24-hours"}}
+ if(!supplied)await ensure(pool);const owns=!supplied,tx=supplied||await pool.connect();try{
+  if(owns)await tx.query("BEGIN");else await tx.query("SAVEPOINT hit_import_scope");await tx.query("SELECT pg_advisory_xact_lock(hashtext($1))",[SOURCE+":store:"+store.storeId]);let canonical;
+  try{canonical=await canonicalStore(tx,store)}catch(error){if(!error.code?.startsWith("hit-import-"))throw error;if(owns)await tx.query("ROLLBACK");else{await tx.query("ROLLBACK TO SAVEPOINT hit_import_scope");await tx.query("RELEASE SAVEPOINT hit_import_scope");}for(const row of rows)rejected.push({index:row.index,retailerSku:row.candidate.retailerSku,reasons:[error.code]});return{sourceId:SOURCE,received:candidates.length,accepted,rejected,duplicates,productsCreated,storeId:null,conservativeValidity:"original-capture-24-hours",captureValidity:"original-capture-24-hours"}}
   for(const row of rows){const current=validateCandidate(row.candidate,{storeProfile:store,now:nowValue(options.now)});if(!current.ok){rejected.push({index:row.index,retailerSku:row.candidate.retailerSku,reasons:current.reasons});continue}await tx.query("SAVEPOINT hit_import_row");try{const result=await save(tx,row,canonical);await tx.query("RELEASE SAVEPOINT hit_import_row");if(result.duplicate)duplicates++;else{productsCreated+=result.created?1:0;accepted.push({index:row.index,retailerSku:row.candidate.retailerSku,gtin:row.candidate.gtin,productId:result.productId,storeId:canonical.storeId,observationId:result.observationId,capturedAt:row.candidate.capturedAt,price:row.candidate.price,pack:row.strictPack})}}catch(error){await tx.query("ROLLBACK TO SAVEPOINT hit_import_row");await tx.query("RELEASE SAVEPOINT hit_import_row");if(!error.code?.startsWith("hit-import-"))throw error;rejected.push({index:row.index,retailerSku:row.candidate.retailerSku,reasons:[error.code]})}}
-  await tx.query("COMMIT");return{sourceId:SOURCE,received:candidates.length,accepted,rejected,duplicates,productsCreated,storeId:canonical.storeId,conservativeValidity:"original-capture-24-hours",captureValidity:"original-capture-24-hours"};
- }catch(error){await tx.query("ROLLBACK");throw error}finally{tx.release()}
+  if(owns)await tx.query("COMMIT");else await tx.query("RELEASE SAVEPOINT hit_import_scope");return{sourceId:SOURCE,received:candidates.length,accepted,rejected,duplicates,productsCreated,storeId:canonical.storeId,conservativeValidity:"original-capture-24-hours",captureValidity:"original-capture-24-hours"};
+ }catch(error){if(owns)await tx.query("ROLLBACK");throw error}finally{if(owns)tx.release()}
 }
-module.exports={SOURCE,MERCHANT,TABLE,STORE_PROFILE,ensure,quarantineUnsupportedWeight,repairValidityWindow,validateCandidate,persist};
+module.exports={SOURCE,MERCHANT,TABLE,STORE_PROFILE,ensure,quarantineUnsupportedWeight,quarantineConflictingIdentities,repairValidityWindow,validateCandidate,persist};

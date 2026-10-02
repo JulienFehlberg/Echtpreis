@@ -64,7 +64,7 @@ test("native category URLs cover small leaves; duplicate parent rows never infla
  assert.equal(result.total,3);assert.equal(result.received,3);assert.equal(result.pagesFetched,6);assert.equal(result.pages.length,6);assert.equal(result.requests,9);assert.equal(result.cursor,null);assert.equal(result.error,null);
  assert.deepEqual(result.accepted.map(c=>c.gtin),[milk.ean,ordinary.ean,butter.ean]);assert.equal(result.accepted[2].pack,"250g Packung");assert.equal(result.accepted[0].price,1.25);assert.equal(result.accepted[0].deposit,null);
  assert.equal(result.pages.reduce((n,p)=>n+p.uniqueRowCount,0),3);assert(result.pages.every(p=>p.uniqueRowCount<=p.rowCount&&p.pagination.page===0));assert(result.pages.every(p=>p.capturedAt&&p.sourceResponseHash.length===64));
- assert.deepEqual(result.categoryCoverage,{visited:6,pending:0,truncatedLeaves:[],unresolvedNodes:[]});
+ assert.deepEqual(result.categoryCoverage,{visited:6,pending:0,truncatedLeaves:[],unresolvedNodes:[],conflictingIdentities:[]});assert.deepEqual(result.conflictGtins,[]);assert(result.pages.every(p=>Array.isArray(p.conflictGtins)&&!p.conflictGtins.length));
  assert(h.calls.every(c=>!new URL(c.url).searchParams.has("page")));assert(h.calls.every(c=>!new URL(c.url).pathname.startsWith("/api/")));
  for(let n=1;n<h.calls.length;n++)assert(h.calls[n].at-h.calls[n-1].at>=1000);
  const firstBody=fixture()["/sortiment/uebersicht"];assert.equal(result.accepted[0].sourceResponseHash,crypto.createHash("sha256").update(firstBody).digest("hex"));
@@ -97,16 +97,57 @@ test("a batch day snapshot crossing midnight never changes native capture timest
  const after=Date.parse("2026-10-01T22:00:01.000Z"),h=harness(fixture(),{clock:after}),r=await collect(h,{cursorDay:"2026-10-01",maxRequests:4});assert.equal(r.cursorDay,"2026-10-01");assert.equal(r.accepted.length,2);assert(r.accepted.every(c=>Date.parse(c.capturedAt)>=after));assert(r.accepted.every(c=>Date.parse(c.expiresAt)-Date.parse(c.capturedAt)===86400000));
  const resumed=harness(fixture(),{clock:after+60000});await assert.rejects(()=>collect(resumed,{cursor:r.cursor}),e=>e.code==="hit-continuation-day-conflict");assert.equal(resumed.calls.length,0,"The next ordinary batch recognizes the earlier scheduling day");
 });
-test("one-page conflicting primary identities produce conflict GTINs without advancing a page",async()=>{
+test("one-page conflicting GTIN-pack identities quarantine those goods and continue unrelated categories",async()=>{
  const alt=clone(milk);alt.external_id="000000000000999999ST";alt.url=alt.url.replace(milk.external_id,alt.external_id);alt.price="1.45";alt.priceTag.priceCent="45";
- const routes=fixture();routes["/sortiment/uebersicht"]=listing([milk,alt],null,[dairy],2);
- const r=await collect(harness(routes));assert.equal(r.complete,false);assert.equal(r.error.code,"hit-native-page-identity-conflict");assert.deepEqual(r.error.conflictGtins,[milk.ean]);assert.equal(r.pages.length,0);assert.equal(r.received,0);assert.equal(r.cursor.pending.length,1);
+ const routes=fixture();routes["/sortiment/uebersicht"]=listing([milk,alt,ordinary],null,[dairy],3,3);
+ const r=await collect(harness(routes));assert.equal(r.complete,true);assert.equal(r.error,null);assert.deepEqual(r.conflictGtins,[milk.ean]);assert.deepEqual(r.categoryCoverage.conflictingIdentities,[milk.ean]);assert.equal(r.pages.length,6);assert.equal(r.received,4);assert.equal(r.cursor,null);assert.equal(r.nativePaginationComplete,false);
+ assert.deepEqual(r.accepted.map(c=>c.gtin),[ordinary.ean,butter.ean]);assert.deepEqual(r.pages[0].conflictGtins,[milk.ean]);assert.equal(r.pages[0].rowCount,3);assert.equal(r.pages[0].uniqueRowCount,3);assert(r.rejected.some(row=>row.reasons.includes("hit-conflicting-native-gtin-pack-quotes")));assert(r.rejected.some(row=>row.reasons.includes("hit-conflicting-native-gtin-cycle-quarantine")));
 });
-test("fresh contradiction on the first resumed category returns an unchanged checkpoint and conflict GTINs",async()=>{
+test("fresh contradiction on a resumed category advances its queue and persists quarantine across restarts",async()=>{
  const h=harness(),first=await collect(h,{maxRequests:4});assert.equal(first.received,2);
  const conflict=clone(milk);conflict.price="1.45";conflict.priceTag.priceCent="45";const routes=fixture();routes[new URL(dairy.url).pathname]=listing([conflict,ordinary],dairy,[dairy,milkParent,butterParent],3);
- const r=await collect(harness(routes),{cursor:first.cursor});assert.equal(r.error.code,"hit-native-cross-page-identity-conflict");assert.deepEqual(r.error.conflictGtins,[milk.ean]);assert.equal(r.accepted.length,0);assert.equal(r.pages.length,0);assert.equal(r.received,2);assert.equal(r.cursor.pending[0].id,String(dairy.id));
+ const prior=clone(first.cursor),r=await collect(harness(routes),{cursor:first.cursor,maxRequests:3});assert.deepEqual(first.cursor,prior);assert.equal(r.error,null);assert.deepEqual(r.conflictGtins,[milk.ean]);assert.equal(r.accepted.length,0);assert.equal(r.pages.length,1);assert.equal(r.received,2);assert.equal(r.cursor.pending[0].id,String(milkParent.id));assert.equal(r.cursor.pagesFetched,2);assert.deepEqual(r.cursor.conflictGtins,[milk.ean]);assert.deepEqual(r.cursor.visited[1].conflictGtins,[milk.ean]);assert.equal(r.cursor.seenQuotes[milk.ean+"|ml|1000|1"].signature,first.cursor.seenQuotes[milk.ean+"|ml|1000|1"].signature,"A contradiction never replaces the originally observed quote signature");
+ const saved=JSON.parse(JSON.stringify(r.cursor)),snapshot=clone(saved),again=await collect(harness(routes),{cursor:saved,maxRequests:3});assert.deepEqual(saved,snapshot);assert.equal(again.error,null);assert.equal(again.pages.length,1);assert.equal(again.pages[0].categoryId,String(milkParent.id));assert.deepEqual(again.pages[0].conflictGtins,[milk.ean]);assert.equal(again.accepted.length,0);assert.deepEqual(again.cursor.conflictGtins,[milk.ean]);assert.notEqual(again.cursor.conflictGtins,saved.conflictGtins);
+ const finished=await collect(harness(routes),{cursor:JSON.parse(JSON.stringify(again.cursor))});assert.equal(finished.complete,true);assert.equal(finished.error,null);assert.equal(finished.received,3);assert.deepEqual(finished.accepted.map(c=>c.gtin),[butter.ean]);assert.deepEqual(finished.conflictGtins,[milk.ean]);assert.equal(finished.nativePaginationComplete,false);
 });
+test("conflicting duplicate native SKUs count once and quarantine every affected native GTIN",async()=>{
+ const conflict=clone(milk);conflict.ean=butter.ean;conflict.price="1.45";conflict.priceTag.priceCent="45";
+ const routes=fixture();routes["/sortiment/uebersicht"]=listing([milk,conflict,ordinary],null,[dairy],3,3);
+ const r=await collect(harness(routes));assert.equal(r.complete,true);assert.equal(r.error,null);assert.deepEqual(r.conflictGtins,[milk.ean,butter.ean]);assert.equal(r.received,3);assert.equal(r.total,3);assert.equal(r.pages[0].uniqueRowCount,2);assert.equal(r.pages[0].rowCount,3);assert.deepEqual(r.accepted.map(c=>c.gtin),[ordinary.ean]);assert.equal(r.nativePaginationComplete,false);assert(r.rejected.some(row=>row.reasons.includes("hit-conflicting-native-sku-quotes")));
+});
+
+test("a later conflicting page removes all earlier batch quotes while preserving unrelated native proof",async()=>{
+ const conflict=clone(milk);conflict.price="1.45";conflict.priceTag.priceCent="45";
+ const routes=fixture();routes[new URL(dairy.url).pathname]=listing([conflict,ordinary],dairy,[dairy,milkParent,butterParent],3);
+ const r=await collect(harness(routes));assert.equal(r.error,null);assert.equal(r.complete,true);assert.equal(r.categoryTraversalCycleComplete,true);assert.equal(r.received,r.total);assert.equal(r.received,3);assert.equal(r.pagesFetched,6);assert.equal(r.nativePaginationComplete,false);assert.equal(r.publishedTraversalComplete,false);assert.equal(r.cursor,null);assert.deepEqual(r.conflictGtins,[milk.ean]);assert.deepEqual(r.accepted.map(c=>c.gtin),[ordinary.ean,butter.ean]);
+ assert.equal(r.pages[0].accepted,1);assert.equal(r.pages[0].rejected,1);assert.deepEqual(r.pages[1].conflictGtins,[milk.ean]);assert.equal(r.categoryCoverage.pending,0);assert.equal(r.categoryCoverage.visited,6);assert.deepEqual(r.categoryCoverage.conflictingIdentities,[milk.ean]);assert.notEqual(r.conflictGtins,r.categoryCoverage.conflictingIdentities);
+ const original=routes["/sortiment/uebersicht"],quote=r.accepted.find(c=>c.gtin===ordinary.ean);assert.equal(quote.sourceResponseHash,crypto.createHash("sha256").update(original).digest("hex"));assert.equal(quote.sourceResponseUrl,"https://www.hit.de/sortiment/uebersicht");assert.equal(quote.capturedAt,r.pages[0].capturedAt);assert.equal(Date.parse(quote.expiresAt)-Date.parse(quote.capturedAt),86400000);
+});
+
+test("page-rejected GTIN quarantine persists without inventing a seen quote",async()=>{
+ const alt=clone(milk);alt.external_id="000000000000999999ST";alt.url=alt.url.replace(milk.external_id,alt.external_id);alt.price="1.45";alt.priceTag.priceCent="45";
+ const routes=fixture();routes["/sortiment/uebersicht"]=listing([milk,alt],null,[dairy],3);
+ const first=await collect(harness(routes),{maxRequests:4});assert.equal(first.error,null);assert.equal(first.accepted.length,0);assert.equal(first.received,2);assert.deepEqual(first.cursor.conflictGtins,[milk.ean]);assert.deepEqual(first.cursor.seenQuotes,{});assert.deepEqual(Collector.cursorFor(JSON.parse(JSON.stringify(first.cursor)),store,first.cursorDay).conflictGtins,[milk.ean]);
+ const second=await collect(harness(routes),{cursor:JSON.parse(JSON.stringify(first.cursor))});assert.equal(second.error,null);assert.equal(second.complete,true);assert.deepEqual(second.conflictGtins,[milk.ean]);assert.deepEqual(second.accepted.map(c=>c.gtin),[ordinary.ean,butter.ean]);assert.equal(second.nativePaginationComplete,false);
+});
+
+test("quarantine excludes later appearances on a new SKU and a different pack",async()=>{
+ const conflict=clone(milk);conflict.price="1.45";conflict.priceTag.priceCent="45";
+ const routes=fixture();routes[new URL(dairy.url).pathname]=listing([conflict,ordinary],dairy,[dairy,milkParent,butterParent],3);
+ const first=await collect(harness(routes),{maxRequests:5}),variant=clone(milk);variant.external_id="000000000000999999ST";variant.url=variant.url.replace(milk.external_id,variant.external_id);variant.overview="2l Packung";variant.price="2.50";variant.priceTag.priceEuro="2";variant.priceTag.priceCent="50";
+ routes[new URL(milkParent.url).pathname]=listing([variant,ordinary],milkParent,[dairy,milkParent,milkLeaf],2);
+ const r=await collect(harness(routes),{cursor:JSON.parse(JSON.stringify(first.cursor)),maxRequests:3});assert.equal(r.error,null);assert.equal(r.accepted.length,0);assert.equal(r.received,3);assert.deepEqual(r.conflictGtins,[milk.ean]);assert.deepEqual(r.pages[0].conflictGtins,[milk.ean]);assert(r.rejected.some(row=>row.retailerSku===variant.external_id&&row.gtin===milk.ean));
+});
+
+test("the next real Berlin-day cycle freshly reconsiders a quarantined product",async()=>{
+ const before=Date.parse("2026-10-01T21:59:30.000Z"),after=Date.parse("2026-10-01T22:00:01.000Z"),conflict=clone(milk);conflict.price="1.45";conflict.priceTag.priceCent="45";
+ const routes=fixture();routes[new URL(dairy.url).pathname]=listing([conflict,ordinary],dairy,[dairy,milkParent,butterParent],3);
+ const first=await collect(harness(routes,{clock:before}),{maxRequests:5});assert.deepEqual(first.cursor.conflictGtins,[milk.ean]);assert(!first.accepted.some(c=>c.gtin===milk.ean));
+ const stale=harness(fixture(),{clock:after});await assert.rejects(()=>collect(stale,{cursor:first.cursor}),e=>e.code==="hit-continuation-day-conflict");assert.equal(stale.calls.length,0);
+ const changed=fixture();changed["/sortiment/uebersicht"]=listing([conflict,ordinary],null,[dairy],3);changed[new URL(dairy.url).pathname]=listing([conflict,ordinary],dairy,[dairy,milkParent,butterParent],3);
+ const fresh=await collect(harness(changed,{clock:after}),{cursor:null,maxRequests:5});assert.deepEqual(fresh.conflictGtins,[]);assert.deepEqual(fresh.cursor.conflictGtins,[]);assert.equal(fresh.error,null);assert.equal(fresh.accepted.find(c=>c.gtin===milk.ean).price,1.45);assert(Date.parse(fresh.accepted.find(c=>c.gtin===milk.ean).capturedAt)>=after);
+});
+
 test("equal same-GTIN pack quotes on another SKU dedupe while native SKU counts remain accurate",async()=>{
  const alternate=clone(milk);alternate.external_id="000000000000999999ST";alternate.url=alternate.url.replace(milk.external_id,alternate.external_id);
  const routes=fixture();routes[new URL(milkLeaf.url).pathname]=listing([alternate,ordinary],milkLeaf,[dairy,milkParent,milkLeaf],2);
@@ -118,6 +159,20 @@ test("source HTTP denial stops immediately and honors a longer native Retry-Afte
   const h=harness(routes),r=await collect(h);assert.equal(r.error.code,"hit-source-http-"+status);assert(r.error.retryAfterMs>=7200000);assert.equal(r.received,2);assert.equal(r.pages.length,1);assert.equal(r.cursor.pending[0].id,String(dairy.id));assert.equal(h.calls.length,5);
  }
 });
+test("HTTP denial after an isolated product conflict remains a global source error",async()=>{
+ const conflict=clone(milk);conflict.price="1.45";conflict.priceTag.priceCent="45";
+ for(const status of [403,429]){
+  const routes=fixture();routes[new URL(dairy.url).pathname]=listing([conflict,ordinary],dairy,[dairy,milkParent,butterParent],3);routes[new URL(milkParent.url).pathname]={body:"Denied",status};
+  const h=harness(routes),r=await collect(h);assert.equal(r.error.code,"hit-source-http-"+status);assert.equal(r.error.retryAfterMs,3600000);assert.equal(r.complete,false);assert.equal(r.received,2);assert.equal(r.pagesFetched,2);assert.equal(r.cursor.pending[0].id,String(milkParent.id));assert.deepEqual(r.conflictGtins,[milk.ean]);assert.deepEqual(r.cursor.conflictGtins,[milk.ean]);assert.deepEqual(r.accepted.map(c=>c.gtin),[ordinary.ean]);assert.equal(h.calls.length,6);
+ }
+});
+
+test("a duplicate identity cannot hide a hard wrong-store proof",async()=>{
+ const wrong=clone(milk);wrong.storeId=1729;wrong.storeNumber="054";
+ const routes=fixture();routes[new URL(dairy.url).pathname]=listing([milk,wrong,ordinary],dairy,[dairy,milkParent,butterParent],3,3);
+ const r=await collect(harness(routes));assert.equal(r.error.code,"hit-native-store-conflict");assert.equal(r.error.retryAfterMs,3600000);assert.equal(r.pagesFetched,1);assert.equal(r.received,2);assert.deepEqual(r.conflictGtins,[]);assert.equal(r.cursor.pending[0].id,String(dairy.id));
+});
+
 test("wrong native store or category proof cannot advance a partial scan",async()=>{
  for(const body of [listing([{...milk,storeId:1729,storeNumber:"054"},ordinary],dairy,[dairy,milkParent],3),listing([milk,ordinary],dairy,[dairy,milkParent],3,2,{params:{for_store:1729}}),listing([milk,ordinary],milkParent,[dairy,milkParent],3)]){
   const routes=fixture();routes[new URL(dairy.url).pathname]=body;const r=await collect(harness(routes));assert.equal(r.complete,false);assert(r.error);assert.equal(r.received,2);assert.equal(r.pages.length,1);assert.equal(r.cursor.pending[0].id,String(dairy.id));
@@ -171,6 +226,21 @@ test("invalid and wrong-market version-two checkpoints reject before any source 
   await assert.rejects(()=>collect(h,{cursor:{...clone(first.cursor),...change}}),e=>errorIncludes(e,"cursor"));assert.equal(h.calls.length,count);
  }
 });
+test("legacy version-two cursors default to empty quarantine and clone all conflict arrays",async()=>{
+ const first=await collect(harness(),{maxRequests:4}),legacy=clone(first.cursor);delete legacy.conflictGtins;delete legacy.categoryCoverage.conflictingIdentities;for(const visit of legacy.visited)delete visit.conflictGtins;
+ const before=clone(legacy),state=Collector.cursorFor(legacy,store,legacy.cursorDay);assert.deepEqual(legacy,before);assert.deepEqual(state.conflictGtins,[]);assert.deepEqual(state.categoryCoverage.conflictingIdentities,[]);assert.equal((await collect(harness(),{cursor:legacy})).error,null);
+ const observed=clone(first.cursor);observed.conflictGtins=[milk.ean];observed.visited[0].conflictGtins=[milk.ean];const quarantined=Collector.cursorFor(observed,store,observed.cursorDay);quarantined.conflictGtins.push(butter.ean);quarantined.visited[0].conflictGtins.push(butter.ean);quarantined.categoryCoverage.conflictingIdentities.push(butter.ean);assert.deepEqual(observed.conflictGtins,[milk.ean]);assert.deepEqual(observed.visited[0].conflictGtins,[milk.ean]);assert.deepEqual(observed.categoryCoverage.conflictingIdentities,[]);
+});
+
+test("invalid quarantine GTINs or unobserved cursor conflicts reject before any source request",async()=>{
+ const first=await collect(harness(),{maxRequests:4});
+ const changes=[
+  cursor=>{cursor.conflictGtins=null},cursor=>{cursor.conflictGtins="4388860095920"},cursor=>{cursor.conflictGtins=[milk.ean,milk.ean]},cursor=>{cursor.conflictGtins=["4388860095921"]},cursor=>{cursor.conflictGtins=[" "+milk.ean]},cursor=>{cursor.conflictGtins=[Number(milk.ean)]},cursor=>{cursor.conflictGtins=["000000000"]},cursor=>{cursor.conflictGtins=Array(100001).fill(milk.ean)},
+  cursor=>{cursor.conflictGtins=[milk.ean]},cursor=>{cursor.visited[0].conflictGtins=[milk.ean]},cursor=>{cursor.conflictGtins=[milk.ean];cursor.visited[0].conflictGtins=[butter.ean]},cursor=>{cursor.conflictGtins=[milk.ean];cursor.visited[0].conflictGtins=[milk.ean,milk.ean]},cursor=>{cursor.visited[0].conflictGtins=null},cursor=>{cursor.visited[0].conflictGtins=[" "+milk.ean]},cursor=>{cursor.visited[0].conflictGtins=Array(100001).fill(milk.ean)}
+ ];
+ for(const change of changes){const cursor=clone(first.cursor),h=harness();change(cursor);await assert.rejects(()=>collect(h,{cursor}),e=>e.code==="hit-continuation-cursor-conflict");assert.equal(h.calls.length,0);assert.equal(h.delays.length,0);}
+});
+
 test("offered category identifiers cannot be replaced with credentials, guessed paths or page queries",async()=>{
  for(const url of ["https://www.hit.de/sortiment/uebersicht?page=1","https://www.hit.de/sortiment/uebersicht?for_q=milk","https://www.hit.de/sortiment/%6bilch-4261891","https://www.hit.de/maerkte/berlin-zoo?mein-markt=1","https://www.hit.de/maerkte/berlin-mitte?mein-markt=1&mein-markt=1","https://www.hit.de/sortiment/kaese-eier-molkerei-4261253?markt=054","https://www.hit.de:444/sortiment","https://www.hit.de/sortiment/../konto"])
   assert.throws(()=>Collector.allowedUrl(url,store),e=>errorIncludes(e,"url-not-allowed"),url);
