@@ -52,9 +52,12 @@ function referenceFor(c) {
 function cycleFor(state, day) {
   const completedCycles = state.completedCycles ?? 0;
   if (!Number.isSafeInteger(completedCycles) || completedCycles < 0 || !Collector.validDay(day)) throw fail(code("cycle-invalid"));
-  return { cursorDay: day, completedCycles };
+  const ordinaryCycleId = state.ordinaryCycleId;
+  if (ordinaryCycleId != null && (typeof ordinaryCycleId !== "string" || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(ordinaryCycleId)))
+    throw fail(code("cycle-invalid"));
+  return { cursorDay: day, completedCycles, ...(ordinaryCycleId != null ? { ordinaryCycleId } : {}) };
 }
-const cycleKey = c => JSON.stringify([c.cursorDay, c.completedCycles]);
+const cycleKey = c => JSON.stringify([c.cursorDay, c.completedCycles, c.ordinaryCycleId ?? null]);
 function normalContext(result, state, now) {
   if (!plain(result) || !plain(state) || result.sourceId !== Native.SOURCE || !Collector.validDay(result.cursorDay)
     || !Array.isArray(result.pages) || result.pages.length > 16 || !Array.isArray(result.accepted) || result.accepted.length > 640

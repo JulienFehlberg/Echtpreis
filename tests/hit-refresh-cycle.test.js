@@ -1,0 +1,24 @@
+"use strict";
+const assert = require("node:assert/strict");
+const Cycle = require("../hit-refresh-cycle");
+const ID = "9e6605b8-1d77-4bbf-92b8-c9d4ce63feb8", day = "2026-10-02";
+const active = { ordinaryCycleId: ID, cursor: { version: 2, cursorDay: day }, completedCycles: 7 };
+let cases = 0;
+function test(fn) { fn(); cases++; }
+test(() => assert.equal(Cycle.select(active, { cursorDay: day }), ID));
+test(() => assert.equal(Cycle.select({ ...active, lastError: "hit-source-http-429", retryAfter: "2026-10-02T15:00:00Z" }, { cursorDay: day }), ID));
+test(() => assert.equal(Cycle.select(active, { cursorDay: day, terminalOnly: true }), ID));
+test(() => { const next = Cycle.select({ ...active, cursor: null }, { cursorDay: day }); assert(Cycle.validId(next)); assert.notEqual(next, ID); });
+test(() => { const next = Cycle.select(active, { cursorDay: "2026-10-03" }); assert(Cycle.validId(next)); assert.notEqual(next, ID); });
+test(() => { const next = Cycle.select({ ...active, ordinaryCycleId: null }, { cursorDay: day }); assert(Cycle.validId(next)); assert.notEqual(next, ID); });
+test(() => { const next = Cycle.select({ ...active, cursor: { version: 1 } }, { cursorDay: day }); assert(Cycle.validId(next)); assert.notEqual(next, ID); });
+test(() => { const next = Cycle.select({ ...active, cursor: { version: 2 } }, { cursorDay: day }); assert(Cycle.validId(next)); assert.notEqual(next, ID); });
+test(() => { const before = structuredClone(active); Cycle.select(active, { cursorDay: "2026-10-03" }); assert.deepEqual(active, before); });
+test(() => { const first = Cycle.select({}, { cursorDay: day }), second = Cycle.select({}, { cursorDay: day }); assert(Cycle.validId(first)); assert(Cycle.validId(second)); assert.notEqual(first, second); });
+test(() => assert.throws(() => Cycle.select({ ...active, ordinaryCycleId: "caller-cycle" }, { cursorDay: day }), /cycle-id-invalid/));
+test(() => assert.throws(() => Cycle.select({ ...active, cursor: null }, { cursorDay: day, terminalOnly: true }), /terminal-cycle-unconfirmed/));
+test(() => assert.throws(() => Cycle.select(active, { cursorDay: "2026-10-03", terminalOnly: true }), /terminal-cycle-unconfirmed/));
+test(() => assert.throws(() => Cycle.select(active, { cursorDay: "2026-02-30" }), /cycle-state-required/));
+test(() => assert.throws(() => Cycle.select(null, { cursorDay: day }), /cycle-state-required/));
+test(() => assert.throws(() => Cycle.select([], { cursorDay: day }), /cycle-state-required/));
+console.log("hit-refresh-cycle: " + cases + " durable traversal generation cases passed");

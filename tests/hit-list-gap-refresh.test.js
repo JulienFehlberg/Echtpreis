@@ -16,7 +16,7 @@ function database(initial={}){
    db.rows.push({gapId:args[0],record:JSON.parse(args[3]),capturedAt:args[4],bodyBytes:args[5],recordBytes:args[6]});db.events.push("original-insert");if(db.insertFault)throw Object.assign(Error("synthetic original insert outage"),{code:"22012"});return{rows:[],rowCount:1};
   }
   if(sql.startsWith("INSERT INTO "+Refresh.TABLE)){
-   if(args.length===10){db.state={...db.state,cursor:JSON.parse(args[1]),lastCompletedAt:args[2]?args[3]:db.state.lastCompletedAt,completedCycles:(db.state.completedCycles||0)+(args[2]?1:0),nativeTotal:args[4],pagesFetched:args[5],receivedCumulative:args[6],lastError:args[7],retryAfter:args[8],updatedAt:args[3],scanCoverage:JSON.parse(args[9])};db.events.push("checkpoint");if(db.checkpointFault)throw Object.assign(Error("synthetic checkpoint outage"),{code:"22012"});}
+   if(args.length===11){db.state={...db.state,cursor:JSON.parse(args[1]),lastCompletedAt:args[2]?args[3]:db.state.lastCompletedAt,completedCycles:(db.state.completedCycles||0)+(args[2]?1:0),nativeTotal:args[4],pagesFetched:args[5],receivedCumulative:args[6],lastError:args[7],retryAfter:args[8],updatedAt:args[3],scanCoverage:JSON.parse(args[9]),ordinaryCycleId:args[10]};db.events.push("checkpoint");if(db.checkpointFault)throw Object.assign(Error("synthetic checkpoint outage"),{code:"22012"});}
    else if(args[6]||iso(Date.parse(db.state.updatedAt))===args[5]){db.state={...db.state,lastError:args[1],retryAfter:iso(Math.max(Date.parse(args[2]),Date.parse(db.state.retryAfter)||0)),cursor:args[4]&&db.state.updatedAt===args[5]?null:db.state.cursor,updatedAt:args[3]};db.events.push("failure");}
    return{rows:[],rowCount:1};
   }
