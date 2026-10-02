@@ -30,12 +30,13 @@ function selection(raw){
 }
 function key(raw){const valid=selection(raw);return valid?JSON.stringify([valid.gtin,valid.packUnit,valid.packAmount,valid.packCount]):null;}
 function searchFilters(options={}){
+ if(options.priorityRetailersOnly!==undefined&&typeof options.priorityRetailersOnly!=="boolean")return{ok:false,reason:"invalid-retailer-priority-filter"};
  const rawPack=options.pack,rawChannel=options.scopeChannel;
  if(rawPack!=null&&typeof rawPack!=="string")return{ok:false,reason:"invalid-pack-filter"};
  const description=text(rawPack);if(description.length>80||description&&!pack(description))return{ok:false,reason:"invalid-pack-filter"};
  if(rawChannel!=null&&typeof rawChannel!=="string")return{ok:false,reason:"invalid-scope-channel-filter"};
  const scopeChannel=text(rawChannel);if(scopeChannel&&!['physical-store','online','pickup'].includes(scopeChannel))return{ok:false,reason:"invalid-scope-channel-filter"};
- return{ok:true,pack:description||null,parsedPack:description?pack(description):null,scopeChannel:scopeChannel||null};
+ return{ok:true,pack:description||null,parsedPack:description?pack(description):null,scopeChannel:scopeChannel||null,...(options.priorityRetailersOnly===undefined?{}:{priorityRetailersOnly:options.priorityRetailersOnly})};
 }
 function storeSelection(raw){return raw&&raw.merchant==="HIT"&&UUID.test(text(raw.storeId))?{merchant:"HIT",storeId:raw.storeId.toLowerCase()}:null;}
 function physicalDecision(raw,query={},branch=raw?.branch,options={}){
@@ -61,7 +62,7 @@ function physicalOffer(raw,query={},options={}){
 function candidate(raw,options={}){
  const filters=searchFilters(options),identity=selection(raw);if(!filters.ok||!identity||!Current||!Array.isArray(raw.offers)||raw.offers.length>200||raw.physicalOffers!=null&&!Array.isArray(raw.physicalOffers)||(raw.physicalOffers?.length||0)+raw.offers.length>200)return null;
  if(filters.parsedPack&&(filters.parsedPack.unit!==identity.packUnit||filters.parsedPack.count!==identity.packCount||Math.abs(filters.parsedPack.amount-identity.packAmount)>1e-9))return null;
- const allowed=offer=>offer&&(!filters.scopeChannel||offer.scopeChannel===filters.scopeChannel);
+ const allowed=offer=>offer&&(!filters.scopeChannel||offer.scopeChannel===filters.scopeChannel)&&(!filters.priorityRetailersOnly||["ALDI","PENNY","REWE","Lidl","Kaufland","EDEKA"].includes(offer.merchant));
  const offers=raw.offers.map(offer=>Current.normalizePublishedAlternative(offer,{gtin:identity.gtin,pack:identity.pack},options)).filter(allowed);
  const physicalOffers=(raw.physicalOffers||[]).map(offer=>physicalOffer(offer,{gtin:identity.gtin,pack:identity.pack},options)).filter(allowed);
  return offers.length||physicalOffers.length?{...identity,offers,physicalOffers}:null;
@@ -70,23 +71,23 @@ function normalizeResponse(raw,options={}){
  const filters=searchFilters(options);if(!filters.ok)return{ok:false,items:[],reason:filters.reason};
  if(!raw||raw.ok!==true||!Array.isArray(raw.items)||raw.items.length>20||raw.items.reduce((sum,item)=>sum+(Array.isArray(item?.offers)?item.offers.length:0)+(Array.isArray(item?.physicalOffers)?item.physicalOffers.length:0),0)>200)return{ok:false,items:[],reason:"invalid-response"};
  const rows=new Map(),duplicates=new Set();for(const input of raw.items){const value=candidate(input,options);if(!value)continue;const id=key(value);if(rows.has(id))duplicates.add(id);rows.set(id,value);}
- return{ok:true,items:[...rows].filter(([id])=>!duplicates.has(id)).map(([,value])=>value),discoveryTruncated:raw.discoveryTruncated===true,appliedFilters:{pack:filters.pack,scopeChannel:filters.scopeChannel}};
+ return{ok:true,items:[...rows].filter(([id])=>!duplicates.has(id)).map(([,value])=>value),discoveryTruncated:raw.discoveryTruncated===true,appliedFilters:{pack:filters.pack,scopeChannel:filters.scopeChannel,...(filters.priorityRetailersOnly===undefined?{}:{priorityRetailersOnly:filters.priorityRetailersOnly})}};
 }
 function create(options={}){
  const apiBase=text(options.apiBase).replace(/\/+$/,""),fetchImpl=options.fetchImpl||root.fetch?.bind(root),now=typeof options.now==="function"?options.now:Date.now;
  async function search(raw,options={}){
-  const object=raw&&typeof raw==="object"&&!Array.isArray(raw),query=text(object?raw.search:raw),signal=options.signal,filters=searchFilters({pack:options.pack===undefined&&object?raw.pack:options.pack,scopeChannel:options.scopeChannel===undefined&&object?raw.scopeChannel:options.scopeChannel});
+  const object=raw&&typeof raw==="object"&&!Array.isArray(raw),query=text(object?raw.search:raw),signal=options.signal,filters=searchFilters({pack:options.pack===undefined&&object?raw.pack:options.pack,scopeChannel:options.scopeChannel===undefined&&object?raw.scopeChannel:options.scopeChannel,priorityRetailersOnly:options.priorityRetailersOnly===undefined&&object?raw.priorityRetailersOnly:options.priorityRetailersOnly});
   if(query.length<2||query.length>120||typeof fetchImpl!=="function")return{ok:false,items:[],reason:"invalid-search"};
   if(!filters.ok)return{ok:false,items:[],reason:filters.reason};
   const controller=new AbortController(),abort=()=>controller.abort(),timeout=Number(options.timeoutMs)||8000;let timer;
   if(signal?.aborted)return{ok:false,items:[],reason:"cancelled"};signal?.addEventListener("abort",abort,{once:true});
   try{
    const result=await Promise.race([
-    Promise.resolve().then(async()=>{const response=await fetchImpl(apiBase+"/v1/published-products?search="+encodeURIComponent(query)+"&limit=20"+(filters.pack?"&pack="+encodeURIComponent(filters.pack):"")+(filters.scopeChannel?"&scopeChannel="+encodeURIComponent(filters.scopeChannel):""),{method:"GET",credentials:"omit",signal:controller.signal});if(!response?.ok)throw Error("unavailable");return response.json();}),
+    Promise.resolve().then(async()=>{const response=await fetchImpl(apiBase+"/v1/published-products?search="+encodeURIComponent(query)+"&limit=20"+(filters.pack?"&pack="+encodeURIComponent(filters.pack):"")+(filters.scopeChannel?"&scopeChannel="+encodeURIComponent(filters.scopeChannel):"")+(filters.priorityRetailersOnly===undefined?"":"&priorityRetailersOnly="+filters.priorityRetailersOnly),{method:"GET",credentials:"omit",signal:controller.signal});if(!response?.ok)throw Error("unavailable");return response.json();}),
     new Promise((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(Error("timeout"));},Math.max(1,Math.min(10000,timeout)));})
    ]);
    if(controller.signal.aborted)return{ok:false,items:[],reason:"cancelled"};
-   return normalizeResponse(result,{now:now(),pack:filters.pack,scopeChannel:filters.scopeChannel});
+   return normalizeResponse(result,{now:now(),pack:filters.pack,scopeChannel:filters.scopeChannel,...(filters.priorityRetailersOnly===undefined?{}:{priorityRetailersOnly:filters.priorityRetailersOnly})});
   }catch(_){return{ok:false,items:[],reason:controller.signal.aborted?"cancelled":"unavailable"};}
   finally{clearTimeout(timer);signal?.removeEventListener("abort",abort);}
  }
