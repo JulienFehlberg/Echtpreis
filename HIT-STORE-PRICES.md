@@ -82,3 +82,34 @@ are separate diagnostic fields. Public status rebuilds a whitelist and excludes
 bodies, quote/SKU/GTIN arrays, headers and arbitrary extra fields. Immutable
 small/large attempted originals remain separate and unchanged; filtered prices
 and ordinary traversal counters remain unchanged.
+
+## Original-bound partition admission preparation
+
+`hit-partition-admission-gate.js` is a pure, disabled preparation step for a
+future filtered price import. A fresh diagnostic is first bound to the actual
+ordinary collector batch and checkpoint by `hit-brand-partition-binding.js`.
+Filtered cards then pass the existing native parser and unchanged price-import
+validator. Normal SKU and quote rows before and after the control are compared,
+including repeated rows omitted from the ordinary accepted-price list.
+
+The returned candidates do not authorize a database write. Collection, price
+import and completeness remain false. Public status summaries are insufficient
+input: the gate needs the private unchanged original bodies, hashes, captures
+and source/store metadata. First admission requires the original five-minute
+freshness window; archived originals are never renewed. Previous partition
+references support comparison only and must reconstruct from their original.
+Their original cycle is kept across a Berlin day change. A later-cycle price
+change alone does not invent an identity conflict.
+
+Productive enablement still requires a separate immutable admission ledger,
+actual import observation references, checkpoint comparison under the existing
+source/store advisory transaction and persistent partition quarantine. Filtered
+SKUs and conflicts cannot be appended to ordinary traversal counters or its
+visited-page quarantine union. This module performs no request, schema change,
+import, source reset or scheduler change.
+
+The cycle fields and computed checkpoint fingerprint are comparison metadata,
+not authenticated database authority. A productive ledger must bind the actual
+original checkpoint and a durable cycle identity: day and completed-cycle count
+alone can alias a same-day reset. Supplied previous references prove that a card
+exists in its original, not that an observation was admitted by PostgreSQL.
