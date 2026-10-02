@@ -105,7 +105,7 @@ async function main(){
   assert.equal(await count(pool,Import.TABLE),beforeAtomicCaptures);assert.equal(await count(pool,"price_observations","id=$1",[enlistedId]),0);assert.deepEqual((await pool.query("SELECT * FROM price_observations WHERE id=$1",[paidObservation])).rows[0],beforeAtomic);assert.deepEqual((await pool.query("SELECT * FROM hit_price_import_evidence WHERE observation_id=$1",[paidObservation])).rows[0],beforeAtomicLedger);
   // Exercise the actual refresh owner and actual progress INSERT, with no source requests.
   assert.equal(await count(pool,Refresh.TABLE,"source_id=$1",[SOURCE]),0,"This dedicated test DB has no running collector checkpoint");
-  const refreshTime=Date.now(),refreshResult=refreshBatch(refreshTime),failingRefreshPool={query:(...args)=>pool.query(...args),connect:async()=>{const tx=await pool.connect();return{release:()=>tx.release(),query:(sql,args)=>sql.startsWith("INSERT INTO "+Refresh.TABLE)&&args?.length===10?tx.query("SELECT 1/0"):tx.query(sql,args)}}};
+  const refreshTime=Date.now(),refreshResult=refreshBatch(refreshTime),failingRefreshPool={query:(...args)=>pool.query(...args),connect:async()=>{const tx=await pool.connect();return{release:()=>tx.release(),query:(sql,args)=>sql.startsWith("INSERT INTO "+Refresh.TABLE)&&args?.length===11?tx.query("SELECT 1/0"):tx.query(sql,args)}}};
   try{
    await assert.rejects(Refresh.refresh({pool:failingRefreshPool,now:()=>refreshTime},{collect:async()=>structuredClone(refreshResult)}),error=>error.code==="22012");
    assert.equal(await count(pool,Import.TABLE),beforeAtomicCaptures,"The actual checkpoint failure rolls back its new capture");
@@ -163,6 +163,7 @@ async function main(){
    assert.equal(await count(pool,Import.TABLE),allCapturesBefore);assert.equal(await count(pool,"receipt_submissions"),receiptsBefore);assert.deepEqual((await pool.query("SELECT * FROM "+Import.TABLE+" WHERE observation_id=ANY($1::uuid[]) ORDER BY observation_id",[butterImported.accepted.map(row=>row.observationId)])).rows,butterLedgerBefore,"Butter classification and invalid needs cannot rewrite any real original capture, deposit, ledger signature or price");console.log("butter-shopping-need-postgres: actual import/join/HTTP, literal salt, exact pack, native scope, unconfirmed properties and immutable capture passed");
   }finally{await new Promise((resolve,reject)=>api.server.close(error=>error?reject(error):resolve()));}
   const coverageColumn=(await pool.query("SELECT data_type FROM information_schema.columns WHERE table_name=$1 AND column_name='scan_coverage'",[Refresh.TABLE])).rows[0];assert.equal(coverageColumn.data_type,"jsonb","The persisted category coverage schema is real PostgreSQL DDL");
+  await require("./hit-partition-admission-postgres")(pool);
   console.log("hit-price-postgres tests passed");
  }catch(error){testError=error;throw error}finally{await pool.end();await api.closeDb();if(testError)process.exitCode=1}
 }

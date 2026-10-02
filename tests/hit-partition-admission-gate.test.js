@@ -178,6 +178,21 @@ async function main() {
     assert.throws(() => evaluate(batch.result, state, { now: undefined }));
     const bad = clone(batch.result); bad.cursorDay = "2026-10-03"; assert.throws(() => evaluate(bad));
   });
+  await test("same-day reset UUID separates a changed quote from its prior actual cycle", async () => {
+    const b=await F.threeNodeBatch(),p=F.snapshot(b);p.ordinaryCycle.ordinaryCycleId="11111111-1111-4111-8111-111111111111";
+    const next=await F.continuation(b.result.cursor,[F.price(F.row(41)),F.row(91)]);
+    const g=Gate.evaluate(next.result,{cursor:next.previous,ordinaryCycleId:"22222222-2222-4222-8222-222222222222"},{now:next.time,previousPartitions:[p]});
+    assert(!g.quarantineGtins.includes(F.row(41).ean));assert(g.unresolved.some(x=>x.reason==="cross-cycle-normal-quote-change"));
+  });
+  await test("one durable UUID retains same-cycle quote conflict even on identical day counters", async () => {
+    const b=await F.threeNodeBatch(),p=F.snapshot(b),id="11111111-1111-4111-8111-111111111111";p.ordinaryCycle.ordinaryCycleId=id;
+    const next=await F.continuation(b.result.cursor,[F.price(F.row(41)),F.row(91)]);
+    const g=Gate.evaluate(next.result,{cursor:next.previous,ordinaryCycleId:id},{now:next.time,previousPartitions:[p]});
+    assert(g.quarantineGtins.includes(F.row(41).ean));
+  });
+  await test("invalid caller cycle UUID cannot become durable comparison metadata",()=>{
+    assert.throws(()=>evaluate(batch.result,{...state,ordinaryCycleId:"caller-cycle"}),/cycle-invalid/);
+  });
   await test("module exposes no fetch, persist, execute or import capability", () => {
     assert.deepEqual(Object.keys(Gate).sort(), ["evaluate", "quoteFor", "referenceFor"]);
   });

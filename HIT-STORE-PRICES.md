@@ -101,6 +101,47 @@ references support comparison only and must reconstruct from their original.
 Their original cycle is kept across a Berlin day change. A later-cycle price
 change alone does not invent an identity conflict.
 
+## Durable cycles and database-bound admission ledger
+
+Ordinary HIT refreshes now persist a private `ordinary_cycle_id` UUID in the
+same PostgreSQL transaction as their admitted prices and continuation checkpoint.
+The UUID participates in the actual source/store checkpoint comparison. An
+existing continuation, terminal settlement, or 403/429 pause retains it; a new
+traversal, same-day restart, Berlin day change, or legacy adoption gets a new
+generation only after the existing advisory lock and checkpoint comparison.
+An error/reset never relabels the prices from the previous generation. Public
+status excludes this internal ID. The pure admission gate compares UUIDs when
+present, preventing identical day/cycle counters from aliasing a same-day reset.
+
+`hit-partition-admission-store.js` creates separate bounded append-only event and
+observation-reference tables. PostgreSQL triggers reject update/delete, foreign
+keys protect observation references, and a stable recursive encoding verifies
+payload hashes and byte limits after JSONB key reordering. Original body strings,
+captures and expiry are preserved. The internal admission operation requires a
+real assigned transaction, reacquires the source/store lock, rereads the actual
+checkpoint/UUID, and recomputes the original-bound gate. References come from
+real joins of native evidence, observations, products, stores and verified
+mappings, including exact sales packs, price, unknown/known deposit, DE/Berlin
+store 1775/258, proof, source, channel and original 24-hour timestamps. Candidate
+metadata or an import's accepted-array cannot manufacture a persisted reference.
+
+The database wall clock is reread after lock waiting and just before the first
+write. First admission retains the five-minute capture bound. An existing event
+is only reread as historical evidence; retries cannot renew its capture/expiry.
+At exactly 24 hours it ceases active comparison, without deletion. At most one
+active partition is supported; additional active originals fail closed instead
+of silently dropping prior evidence. Historical reads retain quarantined or
+superseded references without claiming current price eligibility.
+
+This release activates durable ordinary cycle protection and initializes the
+ledger schema. **No production caller invokes filtered import or ledger
+admission.** The ledger remains empty in production, archived diagnostics stay
+unchanged, and the existing attempt flags and request budgets are preserved.
+The next step is a separate persistent partition-quarantine contract shared by
+ordinary and filtered imports, followed by a separately budgeted fresh capture
+and explicit productive admission wiring. `previous(tx)` must then be called
+inside the actual source/store transaction with a current real clock.
+
 Productive enablement still requires a separate immutable admission ledger,
 actual import observation references, checkpoint comparison under the existing
 source/store advisory transaction and persistent partition quarantine. Filtered
