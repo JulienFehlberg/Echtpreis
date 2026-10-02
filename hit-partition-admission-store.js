@@ -53,7 +53,7 @@ function candidateRows(record,now){
  return rows;
 }
 function admissionId(record){return hash(JSON.stringify([Import.SOURCE,1775,record.control.meta.sourceResponseHash,record.filtered.meta.sourceResponseHash,record.filtered.meta.capturedAt]));}
-async function actualReference(tx,c,checked,{historical=false}={}){
+async function actualReference(tx,c,checked,{historical=false,expectedCycleId=null}={}){
  const q=await tx.query(`SELECT row_to_json(e) AS evidence,row_to_json(po) AS observation,
  row_to_json(p) AS product,row_to_json(s) AS store,row_to_json(m) AS merchant,
  row_to_json(pm) AS "productMapping",row_to_json(sm) AS "storeMapping"
@@ -95,7 +95,7 @@ async function actualReference(tx,c,checked,{historical=false}={}){
   ||m.name!=="HIT"||m.normalized_name!=="hit"||m.active!==true
   ||pm.product_id!==p.id||pm.status!=="verified"||Number(pm.confidence)!==1||sm.store_id!==s.id||sm.status!=="verified"||Number(sm.confidence)!==1)
   throw fail("persisted-reference-conflict");
- if(!historical&&(o.truth_eligible!==true||o.status!=="observed"))return null;
+ if(!historical&&(o.truth_eligible!==true||o.status!=="observed"||e.ordinary_cycle_id!==expectedCycleId))return null;
  return{retailerSku:c.retailerSku,observationId:e.observation_id,productId:e.product_id,storeId:e.store_id};
 }
 function snapshot(row,now){
@@ -151,9 +151,17 @@ async function admit(tx,result,expectedCheckpoint,{now}={}){
   return{inserted:0,persistedCandidateCount:saved.acceptedRefs.length,historicalReuse:true,priceImportEnabled:false,complete:false};}
  const record=original(raw,now);
  const prior=await previous(tx,{now}),gate=Gate.evaluate(result,state,{now,previousPartitions:prior});
- if(gate.recordOutcome!=="confirmed"||gate.conflicts.length||gate.quarantineGtins.length||gate.unresolved.length)throw fail("unconflicted-original-required");
+ if(gate.conflicts.length){
+  const quarantine=require("./hit-partition-quarantine-store"),recorded=await quarantine.record(tx,result,expectedCheckpoint,{now});
+  await Import.quarantineConflictingIdentities(tx,recorded.quarantineGtins);
+  // Return a withheld admission so the future caller can commit genuine
+  // quarantine evidence instead of rolling it back with a thrown admission.
+  return{inserted:0,persistedCandidateCount:0,quarantineEventsInserted:recorded.inserted,quarantineGtins:recorded.quarantineGtins,priceImportEnabled:false,complete:false};
+ }
+ if(gate.recordOutcome!=="confirmed"||gate.quarantineGtins.length||gate.unresolved.length)throw fail("unconflicted-original-required");
+ const blockedGtins=new Set(await require("./hit-partition-quarantine-store").blocked(tx,gate.candidates.map(c=>c.gtin)));
  const acceptedRefs=[],observationRefs=[];
- for(const c of gate.candidates){const checked=Import.validateCandidate(c,{now,storeProfile:Import.STORE_PROFILE});if(!checked.ok)throw fail("candidate-invalid");const actual=await actualReference(tx,c,checked);if(actual){acceptedRefs.push(Gate.referenceFor(c));observationRefs.push(actual);}}
+ for(const c of gate.candidates){if(blockedGtins.has(c.gtin))continue;const checked=Import.validateCandidate(c,{now,storeProfile:Import.STORE_PROFILE});if(!checked.ok)throw fail("candidate-invalid");const actual=await actualReference(tx,c,checked,{expectedCycleId:state.ordinaryCycleId});if(actual){acceptedRefs.push(Gate.referenceFor(c));observationRefs.push(actual);}}
  // Candidate/reference metadata alone cannot manufacture an admission event.
  if(!acceptedRefs.length)return{inserted:0,persistedCandidateCount:0,priceImportEnabled:false,complete:false};
  const payload={version:1,record,ordinaryCycle:gate.ordinaryCycle,ordinaryCheckpointFingerprint:hash(expectedCheckpoint),acceptedRefs,observationRefs},encoded=encode(payload),bytes=Buffer.byteLength(encoded);

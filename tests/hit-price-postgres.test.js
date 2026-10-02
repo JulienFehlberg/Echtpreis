@@ -164,6 +164,8 @@ async function main(){
   }finally{await new Promise((resolve,reject)=>api.server.close(error=>error?reject(error):resolve()));}
   const coverageColumn=(await pool.query("SELECT data_type FROM information_schema.columns WHERE table_name=$1 AND column_name='scan_coverage'",[Refresh.TABLE])).rows[0];assert.equal(coverageColumn.data_type,"jsonb","The persisted category coverage schema is real PostgreSQL DDL");
   await require("./hit-partition-admission-postgres")(pool);
+  await require("./hit-partition-quarantine-postgres")(pool);
+  await require("./hit-partition-quarantine-refresh-postgres")(pool);
   console.log("hit-price-postgres tests passed");
  }catch(error){testError=error;throw error}finally{await pool.end();await api.closeDb();if(testError)process.exitCode=1}
 }

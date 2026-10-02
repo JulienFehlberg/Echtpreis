@@ -154,3 +154,43 @@ not authenticated database authority. A productive ledger must bind the actual
 original checkpoint and a durable cycle identity: day and completed-cycle count
 alone can alias a same-day reset. Supplied previous references prove that a card
 exists in its original, not that an observation was admitted by PostgreSQL.
+
+## Dauerhafte gemeinsame Konfliktsperren
+
+Normale Erfassung und der vorbereitete gefilterte Import verwenden dieselbe
+append-only Quarantäne für HIT/Deutschland/Berlin, Store1775/Nummer258 und den
+Filialkanal. Neue Sperren benötigen einen tatsächlich schreibenden, quellen-
+gesperrten Datenbankvorgang, den aktuellen vollständigen Checkpoint und die
+echte UUID. Reine GTIN-/Preis-/Quote-Metadaten erzeugen kein Ereignis.
+
+Die normalen, erfolgreich gelesenen HTML-Seiten bleiben im Batch intern als
+Originale erhalten, innerhalb der bestehenden Grenze von16 Requests und6MiB
+pro Antwort (maximal96MiB transient). Nur konfliktbezogene Originale gelangen
+in das gesondert begrenzte unveränderliche Ereignisledger. Rohbelege und UUID
+werden weder im normalen Cursor noch in öffentlichen Antworten gespeichert.
+
+Neue Preis-Captures erhalten eine nullable ordinary_cycle_id ausschließlich
+aus dem tatsächlichen Refresh-Zustand unter derselben Advisory-Sperre. Alte
+Captures behalten NULL; Duplikate erhalten keine neue Generation, Capturezeit
+oder Ablaufzeit. Erste Partitionszulassungen benötigen passende tatsächliche
+Capture-Witnesses; historische Ledgerreferenzen behalten ihre Originalbindung.
+
+Gleiche GTIN mit widersprüchlicher Verkaufspackung oder gleiche native SKU mit
+unterschiedlicher Identität bleiben gesperrt. Reine Quote-/Preisabweichungen
+brauchen belegte gleiche Durchlaufgeneration; spätere normale Preisänderungen
+werden nicht durch eine erfundene Generation zum Dauerkonflikt. Auch native
+Konfliktzeilen, die der Seitenparser bereits vor Sidecars verwirft, können nur
+anhand ihrer authentifizierten tatsächlichen Originale eine Sperre erzeugen.
+
+UUID-Zuweisung, Konfliktereignis, Invalidierung alter passender Beobachtungen,
+Import und Fortschritt committen oder rollen gemeinsam zurück. Jeder echte
+Preisimport prüft die dauerhaften Sperren vor Identitäts-/Preisschreibvorgängen.
+Ein Zeitablauf, Tageswechsel, neuer Durchlauf oder Prozessneustart entsperrt
+kein Ereignis. Für eine spätere Auflösung ist ein eigenes geprüftes Verfahren
+erforderlich; UPDATE und DELETE der Ereignis-, GTIN- und Referenztabellen werden
+von PostgreSQL abgewiesen. Preis, Pfandstatus und Originalzeiten bleiben erhalten.
+
+Der Status veröffentlicht nur Ereignis-/GTIN-Zähler und die Zahl der tatsächlich
+generationsgebundenen Preis-Captures. Er zeigt keine UUID oder Rohbelege. Der
+produktive gefilterte Import bleibt deaktiviert: ein frischer separat budgetierter
+Quellen-Capture und seine geprüfte produktive Anbindung stehen weiterhin aus.

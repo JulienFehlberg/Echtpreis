@@ -6,6 +6,7 @@ function database(initial={}){
  db.connect=async()=>({query:db.query,release(){}});
  db.query=async(sql,args=[])=>{
   db.calls.push({sql,args:copy(args)});
+  if(sql.includes('AS "eventCount"'))return{rows:[{eventCount:0,blockedGtinCount:0}]};
   if(sql==="BEGIN"){snapshot=copy({state:db.state,rows:db.rows});return{rows:[]};}
   if(sql==="ROLLBACK"){if(snapshot){db.state=snapshot.state;db.rows=snapshot.rows;snapshot=null;}db.events.push("rollback");return{rows:[]};}
   if(sql==="COMMIT"){snapshot=null;db.events.push("commit");return{rows:[]};}
