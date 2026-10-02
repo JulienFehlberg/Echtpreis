@@ -3,7 +3,7 @@ const assert = require("assert");
 const Matcher = require("../shopping-need-matcher");
 let count = 0;
 function test(name, run) { run(); count++; }
-function need(family, constraints = {}, search = { milk: "Milch", bread: "Brot", eggs: "Eier" }[family]) {
+function need(family, constraints = {}, search = { milk: "Milch", bread: "Brot", eggs: "Eier", butter: "Butter" }[family]) {
   return Matcher.parse({ search, constraints: { family, ...constraints } });
 }
 function classify(family, constraints, name, description) {
@@ -12,7 +12,7 @@ function classify(family, constraints, name, description) {
 function throws(code, input) { assert.throws(() => Matcher.parse(input), error => error.code === code); }
 
 test("generic families add no qualifiers", () => {
-  for (const family of ["milk", "bread", "eggs"]) assert.deepStrictEqual(need(family).constraints, { family });
+  for (const family of ["milk", "bread", "eggs", "butter"]) assert.deepStrictEqual(need(family).constraints, { family });
 });
 test("explicit search qualifiers normalize without losing spelling", () => {
   assert.deepStrictEqual(need("milk", {}, "ja! H-Milch 1,5%"), {
@@ -456,6 +456,102 @@ test("explicit infant milk nutrition is not an ordinary drinking-milk choice", (
   for (const name of ["TEST Aptamil Milchnahrung 1J 1+", "TEST Anfangsmilch PRE", "TEST Folgemilch 2", "TEST Säuglingsmilch", "TEST Babymilch"]) {
     assert.strictEqual(classify("milk", {}, name).status, "contradicted", name);
     assert.strictEqual(classify("milk", { processing: "uht", fatPercent: 1.5 }, name).status, "contradicted", name);
+  }
+});
+test("butter has no salt, composition or fat defaults", () => {
+  for (const name of ["Butter", "Kerrygold Irische Butter", "REWE Weidebutter Süßrahm", "ja! Deuts. Markenbutter mild gesäuert", "Bio-Alpenbutter", "Landliebe Butter Streichzart", "Butter 82% Fett"]) {
+    const broad = classify("butter", {}, name);
+    assert.strictEqual(broad.status, "confirmed", name);
+    assert.deepStrictEqual(broad.matched, ["family"]);
+    assert.deepStrictEqual(classify("butter", { salt: "unsalted" }, name).missing, ["salt"], name);
+    assert.deepStrictEqual(classify("butter", { salt: "salted" }, name).missing, ["salt"], name);
+  }
+});
+test("explicit native butter salt phrases establish only the requested salt", () => {
+  for (const name of ["Butter ungesalzen", "Ungesalzene Butter", "Butter ohne Salz", "Butter frei von Salz", "Butter nicht gesalzen", "Salzfreie Butter"]) {
+    assert.strictEqual(classify("butter", { salt: "unsalted" }, name).status, "confirmed", name);
+    assert.strictEqual(classify("butter", { salt: "salted" }, name).status, "contradicted", name);
+    assert.strictEqual(need("butter", {}, name).constraints.salt, "unsalted", name);
+  }
+  for (const name of ["Butter gesalzen", "Gesalzene Butter", "Butter mit Salz", "Président Meersalz Butter mit Meersalzkörnern", "Butter nicht ungesalzen"]) {
+    assert.strictEqual(classify("butter", { salt: "salted" }, name).status, "confirmed", name);
+    assert.strictEqual(classify("butter", { salt: "unsalted" }, name).status, "contradicted", name);
+    assert.strictEqual(need("butter", {}, name).constraints.salt, "salted", name);
+  }
+});
+test("butter salt contradictions reject queries and exclude candidates", () => {
+  for (const search of ["Butter gesalzen und ungesalzen", "Butter ohne Salz mit Salz", "Butter nicht gesalzen mit Meersalz"]) {
+    throws("invalid-shopping-need-conflict", { search, constraints: { family: "butter" } });
+    for (const salt of ["salted", "unsalted"]) assert.strictEqual(classify("butter", { salt }, search).status, "contradicted", search);
+  }
+  throws("invalid-shopping-need-conflict", { search: "Butter gesalzen", constraints: { family: "butter", salt: "unsalted" } });
+  assert.strictEqual(classify("butter", { salt: "unsalted" }, "Butter ungesalzen", "Gesalzene Butter.").status, "contradicted");
+});
+test("butter descriptions may disclose salt without rewriting original evidence", () => {
+  const description = "Ungesalzene Butter. Rezept: Gesalzene Butter zum Backen verwenden.";
+  const result = classify("butter", { salt: "unsalted" }, "TEST Butter", description);
+  assert.strictEqual(result.status, "confirmed");
+  assert.deepStrictEqual(result.evidence, [{ field: "name", value: "TEST Butter", matches: ["family"] }, { field: "description", value: description, matches: ["salt"] }]);
+});
+test("butter salt must not come from ingredients, traces, recipe or usage", () => {
+  for (const description of ["Rezept: Gesalzene Butter verwenden.", "Zum Backen ungesalzene Butter verwenden.", "Für das Rezept Butter mit Meersalz.", "Serviervorschlag: Butter ohne Salz.", "Zutaten: Rahm; gesalzene Butter.", "Zutaten: Ungesalzene Butter.", "Kann Spuren von Meersalz enthalten.", "Möglicherweise gesalzene Butter.", "Ideal zu Brot mit Meersalz.", "Servieren Sie diese Butter mit Meersalz.", "Servieren Sie diese Butter ohne Salz.", "Auf Brot schmeckt Butter gesalzen.", "Mit Meersalz würzen.", "Die Butter ist ideal zu Brot mit Meersalz.", "Mit Salz zum Backen verwenden."]) {
+    for (const salt of ["salted", "unsalted"]) assert.deepStrictEqual(classify("butter", { salt }, "TEST Butter", description).missing, ["salt"], description);
+  }
+});
+test("explicit butter self-claims survive a separate recipe or serving instruction", () => {
+  for (const description of ["Mit Meersalz.", "Gesalzene Butter.", "Die Butter ist gesalzen.", "Produktbeschreibung: Butter mit Salz.", "Gesalzen. Servieren Sie diese Butter ohne Salz."]) {
+    assert.strictEqual(classify("butter", { salt: "salted" }, "TEST Butter", description).status, "confirmed", description);
+    assert.strictEqual(classify("butter", { salt: "unsalted" }, "TEST Butter", description).status, "contradicted", description);
+  }
+  for (const description of ["Ungesalzen.", "Diese Butter ist ungesalzen.", "Butter nicht gesalzen.", "Ohne Salz. Servieren Sie diese Butter mit Meersalz."]) {
+    assert.strictEqual(classify("butter", { salt: "unsalted" }, "TEST Butter", description).status, "confirmed", description);
+    assert.strictEqual(classify("butter", { salt: "salted" }, "TEST Butter", description).status, "contradicted", description);
+  }
+  assert.strictEqual(classify("butter", { salt: "unsalted" }, "TEST Butter", "Nicht ungesalzen.").status, "contradicted");
+  for (const description of ["Vielleicht ist die Butter ungesalzen.", "Die Butter könnte ungesalzen sein.", "Butter ungesalzen oder gesalzen."]) {
+    assert.notStrictEqual(classify("butter", { salt: "unsalted" }, "TEST Butter", description).status, "confirmed", description);
+  }
+});
+test("absence of a specific salt kind does not establish an unsalted product", () => {
+  for (const description of ["Ohne Meersalz.", "Frei von Speisesalz.", "Nicht mit Meersalz."]) {
+    for (const salt of ["salted", "unsalted"]) assert.deepStrictEqual(classify("butter", { salt }, "TEST Butter", description).missing, ["salt"], description);
+    throws("invalid-shopping-need-conflict", { search: `Butter ${description.slice(0, -1)}`, constraints: { family: "butter" } });
+  }
+  assert.strictEqual(classify("butter", { salt: "salted" }, "TEST Butter", "Ohne Meersalz, mit Salz.").status, "confirmed");
+});
+for (const name of ["ja! Butter-Toastbrot", "Harry Butter Toast", "Bahlsen Butterkeks", "Butter Spritzgebäck", "Butter-Croissants", "Hefeteig mit Butter", "Butter Chicken", "Butter Chicken Sauce", "Buttersoße", "Buttergemüse", "Gemüse mit Butter", "REWE Aroma Butter-Vanille", "Erdnussbutter", "Peanut Butter Cups", "Kakao-Butter", "Buttermilch", "Meggle Butterschmalz", "Butterreinfett", "Ghee Butter", "Kräuterbutter", "Butter mit Knoblauch", "Butter & Rapsöl", "Butter mit Pflanzenöl", "Butter Streichfettmischung", "Butter Streichmischung", "Mischfett aus Butter", "Vegane Butteralternative", "Butter-Handcreme"]) {
+  test(`ordinary butter excludes ${name}`, () => {
+    assert.strictEqual(classify("butter", {}, name).status, "contradicted", name);
+    assert.strictEqual(classify("butter", { salt: "unsalted" }, `${name} ungesalzen`).status, "contradicted");
+    throws("invalid-shopping-need-conflict", { search: name, constraints: { family: "butter" } });
+  });
+}
+test("native butter blend self-identification overrides an ordinary butter headline", () => {
+  for (const description of ["Streichfettmischung aus Butter und Rapsöl.", "Produktbeschreibung: Eine Margarine.", "Arla Kærgården ist eine herrliche Mischung aus bester Butter und wertvollem Rapsöl.", "Eine Mischung aus Butter und Pflanzenöl.", "Butteralternative.", "Butter Chicken."]) {
+    assert.strictEqual(classify("butter", {}, "TEST Butter", description).status, "contradicted", description);
+    assert.strictEqual(classify("butter", { salt: "unsalted" }, "TEST Butter ungesalzen", description).status, "contradicted", description);
+  }
+});
+test("butter recipes and traces of oil do not establish a mixed product", () => {
+  for (const description of ["Zum Backen mit Rapsöl geeignet.", "Rezept: Eine Mischung aus Butter und Rapsöl herstellen.", "Zutaten: Rahm. Kann Spuren von Rapsöl enthalten.", "Butter. Rezept: Kräuterbutter herstellen.", "Für Buttergemüse und Butter Chicken geeignet."]) {
+    assert.strictEqual(classify("butter", {}, "TEST Butter", description).status, "confirmed", description);
+    assert.deepStrictEqual(classify("butter", { salt: "unsalted" }, "TEST Butter", description).missing, ["salt"], description);
+  }
+});
+test("butter as an ingredient or several purchased families cannot confirm ordinary butter", () => {
+  assert.strictEqual(classify("butter", {}, "Kaffee mit Butter").status, "contradicted");
+  assert.strictEqual(classify("butter", {}, "Milch und Butter Set").status, "unconfirmed");
+  assert.strictEqual(classify("butter", {}, "Bauernprodukt", "Ungesalzene Butter").status, "unconfirmed", "A description cannot replace a missing native family headline");
+  assert.strictEqual(classify("milk", {}, "Milch mit Butter").status, "confirmed", "The new family must not break an explicitly named existing family");
+  assert.strictEqual(classify("bread", {}, "Brot mit Butter").status, "confirmed");
+  assert.strictEqual(classify("eggs", {}, "Eier mit Butter").status, "confirmed");
+});
+test("butter unsupported properties reject without pretending composition is known", () => {
+  for (const search of ["Butter pur", "Reine Butter", "Butter salzarm", "Butter salzreduziert", "Butter fettarm", "Butter light", "Butter laktosefrei", "Butter ohne Zusätze", "Butter 82% Fett"]) {
+    throws("invalid-shopping-need-conflict", { search, constraints: { family: "butter" } });
+  }
+  for (const constraints of [{ family: "butter", salt: "none" }, { family: "butter", salt: true }, { family: "butter", salt: ["unsalted"] }, { family: "butter", fatPercent: 82 }, { family: "butter", composition: "pure" }, { family: "milk", salt: "salted" }]) {
+    throws("invalid-shopping-need-constraints", { search: constraints.family === "milk" ? "Milch" : "Butter", constraints });
   }
 });
 console.log(`shopping need matcher: ${count} passed`);

@@ -26,7 +26,7 @@ function eligible(offer,now){
  return{gtin:checked.offer.gtin,pack:parsed};
 }
 async function search(pool,options={},inventory=Inventory,physical=Hit){
- const query=input(options),lookup={search:query.need?{milk:"Milch",bread:"Brot",eggs:"Eier"}[query.need.constraints.family]:query.search,limit:200,now:query.now,...(query.merchant===undefined?{}:{merchant:query.merchant}),...(query.pack===undefined?{}:{pack:query.pack}),...(query.scopeChannel?{scopeChannel:query.scopeChannel}:{})};
+ const query=input(options),lookup={search:query.need?{milk:"Milch",bread:"Brot",eggs:"Eier",butter:"Butter"}[query.need.constraints.family]:query.search,limit:200,now:query.now,...(query.merchant===undefined?{}:{merchant:query.merchant}),...(query.pack===undefined?{}:{pack:query.pack}),...(query.scopeChannel?{scopeChannel:query.scopeChannel}:{})};
  const [result,physicalResult]=await Promise.all([query.scopeChannel==="physical-store"?{items:[]}:inventory.search(pool,lookup),query.scopeChannel&&query.scopeChannel!=="physical-store"?{items:[],truncated:false}:physical.search(pool,lookup)]),groups=new Map();
  const needCounts={confirmedOffers:0,unconfirmedOffers:0,contradictedOffers:0},assessments=new WeakMap();
  function assess(offer){if(assessments.has(offer))return assessments.get(offer);const native=offer.scopeChannel==="physical-store",assessment=Need.classify(query.need,{name:native?offer.nativeProof.headline:offer.name,...(!native&&[Wolt.SOURCE,Nahkauf.SOURCE,Rewe.SOURCE].includes(offer.sourceId)&&offer.description?{description:offer.description}:{})});assessments.set(offer,assessment);return assessment;}
