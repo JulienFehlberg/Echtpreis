@@ -1,0 +1,63 @@
+"use strict";
+const assert=require("node:assert/strict"),fs=require("node:fs"),{JSDOM,VirtualConsole}=require("jsdom");
+const Matcher=require("../shopping-need-matcher"),capture=require("./fixtures/retailers/automatic-choice-berlin-capture.json"),clone=value=>JSON.parse(JSON.stringify(value));
+const NOW=Date.parse(capture.ownApiCapturedAt),rows=search=>clone(capture.responses.find(row=>row.search===search).items);
+// Original archived DTOs are evaluated at their original API time. They do not
+// assert present-day live prices, availability, physical prices or completeness.
+function needResponse(items,input){
+ const need=Matcher.parse({search:input.search,constraints:input.constraints});
+ const binding=o=>({sourceId:o.sourceId,scopeChannel:o.scopeChannel,retailerSku:o.retailerSku,storeId:o.storeId||null,nativeVenueId:o.nativeVenueId||null,nativeMarketId:o.nativeMarketId||null,gtin:o.gtin,pack:o.pack});
+ items=items.map(item=>{const offers=item.offers.filter(o=>Matcher.classify(need,{name:o.name,...(o.description?{description:o.description}:{})}).status!=="contradicted"),offerMatches=offers.map(o=>({...binding(o),...Matcher.classify(need,{name:o.name,...(o.description?{description:o.description}:{})})}));return{...item,offers,physicalOffers:[],needAssessment:{selectionRequired:true,status:offerMatches.some(match=>match.status==="confirmed")?"confirmed":"unconfirmed",offerMatches}};}).filter(item=>item.offers.length);
+ return{ok:true,scopeCountry:"DE",selectionRequired:true,automaticSelection:false,needCoverage:{complete:false},need,items};
+}
+async function setup(){
+ const errors=[],calls=[],queue=[],vc=new VirtualConsole();let clock=NOW,override=null,deferred=false;
+ vc.on("jsdomError",error=>errors.push(error.message));
+ const dom=new JSDOM(fs.readFileSync("index.html","utf8"),{runScripts:"dangerously",url:"https://caddy.example.test/",pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){
+  w.AbortController=global.AbortController;w.Date.now=()=>clock;w.SPARKORB_CONFIG={apiBase:"https://prices.example.test"};
+  w.fetch=async(input,options={})=>{
+   const url=new URL(String(input),w.location.href),search=url.pathname==="/v1/shopping-need"?JSON.parse(options.body).search:url.searchParams.get("search");
+   if(["/v1/published-products","/v1/shopping-need"].includes(url.pathname)){
+    const request={url,body:options.body?JSON.parse(options.body):null};calls.push(request);
+    const respond=()=>{const family=/milch/i.test(search)?"Milch":/keks/i.test(search)?"Kekse":"Nutella",items=override===null?rows(family):clone(override);return{ok:true,json:async()=>url.pathname==="/v1/shopping-need"?needResponse(items,request.body):{ok:true,items}};};
+    return deferred?new Promise(resolve=>queue.push(()=>resolve(respond()))):respond();
+   }
+   return{ok:false,status:503,json:async()=>({})};
+  };
+  for(const file of["app/price-engine.js","wolt-sales-pack-validation.js","app/current-price-client.js","app/published-product-client.js","shopping-need-matcher.js","app/shopping-need-client.js","app/automatic-product-choice.js"])w.eval(fs.readFileSync(file,"utf8"));
+  w.alert=()=>{};w.confirm=()=>true;w.prompt=()=>null;w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=function(){};
+  Object.defineProperty(w.navigator,"geolocation",{value:{getCurrentPosition(){throw Error("Adding a product must not ask for location permission");}}});
+ }});
+ await new Promise(resolve=>setTimeout(resolve,30));
+ return{w:dom.window,errors,calls,queue,setRows(value){override=value;},defer(value=true){deferred=value;},setNow(value){clock=value;},async settle(){await Promise.allSettled(dom.window.eval("basket.map(w=>automaticChoicePromises.get(w)).filter(Boolean)"));await new Promise(resolve=>setTimeout(resolve,5));},async release(){while(queue.length)queue.shift()();await this.settle();}};
+}
+(async()=>{let checks=0;
+ const f=await setup(),w=f.w;try{
+  assert.equal(capture.currentPriceProof,false);w.add("Milch");assert.equal(w.eval("basket.length"),1);assert.equal(w.document.querySelector("#publishedProductPicker, #packPicker"),null);assert(w.document.getElementById("list").textContent.includes("wird gesucht"));assert(!w.document.getElementById("list").textContent.includes("Auswahl fehlt"));checks++;
+  await f.settle();assert.equal(f.calls[0].url.pathname,"/v1/shopping-need");assert.equal(f.calls[0].body.search,"Milch");assert.equal(f.calls[0].body.constraints.family,"milk");assert.equal(f.calls[0].body.priorityRetailersOnly,true);assert.equal(f.calls[0].body.pack,undefined,"Generic wish must not filter an inferred 1l pack");assert.equal(w.eval("basket[0].selectedProduct.name"),"Weihenstephan Haltbare Milch 1,5%, 1 l");assert.equal(w.eval("basket[0].packCount"),1);checks++;
+  const hint=w.document.querySelector("[data-auto-choice-status]");assert.match(hint.textContent,/1,79\s*€/);assert(hint.textContent.includes("/ l"));assert(hint.textContent.includes("Lieferreferenz"));assert(hint.textContent.includes("günstigste gefundene Option"));assert.equal(hint.querySelector("a").href,w.eval("automaticChoiceStates.get(basket[0]).result.offer.sourceUrl"));assert(!hint.textContent.includes("Filialpreis"));checks++;
+  w.add("Kekse");w.add("Nutella");await f.settle();assert.equal(w.eval("basket[1].selectedProduct.name"),"Lotus Biscoff Kekse, 150 g");assert.equal(w.eval("basket[2].selectedProduct.pack"),"750 g");assert.equal(f.calls[1].url.searchParams.get("pack"),null);assert.equal(f.calls[2].url.searchParams.get("pack"),null);assert.equal(f.calls[2].url.searchParams.get("priorityRetailersOnly"),"true");assert.equal(w.document.querySelector("[data-fix-list]"),null);assert.equal(w.document.querySelector("#publishedProductPicker, #packPicker"),null);checks++;
+  w.document.querySelector('[data-qty-index="2"][data-qty="1"]').click();assert.equal(w.eval("basket[2].packCount"),2);assert.equal(w.eval("basket[2].selectedProduct.pack"),"750 g");checks++;
+  const saved=JSON.parse(w.localStorage.getItem("sparkorb_basket_state_v1"));for(const item of saved){assert(item.selectedProduct.gtin);for(const field of["price","offers","physicalOffers","capturedAt","sourceResponseHash","proofHash","productId"])assert.equal(Object.hasOwn(item.selectedProduct,field),false,field);}checks++;
+  w.eval("basket=[]");w.add("Nutella 450g");await f.settle();assert.equal(f.calls.at(-1).url.searchParams.get("pack"),"450 g");assert.equal(w.eval("basket[0].selectedProduct.pack"),"450 g");assert.equal(w.eval("basket[0].packCount"),1);checks++;
+  w.eval("basket=[]");w.add("2x450g Nutella");await f.settle();assert.equal(w.eval("basket[0].packCount"),2);assert.equal(w.eval("basket[0].selectedProduct.packCount"),1,"Outer list quantity is not inner sales-pack count");checks++;
+  w.eval("basket=[]");w.add("Milch 3,5%");await f.settle();assert.equal(w.eval("basket[0].selectedProduct"),undefined,"Unavailable real 3.5% quotes never replace explicit wish");assert(w.document.getElementById("list").textContent.includes("Preis noch offen"));assert(!w.document.getElementById("list").textContent.includes("Auswahl fehlt"));assert.equal(w.document.querySelector("[data-choice]"),null);assert.equal(w.document.querySelector("[data-fix-list]"),null);assert.equal(f.calls.at(-1).body.search,"Milch 3,5%");checks++;
+  w.eval("basket=[]");f.setRows([]);w.add("Nutella");await f.settle();assert.equal(w.eval("basket[0].selectedProduct"),undefined);assert.equal(w.eval("basket[0].ean"),undefined);assert(w.document.getElementById("list").textContent.includes("Preis noch offen"));assert(!w.document.getElementById("list").textContent.includes("450 g"),"An inferred default is not a found option");checks++;
+  f.setRows(rows("Nutella").filter(item=>/Biscuits|Go!|Ice Cream/.test(item.name)));w.eval("basket=[]");w.add("Nutella");await f.settle();assert.equal(w.eval("basket[0].selectedProduct"),undefined);checks++;
+  f.setRows(null);w.eval("basket=[]");w.add("Nutella");await f.settle();assert(w.document.getElementById("list").textContent.includes("Automatisch gewählt"));const original=w.eval("basket[0].selectedProduct.gtin");w.document.querySelector("[data-product-pick]").click();await new Promise(resolve=>setTimeout(resolve,15));assert(w.document.getElementById("publishedProductPicker"));assert(!w.document.getElementById("list").textContent.includes("Automatisch gewählt"));const buttons=[...w.document.querySelectorAll("[data-product-select]")],different=buttons.find(button=>button.textContent.includes("450 g"));assert(different,"Optional picker still offers another exact pack");different.click();assert.equal(w.eval("basket[0].selectedProduct.pack"),"450 g");assert.doesNotMatch(w.document.getElementById("list").textContent,/6,89\s*€/);assert.notEqual(w.eval("basket[0].selectedProduct.gtin"),original);checks++;
+  w.eval("basket=[]");w.add("Milch");await f.settle();w.applyPackSize(w.eval("basket[0]"),"500 ml");w.drawList();assert(!w.document.getElementById("list").textContent.includes("Automatisch gewählt"));assert.equal(w.eval("basket[0].selectedProduct"),undefined);checks++;
+  assert.deepEqual(f.errors,[]);
+ }finally{w.close();}
+ const race=await setup(),r=race.w;try{
+  race.defer();r.add("Milch");r.add("Kekse");r.add("Nutella");await new Promise(resolve=>setTimeout(resolve,5));assert.equal(race.queue.length,3);r.document.querySelector('[data-qty-index="0"][data-qty="1"]').click();await race.release();assert.equal(r.eval("basket.filter(w=>w.selectedProduct).length"),3,"Unrelated additions do not invalidate earlier searches");assert.equal(r.eval("basket[0].packCount"),2,"Quantity changed during lookup is preserved");checks++;
+  r.eval("basket=[]");r.add("Nutella");await new Promise(resolve=>setTimeout(resolve,5));r.document.querySelector("[data-edit]").click();r.document.querySelector("[data-edit-input]").value="Kekse";r.document.querySelector("[data-save-edit]").click();await new Promise(resolve=>setTimeout(resolve,5));await race.release();assert.equal(r.eval("basket[0].selectedProduct.name"),"Lotus Biscoff Kekse, 150 g","Old Nutella result cannot overwrite edited row");checks++;
+  r.eval("basket=[]");r.add("Milch");await new Promise(resolve=>setTimeout(resolve,5));r.document.querySelector("[data-del]").click();await race.release();assert.equal(r.eval("basket.length"),0);checks++;
+  r.add("Nutella");await new Promise(resolve=>setTimeout(resolve,5));r.setTimeout(()=>{},0);race.setNow(NOW+2*86400000);await race.release();assert.equal(r.eval("basket[0].selectedProduct"),undefined,"Expired before commit cannot be chosen");assert(r.document.getElementById("list").textContent.includes("Preis noch offen"));checks++;
+  assert.deepEqual(race.errors,[]);
+ }finally{r.close();}
+ const immediate=await setup(),i=immediate.w;try{
+  immediate.defer();i.add("Nutella");const compared=i.compare({skipLocation:true,scroll:false});await new Promise(resolve=>setTimeout(resolve,10));assert.equal(i.eval("basket[0].selectedProduct"),undefined);assert(i.document.getElementById("compareStatus").textContent.includes("Preisoptionen"));await immediate.release();await compared;assert.equal(i.eval("basket[0].selectedProduct.pack"),"750 g");assert(!i.document.getElementById("compareStatus").textContent.includes("Freitextartikel"));checks++;
+  assert.deepEqual(immediate.errors,[]);
+ }finally{i.close();}
+ console.log("browser-auto-product-choice: "+checks+" actual-DTO browser groups; immediate input, unit-price/brand/pack/channel choice, passive gaps, optional edits, quantity and race guards OK");
+})().catch(error=>{console.error(error);process.exitCode=1;});

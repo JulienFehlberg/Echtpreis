@@ -11,10 +11,10 @@ function equal(a,b){
  const left=Object.keys(a).sort(),right=Object.keys(b).sort();return left.length===right.length&&left.every((key,i)=>key===right[i]&&equal(a[key],b[key]));
 }
 function request(raw){
- if(!raw||typeof raw!=="object"||Array.isArray(raw)||Object.keys(raw).some(key=>!["search","constraints","pack","scopeChannel"].includes(key)))throw Error("invalid-shopping-need-input");
+ if(!raw||typeof raw!=="object"||Array.isArray(raw)||Object.keys(raw).some(key=>!["search","constraints","pack","scopeChannel","priorityRetailersOnly"].includes(key)))throw Error("invalid-shopping-need-input");
  const need=Matcher.parse({search:raw.search,constraints:raw.constraints}),filters=Products.searchFilters(raw);
  if(!filters.ok)throw Object.assign(Error(filters.reason),{code:filters.reason});
- return{need,filters,payload:{search:need.search,constraints:need.constraints,limit:20,...(filters.pack?{pack:filters.pack}:{}),...(filters.scopeChannel?{scopeChannel:filters.scopeChannel}:{})}};
+ return{need,filters,payload:{search:need.search,constraints:need.constraints,limit:20,...(filters.pack?{pack:filters.pack}:{}),...(filters.scopeChannel?{scopeChannel:filters.scopeChannel}:{}),...(filters.priorityRetailersOnly===undefined?{}:{priorityRetailersOnly:filters.priorityRetailersOnly})}};
 }
 function binding(offer){return{sourceId:offer.sourceId,scopeChannel:offer.scopeChannel,retailerSku:offer.retailerSku,storeId:offer.storeId||null,nativeVenueId:offer.nativeVenueId||null,nativeMarketId:offer.nativeMarketId||null,gtin:offer.gtin,pack:offer.pack};}
 const bindingKey=offer=>JSON.stringify(Object.values(binding(offer)));
@@ -27,7 +27,7 @@ function candidate(input,options={}){
  const saved=retained.get(input),raw=saved?saved.raw:input;
  let prepared;try{prepared=request(options.request||saved?.request);}catch(_){return null;}
  if(saved&&!equal(prepared.need,saved.need))return null;
- const value=Products.candidate(raw,{...options,pack:prepared.filters.pack,scopeChannel:prepared.filters.scopeChannel});
+ const value=Products.candidate(raw,{...options,pack:prepared.filters.pack,scopeChannel:prepared.filters.scopeChannel,...(prepared.filters.priorityRetailersOnly===undefined?{}:{priorityRetailersOnly:prepared.filters.priorityRetailersOnly})});
  if(!value||!raw.needAssessment||raw.needAssessment.selectionRequired!==true||!Array.isArray(raw.needAssessment.offerMatches))return null;
  const original=[...raw.offers,...(raw.physicalOffers||[])],matches=raw.needAssessment.offerMatches;
  if(matches.length!==original.length||matches.length>200)return null;
@@ -44,13 +44,13 @@ function candidate(input,options={}){
  const needAssessment={status:offerMatches.some(match=>match.status==="confirmed")?"confirmed":"unconfirmed",selectionRequired:true,offerMatches};
  const result={...value,needAssessment};
  // Only this open picker retains original evidence. Saving an identity excludes it.
- retained.set(result,{raw,need:prepared.need,request:{search:prepared.need.search,constraints:prepared.need.constraints,...(prepared.filters.pack?{pack:prepared.filters.pack}:{}),...(prepared.filters.scopeChannel?{scopeChannel:prepared.filters.scopeChannel}:{})}});
+ retained.set(result,{raw,need:prepared.need,request:{search:prepared.need.search,constraints:prepared.need.constraints,...(prepared.filters.pack?{pack:prepared.filters.pack}:{}),...(prepared.filters.scopeChannel?{scopeChannel:prepared.filters.scopeChannel}:{}),...(prepared.filters.priorityRetailersOnly===undefined?{}:{priorityRetailersOnly:prepared.filters.priorityRetailersOnly})}});
  return result;
 }
 function normalizeResponse(raw,requested,options={}){
  let prepared;try{prepared=request(requested);}catch(error){return{ok:false,items:[],reason:error.code||"invalid-shopping-need-input"};}
  if(!raw||raw.ok!==true||raw.scopeCountry!=="DE"||raw.selectionRequired!==true||raw.automaticSelection!==false||raw.needCoverage?.complete!==false||!equal(raw.need,prepared.need))return{ok:false,items:[],reason:"invalid-need-response"};
- const bounded=Products.normalizeResponse(raw,{...options,pack:prepared.filters.pack,scopeChannel:prepared.filters.scopeChannel});if(!bounded.ok)return bounded;
+ const bounded=Products.normalizeResponse(raw,{...options,pack:prepared.filters.pack,scopeChannel:prepared.filters.scopeChannel,...(prepared.filters.priorityRetailersOnly===undefined?{}:{priorityRetailersOnly:prepared.filters.priorityRetailersOnly})});if(!bounded.ok)return bounded;
  const seen=new Set(),duplicates=new Set(),items=[];
  for(const input of raw.items){const value=candidate(input,{...options,request:requested});if(!value)continue;const id=Products.key(value);if(seen.has(id))duplicates.add(id);seen.add(id);items.push(value);}
  const accepted=items.filter(item=>!duplicates.has(Products.key(item))).sort((a,b)=>Number(b.needAssessment.status==="confirmed")-Number(a.needAssessment.status==="confirmed"));
