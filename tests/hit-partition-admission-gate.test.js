@@ -37,6 +37,23 @@ async function main() {
   await test("no actual diagnostic gives no new filtered candidate", () => {
     const r = clone(batch.result); r.brandPartitionProbe = null; assert.equal(evaluate(r).candidates.length, 0);
   });
+  await test("ordinary page followed by an isolated listing gap retains the sanitized diagnostic profile", async () => {
+    const b = await F.batch({ enabled: false, maxRequests: 4, followingRows: [F.row(90), F.row(90)] });
+    assert.equal(b.result.ordinaryConflictOriginals.length, 1); assert.equal(b.result.originalListingGaps.length, 1);
+    assert.equal(b.result.pages[1].diagnosticOnly, true);
+    assert.deepEqual(b.result.pages[1].storeProfile, require("../hit-native-list-gap").STORE);
+    const before = clone(b.result), g = Gate.evaluate(b.result, F.state(b), { now: b.time });
+    assert.equal(g.candidates.length, 0); assert.equal(g.conflicts.length, 0);
+    assert.equal(b.result.accepted.length, 40); assert.equal(b.result.error.code, "hit-native-list-duplicate-or-invalid-sku");
+    assert.deepEqual(b.result, before);
+    for (const [pageIndex, patch] of [[0, { country: "AT" }], [1, { country: "AT" }],
+      [1, { storeId: 1792 }], [1, { storeNumber: "336" }], [1, { address: "unproven address" }]]) {
+      const changed = clone(b.result); Object.assign(changed.pages[pageIndex].storeProfile, patch);
+      assert.throws(() => Gate.evaluate(changed, F.state(b), { now: b.time }), /normal-page-invalid/);
+    }
+    const forged = clone(b.result); forged.pages[1].nativeSkuIds = [F.sku(90)];
+    assert.throws(() => Gate.evaluate(forged, F.state(b), { now: b.time }), /diagnostic-normal-rows-forbidden/);
+  });
   await test("first admission after five minutes is refused despite24h expiry", () => {
     assert.throws(() => evaluate(batch.result, state, { now: batch.time + 300001 }));
   });

@@ -9,6 +9,7 @@ const Collector = require("./hit-assortment-collector");
 const Binding = require("./hit-brand-partition-binding");
 const Partition = require("./hit-native-brand-partition");
 const Native = require("./hit-assortment-client");
+const ListingGap = require("./hit-native-list-gap");
 const Import = require("./hit-price-import");
 const Identity = require("./product-identity");
 const Discovery = require("./price-query-discovery");
@@ -73,7 +74,11 @@ function normalContext(result, state, now) {
   for (const [key, q] of Object.entries(known)) quotes.push(tuple(key, q, { origin: "ordinary", cycle }));
   const pending = new Set(prior.pending.map(n => n.id)), visited = new Set(prior.visited.map(n => n.id).filter(Boolean));
   for (const page of result.pages) {
-    if (!plain(page) || !same(page.storeProfile, Import.STORE_PROFILE) || !/^[a-f0-9]{64}$/.test(page.sourceResponseHash || "")
+    // Rejected listing originals retain the exact sanitized profile. Their
+    // diagnostics never become price evidence; ordinary pages still require
+    // the complete approved profile, including the independently mapped store.
+    const diagnostic = page?.diagnosticOnly === true || !!page?.gapId;
+    if (!plain(page) || !same(page.storeProfile, diagnostic ? ListingGap.STORE : Import.STORE_PROFILE) || !/^[a-f0-9]{64}$/.test(page.sourceResponseHash || "")
       || !Number.isFinite(Date.parse(page.capturedAt)) || Date.parse(page.capturedAt) > now || now - Date.parse(page.capturedAt) > 300000
       || !Number.isFinite(Date.parse(page.responseDate)) || Date.parse(page.responseDate) > now
       || Math.abs(Date.parse(page.responseDate) - Date.parse(page.capturedAt)) > 300000
