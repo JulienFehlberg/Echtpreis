@@ -2,6 +2,13 @@
 const assert=require("node:assert/strict"),crypto=require("node:crypto"),{Pool}=require("pg"),Import=require("../hit-price-import"),Client=require("../hit-assortment-client"),Query=require("../current-price-query-service"),Benchmark=require("../current-price-benchmark-service"),Semantics=require("../source-semantics"),Aliases=require("../product-alias-store"),Browser=require("../app/current-price-client");
 const Refresh=require("../hit-price-refresh"),SOURCE=Import.SOURCE,storeProfile=Import.STORE_PROFILE,sku="000000000000869561ST",gtin="4388844177314",hash=value=>crypto.createHash("sha256").update(value).digest("hex");
 const BrandFixture=require("./fixtures/hit-brand-probe");
+// Only the synthetic checkpoint-race batch needs a short continuation window.
+// Keep it on today's actual Berlin day without changing production clocks.
+function continuationTime(wallTime){
+ const day=Query.today(new Date(wallTime));
+ for(let retreat=0;retreat<=180000;retreat+=1000){const time=wallTime-retreat;if(Query.today(new Date(time))===day&&Query.today(new Date(time+120004))===day)return time;}
+ throw Error("synthetic-HIT-continuation-window-required");
+}
 // Native identity/normal-price fields from the saved public Berlin-Mitte milk card.
 // Capture metadata and subsequent changed prices are explicitly local TEST responses.
 const raw={external_id:sku,ean:gtin,storeId:1775,storeNumber:"258",headline:"ja! H-Milch 1,5%",overview:"1l Packung",price:"0.85",deposit:null,url:"https://www.hit.de/sortiment/kaese-eier-molkerei/milch-h-kuh-4261891/ja-h-milch-15-"+sku,inventoryAvailable:true,inventoryUpdatedAt:"2026-10-01T19:24:29+02:00",priceTag:{type:"discount",badgeText:"DAUER\nDISCOUNT\nPREIS",priceEuro:"0",priceCent:"85",priceStrikeThroughText:null,beforeText:null,belowText:null,couponCode:null,couponName:null}};
@@ -23,6 +30,7 @@ async function main(){
  const connectionString=process.env.DATABASE_URL;assert(connectionString,"DATABASE_URL is required for the HIT PostgreSQL test");const database=new URL(connectionString);assert.equal(database.hostname,"localhost","HIT integration writes only to a dedicated local test database");assert(database.pathname.endsWith("_test"),"Use a dedicated _test database");
  const pool=new Pool({connectionString,ssl:false,connectionTimeoutMillis:5000}),api=require("../server");let testError;
  try{
+  for(const wallTime of ["2026-10-02T21:59:20.000Z","2026-10-02T21:59:59.999Z","2026-03-29T21:59:59.999Z","2026-10-25T22:59:59.999Z"]){const wall=Date.parse(wallTime),start=continuationTime(wall);assert(start<=wall&&wall-start<=180000);assert.equal(Query.today(new Date(start)),Query.today(new Date(wall)));assert.equal(Query.today(new Date(start+120004)),Query.today(new Date(wall)));}
   await api.initDb();await Import.ensure(pool);await Aliases.ensure(pool);assert(Semantics.policy({source:SOURCE,sourceType:"official_retailer"}).registered,"Root must register the real HIT source before API admission");
   const now=Date.now(),capture=now-120000,today=Query.today(new Date(capture)),good=candidate(capture),options={storeProfile,now};
   const baseline={products:await count(pool,"products"),observations:await count(pool,"price_observations"),receipts:await count(pool,"receipt_submissions"),availability:await count(pool,"availability_observations"),aliases:await count(pool,"product_alias_evidence")};
@@ -105,7 +113,7 @@ async function main(){
   assert.equal(await count(pool,Import.TABLE),beforeAtomicCaptures);assert.equal(await count(pool,"price_observations","id=$1",[enlistedId]),0);assert.deepEqual((await pool.query("SELECT * FROM price_observations WHERE id=$1",[paidObservation])).rows[0],beforeAtomic);assert.deepEqual((await pool.query("SELECT * FROM hit_price_import_evidence WHERE observation_id=$1",[paidObservation])).rows[0],beforeAtomicLedger);
   // Exercise the actual refresh owner and actual progress INSERT, with no source requests.
   assert.equal(await count(pool,Refresh.TABLE,"source_id=$1",[SOURCE]),0,"This dedicated test DB has no running collector checkpoint");
-  const refreshTime=Date.now(),refreshResult=refreshBatch(refreshTime),failingRefreshPool={query:(...args)=>pool.query(...args),connect:async()=>{const tx=await pool.connect();return{release:()=>tx.release(),query:(sql,args)=>sql.startsWith("INSERT INTO "+Refresh.TABLE)&&args?.length===11?tx.query("SELECT 1/0"):tx.query(sql,args)}}};
+  const refreshTime=continuationTime(Date.now()),refreshResult=refreshBatch(refreshTime),failingRefreshPool={query:(...args)=>pool.query(...args),connect:async()=>{const tx=await pool.connect();return{release:()=>tx.release(),query:(sql,args)=>sql.startsWith("INSERT INTO "+Refresh.TABLE)&&args?.length===11?tx.query("SELECT 1/0"):tx.query(sql,args)}}};
   try{
    await assert.rejects(Refresh.refresh({pool:failingRefreshPool,now:()=>refreshTime},{collect:async()=>structuredClone(refreshResult)}),error=>error.code==="22012");
    assert.equal(await count(pool,Import.TABLE),beforeAtomicCaptures,"The actual checkpoint failure rolls back its new capture");
