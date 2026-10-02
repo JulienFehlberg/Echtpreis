@@ -62,3 +62,23 @@ Bekannte widersprüchliche native SKU-/GTIN-/Packungs-/Preisangaben und bestehen
 Der zusätzliche GET ist bereits vor seiner Autorisierung durch das 16-MiB-Recordlimit begrenzt. Jeder HTML-Körper bleibt auf 6 MiB begrenzt; die Reservierung berücksichtigt JSON-Escaping und begrenzte Metadaten. Ein zu großer Kontroll-/Quote-Stand autorisiert keinen Abruf. Redirects werden nicht verfolgt, 403/429 erhalten die normale vollständige Quellenpause einschließlich längerer Retry-After-Werte und konkurrierender Checkpoints. Original und normale Importe/Checkpoint teilen dieselbe echte PostgreSQL-Transaktion: ein Schreibfehler rollt alle zurück. Ein gespeicherter Versuch wird weder beim Tageswechsel noch beim Neustart wiederholt oder erneuert.
 
 Der öffentliche Status zeigt nur begrenzte Zeit-/Hash-/Ergebnis- und SKU-Zähler. Originalkörper, SKU-Listen, interne Quote-Historie und Gastdaten bleiben privat. `collectionEnabled`, `priceImportEnabled` und `complete` bleiben false. Ein bestätigter Filter oder gleiche Facettenzähler beweisen weder exklusive/vollständige Markenpartitionen noch ein vollständiges physisches Sortiment. Für spätere Filterimporte werden getrennte Kategorie-/Facetten-Cursor, frische angebotene Filterbelege, originäre Preiszulassung, Dubletten-/Quarantänebehandlung und eigene Vollständigkeitsgrenzen benötigt.
+# Bounded large-partition preflight diagnostics
+
+The ordinary leased collector now reports why a normally processed truncated
+level3 control cannot prepare the existing one-time HTML diagnostic, including
+when the remaining request budget is zero. This adds no GET, queue change,
+source eligibility, price admission or completeness claim. Reasons come from a
+fixed whitelist; arbitrary exception messages are excluded.
+
+At most the latest16 small entries are retained per current scan in its existing
+atomic `scan_coverage` checkpoint, capped at16KiB by retaining fewer old entries
+when necessary. Each new entry is bound to an actual ordinary
+40-row truncated page, original URL/hash/capture, category and native total.
+The capture is preserved verbatim, including supported RFC3339 offsets; old
+diagnostic captures are never renewed and are not a readiness/fresh-price proof.
+`categoryName` and `nativeCategoryLevel` remain null because the summary does not
+retain an independently reparsable native category original. Queued level/count
+are separate diagnostic fields. Public status rebuilds a whitelist and excludes
+bodies, quote/SKU/GTIN arrays, headers and arbitrary extra fields. Immutable
+small/large attempted originals remain separate and unchanged; filtered prices
+and ordinary traversal counters remain unchanged.

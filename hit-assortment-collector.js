@@ -1,5 +1,6 @@
 "use strict";
 const crypto=require("node:crypto"),Client=require("./hit-assortment-client"),Identity=require("./product-identity"),Clock=require("./current-price-query-service"),BrandProbe=require("./hit-native-brand-probe"),PartitionProbe=require("./hit-native-brand-partition"),ListingGap=require("./hit-native-list-gap");
+const PartitionPreflight=require("./hit-brand-partition-preflight");
 const SOURCE=Client.SOURCE,COOLDOWN_UNTIL="2026-10-01T19:51:16.522Z";
 const fail=code=>Object.assign(new Error(code),{code});
 const hash=body=>crypto.createHash("sha256").update(body).digest("hex");
@@ -56,7 +57,7 @@ async function collect(options={}){
  // A wrapper supplies one actual-clock day snapshot so a batch crossing midnight has a consistent checkpoint.
  const cursorDay=options.cursorDay??Clock.today(new Date(now())),state=cursorFor(options.cursor,store,cursorDay),jar=new Map(),seen=new Set(state.seenSkus),quarantined=new Set(state.conflictGtins);
  if(state.cursorDay!==cursorDay)throw fail("hit-continuation-day-conflict");
- const accepted=[],rejected=[],pages=[],originalListingGaps=[];let requests=0,lastRequest=0,error=null,brandFilterProbe=null,brandPartitionProbe=null;
+ const accepted=[],rejected=[],pages=[],originalListingGaps=[],brandPartitionPreflight=[];let requests=0,lastRequest=0,error=null,brandFilterProbe=null,brandPartitionProbe=null;
  async function read(input,probeControl=null){
   if(probeControl!==null&&!BrandProbe.authorizeRequest(probeControl,input)&&!PartitionProbe.authorizeRequest(probeControl,input))throw fail("hit-brand-probe-request-not-authorized");
   let url=probeControl===null?allowedUrl(input,store):input;const requestUrl=url,redirects=[];
@@ -178,8 +179,10 @@ async function collect(options={}){
       }
      }
     }
+    if(options.brandPartitionProbeEnabled===true&&brandPartitionProbe===null&&node.level===3&&pages.at(-1)?.truncated===true&&requests>=maxRequests)brandPartitionPreflight.push(PartitionPreflight.entry(pages.at(-1),node,0,"not-checked","request-budget-exhausted"));
     if(options.brandPartitionProbeEnabled===true&&brandPartitionProbe===null&&requests<maxRequests){
-     let control=null;try{control=PartitionProbe.prepareControl(page.body,page.probeMeta,node,{now,nativeState:{seenQuotes:state.seenQuotes,conflictGtins:state.conflictGtins}});}catch{}
+     let control=null,preflightReason="control-prepared";try{control=PartitionProbe.prepareControl(page.body,page.probeMeta,node,{now,nativeState:{seenQuotes:state.seenQuotes,conflictGtins:state.conflictGtins}});}catch(e){preflightReason=PartitionPreflight.reason(e.code);}
+     if(node.level===3&&pages.at(-1)?.truncated===true)brandPartitionPreflight.push(PartitionPreflight.entry(pages.at(-1),node,maxRequests-requests,control===null?"rejected":"prepared",preflightReason));
      if(control!==null){
       try{const filtered=await read(PartitionProbe.proposal(control).requestedUrl,control);brandPartitionProbe=PartitionProbe.record(control,{filtered:{body:filtered.body,meta:filtered.probeMeta}},{now});}
       catch(e){
@@ -201,6 +204,6 @@ async function collect(options={}){
  }
  state.categoryCoverage=coverageFor(state);
  const complete=!error&&state.initialIndexLoaded&&state.overviewLoaded&&state.pending.length===0,nativePaginationComplete=complete&&state.total!==null&&state.received===state.total&&!state.categoryCoverage.truncatedLeaves.length&&!state.categoryCoverage.unresolvedNodes.length&&!state.conflictGtins.length;
- return{sourceId:SOURCE,cursorDay:state.cursorDay,accepted,rejected,pages,requests,complete,categoryTraversalCycleComplete:complete,nativePaginationComplete,publishedTraversalComplete:nativePaginationComplete,categoryCoverage:state.categoryCoverage,conflictGtins:[...state.conflictGtins],physicalStoreAssortmentComplete:false,cursor:complete?null:state,total:state.total,pagesFetched:state.pagesFetched,received:state.received,error,brandFilterProbe,brandPartitionProbe,originalListingGaps};
+ return{sourceId:SOURCE,cursorDay:state.cursorDay,accepted,rejected,pages,requests,complete,categoryTraversalCycleComplete:complete,nativePaginationComplete,publishedTraversalComplete:nativePaginationComplete,categoryCoverage:state.categoryCoverage,conflictGtins:[...state.conflictGtins],physicalStoreAssortmentComplete:false,cursor:complete?null:state,total:state.total,pagesFetched:state.pagesFetched,received:state.received,error,brandFilterProbe,brandPartitionProbe,originalListingGaps,brandPartitionPreflight};
 }
 module.exports={SOURCE,COOLDOWN_UNTIL,allowedUrl,validDay,validConflictGtins,cursorFor,coverageFor,collect};
