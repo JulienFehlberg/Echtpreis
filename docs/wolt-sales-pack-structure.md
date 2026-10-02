@@ -1,0 +1,11 @@
+# Wolt sales-pack structure
+
+An explicit title such as `Elinas Joghurt Natur 9,4%, 4 x 150 g` can reveal a missing or contradictory native sales-pack structure. It never supplies missing quantity or count metadata. Native `unit_info: 600 g` establishes an aggregate quantity, but does not establish an exact single 600-g pack or four individual 150-g units. The captured native item stays archived; exact product discovery and price comparison hold that offer with `wolt-native-sales-pack-structure-unresolved`.
+
+Admission requires independently parsed native individual quantity, unit and count to agree with every explicit multipack in the title. Unit conversion and a 0.1% quantity tolerance are shared by the backend, PostgreSQL 18 predicates and browser validator. Equal aggregate quantities with different counts (4 × 150 g versus 6 × 100 g) remain different packs. Dimensions, model numbers and decimal multipack counts do not provide structure evidence.
+
+Historical holding annotates `validation_issue` without changing native identity, price, proof, captured time or expiry. SQL read predicates also protect rows inserted or changed after schema initialization. Only a newer, valid native quote can replace a held row; reading or migrating never renews freshness. `excludedPackStructures` and `excludedPackConflicts` describe separate predicates which can overlap, so adding the counters does not yield the number of uniquely excluded rows.
+
+The original Elinas regression fixture records the source file hash and JSON pointer and explicitly declares `currentPriceProof: false`. Explicit-native-structure variants and Müsliriegel cases are synthetic tests. Neither test fixture is a current price import. Existing GTIN/SKU, venue, channel, deposit, original-capture and expiry requirements remain in force. Wolt delivery evidence does not establish a physical shelf price or full market coverage.
+
+Generic Cashewkerne, Studentenfutter, Mandeln and Erdnüsse shopping wishes have no assumed standard pack, GTIN, SKU or price. An explicitly supplied quantity can be retained; missing quantity needs clarification. Family and variant filtering narrow displayed references without turning a generic wish into an exact product selection or a retailer winner.

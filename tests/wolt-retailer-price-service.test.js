@@ -8,7 +8,7 @@ const unknownDeposit=offer({deposit:null,depositLabel:null,price:2.04,depositInc
 assert.equal(Service.validateOffer(offer({gtin:null}),{now}).offer.identityStatus,"native-retailer-sku");assert.equal(Service.validateOffer(offer({gtin:""}),{now}).offer.gtin,null);
 const multi=Service.validateOffer(offer({pack:"6 x 0.5 l",packAmount:0.5,packUnit:"l",packCount:6}),{now});assert.equal(multi.ok,true);assert.equal(multi.offer.packAmount,500);assert.equal(multi.offer.packCount,6);
 for(const patch of[{name:"Milka Tender Milch, 5 x 37 g",pack:"37 g",packAmount:37,packUnit:"g",packCount:1},{name:"LOCAL TEST water 6 × 0,5 l",pack:"0.5 l",packAmount:.5,packUnit:"l",packCount:1}]){const invalid=Service.validateOffer(offer(patch),{now});assert.equal(invalid.ok,false);assert(invalid.reasons.includes("wolt-native-sales-pack-conflict"));}
-assert.equal(Service.validateOffer(offer({name:"Milka Tender Milch, 5 x 37 g",pack:"185 g",packAmount:185,packUnit:"g",packCount:1}),{now}).ok,true);
+const unresolved=Service.validateOffer(offer({name:"Milka Tender Milch, 5 x 37 g",pack:"185 g",packAmount:185,packUnit:"g",packCount:1}),{now});assert.equal(unresolved.ok,false);assert(unresolved.reasons.includes("wolt-native-sales-pack-structure-unresolved"));
 assert.equal(Service.validateOffer(offer({name:"Milka Tender Milch, 5 x 37 g",pack:"5 x 37 g",packAmount:37,packUnit:"g",packCount:5}),{now}).ok,true);
 assert(Service.querySpec().sql.includes("validation_issue IS NULL"));
 assert.equal(Service.validateOffer(offer({expiresAt:"2099-01-01T00:00:00Z"}),{now}).offer.expiresAt,approved.offer.expiresAt);

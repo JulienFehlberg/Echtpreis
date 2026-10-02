@@ -294,7 +294,7 @@ assert(html.includes('let multi=rawForAmount.match(/^(\\d+)\\s*(?:x|×|packungen
 assert(html.includes('multiPack={count,amount:size*factor,unit,label'),"multipack parser should retain count and per-pack size separately");
 assert(html.includes('wish.packCount=multiPack.count')&&html.includes('wish.amount=multiPack.count*multiPack.amount'),"multipacks should calculate total comparison quantity from pack count and pack size");
 assert(html.includes('packungen?|packs?'),"shopping parser should accept natural pack/Packungen wording");
-assert(html.includes('return multiPack?wish:initializePackageQuantity(wish)'),"explicit multipacks should not be overwritten by standard package inference");
+assert(html.includes('const result=multiPack?wish:initializePackageQuantity(wish)')&&html.includes('!multiPack&&explicit&&unit==="kg"'),"explicit multipacks bypass standard package inference and the single-pack nut label adjustment");
 assert(html.includes('natural German multipack phrasing'),"natural German multipack parser regression marker missing");
 assert(html.includes('(?:à|a|je|zu\\s+je)?'),"multipack parser should accept à/je wording before package size");
 assert(html.includes('const natural=rawForAmount.match'),"multipack parser should accept product-before-size phrasing such as 2 Packungen Hackfleisch à 500 g");

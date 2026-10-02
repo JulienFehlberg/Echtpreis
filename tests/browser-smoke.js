@@ -6,6 +6,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  vc.on("jsdomError",e=>errors.push(String(e.message||e)));
  const dom=new JSDOM(html,{runScripts:"dangerously",url:"https://julienfehlberg.github.io/Sparkorb/",pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){
   w.eval(fs.readFileSync("app/price-engine.js","utf8"));
+  w.eval(fs.readFileSync("wolt-sales-pack-validation.js","utf8"));
   w.eval(fs.readFileSync("app/current-price-client.js","utf8"));
   w.eval(fs.readFileSync("app/current-price-client.js","utf8"));
   w.fetch=async()=>({ok:false,status:503,json:async()=>({})});w.alert=()=>{};w.confirm=()=>true;w.prompt=()=>null;w.scrollTo=()=>{};Object.defineProperty(w.navigator,"geolocation",{configurable:true,value:{getCurrentPosition:(ok,fail)=>fail&&fail({code:1})}});
