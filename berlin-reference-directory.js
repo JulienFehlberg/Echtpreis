@@ -1,6 +1,7 @@
 "use strict";
 const References = require('./berlin-reference-prices');
 const Penny = require('./penny-berlin-publications');
+const Lidl = require('./lidl-price-publications');
 // A CMS price card is neither a retailer SKU nor a canonical product.
 // Keep both contracts separate, including their counts and eligibility.
 async function search(pool, input = {}, deps = { references: References, penny: Penny }) {
@@ -9,18 +10,19 @@ async function search(pool, input = {}, deps = { references: References, penny: 
     ...(query.search ? { search: query.search } : {}), ...(query.gtin ? { gtin: query.gtin } : {}),
     ...(query.merchant ? { merchant: query.merchant } : {}), ...(query.pack !== undefined ? { pack: query.pack } : {}),
     ...(query.scopeChannel ? { scopeChannel: query.scopeChannel } : {}) };
-  const [ordinary, regional] = await Promise.all([deps.references.search(pool, normalized), deps.penny.search(pool, normalized)]);
+  const [ordinary, regional, dated] = await Promise.all([deps.references.search(pool, normalized), deps.penny.search(pool, normalized), (deps.lidl || Lidl).search(pool, normalized)]);
   const publicationRows = regional.publicationCoverage.matchedCards;
   const retailers = ordinary.coverage.retailers.map(row => {
     const count = row.merchant === 'PENNY' ? publicationRows : 0;
-    return { ...row, publicationReferences: count, missing: row.referenceRows + count === 0,
-      supportedSources: [...row.supportedSources, ...(row.merchant === 'PENNY' ? [Penny.SOURCE] : [])],
+    return { ...row, publicationReferences: count, datedPublicationReferences: row.merchant === 'Lidl' ? dated.datedPublicationCoverage.matchedGroups : 0, missing: row.referenceRows + count === 0,
+      supportedSources: [...row.supportedSources, ...(row.merchant === 'PENNY' ? [Penny.SOURCE] : row.merchant === 'Lidl' ? [Lidl.SOURCE] : [])],
       scopeChannels: [...new Set([...row.scopeChannels, ...(count ? [Penny.CHANNEL] : [])])] };
   });
   return { ...ordinary, publications: regional.publications, publicationCoverage: regional.publicationCoverage,
-    truncated: ordinary.truncated || regional.truncated,
+    datedPublications: dated.datedPublications, datedPublicationCoverage: dated.datedPublicationCoverage,
+    truncated: ordinary.truncated || regional.truncated || dated.truncated,
     scopeChannels: [...new Set([...ordinary.scopeChannels, ...(publicationRows ? [Penny.CHANNEL] : [])])].sort(),
-    coverage: { ...ordinary.coverage, matchedPublicationReferences: publicationRows, retailers,
+    coverage: { ...ordinary.coverage, matchedPublicationReferences: publicationRows, matchedDatedPublicationReferences: dated.datedPublicationCoverage.matchedGroups, retailers,
       missingRetailers: retailers.filter(row => row.missing).map(row => row.merchant) } };
 }
 module.exports = Object.freeze({ search });

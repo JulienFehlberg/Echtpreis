@@ -84,3 +84,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
         run: node tests/penny-berlin-publications-postgres.test.js
+
+      - name: Run PostgreSQL dated Lidl publication integration test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
+        run: node tests/lidl-publications-postgres.test.js
