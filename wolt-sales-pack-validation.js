@@ -24,9 +24,12 @@ const scaleCase="CASE lower(parts[3]) "+Object.entries(UNITS).map(([unit,value])
 const titleTotal="(parts[1]::numeric*replace(parts[2],',','.')::numeric*("+scaleCase+"))",nativeTotal="(pack_amount*pack_count)";
 // PostgreSQL 18 predicate for the same explicit title/native quantity comparison.
 // These unqualified column names refer to the outer published-price record.
-const SQL_CONFLICT="EXISTS(SELECT 1 FROM regexp_matches(normalize(name,NFKC),'"+TITLE_MULTIPACK_PATTERN+"','gi') AS explicit_multipack(parts) WHERE ("+unitCase+")<>pack_unit OR abs("+titleTotal+"-"+nativeTotal+")>greatest(1,"+titleTotal+","+nativeTotal+")*0.001)";
+// Every explicit title multipack contains x, X or × after the same NFKC normalization.
+// CASE skips expensive regexp_matches for titles without any necessary separator.
+const SQL_FAST_GATE="normalize(name,NFKC) ~ '[xX×]'";
+const SQL_CONFLICT="CASE WHEN "+SQL_FAST_GATE+" THEN EXISTS(SELECT 1 FROM regexp_matches(normalize(name,NFKC),'"+TITLE_MULTIPACK_PATTERN+"','gi') AS explicit_multipack(parts) WHERE ("+unitCase+")<>pack_unit OR abs("+titleTotal+"-"+nativeTotal+")>greatest(1,"+titleTotal+","+nativeTotal+")*0.001) ELSE false END";
 const titleAmount="(replace(parts[2],',','.')::numeric*("+scaleCase+"))";
-const SQL_STRUCTURE_UNRESOLVED="EXISTS(SELECT 1 FROM regexp_matches(normalize(name,NFKC),'"+TITLE_MULTIPACK_PATTERN+"','gi') AS explicit_multipack(parts) WHERE "+titleAmount+"<=0 OR parts[1]::numeric<>pack_count OR ("+unitCase+")<>pack_unit OR abs("+titleAmount+"-pack_amount)>greatest(1,"+titleAmount+",pack_amount)*0.001)";
+const SQL_STRUCTURE_UNRESOLVED="CASE WHEN "+SQL_FAST_GATE+" THEN EXISTS(SELECT 1 FROM regexp_matches(normalize(name,NFKC),'"+TITLE_MULTIPACK_PATTERN+"','gi') AS explicit_multipack(parts) WHERE "+titleAmount+"<=0 OR parts[1]::numeric<>pack_count OR ("+unitCase+")<>pack_unit OR abs("+titleAmount+"-pack_amount)>greatest(1,"+titleAmount+",pack_amount)*0.001) ELSE false END";
 const api=Object.freeze({multipackConflict,structureUnresolved,SQL_CONFLICT,SQL_STRUCTURE_UNRESOLVED,TITLE_MULTIPACK_PATTERN});
 if(root)root.CaddyWoltSalesPackValidator=api;if(typeof module==="object"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
