@@ -178,7 +178,7 @@ function compare(quotes, initialBlocked) {
     if (group && !Discovery.samePack(group.first.pack, q.pack)) conflict("gtin-sales-pack-disagreement", group.first, q);
     if (group) {
       const sameCycle = group.cycles.get(key);
-      if (sameCycle && sameCycle.signature !== q.signature) conflict("exact-native-quote-disagreement", sameCycle, q);
+      if (sameCycle && Discovery.samePack(sameCycle.pack, q.pack) && sameCycle.signature !== q.signature) conflict("exact-native-quote-disagreement", sameCycle, q);
       else if (!sameCycle) {
         group.cycles.set(key, q);
         if (group.first.signature !== q.signature) unresolved.push({ gtin: q.gtin, reason: "cross-cycle-normal-quote-change", retailerSku: q.sku ?? null });

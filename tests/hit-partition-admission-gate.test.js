@@ -153,6 +153,15 @@ async function main() {
     const next = await F.continuation(b.result.cursor, [raw, F.row(91)]);
     const g = Gate.evaluate(next.result, { cursor: next.previous }, { now: next.time, previousPartitions: [p] });
     assert(g.conflicts.some(x => x.reason === "gtin-sales-pack-disagreement")); assert(g.quarantineGtins.includes(raw.ean));
+    assert(!g.conflicts.some(x => x.reason === "exact-native-quote-disagreement"));
+  });
+  await test("different exact sales packs and prices produce a pack conflict without a quote conflict", async () => {
+    const b = await F.threeNodeBatch(), p = F.snapshot(b), raw = F.price({ ...F.row(41), overview: "2 x 250g Packung" }, "2.45");
+    const next = await F.continuation(b.result.cursor, [raw, F.row(91)]);
+    const g = Gate.evaluate(next.result, { cursor: next.previous }, { now: next.time, previousPartitions: [p] });
+    assert(g.conflicts.some(x => x.reason === "gtin-sales-pack-disagreement"));
+    assert(!g.conflicts.some(x => x.reason === "exact-native-quote-disagreement"));
+    assert(g.quarantineGtins.includes(raw.ean)); assert(!g.candidates.some(c => c.gtin === raw.ean));
   });
   await test("same native partition SKU with another valid GTIN quarantines both known identities", async () => {
     const b = await F.threeNodeBatch(), p = F.snapshot(b), raw = { ...F.row(90), external_id: F.sku(41) };

@@ -14,6 +14,10 @@ module.exports = async function(pool) {
   const duplicatePage = L.page({ now: time, rows: [duplicateRow, conflicting] }), h = L.harness({ [duplicateNode.url]: duplicatePage.body }, { now: time });
   const duplicatePrior = L.cursor(undefined, time), duplicateResult = await Collector.collect({ ...h.options, storeProfile: Import.STORE_PROFILE, cursor: duplicatePrior, brandProbeEnabled: false, brandPartitionProbeEnabled: false });
   assert.equal(duplicateResult.accepted.length, 0); assert.equal(duplicateResult.pages[0].nativeQuoteRows.length, 0);
+  const secondPackRow = { ...L.row(2), ean: duplicateRow.ean, overview: "2 x 250g Packung" };
+  const packPage = L.page({ now: time, rows: [duplicateRow, secondPackRow] }), packHarness = L.harness({ [duplicateNode.url]: packPage.body }, { now: time });
+  const packResult = await Collector.collect({ ...packHarness.options, storeProfile: Import.STORE_PROFILE, cursor: duplicatePrior, brandProbeEnabled: false, brandPartitionProbeEnabled: false });
+  assert.equal(packResult.accepted.length, 2); assert.deepEqual(packResult.pages[0].conflictGtins, []);
   let cases = 0;
   const count = async (tx, table = Q.TABLE) => Number((await tx.query("SELECT count(*)::int AS n FROM " + table)).rows[0].n);
   const baseline = await count(pool);
@@ -38,6 +42,20 @@ module.exports = async function(pool) {
     const before = await count(tx, "products"), r = await record(tx, duplicateResult, state); assert.equal(r.inserted, 1); assert.deepEqual(r.quarantineGtins, [duplicateRow.ean]);
     assert.deepEqual(await Q.blocked(tx, [duplicateRow.ean, F.row(91).ean]), [duplicateRow.ean]); assert.equal(await count(tx, "products"), before);
     assert.equal(await count(tx, Q.REF_TABLE), 0, "Never manufacture product/observation references for new contradictory cards");
+  });
+  await test("Different native SKUs with equal total weight and unequal sale packs create a permanent original-bound block", async tx => {
+    const state = await seed(tx, duplicatePrior), gate = Gate.evaluate(packResult, state, { now: Date.now() });
+    assert.deepEqual(gate.conflicts.map(c => c.reason), ["gtin-sales-pack-disagreement"]);
+    const before = await count(tx, "products"), r = await record(tx, packResult, state);
+    assert.equal(r.inserted, 1); assert.deepEqual(r.quarantineGtins, [duplicateRow.ean]);
+    assert.equal(await count(tx, "products"), before); assert.equal(await count(tx, Q.REF_TABLE), 0);
+    const saved = await Import.persist(pool, packResult.accepted, { now: Date.now, transactionClient: tx });
+    assert.equal(saved.accepted.length, 0); assert.deepEqual(await Q.blocked(tx, [duplicateRow.ean]), [duplicateRow.ean]);
+  });
+  await test("A forged sold-pack quote cannot authorize a block despite genuine source metadata", async tx => {
+    const state = await seed(tx, duplicatePrior), result = clone(packResult);
+    result.pages[0].nativeQuoteRows[0].key = result.pages[0].nativeQuoteRows[0].key.replace(/\|1$/, "|2");
+    await assert.rejects(record(tx, result, state)); assert.equal(await count(tx), baseline);
   });
   await test("Cross-batch ordinary conflict uses actual generation-witnessed evidence", async tx => {
     const old = await importOld(tx), state = await seed(tx, normal.previous);

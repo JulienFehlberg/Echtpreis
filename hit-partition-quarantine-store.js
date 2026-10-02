@@ -200,8 +200,14 @@ async function record(tx, result, expectedCheckpoint, { now, ordinaryOriginals =
     const reason = ["native-sku-identity-disagreement", "gtin-sales-pack-disagreement", "exact-native-quote-disagreement"].find(r => pairReason(a, b, r));
     if (!reason) continue;
     const gtins = [...new Set([a.candidate.gtin, b.candidate.gtin])].sort();
-    if (!gtins.every(g => capture.conflictGtins.includes(g))) throw fail("ordinary-native-conflict-binding-required");
     const value = { reason, gtins, origins: ["ordinary", "ordinary"], retailerSkus: [a.candidate.retailerSku, b.candidate.retailerSku] };
+    // Different sold packs can both survive whole-page parsing. Its collector
+    // conflict sidecar then remains empty, while the actual bound gate already
+    // proves their discrepancy. The native pair still comes only from the
+    // authenticated original; neither gate nor collector metadata replaces it.
+    const gateBound = gate.conflicts.some(c => c.reason === reason && same(c.gtins, gtins)
+      && same([...c.origins].sort(), value.origins) && c.retailerSkus.every(s => value.retailerSkus.includes(s)));
+    if (!gateBound && !gtins.every(g => capture.conflictGtins.includes(g))) throw fail("ordinary-native-conflict-binding-required");
     if (!conflicts.some(c => same(c, value))) conflicts.push(value);
   }
   if (!conflicts.length) return { inserted: 0, events: 0, quarantineGtins: [] };
