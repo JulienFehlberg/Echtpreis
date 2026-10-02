@@ -150,7 +150,7 @@ assert(html.includes('x.store&&x.store!==current.store'),"personal savings compa
 
 assert(html.includes('coverage>=.7&&currentCoverage>=.8'),"receipt savings claim must require at least 70% basket-value and 80% current-price coverage");
 assert(html.includes('Nur ausreichend aktuelle, nicht bloß historische/Richtwert-Preise'),"receipt analysis must explain current-price quality gate");
-assert(html.includes('deshalb zeigt Sparkorb noch keine Warenkorb-Ersparnis'),"weak partial comparisons must not claim basket savings");
+assert(html.includes('deshalb zeigt Caddy noch keine Warenkorb-Ersparnis'),"weak partial comparisons must not claim basket savings");
 
 assert(html.includes('id="statsSavingsEvidence"'),"stats should expose evidence-aware savings section");
 assert(html.includes('currentReceiptSavingMeta={store:best.store'),"receipt savings must persist comparison evidence metadata");
@@ -212,7 +212,7 @@ assert(html.includes('cheap.length')&&html.includes('expensive.length'),"persona
 assert(html.includes('id="receiptHeroInsight"')&&html.includes('DAS WICHTIGSTE')&&html.includes('strongestReceiptInsight'),"receipt should lead with one strongest personal aha insight");
 assert(html.includes('score:98')&&html.includes('score:96')&&html.includes('score:94'),"hero insight should prioritize supported savings, personal price anomalies and plan extras");
 assert(html.includes('Beleg-Gesamtsumme')&&html.includes('maßgebliche Ausgabe'),"hero fallback must preserve printed receipt total as source of truth");
-assert(html.includes('Dieser Beleg hat Sparkorb beigebracht'),"saved receipt should explain the value learned from scanning");
+assert(html.includes('Dieser Beleg hat Caddy beigebracht'),"saved receipt should explain the value learned from scanning");
 assert(html.includes('history.length?"💡 "+history[0].title'),"home pulse should lead with the latest personal shopping discovery");
 
 assert(html.includes('BEIM NÄCHSTEN EINKAUF')&&html.includes('receiptNextMove'),"receipt analysis should turn insight into a concrete next-shopping action");
