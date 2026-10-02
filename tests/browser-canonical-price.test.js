@@ -74,7 +74,7 @@ async function fixture(mode){
    }
    return{ok:false,status:503,json:async()=>({})};
   };
-  w.eval(fs.readFileSync("app/price-engine.js","utf8"));w.eval(fs.readFileSync("app/current-price-client.js","utf8"));w.eval(fs.readFileSync("app/published-product-client.js","utf8"));w.eval(fs.readFileSync("shopping-need-matcher.js","utf8"));w.eval(fs.readFileSync("app/shopping-need-client.js","utf8"));
+  w.eval(fs.readFileSync("app/price-engine.js","utf8"));w.eval(fs.readFileSync("wolt-sales-pack-validation.js","utf8"));w.eval(fs.readFileSync("app/current-price-client.js","utf8"));w.eval(fs.readFileSync("app/published-product-client.js","utf8"));w.eval(fs.readFileSync("shopping-need-matcher.js","utf8"));w.eval(fs.readFileSync("app/shopping-need-client.js","utf8"));
   w.alert=()=>{};w.confirm=()=>true;w.prompt=()=>null;w.scrollTo=()=>{};
   Object.defineProperty(w.navigator,"geolocation",{configurable:true,value:{getCurrentPosition:(_,fail)=>fail&&fail({code:1})}});
   w.HTMLElement.prototype.scrollIntoView=function(){};

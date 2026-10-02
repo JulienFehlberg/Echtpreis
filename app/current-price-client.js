@@ -1,6 +1,7 @@
 (function(root){
 "use strict";
 const DAY=86400000,STATES=new Set(["observed","verified"]),PUBLIC_TYPES=new Set(["regular","promotion"]),CONDITIONAL_TYPES=new Set(["loyalty","app","coupon","multi_buy","personalized"]);
+const WoltSalesPack=typeof module==="object"&&module.exports?require("../wolt-sales-pack-validation"):root.CaddyWoltSalesPackValidator;
 const text=x=>typeof x==="string"?x.trim():"",merchantKey=x=>text(x).toLowerCase(),clone=x=>JSON.parse(JSON.stringify(x));
 function number(x){if(typeof x!=="number"&&typeof x!=="string"||x===""||typeof x==="string"&&!x.trim())return null;const n=Number(x);return Number.isFinite(n)?n:null}
 function positive(x){const n=number(x);return n!=null&&n>0?n:null}
@@ -65,6 +66,7 @@ function normalizePublishedQuote(raw,query={},ctx={},nativeReference=false){
  if(nativeReference&&(!["Wolt EDEKA Berlin","REWE Berlin pickup"].includes(raw.sourceId)||source.venue&&!/^[a-f0-9]{24}$/.test(raw.retailerSku)||source.market&&!/^[1-9]\d{0,4}-[A-Za-z0-9]{1,40}-7ae33841-fa98-3b7e-9ee5-8132f39c189c$/.test(raw.retailerSku)))return null;
  const nativePack=packAmount(raw.packAmount,raw.packUnit),nativeCount=number(raw.packCount);
  if(!nativePack||!Number.isSafeInteger(nativeCount)||nativeCount!==pack.count||nativePack.unit!==pack.unit||Math.abs(nativePack.amount*nativeCount-pack.amount)>1e-9)return null;
+ if(source.venue&&(!WoltSalesPack||WoltSalesPack.multipackConflict(raw.name,nativePack.amount,nativePack.unit,nativeCount)||WoltSalesPack.structureUnresolved(raw.name,nativePack.amount,nativePack.unit,nativeCount)))return null;
  const time=ctx.now===undefined?Date.now():Number(ctx.now),captured=isoTime(raw.capturedAt),expiry=isoTime(raw.expiresAt);
  if(!Number.isFinite(time)||captured===null||expiry===null||captured>time||time-captured>DAY||expiry<=time||expiry>captured+DAY)return null;
  const cents=value=>typeof value==="number"&&Number.isFinite(value)&&value>=0&&value<=10000&&Math.abs(value*100-Math.round(value*100))<.000001?Math.round(value*100):null;

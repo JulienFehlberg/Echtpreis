@@ -1,0 +1,98 @@
+{
+  "evidenceKind": "archived-original-native-item",
+  "sourceFile": "work/price-sources-probes/wolt-hilbrecht-venue-content-native.json",
+  "sourceFileSha256": "1ee72a5425c12eb9b1d70ca1570d18f9cc49b2d08d05fc3ac76d11f1e84e8df1",
+  "sourcePointer": "$.pages[0].sections[0].items[5]",
+  "currentPriceProof": false,
+  "nativeItem": {
+    "id": "f4f809d32c853e0e4edf784c",
+    "options": [],
+    "advertising_metadata": null,
+    "advertising_badge": null,
+    "advertising_info": null,
+    "quantity_left": null,
+    "purchasable_balance": null,
+    "images": [
+      {
+        "url": "https://imageproxy.wolt.com/assets/686d2c456155cf1e51169a0a",
+        "blurhash": "LTRyvrof~VWBWCWCoeof~Vax4:kC"
+      }
+    ],
+    "videos": [],
+    "barcode_gtin": "4003490323600",
+    "price": 259,
+    "lowest_price_v2": null,
+    "alcohol_permille": 0,
+    "allowed_delivery_methods": [
+      "homedelivery",
+      "takeaway",
+      "eatin"
+    ],
+    "available_times": [
+      {
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "start_time": 0,
+        "end_time": 86400000
+      }
+    ],
+    "caffeine_info": null,
+    "can_be_promoted": {
+      "basket": true,
+      "venue": true,
+      "credits": true
+    },
+    "checksum": "5252faa7f3f304117d2e725d2a47b926",
+    "description": "Der Naturjoghurt ist besonders cremig und sehr gut geeignet für die Verfeinerung von Desserts, Müsli, Dips oder Tzatziki.",
+    "deposit": null,
+    "dietary_preferences": [],
+    "disabled_info": null,
+    "fulfillment_lead_time": null,
+    "has_extra_info": true,
+    "is_cutlery": false,
+    "is_no_contact_delivery_allowed": true,
+    "is_wolt_plus_only": false,
+    "lowest_price": null,
+    "max_quantity_per_purchase": 10,
+    "min_quantity_per_purchase": null,
+    "name": "Elinas Joghurt Natur 9,4%, 4 x 150 g",
+    "original_price": null,
+    "original_net_price": null,
+    "item_price_discount_validity_period": null,
+    "net_price": null,
+    "product_hierarchy_level_id": "a0262ee7-42dd-48fb-952b-980528a5efef",
+    "product_hierarchy_tags": [
+      "PERISHABLE"
+    ],
+    "restrictions": [],
+    "return_policy": null,
+    "sell_by_weight_config": null,
+    "should_display_purchasable_balance": false,
+    "tags": [],
+    "unit_info": "600 g",
+    "unit_price": {
+      "base": 1,
+      "original_price": null,
+      "original_net_price": null,
+      "price": 432,
+      "net_price": null,
+      "unit": "kilogram"
+    },
+    "variant": null,
+    "vat_category_code": "DEU-5",
+    "vat_percentage": 7,
+    "vat_percentage_decimal": "7.0",
+    "external_compliance_link": null,
+    "consent_info": {
+      "ask_consent": false,
+      "blur_image": false
+    }
+  }
+}

@@ -18,6 +18,7 @@ window.sparkorbHealthCheck=sparkorbSelfCheck;window.addEventListener("load",()=>
 </script>
 <script src="app/runtime.js"></script>
 <script src="app/price-engine.js"></script>
+<script src="wolt-sales-pack-validation.js"></script>
 <script src="app/current-price-client.js"></script>
 <script src="app/published-product-client.js"></script>
 <script src="app/penny-reference-client.js"></script>
@@ -1722,6 +1723,8 @@ const catalogExpansion={
  spuelmaschinentabs:{label:"Spülmaschinen-Tabs",unit:"piece"},muellbeutel:{label:"Müllbeutel",unit:"piece"},alufolie:{label:"Alufolie",unit:"piece"},backpapier:{label:"Backpapier",unit:"piece"},handseife:{label:"Handseife",unit:"piece"},duschgel:{label:"Duschgel",unit:"piece"},deo:{label:"Deo",unit:"piece"},rasierer:{label:"Rasierer",unit:"piece"},windeln:{label:"Windeln",unit:"piece"},feuchttuecher:{label:"Feuchttücher",unit:"piece"}
 };
 Object.assign(catalog,catalogExpansion);
+// Generic shopping wishes only: no article identity, assumed pack or price.
+Object.assign(catalog,{cashewkerne:{label:"Cashewkerne",unit:"kg"},studentenfutter:{label:"Studentenfutter",unit:"kg"},mandeln:{label:"Mandeln",unit:"kg"},erdnuesse:{label:"Erdnüsse",unit:"kg"}});
 // SPARKORB Data Engine v2
 // Ein Preis ist immer eine Beobachtung: Produkt + Händler + Betrag + Einheit + Datum + Quelle + Trust.
 const seedPrices=[
@@ -2035,6 +2038,36 @@ Object.assign(productAliases,{
  pommes:["pommes","pommes frites"],tk_gemuese:["tk gemüse","tiefkühlgemüse","tiefkuehlgemuese"],tk_obst:["tk obst","tiefkühlobst","tiefkuehlobst"],
  spuelmaschinentabs:["spülmaschinentabs","spuelmaschinentabs","geschirrspültabs"],muellbeutel:["müllbeutel","muellbeutel"],alufolie:["alufolie"],backpapier:["backpapier"],handseife:["handseife","seife"],duschgel:["duschgel"],deo:["deo","deodorant"],rasierer:["rasierer"],windeln:["windeln"],feuchttuecher:["feuchttücher","feuchttuecher"]
 });
+Object.assign(productAliases,{cashewkerne:["cashewkerne","cashew kern","cashew kerne","cashew","cashews"],studentenfutter:["studentenfutter","studenten futter"],mandeln:["mandeln","mandel"],erdnuesse:["erdnüsse","erdnuesse","erdnuss","erdnüsse kerne","erdnusskerne"]});
+const nutWishFamilies={cashewkerne:/\b(?:cashewkerne|cashew kern|cashew kerne|cashews?)\b/,studentenfutter:/\b(?:studentenfutter|studenten futter)\b/,mandeln:/\b(?:mandeln?)\b/,erdnuesse:/\b(?:erdnusse|erdnuesse|erdnuss|erdnusskerne|erdnusse kerne)\b/};
+function nutWishFamilyMatches(text,key){
+ const family=nutWishFamilies[key],n=normalizeProduct(text);if(!family||!family.test(n))return false;
+ if(/\b[a-z]*(?:milch|drink|mus|creme|butter|mehl|schoko[a-z]*|schokolad[a-z]*|schokoliert[a-z]*|kandiert[a-z]*|karamell[a-z]*|riegel[a-z]*|keks[a-z]*|kuchen[a-z]*|pralin[a-z]*|nougat|marzipan|pesto|cantuccini|honig|wasabi|chili)\b/.test(n))return false;
+ if(key!=="studentenfutter"&&(/\b(?:[a-z]*mix|[a-z]*mischung(?:en)?|mixed|nuts|studentenfutter|studenten futter|rosinen|cranberries|cranberry|trockenfruchte|frucht|walnuss(?:e|en)?|walnuesse(?:n)?|haselnuss(?:e|en)?|haselnuesse(?:n)?|pistazien|pistazie|macadamias|macadamia|pekannuss(?:e|en)|pekannuesse(?:n)?|paranuss(?:e|en)|paranuesse(?:n)?)\b/.test(n)||Object.entries(nutWishFamilies).some(([other,pattern])=>other!==key&&pattern.test(n))))return false;
+ return true;
+}
+function nutWishFeatures(text){
+ const n=normalizeProduct(text),features={};
+ const assign=(key,value)=>{if(Object.prototype.hasOwnProperty.call(features,key)&&features[key]!==value)features.invalid=true;else features[key]=value};
+ if(/\b(?:ungesalzen(?:e|en|er|es)?|salzfrei|natur)\b|\bohne salz\b/.test(n))assign("salt",false);if(/\bgesalzen(?:e|en|er|es)?\b|\bmit salz\b/.test(n))assign("salt",true);
+ if(/\b(?:ungerostet(?:e|en|er|es)?|ungeroestet(?:e|en|er|es)?|roh)\b/.test(n))assign("roast",false);if(/\b(?:gerostet(?:e|en|er|es)?|geroestet(?:e|en|er|es)?|roasted)\b/.test(n))assign("roast",true);
+ if(/\bbio\b/.test(n))assign("organic",true);if(/\bkonventionell\b/.test(n))assign("organic",false);
+ if(/\b(?:gehackt|hack)\b/.test(n))assign("form","chopped");if(/\b(?:gehobelt|blattchen|blaettchen)\b/.test(n))assign("form","sliced");if(/\b(?:gemahlen|gerieben)\b/.test(n))assign("form","ground");if(/\b(?:bruch|gebrochen)\b/.test(n))assign("form","broken");if(/\b(?:ganz|ganze|ganzen|whole)\b/.test(n))assign("form","whole");
+ if(/\b(?:geschalt|geschaelt|blanchiert)\b/.test(n))assign("skin",false);if(/\b(?:ungeschalt|ungeschaelt)\b/.test(n))assign("skin",true);
+ if(/\b(?:cranberry|cranberries)\b/.test(n))assign("fruit","cranberry");if(/\brosinen\b/.test(n))assign("fruit","raisin");
+ if(/\b(?:classic|klassisch|klassisches)\b/.test(n))assign("recipe","classic");if(/\b(?:cranberry|cranberries)\b/.test(n))assign("recipe","cranberry");
+ return features;
+}
+function nutWishAssessment(wish,offer){
+ if(!nutWishFamilyMatches(offer?.name,wish.key))return{status:"contradicted"};
+ const raw=String(wish.raw||wish.label||catalog[wish.key]?.label||""),wanted=nutWishFeatures(raw),actual=nutWishFeatures(offer.name);
+ let rest=normalizeProduct(raw.replace(/\d+(?:[.,]\d+)?\s*(?:kg|gramm|g|ml|liter|l|stueck|stück|stk)\b/gi," ")).replace(nutWishFamilies[wish.key]," ");
+ rest=rest.replace(/\b(?:\d+|x|packung|packungen|pack|packs|a|je|zu|mit|ohne|und|salz|natur|classic|klassisch|klassisches|bio|konventionell|ungesalzen|salzfrei|gesalzen|ungerostet|ungeroestet|roh|gerostet|geroestet|roasted|gehackt|hack|gehobelt|blattchen|blaettchen|gemahlen|gerieben|bruch|gebrochen|ganz|ganze|ganzen|whole|geschalt|geschaelt|blanchiert|ungeschalt|ungeschaelt|cranberry|cranberries|rosinen)\b/g," ").trim();
+ rest=rest.replace(/\b(?:un)?(?:gesalzen|gerostet|geroestet)(?:e|en|er|es)?\b/g," ").trim();
+ if(rest||wanted.invalid||/\bohne (?:rosinen|cranberry|cranberries)\b/.test(normalizeProduct(raw)))return{status:"contradicted",reason:"need-selection-required"};
+ if(actual.invalid||Object.entries(wanted).some(([key,value])=>Object.prototype.hasOwnProperty.call(actual,key)&&actual[key]!==value))return{status:"contradicted"};
+ return{status:"unconfirmed"};
+}
 const receiptAliasExtras={gummibaerchen:["haribo schlümpfe","schlümpfe","schlumpf"]};
 const exactBrandNames=["coca cola","coca-cola","red bull","dr oetker","dr. oetker","oetker","g&g","gut & günstig","gut und günstig","alpro","milka","ehrmann","nissin","nutella","paulaner"];
 const receiptNoise=["bio","bioland","okt","xxl","vegan","vegane","veganer","natur","classic","original","frisch","regional"];
@@ -2047,7 +2080,7 @@ function identifyReceiptProduct(name){
   if(n===a){score=1;type="exact"}else if((" "+n+" ").includes(" "+a+" ")){score=.92;type="alias"}else{score=tokenScore(n,a);type="fuzzy"}
   if(!best||score>best.score)best={key,label:catalog[key]?.label||key,score,type,matched:alias};
  }}
- if(!best||best.score<.58)return {key:null,label:"Nicht sicher erkannt",score:best?.score||0,type:"unknown"};
+  if(!best||best.score<.58||nutWishFamilies[best.key]&&!nutWishFamilyMatches(name,best.key))return {key:null,label:"Nicht sicher erkannt",score:best?.score||0,type:"unknown"};
  if(best.score<.78)return {...best,key:null,label:"Möglicherweise "+best.label,type:"uncertain"};
  return best;
 }
@@ -2116,6 +2149,7 @@ async function loadBerlinReferenceComparison(items,revision,runId){
 }
 function berlinReferenceWishAssessment(wish,offer){
  if(window.SparkorbPublishedProductClient?.selection(wish.selectedProduct)||wish.ean)return{status:'exact'};
+  if(nutWishFamilies[wish.key])return nutWishAssessment(wish,offer);
  const family={milch:'milk',butter:'butter',brot:'bread',eier:'eggs'}[wish.key],matcher=window.SparkorbShoppingNeedMatcher;
  if(!family)return{status:'unconfirmed'};if(!matcher)return{status:'contradicted'};
  let need;try{need=matcher.parse({search:wish.raw||wish.label||catalog[wish.key].label,constraints:{family}})}catch(_){return{status:'contradicted',reason:'need-selection-required'}}
@@ -2179,7 +2213,7 @@ function learnedMatch(name){
  return best&&best.score>=.82?{key:best.key,label:catalog[best.key]?.label||best.key,aliasRaw:best.raw,score:best.score,type:best.type,ean:best.ean,brand:best.brand,quantity:best.quantity}:null;
 }
 const baseIdentifyReceiptProduct=identifyReceiptProduct;
-identifyReceiptProduct=function(name){const learned=learnedMatch(name),base=baseIdentifyReceiptProduct(name);if(learned&&(!base.key||learned.score>=base.score))return learned;return base}
+identifyReceiptProduct=function(name){const learned=learnedMatch(name),base=baseIdentifyReceiptProduct(name);if(learned&&(!nutWishFamilies[learned.key]||nutWishFamilyMatches(name,learned.key))&&(!base.key||learned.score>=base.score))return learned;return base}
 const communityAliasCacheKey="sparkorb_community_aliases_v1";
 let communityAliasSync=null;
 function applyCommunityAliases(rows){
@@ -2285,6 +2319,7 @@ function isClearlyNonGrocery(raw){
 }
 function groceryMatchIsSafe(term,key,score){
  if(!key||!catalog[key])return false;
+  if(nutWishFamilies[key])return nutWishFamilyMatches(term,key);
  const q=normalizeProduct(term),tokens=q.split(/\s+/).filter(Boolean);
  if(score>=.90)return true;
  const aliases=[key,catalog[key].label,...(productAliases[key]||[])].map(normalizeProduct);
@@ -2300,14 +2335,16 @@ function parseWish(raw){
  if(!multi){const natural=rawForAmount.match(/^(\d+)\s*(?:packungen?|packs?)\s+(.+?)\s+(?:à|a|je|zu\s+je)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)$/i);if(natural)multi=[natural[0],natural[1],natural[3],natural[4],natural[2]]}
  if(multi){const count=Math.max(1,parseInt(multi[1],10)),size=parseFloat(multi[2].replace(",",".")),u=multi[3].toLowerCase(),rest=multi[4];const factor=(u==="g"||u==="ml")?.001:1;unit=(u==="g"||u==="kg")?"kg":"l";amount=count*size*factor;explicit=true;multiPack={count,amount:size*factor,unit,label:size.toLocaleString("de-DE")+" "+u};displayTerm=rest.trim();t=normalizeProduct(rest)}
  else{
-  let m=rawForAmount.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|pcs?|x|packungen?|packs?)?\s+(.+)$/i);
+   let m=rawForAmount.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|pcs?|x|packungen?|packs?)?\s+(.+)$/i);
+   if(!m){const suffix=rawForAmount.match(/^(.+?)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm)$/i);if(suffix&&Object.keys(nutWishFamilies).some(key=>nutWishFamilyMatches(suffix[1],key)))m=[suffix[0],suffix[2],suffix[3],suffix[1]];}
   if(m){amount=parseFloat(m[1].replace(",","."));let u=(m[2]||"stück").toLowerCase(),rest=m[3];displayTerm=rest.trim();explicit=true;
    if(u==="g"||u==="gramm"){amount/=1000;unit="kg"}else if(u==="ml"){amount/=1000;unit="l"}else if(u==="kg"){unit="kg"}else if(u==="l"||u==="liter"){unit="l"}else unit="piece";t=normalizeProduct(rest);}
  }
  t=t.replace(/^(frische|frischer|frisches)\s+/,"").trim();let key=null,best=0;
  for(const [k,aliases] of Object.entries(productAliases)){for(const alias of [k,...aliases]){const a=normalizeProduct(alias);let score=t===a?1:((" "+t+" ").includes(" "+a+" ")?0.9:tokenScore(t,a));if(score>best){best=score;key=k}}}
- const learned=learnedMatch(t);if(learned&&(!key||learned.score>=best)){key=learned.key;best=learned.score}
- if(best<0.72||!groceryMatchIsSafe(t,key,best))key=null;const c=key?catalog[key]:null;let calcAmount=amount,note="";
+  const nutKey=Object.keys(nutWishFamilies).find(candidate=>nutWishFamilyMatches(t,candidate));if(nutKey){key=nutKey;best=Math.max(best,.9)}
+  const learnedCandidate=learnedMatch(t),learned=nutKey&&learnedCandidate?.key!==nutKey?null:learnedCandidate;if(learned&&(!key||learned.score>=best)){key=learned.key;best=learned.score}
+  if(best<0.72||!groceryMatchIsSafe(t,key,best)||nutWishFamilies[key]&&explicit&&(!Number.isFinite(amount)||amount<=0||unit!=="kg"&&unit!=="piece"))key=null;const c=key?catalog[key]:null;let calcAmount=amount,note="";
  if(c&&unit==="piece"&&c.unit==="kg"&&c.unitWeight){calcAmount=amount*c.unitWeight;note="≈ "+calcAmount.toFixed(2).replace(".",",")+" kg für Preisvergleich";}
  else if(c&&unit!==c.unit&&c.unit==="piece"){note="Mengenangabe wird als Stück interpretiert";}
  const exactBrand=exactBrandNames.find(b=>normalized.includes(normalizeProduct(b)))||"";
@@ -2315,7 +2352,7 @@ function parseWish(raw){
  if(ean&&c){wish.ean=ean;wish.matchMode="exact";wish.note="Exaktes Barcode-Produkt";}
  if(multiPack){wish.packCount=multiPack.count;wish.packAmount=multiPack.amount;wish.packUnit=multiPack.unit;wish.packLabel=multiPack.label;wish.quantityMode="packages";wish.amount=multiPack.count*multiPack.amount;wish.unit=multiPack.unit;wish.calcAmount=wish.amount;wish.needsQuantity=false}
  if(learned&&c?.unit!=="piece"&&!c?.unitWeight&&!wish.learnedPackage){wish.needsQuantity=true;wish.needsClarification=true}
- return multiPack?wish:initializePackageQuantity(wish);
+  const result=multiPack?wish:initializePackageQuantity(wish);if(nutWishFamilies[key]&&!multiPack&&explicit&&unit==="kg")result.packLabel=(amount<1?(amount*1000).toLocaleString("de-DE")+" g":amount.toLocaleString("de-DE")+" kg");return result;
 }
 function shoppingProductTerm(raw){let q=normalizeProduct(normalizeSpokenQuantity(raw));q=q.replace(/^\d+\s*(?:x|packungen?|packs?)\s*(?:a|je|zu je)?\s*\d+(?:[.,]\d+)?\s*(?:kg|g|gramm|l|liter|ml)\s+/,"");q=q.replace(/^\d+\s*(?:packungen?|packs?)\s+/,"");return q.replace(/^\d+(?:[.,]\d+)?\s*(?:kg|g|gramm|l|liter|ml|stuck|stueck|stk|x)?\s+/,"").replace(/\s+(?:a|je|zu je)\s*\d+(?:[.,]\d+)?\s*(?:kg|g|gramm|l|liter|ml)$/,"").trim()}
 function productCandidates(raw){
