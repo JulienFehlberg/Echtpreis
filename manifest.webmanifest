@@ -1,6 +1,6 @@
 {
-  "name": "Sparkorb",
-  "short_name": "Sparkorb",
+  "name": "Caddy",
+  "short_name": "Caddy",
   "description": "Deine Liste. Dein günstigster Einkauf. Einkaufsliste erstellen, verfügbare Preise vergleichen und den Einkauf vorab planen.",
   "lang": "de-DE",
   "start_url": "./",
