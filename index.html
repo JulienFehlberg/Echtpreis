@@ -2112,15 +2112,22 @@ async function loadBerlinReferenceComparison(items,revision,runId){
  }}await Promise.all(Array.from({length:Math.min(4,items.length)},()=>worker()));
  if(runId===compareRunId&&revision===comparisonRevision){berlinComparisonReferences=fresh;renderBerlinReferenceComparison(items);$("results").style.display="block";}
 }
+function berlinReferenceWishAssessment(wish,offer){
+ if(window.SparkorbPublishedProductClient?.selection(wish.selectedProduct)||wish.ean)return{status:'exact'};
+ const family={milch:'milk',butter:'butter',brot:'bread',eier:'eggs'}[wish.key],matcher=window.SparkorbShoppingNeedMatcher;
+ if(!family)return{status:'unconfirmed'};if(!matcher)return{status:'contradicted'};
+ let need;try{need=matcher.parse({search:wish.raw||wish.label||catalog[wish.key].label,constraints:{family}})}catch(_){return{status:'contradicted',reason:'need-selection-required'}}
+ try{const assessment=matcher.classify(need,{name:offer.name});return assessment.matched.includes('family')?assessment:{status:'contradicted'};}catch(_){return{status:'contradicted'}}
+}
 function renderBerlinReferenceComparison(items){
  const section=$("berlinReferenceComparison"),target=$("berlinReferenceItems");if(!section||!target)return;section.style.display=items.length?"block":"none";
  const api=window.CaddyBerlinReferenceClient,now=Date.now(),stamp=v=>new Date(v).toLocaleString("de-DE",{dateStyle:"short",timeStyle:"short"});
- target.innerHTML=items.map(wish=>{const saved=berlinComparisonReferences.get(priceWishSignature(wish)),rows=(saved?.items||[]).map(row=>api?.candidate(row,{now})).filter(Boolean),represented=new Set(rows.map(row=>row.offer.merchant)),missing=(api?.retailers||[]).filter(m=>!represented.has(m));
+ target.innerHTML=items.map(wish=>{const saved=berlinComparisonReferences.get(priceWishSignature(wish)),rows=(saved?.items||[]).map(row=>api?.candidate(row,{now})).filter(row=>row&&berlinReferenceWishAssessment(wish,row.offer).status!=='contradicted'),represented=new Set(rows.map(row=>row.offer.merchant)),missing=(api?.retailers||[]).filter(m=>!represented.has(m));
   const title='<h3 style="margin:18px 0 8px">'+escHtml(wish.label||wish.raw||catalog[wish.key]?.label||"Artikel")+'</h3>';
-  if(!rows.length)return title+'<div class="detail">'+(saved?.ok===false?'Berliner Preisabruf gerade nicht verfügbar.':'Für diesen Artikel liegt noch kein passender Berliner Preisbeleg vor.')+'</div>';
+  if(!rows.length)return title+'<div class="detail">'+(berlinReferenceWishAssessment(wish,{name:catalog[wish.key]?.label}).reason==='need-selection-required'?'Bitte wähle ein konkretes Produkt, damit die gewünschten Eigenschaften sicher zugeordnet werden können.':saved?.ok===false?'Berliner Preisabruf gerade nicht verfügbar.':'Für diesen Artikel liegt noch kein passender Berliner Preisbeleg vor.')+'</div>';
   return title+rows.map(({offer,reference})=>{const shop=reference.sourceMarket,channel=offer.scopeChannel==='pickup'?'Abholung':'Lieferung',range=reference.knownPriceRange,variance=range&&range.min!==range.max?' · Weitere belegte Märkte: '+eur(range.min)+'–'+eur(range.max):'',deposit=offer.deposit===null?'Pfand unbekannt':'Pfand '+eur(offer.deposit),priceKind=offer.priceType==='regular'?'Normalpreis':offer.priceType==='promotion'?'Aktionspreis':'Preisart offen';
    return '<article class="merchant"><div><b>'+escHtml(offer.merchant)+' · Berlin</b><div class="detail">'+escHtml(offer.name)+' · '+escHtml(offer.pack)+'</div><div class="detail">'+escHtml(shop.name)+' · '+escHtml(shop.address)+' · '+escHtml(shop.postalCode+' '+shop.city)+'</div></div><div style="text-align:right"><b class="price">'+eur(offer.price)+'</b><div class="detail">je Packung · '+channel+'</div></div><div class="detail" style="grid-column:1 / -1">Berliner Referenz · Stand '+escHtml(stamp(reference.observedAt))+escHtml(variance)+'<br>'+escHtml(priceKind)+' · '+escHtml(deposit)+' · zusätzliche Gebühren offen'+(offer.availability==='unavailable'?' · derzeit als nicht verfügbar veröffentlicht':'')+'<br><a href="'+escHtml(offer.sourceUrl)+'" target="_blank" rel="noopener noreferrer">Quelle: '+escHtml(offer.sourceId)+'</a></div></article>';
-  }).join('')+(saved?.truncated?'<div class="detail">Weitere Artikel vorhanden; grenze deine Suche über ein konkretes Produkt ein.</div>':'')+(missing.length?'<div class="detail" style="margin-top:8px">Noch kein passender Berliner Preisbeleg: '+escHtml(missing.join(', '))+'.</div>':'')+(!wish.selectedProduct?'<div class="detail" style="margin-top:8px">Die genannten Artikel sind einzelne Varianten. Wähle ein konkretes Produkt für deinen Warenkorb.</div>':'');
+  }).join('')+(saved?.truncated?'<div class="detail">Weitere Artikel vorhanden; grenze deine Suche über ein konkretes Produkt ein.</div>':'')+(missing.length?'<div class="detail" style="margin-top:8px">Noch kein passender Berliner Preisbeleg: '+escHtml(missing.join(', '))+'.</div>':'')+(!wish.selectedProduct&&!wish.ean?'<div class="detail" style="margin-top:8px">Die genannten Artikel sind einzelne Varianten. Fehlende Angaben zu gewünschten Eigenschaften bleiben offen. Wähle ein konkretes Produkt für deinen Warenkorb.</div>':'');
  }).join('');
 }
 
