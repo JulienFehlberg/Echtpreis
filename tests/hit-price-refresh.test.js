@@ -30,6 +30,7 @@ function database(initial={}){
  const state=copy(initial),calls=[],events=[];
  return{state,calls,events,probeRecord:null,failCheckpoint:false,query:async function(sql,params=[]){
   calls.push({sql,params:copy(params)});
+  if(sql.includes('AS "eventCount"'))return{rows:[{eventCount:0,blockedGtinCount:0}]};
   if(sql.startsWith("SELECT cursor"))return{rows:Object.keys(state).length?[copy(state)]:[]};
   if(sql.startsWith("INSERT INTO "+Refresh.TABLE)&&params.length===7){events.push("failure-checkpoint");Object.assign(state,{lastError:params[1],retryAfter:params[2],updatedAt:params[3]});if(params[4])state.cursor=null;return{rows:[],rowCount:1};}
   if(sql.startsWith("INSERT INTO "+Refresh.TABLE)){events.push("progress-checkpoint");if(this.failCheckpoint)throw Error("checkpoint-write-failed");Object.assign(state,{cursor:JSON.parse(params[1]),lastCompletedAt:params[2]?params[3]:state.lastCompletedAt??null,completedCycles:(state.completedCycles||0)+(params[2]?1:0),nativeTotal:params[4],pagesFetched:params[5],receivedCumulative:params[6],lastError:params[7],retryAfter:params[8],scanCoverage:JSON.parse(params[9]),ordinaryCycleId:params[10],updatedAt:params[3]});return{rows:[],rowCount:1};}

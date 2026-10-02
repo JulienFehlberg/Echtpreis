@@ -57,7 +57,7 @@ async function collect(options={}){
  // A wrapper supplies one actual-clock day snapshot so a batch crossing midnight has a consistent checkpoint.
  const cursorDay=options.cursorDay??Clock.today(new Date(now())),state=cursorFor(options.cursor,store,cursorDay),jar=new Map(),seen=new Set(state.seenSkus),quarantined=new Set(state.conflictGtins);
  if(state.cursorDay!==cursorDay)throw fail("hit-continuation-day-conflict");
- const accepted=[],rejected=[],pages=[],originalListingGaps=[],brandPartitionPreflight=[];let requests=0,lastRequest=0,error=null,brandFilterProbe=null,brandPartitionProbe=null;
+ const accepted=[],rejected=[],pages=[],originalListingGaps=[],ordinaryConflictOriginals=[],brandPartitionPreflight=[];let requests=0,lastRequest=0,error=null,brandFilterProbe=null,brandPartitionProbe=null;
  async function read(input,probeControl=null){
   if(probeControl!==null&&!BrandProbe.authorizeRequest(probeControl,input)&&!PartitionProbe.authorizeRequest(probeControl,input))throw fail("hit-brand-probe-request-not-authorized");
   let url=probeControl===null?allowedUrl(input,store):input;const requestUrl=url,redirects=[];
@@ -140,6 +140,10 @@ async function collect(options={}){
   pages.push({...page.meta,rowCount:parsed.rowCount,uniqueRowCount:unique.length,accepted:pageAccepted.length,rejected:pageRejected.length,pagination,categoryId:node?.id??null,children:childIds,truncated,conflictGtins:[...pageConflicts],nativeSkuIds:[...unique],nativeAllSkuIds:[...pageSkus],nativeQuotes:structuredClone(incoming),nativeQuoteRows:parsed.accepted.map((candidate,index)=>({retailerSku:candidate.retailerSku,...structuredClone(incoming[index])}))});
   state.visited.push({id:node?.id??null,url:page.meta.sourceResponseUrl,level:node?.level??null,total:pagination.total,rowCount:parsed.rowCount,uniqueRowCount:unique.length,children:childIds,truncated,unresolved,conflictGtins:[...pageConflicts],...(unresolved?{unresolvedReason:tree.rejected?.length?"native-category-discovery-rejected":"native-category-children-unconfirmed"}:{})});
   state.pagesFetched++;state.received+=unique.length;
+  // Private originals authenticate later ordinary/partition comparisons. The
+  // existing 16-request and six-MiB response bounds cap transient retained data.
+  // Originals never enter the durable normal cursor or public refresh output.
+  ordinaryConflictOriginals.push({body:page.body,meta:structuredClone(page.probeMeta),node:node?structuredClone(node):null});
   return pagination;
  }
  while(requests<maxRequests){
@@ -204,6 +208,6 @@ async function collect(options={}){
  }
  state.categoryCoverage=coverageFor(state);
  const complete=!error&&state.initialIndexLoaded&&state.overviewLoaded&&state.pending.length===0,nativePaginationComplete=complete&&state.total!==null&&state.received===state.total&&!state.categoryCoverage.truncatedLeaves.length&&!state.categoryCoverage.unresolvedNodes.length&&!state.conflictGtins.length;
- return{sourceId:SOURCE,cursorDay:state.cursorDay,accepted,rejected,pages,requests,complete,categoryTraversalCycleComplete:complete,nativePaginationComplete,publishedTraversalComplete:nativePaginationComplete,categoryCoverage:state.categoryCoverage,conflictGtins:[...state.conflictGtins],physicalStoreAssortmentComplete:false,cursor:complete?null:state,total:state.total,pagesFetched:state.pagesFetched,received:state.received,error,brandFilterProbe,brandPartitionProbe,originalListingGaps,brandPartitionPreflight};
+ return{sourceId:SOURCE,cursorDay:state.cursorDay,accepted,rejected,pages,requests,complete,categoryTraversalCycleComplete:complete,nativePaginationComplete,publishedTraversalComplete:nativePaginationComplete,categoryCoverage:state.categoryCoverage,conflictGtins:[...state.conflictGtins],physicalStoreAssortmentComplete:false,cursor:complete?null:state,total:state.total,pagesFetched:state.pagesFetched,received:state.received,error,brandFilterProbe,brandPartitionProbe,originalListingGaps,ordinaryConflictOriginals,brandPartitionPreflight};
 }
 module.exports={SOURCE,COOLDOWN_UNTIL,allowedUrl,validDay,validConflictGtins,cursorFor,coverageFor,collect};
