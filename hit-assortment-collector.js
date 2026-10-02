@@ -1,5 +1,5 @@
 "use strict";
-const crypto=require("node:crypto"),Client=require("./hit-assortment-client"),Identity=require("./product-identity"),Clock=require("./current-price-query-service"),BrandProbe=require("./hit-native-brand-probe");
+const crypto=require("node:crypto"),Client=require("./hit-assortment-client"),Identity=require("./product-identity"),Clock=require("./current-price-query-service"),BrandProbe=require("./hit-native-brand-probe"),ListingGap=require("./hit-native-list-gap");
 const SOURCE=Client.SOURCE,COOLDOWN_UNTIL="2026-10-01T19:51:16.522Z";
 const fail=code=>Object.assign(new Error(code),{code});
 const hash=body=>crypto.createHash("sha256").update(body).digest("hex");
@@ -26,7 +26,7 @@ function nativeNode(raw,store){
  return{id:raw.id,name:typeof raw.name==="string"?raw.name.slice(0,300):"",url,level:raw.level,count:raw.count,order:Number.isSafeInteger(raw.order)?raw.order:null,parentId:typeof raw.parentId==="string"?raw.parentId:null,observedChildIds:Array.isArray(raw.observedChildIds)?raw.observedChildIds.filter(id=>typeof id==="string"&&/^\d+$/.test(id)):[],evidence:raw.evidence};
 }
 function coverageFor(state){
- return{visited:state.visited.length,pending:state.pending.length,truncatedLeaves:state.visited.filter(n=>n.truncated).map(n=>({id:n.id,url:n.url,total:n.total,received:n.rowCount})),unresolvedNodes:state.visited.filter(n=>n.unresolved).map(n=>({id:n.id,url:n.url,total:n.total,received:n.rowCount,reason:n.unresolvedReason||"native-category-children-unconfirmed"})),conflictingIdentities:[...(state.conflictGtins||[])]};
+ return{visited:state.visited.length,pending:state.pending.length,truncatedLeaves:state.visited.filter(n=>n.truncated).map(n=>({id:n.id,url:n.url,total:n.total,received:n.rowCount})),unresolvedNodes:state.visited.filter(n=>n.unresolved).map(n=>({id:n.id,url:n.url,total:n.total,received:n.rowCount,reason:n.unresolvedReason||"native-category-children-unconfirmed",...(n.quarantinedListing?{quarantinedListing:true,gapId:n.gapId,uniqueReceived:0,unresolvedSubtree:n.level<3}:{})})),conflictingIdentities:[...(state.conflictGtins||[])]};
 }
 function cursorFor(raw,store,cursorDay=Clock.today()){
  if(!validDay(cursorDay))throw fail("hit-continuation-cursor-conflict");
@@ -37,9 +37,11 @@ function cursorFor(raw,store,cursorDay=Clock.today()){
  if(new Set(pending.map(n=>n.id)).size!==pending.length)throw fail("hit-continuation-cursor-conflict");
  for(const v of raw.visited){
   if(!object(v)||v.id!==null&&(typeof v.id!=="string"||!/^\d+$/.test(v.id))||!integer(v.total)||!integer(v.rowCount)||!integer(v.uniqueRowCount)||v.uniqueRowCount>v.rowCount||!Array.isArray(v.children)||v.children.some(id=>typeof id!=="string"||!/^\d+$/.test(id))||typeof v.truncated!=="boolean"||typeof v.unresolved!=="boolean"||!validConflictGtins(v.conflictGtins===undefined?[]:v.conflictGtins)||(v.conflictGtins?.length||0)>Math.min(v.rowCount,200))throw fail("hit-continuation-cursor-conflict");
+  if(Object.hasOwn(v,"quarantinedListing")||Object.hasOwn(v,"gapId")){if(v.quarantinedListing!==true||!/^[a-f0-9]{64}$/.test(v.gapId||"")||v.id===null||![1,2,3].includes(v.level)||v.unresolved!==true||v.unresolvedReason!==ListingGap.CODE||v.uniqueRowCount!==0||v.rowCount<1||v.rowCount>200||v.total<v.rowCount||v.children.length||(v.conflictGtins?.length||0))throw fail("hit-continuation-cursor-conflict");}
   try{allowedUrl(v.url,store)}catch{throw fail("hit-continuation-cursor-conflict")}
   if(v.id!==null&&new URL(v.url).pathname.match(/-(\d+)$/)?.[1]!==v.id)throw fail("hit-continuation-cursor-conflict");
  }
+ const gapIds=raw.visited.filter(v=>v.quarantinedListing===true).map(v=>v.gapId);if(new Set(gapIds).size!==gapIds.length)throw fail("hit-continuation-cursor-conflict");
  const conflictGtins=raw.conflictGtins===undefined?[]:raw.conflictGtins,observedConflicts=new Set(raw.visited.flatMap(v=>v.conflictGtins||[]));
  if(observedConflicts.size!==conflictGtins.length||conflictGtins.some(gtin=>!observedConflicts.has(gtin)))throw fail("hit-continuation-cursor-conflict");
  if(raw.visited.reduce((n,v)=>n+v.uniqueRowCount,0)!==raw.received||new Set(raw.visited.map(v=>v.id)).size!==raw.visited.length||pending.some(n=>raw.visited.some(v=>v.id===n.id))||!raw.initialIndexLoaded&&(raw.overviewLoaded||raw.pagesFetched||pending.length)||raw.overviewLoaded&&raw.total===null)throw fail("hit-continuation-cursor-conflict");
@@ -54,7 +56,7 @@ async function collect(options={}){
  // A wrapper supplies one actual-clock day snapshot so a batch crossing midnight has a consistent checkpoint.
  const cursorDay=options.cursorDay??Clock.today(new Date(now())),state=cursorFor(options.cursor,store,cursorDay),jar=new Map(),seen=new Set(state.seenSkus),quarantined=new Set(state.conflictGtins);
  if(state.cursorDay!==cursorDay)throw fail("hit-continuation-day-conflict");
- const accepted=[],rejected=[],pages=[];let requests=0,lastRequest=0,error=null,brandFilterProbe=null;
+ const accepted=[],rejected=[],pages=[],originalListingGaps=[];let requests=0,lastRequest=0,error=null,brandFilterProbe=null;
  async function read(input,probeControl=null){
   if(probeControl!==null&&!BrandProbe.authorizeRequest(probeControl,input))throw fail("hit-brand-probe-request-not-authorized");
   let url=probeControl===null?allowedUrl(input,store):input;const requestUrl=url,redirects=[];
@@ -134,7 +136,7 @@ async function collect(options={}){
   for(const sku of unique)seen.add(sku);state.seenSkus.push(...unique);
   const pageRejected=[...parsed.rejected,...parsed.accepted.filter(c=>nextConflicts.has(c.gtin)).map(c=>({retailerSku:c.retailerSku,gtin:c.gtin,reasons:["hit-conflicting-native-gtin-cycle-quarantine"]}))];
   accepted.push(...pageAccepted);rejected.push(...pageRejected);
-  pages.push({...page.meta,rowCount:parsed.rowCount,uniqueRowCount:unique.length,accepted:pageAccepted.length,rejected:pageRejected.length,pagination,categoryId:node?.id??null,children:childIds,truncated,conflictGtins:[...pageConflicts]});
+  pages.push({...page.meta,rowCount:parsed.rowCount,uniqueRowCount:unique.length,accepted:pageAccepted.length,rejected:pageRejected.length,pagination,categoryId:node?.id??null,children:childIds,truncated,conflictGtins:[...pageConflicts],nativeSkuIds:[...unique],nativeQuotes:structuredClone(incoming)});
   state.visited.push({id:node?.id??null,url:page.meta.sourceResponseUrl,level:node?.level??null,total:pagination.total,rowCount:parsed.rowCount,uniqueRowCount:unique.length,children:childIds,truncated,unresolved,conflictGtins:[...pageConflicts],...(unresolved?{unresolvedReason:tree.rejected?.length?"native-category-discovery-rejected":"native-category-children-unconfirmed"}:{})});
   state.pagesFetched++;state.received+=unique.length;
   return pagination;
@@ -149,8 +151,18 @@ async function collect(options={}){
    else if(state.pending.length){
     let selectedIndex=0;for(let index=1;index<state.pending.length;index++)if(priority(state.pending[index])<priority(state.pending[selectedIndex]))selectedIndex=index;
     const node=state.pending[selectedIndex],page=await read(node.url);
-    // Children append during processing; remove this exact node only after success.
-    processPage(page,node);state.pending.splice(selectedIndex,1);
+    // Children append during ordinary processing; remove this exact node only
+    // after success or a fully original-bound diagnostic exclusion.
+    try{processPage(page,node);state.pending.splice(selectedIndex,1);}
+    catch(e){
+     if(e.code!==ListingGap.CODE||originalListingGaps.length)throw e;
+     let isolated;try{const original=ListingGap.record({body:page.body,meta:page.probeMeta},node,{now:now()});isolated=ListingGap.isolate(state,original,{now:now()});}catch{throw e;}
+     Object.assign(state,isolated.cursor);pages.push(isolated.page);originalListingGaps.push(isolated.originalRecord);
+     rejected.push(...Array.from({length:isolated.originalRecord.category.rowCount},(_,index)=>({index,retailerSku:null,reasons:[ListingGap.CODE],diagnosticOnly:true,gapId:isolated.originalRecord.id})));
+     // A diagnostic gap stops at the same failure and retains its full pause.
+     // No rejected-page row, quote, child or SKU enters traversal/admission.
+     throw Object.assign(e,isolated.sourceError);
+    }
     // Only an already processed, fresh native control can authorize one extra
     // HTML GET. It never enters price parsing, deduplication or traversal state.
     if(options.brandProbeEnabled===true&&brandFilterProbe===null&&requests<maxRequests){
@@ -168,7 +180,7 @@ async function collect(options={}){
     }
    }
    else break;
-  }catch(e){error={code:e.code||e.message,retryAfterMs:Math.max(3600000,Number(e.retryAfterMs)||0),...(e.conflictGtins?{conflictGtins:e.conflictGtins}:{})};break;}
+  }catch(e){error={code:e.code||e.message,retryAfterMs:Math.max(3600000,Number(e.retryAfterMs)||0),...(e.conflictGtins?{conflictGtins:e.conflictGtins}:{}),...(e.isolatedListingGapId?{isolatedListingGapId:e.isolatedListingGapId}:{})};break;}
  }
  // A later category may contradict a quote accepted earlier in this same batch.
  for(let index=accepted.length-1;index>=0;index--)if(quarantined.has(accepted[index].gtin)){
@@ -178,6 +190,6 @@ async function collect(options={}){
  }
  state.categoryCoverage=coverageFor(state);
  const complete=!error&&state.initialIndexLoaded&&state.overviewLoaded&&state.pending.length===0,nativePaginationComplete=complete&&state.total!==null&&state.received===state.total&&!state.categoryCoverage.truncatedLeaves.length&&!state.categoryCoverage.unresolvedNodes.length&&!state.conflictGtins.length;
- return{sourceId:SOURCE,cursorDay:state.cursorDay,accepted,rejected,pages,requests,complete,categoryTraversalCycleComplete:complete,nativePaginationComplete,publishedTraversalComplete:nativePaginationComplete,categoryCoverage:state.categoryCoverage,conflictGtins:[...state.conflictGtins],physicalStoreAssortmentComplete:false,cursor:complete?null:state,total:state.total,pagesFetched:state.pagesFetched,received:state.received,error,brandFilterProbe};
+ return{sourceId:SOURCE,cursorDay:state.cursorDay,accepted,rejected,pages,requests,complete,categoryTraversalCycleComplete:complete,nativePaginationComplete,publishedTraversalComplete:nativePaginationComplete,categoryCoverage:state.categoryCoverage,conflictGtins:[...state.conflictGtins],physicalStoreAssortmentComplete:false,cursor:complete?null:state,total:state.total,pagesFetched:state.pagesFetched,received:state.received,error,brandFilterProbe,originalListingGaps};
 }
 module.exports={SOURCE,COOLDOWN_UNTIL,allowedUrl,validDay,validConflictGtins,cursorFor,coverageFor,collect};
