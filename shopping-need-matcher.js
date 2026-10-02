@@ -6,7 +6,8 @@
 const FIELDS = Object.freeze({
   milk: { processing: ["uht", "fresh"], fatPercent: "number", lactose: ["free", "contains"], flavour: ["plain"] },
   bread: { grain: ["wholegrain", "rye", "wheat"], sliced: "boolean" },
-  eggs: { size: ["S", "M", "L", "XL"], husbandry: ["barn", "free-range", "organic"], raw: "boolean" }
+  eggs: { size: ["S", "M", "L", "XL"], husbandry: ["barn", "free-range", "organic"], raw: "boolean" },
+  butter: { salt: ["salted", "unsalted"] }
 });
 
 function fail(code, message) {
@@ -32,13 +33,15 @@ function familyEvidence(text, family) {
   const excluded = {
     milk: /\b(?:buttermilch|milchreis|milchdrink\w*|milchmisch\w*|milchschokolad\w*|milchpulver|milchshake|kondensmilch|sauermilch|dickmilch|kefir|joghurt|quark|pudding|kakao|cappuccino|latte|hafermilch|sojamilch|mandelmilch|kokosmilch|reismilch|vanillemilch|schokomilch|erdbeermilch|bananenmilch|pflanzendrink|babymilch|milchnahrung|anfangsmilch|folgemilch|sauglingsmilch)\b|\b(?:hafer|soja|mandel|kokos|reis)[ -]?(?:milch|drink)\b|\b(?:vegan|pflanzlich)\w*\b/,
     bread: /\b\w*(?:backmischung|brotmischung|brotaufstrich|brotchips|brotcroutons|toast\w*|sandwich|paniermehl|semmelbrosel|pizzabrot)\b/,
-    eggs: /\b(?:schoko\w*|schokolad\w*|marzipan\w*|uberraschungs?ei\w*|eierlikor|eiernudel\w*|eiersalat|eierteig\w*|nudeln?|pasta|spaghetti|spatzle|sauce|sosse|salat|quiche|omelett|ruhrei|eipulver|eierpulver|flussigei\w*|eiweiss\w*|eigelb\w*)\b|\bkinder\b.*\b(?:ei|eier|uberraschung)\b/
+    eggs: /\b(?:schoko\w*|schokolad\w*|marzipan\w*|uberraschungs?ei\w*|eierlikor|eiernudel\w*|eiersalat|eierteig\w*|nudeln?|pasta|spaghetti|spatzle|sauce|sosse|salat|quiche|omelett|ruhrei|eipulver|eierpulver|flussigei\w*|eiweiss\w*|eigelb\w*)\b|\bkinder\b.*\b(?:ei|eier|uberraschung)\b/,
+    butter: /\b\w*(?:buttermilch|butterschmalz|butterreinfett|butterkeks\w*|buttergeback\w*|buttertoast\w*|butterbrotpapier|buttergemuse\w*|buttercroissant\w*|buttersosse\w*|buttersauce\w*)\b|\b(?:erdnuss|peanut|nuss|mandel|cashew|kokos|kakao|shea)[ -]?butter\b|\b(?:streichfett\w*|streichmisch\w*|mischfett\w*|margarine|ghee|butteralternative\w*|butterersatz\w*|vegan\w*|pflanzlich\w*|aroma\w*|keks\w*|cookies?|\w*geback\w*|toast\w*|brot|croissant\w*|hefeteig|blatterteig|sauce|sosse|chicken|fertiggericht\w*|gemuse|tiefkuhlgemuse)\b|\b(?:raps|pflanzen|oliven|sonnenblumen)(?:ol|oel)\b|\b(?:krauter|knoblauch|gewurz|truffel|zitrone)[ -]?butter\b|\bbutter\s+(?:mit\s+)?(?:krautern?|knoblauch|gewurzen?|truffeln?|zitrone)\b/
   };
   if (excluded[family].test(t)) return "contradicted";
   const positive = {
     milk: /\b(?:voll|frisch|weide|roh|ziegen|schafs|heu|mager)?milch\b/,
     bread: /\b[a-z]*brot\b|\bpumpernickel\b/,
-    eggs: /\b(?:bio|freiland|huhner|bodenhaltungs|oster)?eier\b|\bei\b/
+    eggs: /\b(?:bio|freiland|huhner|bodenhaltungs|oster)?eier\b|\bei\b/,
+    butter: /\b[a-z]*butter\b/
   };
   function ingredient(match) {
     return /\b(?:mit|aus|auf|ohne|enth[a-z]*lt|plus|with|contains)\s+(?:[a-z]+[ -]){0,3}$/.test(t.slice(0, match.index));
@@ -63,8 +66,17 @@ function descriptionExcludesFamily(text, family) {
   const types = {
     milk: /^(?:(?:pflanzlich|vegan|flavoured|aromatisiert)[a-z]*\s+)?(?:buttermilch|milchreis|milchdrink[a-z]*|milchmisch[a-z]*|milchschokolad[a-z]*|milchpulver|milchshake|kondensmilch|sauermilch|dickmilch|kefir|joghurt|quark|pudding|kakao|cappuccino|latte|hafermilch|sojamilch|mandelmilch|kokosmilch|reismilch|vanillemilch|schokomilch|erdbeermilch|bananenmilch|pflanzendrink|babymilch|milchnahrung|anfangsmilch|folgemilch|sauglingsmilch|(?:hafer|soja|mandel|kokos|reis)[ -]?(?:milch|drink)|brot|eier)\b|^(?:pflanzlich|vegan)[a-z]*\s+(?:[a-z]+[ -]){0,2}(?:milch|drink|alternative)\b/,
     bread: /^(?:[a-z]*backmischung|[a-z]*brotmischung|brotaufstrich|brotchips|brotcroutons|toast[a-z]*|sandwich|paniermehl|semmelbrosel|pizzabrot|milch|eier)\b/,
-    eggs: /^(?:(?:flussig|pasteurisiert)[a-z]*\s+)?(?:schoko[a-z]*|schokolad[a-z]*|marzipan[a-z]*|uberraschungs?ei[a-z]*|eierlikor|eiernudel[a-z]*|eiersalat|eierteig[a-z]*|nudeln?|pasta|spaghetti|spatzle|sauce|sosse|salat|quiche|omelett|ruhrei|eipulver|eierpulver|flussigei[a-z]*|eiweiss[a-z]*|eigelb[a-z]*|milch|brot)\b/
+    eggs: /^(?:(?:flussig|pasteurisiert)[a-z]*\s+)?(?:schoko[a-z]*|schokolad[a-z]*|marzipan[a-z]*|uberraschungs?ei[a-z]*|eierlikor|eiernudel[a-z]*|eiersalat|eierteig[a-z]*|nudeln?|pasta|spaghetti|spatzle|sauce|sosse|salat|quiche|omelett|ruhrei|eipulver|eierpulver|flussigei[a-z]*|eiweiss[a-z]*|eigelb[a-z]*|milch|brot)\b/,
+    butter: /^(?:(?:vegan|pflanzlich|streichfahig)[a-z]*\s+)?(?:streichfett[a-z]*|streichmisch[a-z]*|mischfett[a-z]*|margarine|ghee|butteralternative[a-z]*|butterersatz[a-z]*|butterschmalz|butterreinfett|buttermilch|(?:erdnuss|peanut|nuss|mandel|cashew|kokos|kakao|shea)[ -]?butter|(?:krauter|knoblauch|gewurz|truffel|zitrone)[ -]?butter|aroma[a-z]*|butter[ -]vanille|buttergemuse|buttersosse[a-z]*|buttersauce[a-z]*|butter[ -]chicken|butter[ -]toast[a-z]*|buttergeback[a-z]*|butterkeks[a-z]*|milch|brot|eier)\b/
   };
+  if (family === "butter") {
+    // A named product's initial self-description can disclose a blend. A later
+    // recipe, ingredient list or suggestion must not replace its identity.
+    const first = t.split(/[.!?\n;]/, 1)[0];
+    if (!/^(?:rezept|zubereitung|serviervorschlag|verwendung|zutaten|fur|zum|ideal fur|geeignet fur)\b/.test(first)
+        && /^(?:.{1,100}\s+ist\s+)?(?:(?:eine|unsere|herrliche|feine|streichfahige|leckere)\s+){0,4}mischung\s+aus\b/.test(first)
+        && /\bbutter\b/.test(first) && /\b(?:raps|pflanzen|oliven|sonnenblumen)(?:ol|oel)\b/.test(first)) return true;
+  }
   return types[family].test(t) || /^(?:handcreme|bodylotion|lotion|duschgel|shampoo|seife|waschmittel|spulmittel|gesichtsmaske|hautpflege|kerze|spielzeug|dekoration|kostum|brotdose|eierbecher)\b/.test(t);
 }
 
@@ -126,7 +138,7 @@ function observations(text, family, description = false) {
     scan("grain", /\broggenfrei(?:e|er|es|en)?\b/g, "not:rye", "rye");
     scan("sliced", /\bungeschnitten(?:e|er|es|en)?\b/g, false, true);
     scan("sliced", /\b(?:geschnitten(?:e|er|es|en)?|in scheiben)\b/g, true, false);
-  } else {
+  } else if (family === "eggs") {
     scan("husbandry", /\bbodenhaltung\b/g, "barn");
     scan("husbandry", /\bfreiland(?:haltung|eier)?\b/g, "free-range");
     scan("husbandry", /\b(?:bio(?:[ -]eier)?|okologisch(?:e|er|es|en)?)\b/g, "organic");
@@ -141,6 +153,28 @@ function observations(text, family, description = false) {
       const prefix = /^(?:nicht|kein(?:e|en|em|er|es)?)\s+/.exec(match[1]);
       const size = match[1].replace(/^(?:nicht|kein(?:e|en|em|er|es)?)\s+/, "").replace(/\s/g, "").toUpperCase();
       add("size", prefix || negated(t, match.index) ? `not:${size}` : size);
+    }
+  } else if (family === "butter") {
+    // Only explicit product salt claims are supported; neither fat percentage,
+    // brand, "mild" nor a recipe's salted ingredient establishes this variant.
+    const saltText = description ? t.split(/\b(?:zutaten|ingredients)\s*:/, 1)[0].split(/;|\n/).filter(part => {
+      const claim = part.trim().replace(/^(?:produktbeschreibung|produktart|verkehrsbezeichnung|bezeichnung)\s*:\s*/, "");
+      // Only a self-stated variant may supply description evidence. Serving
+      // prose is not a product claim even if it names the offered butter.
+      if (/\b(?:ideal|geeignet|rezept|servier\w*|verwend\w*|zubereit\w*|wurzen|verfeinern|mischen|anrichten|bestreichen|hinzufugen|fur|zum|zu)\b/.test(claim)) return false;
+      return /^(?:(?:(?:die|diese|unsere|eine)\s+)?(?:[a-z]*butter)(?:\s+ist)?\s*[,:-]?\s+)?(?:(?:nicht|kein(?:e|en|em|er|es)?)\s+)?(?:ungesalzen(?:e|er|es|en)?|salzfrei(?:e|er|es|en)?|gesalzen(?:e|er|es|en)?|(?:ohne|frei von|mit) (?:meer|speise)?salz|meersalz)\b/.test(claim);
+    }).join("; ") : t;
+    for (const [expression, value, negative] of [
+      [/\b(?:ungesalzen|salzfrei)(?:e|er|es|en)?\b/g, "unsalted", "salted"],
+      [/\b(?:ohne|frei von) salz\b/g, "unsalted", "salted"],
+      [/\bgesalzen(?:e|er|es|en)?\b/g, "salted", "unsalted"],
+      [/\bmit salz\b/g, "salted", "unsalted"],
+      [/\b(?:meer|speise)salz(?:kornern?|koernern?)?\b/g, "salted", null]
+    ]) for (const match of saltText.matchAll(expression)) {
+      if (/\b(?:spuren von|spuren an|eventuell|moglicherweise)\s*$/.test(saltText.slice(0, match.index))) continue;
+      const isNegative = negated(saltText, match.index);
+      if (isNegative && negative === null) continue; // No sea salt does not prove no salt.
+      add("salt", isNegative ? negative : value);
     }
   }
   return values;
@@ -175,6 +209,8 @@ function parse(input) {
   if (familyEvidence(search, family) === "contradicted") fail("invalid-shopping-need-conflict", "Search conflicts with the requested family");
   if (family === "milk" && /\b(?:fettarm\w*|fettreduziert\w*|vollmilch|magermilch|entrahmt\w*|fettfrei\w*|light)\b/.test(normalized(search)))
     fail("invalid-shopping-need-conflict", "Qualitative fat labels need a supported explicit formulation; no exact fat percentage is inferred");
+  if (family === "butter" && /\b(?:pur|rein(?:e|er|es|en)?|salzarm\w*|salzreduziert\w*|fettarm\w*|fettreduziert\w*|fettfrei\w*|light|laktosefrei\w*|lactosefrei\w*|ohne zusatz\w*)\b|\b(?:ohne|frei von|nicht(?: mit)?) (?:meer|speise)salz\b/.test(normalized(search)))
+    fail("invalid-shopping-need-conflict", "Butter composition, fat and reduced-salt claims are not supported constraints");
   const features = observations(search, family);
   if (search.includes("%") && (family !== "milk" || !features.has("fatPercent")))
     fail("invalid-shopping-need-conflict", "Unsupported percentage qualifier");
