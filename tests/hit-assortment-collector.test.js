@@ -335,4 +335,81 @@ test("missing guest proof or malformed facets on a normal control cannot authori
   const h=probeHarness({}, {controlBody}),result=await collect(h,{brandProbeEnabled:true});assert.equal(result.brandFilterProbe,null);assert.equal(result.error,null);assert.equal(result.complete,true);assert.equal(result.requests,9);
  }
 });
+const Gap=require("../hit-native-list-gap"),GapFixture=require("./fixtures/hit-list-gap");
+test("normal internal page IDs and first-quote evidence bind the exact cursor additions without sharing mutable objects",async()=>{
+ const first=await collect(harness(),{maxRequests:4}),page=first.pages[0];assert.deepEqual(page.nativeSkuIds,[milk.external_id,ordinary.external_id]);assert.equal(page.nativeSkuIds.length,page.uniqueRowCount);assert.deepEqual(first.cursor.seenSkus,page.nativeSkuIds);
+ const quotes=[milk,ordinary].map(row=>({key:row.ean+"|ml|1000|1",quote:{gtin:row.ean,signature:crypto.createHash("sha256").update(JSON.stringify([row.headline,Math.round(Number(row.price)*100),null,"discount"])).digest("hex")}}));assert.deepEqual(page.nativeQuotes,quotes);
+ for(const q of page.nativeQuotes){assert.deepEqual(first.cursor.seenQuotes[q.key],q.quote);assert.notEqual(first.cursor.seenQuotes[q.key],q.quote);}
+ const snapshot=clone(first.cursor),resumed=await collect(harness(),{cursor:first.cursor,maxRequests:3});assert.deepEqual(first.cursor,snapshot);assert.deepEqual(resumed.pages[0].nativeSkuIds,[]);assert.deepEqual(resumed.pages[0].nativeQuotes,quotes);assert.deepEqual(resumed.cursor.seenQuotes,snapshot.seenQuotes);
+ page.nativeQuotes[0].quote.signature="0".repeat(64);page.nativeSkuIds.push("999999ST");assert.deepEqual(first.cursor,snapshot);
+});
+test("an original-bound identical SKU failure excludes its entire category and stops with the unchanged hour",async()=>{
+ const node=GapFixture.node(),page=GapFixture.page(),prior=GapFixture.cursor(),snapshot=clone(prior),h=GapFixture.harness({[node.url]:page.body},{maxRequests:8});
+ const result=await Collector.collect({...h.options,cursor:prior,brandProbeEnabled:true});
+ assert.equal(result.error.code,Gap.CODE);assert.equal(result.error.retryAfterMs,3600000);assert.equal(result.requests,3);assert.equal(h.calls.length,3);assert.equal(result.complete,false);assert.equal(result.brandFilterProbe,null);
+ assert.equal(result.originalListingGaps.length,1);const original=result.originalListingGaps[0];assert.equal(result.error.isolatedListingGapId,original.id);assert.equal(original.original.body,page.body);Gap.validateRecord(original,{now:GapFixture.NOW+2000});
+ assert.equal(result.accepted.length,0);assert.equal(result.pages.length,1);assert.equal(result.pages[0].uniqueRowCount,0);assert.equal(result.pages[0].diagnosticOnly,true);assert(!Object.hasOwn(result.pages[0],"nativeSkuIds"));assert(!Object.hasOwn(result.pages[0],"nativeQuotes"));assert.equal(result.rejected.length,2);assert(result.rejected.every(row=>row.retailerSku===null));
+ assert.equal(result.pagesFetched,2);assert.equal(result.received,1);assert.equal(result.cursor.visited.at(-1).gapId,original.id);assert.equal(result.cursor.visited.at(-1).quarantinedListing,true);assert.deepEqual(result.cursor.pending,[snapshot.pending[1]]);assert.deepEqual(prior,snapshot);Collector.cursorFor(result.cursor,Gap.STORE,result.cursorDay);
+});
+test("a malformed native SKU cannot import even independently valid goods rows from its category",async()=>{
+ const node=GapFixture.node(),page=GapFixture.page({rows:[GapFixture.row(1),{...GapFixture.row(2),external_id:"invalid"}]}),h=GapFixture.harness({[node.url]:page.body});
+ const result=await Collector.collect({...h.options,cursor:GapFixture.cursor()});assert.equal(result.error.code,Gap.CODE);assert.equal(result.originalListingGaps.length,1);assert.deepEqual(result.originalListingGaps[0].invalidSkuIndexes,[1]);assert.equal(result.accepted.length,0);assert.equal(result.received,1);assert.deepEqual(result.cursor.seenQuotes,{});assert.deepEqual(result.cursor.seenSkus,[GapFixture.sku(9)]);
+});
+test("isolating a prioritized middle node preserves FIFO of every remaining pending node",async()=>{
+ const first=GapFixture.node("4261244",1),bad={...GapFixture.node("4261253",1),url:"https://www.hit.de/sortiment/kaese-eier-molkerei-4261253"},last=GapFixture.node("4261911",1),page=GapFixture.page({category:bad});
+ const prior=GapFixture.cursor([first,bad,last]),h=GapFixture.harness({[bad.url]:page.body}),result=await Collector.collect({...h.options,cursor:prior});
+ assert.equal(h.calls[2],bad.url);assert.equal(result.originalListingGaps.length,1);assert.deepEqual(result.cursor.pending,[prior.pending[0],prior.pending[2]]);assert.deepEqual(result.cursor.visited.at(-1).children,[]);assert.equal(result.categoryCoverage.unresolvedNodes[0].unresolvedSubtree,true);
+});
+test("failed parents and leaves admit no offered children and retain explicit unresolved coverage",async()=>{
+ for(const level of[1,2,3]){
+  const node=GapFixture.node("4261891",level),child=GapFixture.node("4261912",level===3?3:level+1),page=GapFixture.page({category:node,edit:data=>{data.filters.categories.push(child)}}),prior=GapFixture.cursor([node,GapFixture.node("4261911")]),h=GapFixture.harness({[node.url]:page.body});
+  const result=await Collector.collect({...h.options,cursor:prior});assert.equal(result.originalListingGaps.length,1);assert.deepEqual(result.cursor.pending,[prior.pending[1]]);assert.deepEqual(result.cursor.visited.at(-1).children,[]);assert.equal(result.categoryCoverage.unresolvedNodes[0].uniqueReceived,0);assert.equal(result.categoryCoverage.unresolvedNodes[0].unresolvedSubtree,level<3);assert.equal(result.nativePaginationComplete,false);
+ }
+});
+test("missing original guest proof retains the existing unproved SKU failure and entire cursor",async()=>{
+ for(const transform of[body=>body.replace('data-hit-konto=""','data-hit-konto="account"'),body=>body.replace(/<head[^>]*><\/head>/,"")]){
+  const node=GapFixture.node(),page=GapFixture.page({transform}),prior=GapFixture.cursor(),h=GapFixture.harness({[node.url]:page.body}),result=await Collector.collect({...h.options,cursor:prior});
+  assert.equal(result.error.code,Gap.CODE);assert.equal(result.error.retryAfterMs,3600000);assert(!Object.hasOwn(result.error,"isolatedListingGapId"));assert.deepEqual(result.originalListingGaps,[]);assert.deepEqual(result.cursor.pending,prior.pending);assert.equal(result.pages.length,0);assert.equal(result.pagesFetched,1);
+ }
+});
+test("source Date/Age/store/category defects never become a successful SKU gap",async()=>{
+ const node=GapFixture.node();for(const spec of[{body:GapFixture.page().body,headers:{age:"301"}},{body:GapFixture.page().body,headers:{date:null}},
+  {body:GapFixture.page({rows:[GapFixture.row(1),{...GapFixture.row(1),storeId:1729,storeNumber:"054"}]}).body},
+  {body:GapFixture.page({edit:(_data,params)=>{params.for_category="4261911"}}).body},
+  {body:GapFixture.page({edit:data=>{data.meta.category.count=99}}).body}]){
+  const prior=GapFixture.cursor(),h=GapFixture.harness({[node.url]:spec}),result=await Collector.collect({...h.options,cursor:prior});assert(result.error);assert.deepEqual(result.originalListingGaps,[]);assert.deepEqual(result.cursor.pending,prior.pending);assert.equal(result.pages.length,0);assert.equal(result.accepted.length,0);
+ }
+});
+test("a bad-SKU category cannot hide a known cross-page quote contradiction",async()=>{
+ const node=GapFixture.node(),prior=GapFixture.cursor(),row=GapFixture.row(1);prior.seenQuotes[row.ean+"|g|500|1"]={gtin:row.ean,signature:"a".repeat(64)};
+ const h=GapFixture.harness({[node.url]:GapFixture.page().body}),result=await Collector.collect({...h.options,cursor:prior});assert.equal(result.error.code,Gap.CODE);assert.deepEqual(result.originalListingGaps,[]);assert.equal(result.pages.length,0);assert.deepEqual(result.cursor.pending,prior.pending);assert.deepEqual(result.cursor.seenQuotes,prior.seenQuotes);
+});
+test("existing contradictory native quote quarantine is unchanged and produces no listing gap",async()=>{
+ const node=GapFixture.node(),row=GapFixture.row(1),conflict={...row,price:"1.35",priceTag:{...row.priceTag,priceCent:"35"}},page=GapFixture.page({rows:[row,conflict]}),h=GapFixture.harness({[node.url]:page.body});
+ const result=await Collector.collect({...h.options,cursor:GapFixture.cursor()});assert.equal(result.error,null);assert.deepEqual(result.originalListingGaps,[]);assert.equal(result.pages.length,1);assert.equal(result.received,2);assert.deepEqual(result.conflictGtins,[row.ean]);assert.equal(result.accepted.length,0);assert(!result.pages[0].diagnosticOnly);
+});
+test("an isolated category preserves established native GTIN quarantine across the remaining cursor",async()=>{
+ const prior=GapFixture.cursor(),gtin=GapFixture.row(9).ean;prior.conflictGtins=[gtin];prior.visited[0].conflictGtins=[gtin];const snapshot=clone(prior),node=GapFixture.node(),h=GapFixture.harness({[node.url]:GapFixture.page().body});
+ const result=await Collector.collect({...h.options,cursor:prior});assert.equal(result.originalListingGaps.length,1);assert.deepEqual(result.conflictGtins,[gtin]);assert.deepEqual(result.cursor.conflictGtins,[gtin]);assert.deepEqual(result.pages[0].conflictGtins,[]);assert.deepEqual(prior,snapshot);assert.equal(result.nativePaginationComplete,false);
+});
+test("native403/429 remain source refusals with no original gap and the longer native pause",async()=>{
+ for(const status of[403,429]){
+  const node=GapFixture.node(),prior=GapFixture.cursor(),h=GapFixture.harness({[node.url]:{status,body:"Synthetic refusal",headers:{"retry-after":"7200"}}}),result=await Collector.collect({...h.options,cursor:prior});
+  assert.equal(result.error.code,"hit-source-http-"+status);assert.equal(result.error.retryAfterMs,7200000);assert.deepEqual(result.originalListingGaps,[]);assert.deepEqual(result.cursor.pending,prior.pending);assert.equal(result.pages.length,0);assert.equal(result.requests,3);
+ }
+});
+test("the diagnostic path consumes no request beyond the existing budget",async()=>{
+ const node=GapFixture.node(),prior=GapFixture.cursor(),h=GapFixture.harness({[node.url]:GapFixture.page().body},{maxRequests:2}),result=await Collector.collect({...h.options,cursor:prior});
+ assert.equal(result.requests,2);assert.equal(result.error,null);assert.deepEqual(result.originalListingGaps,[]);assert.deepEqual(result.cursor.pending,prior.pending);assert.equal(result.pages.length,0);
+});
+test("a later real failure isolates one different category while retaining the first original gap marker",async()=>{
+ const firstNode=GapFixture.node(),secondNode=GapFixture.node("4261911"),firstHarness=GapFixture.harness({[firstNode.url]:GapFixture.page().body}),first=await Collector.collect({...firstHarness.options,cursor:GapFixture.cursor()});
+ const later=GapFixture.NOW+3602000,h=GapFixture.harness({[secondNode.url]:GapFixture.page({category:secondNode,now:later}).body},{now:later,maxRequests:8}),snapshot=clone(first.cursor),result=await Collector.collect({...h.options,cursor:first.cursor});
+ assert.equal(result.requests,3);assert.equal(result.originalListingGaps.length,1);assert.notEqual(result.originalListingGaps[0].id,first.originalListingGaps[0].id);assert.equal(result.cursor.visited.filter(v=>v.quarantinedListing).length,2);assert.equal(result.cursor.pending.length,0);assert.equal(result.complete,false);assert.equal(result.received,1);assert.deepEqual(first.cursor,snapshot);Collector.cursorFor(result.cursor,Gap.STORE,result.cursorDay);
+});
+test("after the full pause the actual next category progresses without revisiting or importing the excluded original",async()=>{
+ const node=GapFixture.node(),next=GapFixture.node("4261911"),firstHarness=GapFixture.harness({[node.url]:GapFixture.page().body}),first=await Collector.collect({...firstHarness.options,cursor:GapFixture.cursor()}),later=GapFixture.NOW+3602000;
+ const h=GapFixture.harness({[next.url]:GapFixture.page({category:next,rows:[GapFixture.row(2)],now:later}).body},{now:later,maxRequests:4}),snapshot=clone(first.cursor),result=await Collector.collect({...h.options,cursor:first.cursor});
+ assert.equal(result.error,null);assert.equal(result.complete,true);assert.equal(result.pagesFetched,3);assert.equal(result.received,2);assert.equal(result.accepted.length,1);assert.equal(result.accepted[0].gtin,GapFixture.row(2).ean);assert.equal(result.nativePaginationComplete,false);assert.equal(result.publishedTraversalComplete,false);assert.equal(result.categoryCoverage.unresolvedNodes.length,1);assert(!h.calls.includes(node.url));assert.deepEqual(first.cursor,snapshot);assert.deepEqual(result.originalListingGaps,[]);
+});
 (async()=>{const failures=[];for(const {name,run}of cases)try{await run()}catch(e){failures.push(name+": "+e.stack)}if(failures.length){console.error(failures.join("\n\n"));process.exitCode=1}else console.log("hit-assortment-collector: OK ("+cases.length+" offline category and safety cases)")})().catch(e=>{console.error(e);process.exitCode=1});
