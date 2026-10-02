@@ -144,7 +144,12 @@ async function collect(options={}){
     if(!roots.length||tree.rejected?.length)throw fail("hit-public-category-navigation-required");
     enqueue(roots);state.initialIndexLoaded=true;
    }else if(!state.overviewLoaded){const page=await read("https://www.hit.de/sortiment/uebersicht"),pagination=processPage(page,null);state.total=pagination.total;state.overviewLoaded=true;}
-   else if(state.pending.length){const node=state.pending[0],page=await read(node.url);processPage(page,node);state.pending.shift();}
+   else if(state.pending.length){
+    let selectedIndex=0;for(let index=1;index<state.pending.length;index++)if(priority(state.pending[index])<priority(state.pending[selectedIndex]))selectedIndex=index;
+    const node=state.pending[selectedIndex],page=await read(node.url);
+    // Children append during processing; remove this exact node only after success.
+    processPage(page,node);state.pending.splice(selectedIndex,1);
+   }
    else break;
   }catch(e){error={code:e.code||e.message,retryAfterMs:Math.max(3600000,Number(e.retryAfterMs)||0),...(e.conflictGtins?{conflictGtins:e.conflictGtins}:{})};break;}
  }

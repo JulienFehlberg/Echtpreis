@@ -37,6 +37,11 @@ function fixture(){
   [new URL(butterLeaf.url).pathname]:listing([butter],butterLeaf,[dairy,butterParent,butterLeaf],1)
  };
 }
+function queuedBasicsFixture(){
+ const cosmetics=cat(4261244,"Drogerie & Kosmetik","/sortiment/drogerie-kosmetik-4261244",1,0,999),routes=fixture();
+ routes["/sortiment"]=navigation([dairy,cosmetics]);routes["/sortiment/uebersicht"]=listing([milk,ordinary],null,[dairy,cosmetics],3);
+ routes[new URL(cosmetics.url).pathname]=listing([],cosmetics,[cosmetics],0);return{routes,cosmetics};
+}
 function harness(routes=fixture(),options={}){
  let time=options.clock??clock;const calls=[],delays=[];
  const response=(body,opts={})=>{
@@ -84,6 +89,33 @@ test("a request-limited traversal resumes its exact offered queue and preserves 
  const h=harness(),first=await collect(h,{maxRequests:5});assert.equal(first.complete,false);assert.equal(first.requests,5);assert.equal(first.pagesFetched,2);assert.equal(first.received,2);assert.equal(first.cursor.version,2);assert.equal(first.cursor.pending.length,2);
  const saved=clone(first.cursor),second=await collect(h,{maxRequests:6,cursor:first.cursor});assert.deepEqual(first.cursor,saved);assert.equal(second.complete,true);assert.equal(second.received,3);assert.equal(second.pagesFetched,6);assert.deepEqual(second.accepted.map(c=>c.gtin),[butter.ean]);
  assert.equal(h.calls[5].init.headers.Cookie,undefined);assert(second.pages.every(p=>p.categoryId!==null));
+});
+test("an existing native queue selects basics before cosmetics without losing newly enqueued children",async()=>{
+ const {routes,cosmetics}=queuedBasicsFixture(),first=await collect(harness(routes),{maxRequests:5}),saved=clone(first.cursor);
+ assert.deepEqual(first.cursor.pending.map(n=>n.id),[String(cosmetics.id),String(milkParent.id),String(butterParent.id)]);
+ const h=harness(routes),selected=await collect(h,{cursor:first.cursor,maxRequests:3});assert.deepEqual(first.cursor,saved);assert.equal(selected.error,null);assert.equal(selected.requests,3);assert.equal(h.calls[2].url,milkParent.url);
+ assert.deepEqual(selected.pages.map(p=>p.categoryId),[String(milkParent.id)]);assert.deepEqual(selected.cursor.pending.map(n=>n.id),[String(cosmetics.id),String(butterParent.id),String(milkLeaf.id)]);
+ assert.equal(selected.pagesFetched,3);assert.equal(selected.received,2);assert.equal(selected.total,3);assert.deepEqual(selected.conflictGtins,[]);assert.equal(selected.nativePaginationComplete,false);assert.equal(selected.accepted.length,0);Collector.cursorFor(selected.cursor,store,selected.cursorDay);
+ const beforeFinish=clone(selected.cursor),finished=await collect(harness(routes),{cursor:selected.cursor});assert.deepEqual(selected.cursor,beforeFinish);assert.equal(finished.error,null);assert.equal(finished.complete,true);assert.equal(finished.nativePaginationComplete,true);assert.equal(finished.publishedTraversalComplete,true);assert.equal(finished.physicalStoreAssortmentComplete,false);assert.equal(finished.cursor,null);
+ assert.deepEqual(finished.pages.map(p=>p.categoryId),[String(butterParent.id),String(milkLeaf.id),String(butterLeaf.id),String(cosmetics.id)]);
+ const pages=[...first.pages,...selected.pages,...finished.pages],quotes=[...first.accepted,...selected.accepted,...finished.accepted];assert.equal(new Set(pages.map(p=>p.categoryId)).size,7);assert.equal(pages.length,7);assert.equal(finished.pagesFetched,7);assert.equal(finished.received,3);assert.equal(pages.reduce((n,p)=>n+p.uniqueRowCount,0),3);assert.equal(pages.reduce((n,p)=>n+p.rowCount,0),10);
+ assert.deepEqual(quotes.map(q=>[q.gtin,q.pack,q.price]),[[milk.ean,"1l Packung",1.25],[ordinary.ean,"1l Packung",0.95],[butter.ean,"250g Packung",2.79]]);assert.deepEqual(finished.conflictGtins,[]);assert.deepEqual(finished.categoryCoverage,{visited:7,pending:0,truncatedLeaves:[],unresolvedNodes:[],conflictingIdentities:[]});
+ for(const p of pages){assert.equal(p.pagination.page,0);assert.equal(p.sourceResponseHash,crypto.createHash("sha256").update(routes[new URL(p.sourceResponseUrl).pathname]).digest("hex"));assert.equal(p.rowCount,Math.min(p.pagination.limit,p.pagination.total));}
+ for(const q of quotes){const p=pages.find(p=>p.sourceResponseUrl===q.sourceResponseUrl&&p.sourceResponseHash===q.sourceResponseHash);assert(p);assert.equal(q.capturedAt,p.capturedAt);assert.equal(Date.parse(q.expiresAt)-Date.parse(q.capturedAt),86400000);assert.equal(q.nativeStoreId,1775);assert.equal(q.nativeStoreNumber,"258");}
+});
+test("equal native priorities preserve the existing cursor queue order",async()=>{
+ const {routes,cosmetics}=queuedBasicsFixture(),first=await collect(harness(routes),{maxRequests:5}),cursor=clone(first.cursor);cursor.pending=[cursor.pending[0],cursor.pending[2],cursor.pending[1]];const saved=clone(cursor),h=harness(routes),r=await collect(h,{cursor,maxRequests:3});
+ assert.deepEqual(cursor,saved);assert.equal(r.error,null);assert.equal(h.calls[2].url,butterParent.url);assert.deepEqual(r.cursor.pending.map(n=>n.id),[String(cosmetics.id),String(milkParent.id),String(butterLeaf.id)]);assert.equal(r.received,3);assert.equal(r.pagesFetched,3);assert.deepEqual(r.accepted.map(c=>c.gtin),[butter.ean]);
+});
+test("a failed non-head priority request retains every pending node and the source cooldown",async()=>{
+ const {routes}=queuedBasicsFixture(),first=await collect(harness(routes),{maxRequests:5}),saved=clone(first.cursor);
+ for(const failure of [{body:"Denied",status:403,headers:{"retry-after":"7200"}},{body:"Rate limited",status:429,headers:{"retry-after":"7200"}},{body:"<header>Berlin-Mitte</header>"}]){
+  const broken={...routes,[new URL(milkParent.url).pathname]:failure},h=harness(broken),r=await collect(h,{cursor:first.cursor,maxRequests:16});assert.deepEqual(first.cursor,saved);assert.equal(h.calls.length,3);assert.equal(h.calls[2].url,milkParent.url);assert.equal(r.requests,3);assert.equal(r.complete,false);assert.equal(r.nativePaginationComplete,false);assert.equal(r.pages.length,0);assert.equal(r.accepted.length,0);assert.equal(r.received,first.received);assert.equal(r.pagesFetched,first.pagesFetched);assert.deepEqual(r.cursor,saved);assert.equal(r.error.code,failure.status?"hit-source-http-"+failure.status:"hit-native-pagination-unconfirmed");assert.equal(r.error.retryAfterMs,failure.status?7200000:3600000);
+ }
+});
+test("non-head priority traversal preserves cycle quarantine and incomplete publication flags",async()=>{
+ const {routes,cosmetics}=queuedBasicsFixture(),conflict=clone(milk);conflict.price="1.45";conflict.priceTag.priceCent="45";routes[new URL(dairy.url).pathname]=listing([conflict,ordinary],dairy,[dairy,milkParent,butterParent],3);
+ const first=await collect(harness(routes),{maxRequests:5}),saved=clone(first.cursor);assert.deepEqual(first.conflictGtins,[milk.ean]);const r=await collect(harness(routes),{cursor:first.cursor});assert.deepEqual(first.cursor,saved);assert.equal(r.error,null);assert.equal(r.complete,true);assert.equal(r.nativePaginationComplete,false);assert.equal(r.publishedTraversalComplete,false);assert.equal(r.physicalStoreAssortmentComplete,false);assert.equal(r.received,3);assert.equal(r.pagesFetched,7);assert.deepEqual(r.conflictGtins,[milk.ean]);assert.deepEqual(r.categoryCoverage.conflictingIdentities,[milk.ean]);assert.deepEqual(r.pages.map(p=>p.categoryId),[String(milkParent.id),String(butterParent.id),String(milkLeaf.id),String(butterLeaf.id),String(cosmetics.id)]);assert.deepEqual(r.accepted.map(c=>c.gtin),[butter.ean]);assert(![...first.accepted,...r.accepted].some(c=>c.gtin===milk.ean));
 });
 test("a new Berlin day requires a fresh cycle and accepts a real later price capture",async()=>{
  const before=Date.parse("2026-10-01T21:59:30.000Z"),after=Date.parse("2026-10-01T22:00:01.000Z"),first=await collect(harness(fixture(),{clock:before}),{maxRequests:5}),original=clone(first.cursor);
