@@ -22,6 +22,7 @@ function sameRunScope(last,normalized){
 }
 async function refresh(pool,input={},deps={}){
  if(!pool)throw new Error("inventory-database-required");
+ const allowed=()=>typeof deps.shouldContinue!=="function"||deps.shouldContinue();if(!allowed())return{ok:false,skipped:"server-stopping"};
  const today=input.today||Clock.today(),normalized=Client.normalizeInput({today,maxPages:input.maxPages??20,size:100,region:input.region??DEFAULT_REGION,locationIds:input.locationIds}),scope=Client.scopeMetadata(normalized.region,normalized.locationIds);
  if(running)return{ok:false,skipped:"already-running"};
  running=true;const owner="inventory-"+crypto.randomUUID();let leased=false,runId=null,last=null,started=Date.now();
@@ -32,8 +33,10 @@ async function refresh(pool,input={},deps={}){
   // failure still retains its existing cooldown when changing the region.
   const sourceFailed=last?.status==="failed"||!!last?.error||last?.result?.ok===false;
   if(!input.force&&(compatible||sourceFailed)&&!due(last,started,input.intervalMs))return{ok:true,skipped:"not-due",scope,lastRun:last};
+  if(!allowed())return{ok:false,skipped:"server-stopping"};
   leased=await State.acquire(pool,LEASE,owner,900000);
   if(!leased)return{ok:false,skipped:"lease-held"};
+  if(!allowed())return{ok:false,skipped:"server-stopping"};
   const cursor=compatible&&last.status!=="finished"&&Client.cursorMatches(last.cursor,normalized)?last.cursor:null;
   runId=crypto.randomUUID();
   await pool.query("INSERT INTO price_inventory_runs(id,source,window_since,window_until,cursor,result) VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb)",[runId,SOURCE,normalized.since,today,JSON.stringify(cursor),JSON.stringify({scope})]);
