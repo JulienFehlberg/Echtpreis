@@ -24,12 +24,17 @@ function normalized(text) {
   return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ß/g, "ss")
     .replace(/[–—−]/g, "-");
 }
+// Whole native product tokens identify toiletries/cleaners. Do not exclude
+// generic "creme", "body" or "milk": those also occur in food or brand names.
+const NON_FOOD_TOKEN = "(?:[a-z]*(?:handcreme|bodycreme|korpercreme|lotion|duschgel|duschcreme|shampoo|seifen?|waschmittel|spulmittel|reinigungsmittel|gesichtsmaske|hautpflege|cremebad(?:er)?|cremedusche)|[a-z]*(?:reinigungs|abschmink|sonnen|scheuer|pflege|korper|body|dusch)-?(?:milch|milk)|kerze|spielzeug|dekoration|kostum|brotdose|eierbecher)";
+const NON_FOOD_HEADLINE = new RegExp("\\b" + NON_FOOD_TOKEN + "\\b");
+const NON_FOOD_DESCRIPTION_START = new RegExp("^" + NON_FOOD_TOKEN + "\\b");
 function negated(text, index) {
   return /\b(?:nicht|kein(?:e|en|em|er|es)?|ohne|frei von)\s+(?:(?:besonders|extra|mehr|auch|aus|von|mit)\s+){0,2}$/.test(text.slice(0, index));
 }
 function familyEvidence(text, family) {
   const t = normalized(text);
-  if (/\b(?:handcreme|bodylotion|lotion|duschgel|shampoo|seife|waschmittel|spulmittel|gesichtsmaske|hautpflege|kerze|spielzeug|dekoration|kostum|brotdose|eierbecher)\b/.test(t)) return "contradicted";
+  if (NON_FOOD_HEADLINE.test(t)) return "contradicted";
   const excluded = {
     milk: /\b(?:buttermilch|milchreis|milchdrink\w*|milchmisch\w*|milchschokolad\w*|milchpulver|milchshake|kondensmilch|sauermilch|dickmilch|kefir|joghurt|quark|pudding|kakao|cappuccino|latte|hafermilch|sojamilch|mandelmilch|kokosmilch|reismilch|vanillemilch|schokomilch|erdbeermilch|bananenmilch|pflanzendrink|babymilch|milchnahrung|anfangsmilch|folgemilch|sauglingsmilch)\b|\b(?:hafer|soja|mandel|kokos|reis)[ -]?(?:milch|drink)\b|\b(?:vegan|pflanzlich)\w*\b/,
     bread: /\b\w*(?:backmischung|brotmischung|brotaufstrich|brotchips|brotcroutons|toast\w*|sandwich|paniermehl|semmelbrosel|pizzabrot)\b/,
@@ -77,7 +82,7 @@ function descriptionExcludesFamily(text, family) {
         && /^(?:.{1,100}\s+ist\s+)?(?:(?:eine|unsere|herrliche|feine|streichfahige|leckere)\s+){0,4}mischung\s+aus\b/.test(first)
         && /\bbutter\b/.test(first) && /\b(?:raps|pflanzen|oliven|sonnenblumen)(?:ol|oel)\b/.test(first)) return true;
   }
-  return types[family].test(t) || /^(?:handcreme|bodylotion|lotion|duschgel|shampoo|seife|waschmittel|spulmittel|gesichtsmaske|hautpflege|kerze|spielzeug|dekoration|kostum|brotdose|eierbecher)\b/.test(t);
+  return types[family].test(t) || NON_FOOD_DESCRIPTION_START.test(t);
 }
 
 function observations(text, family, description = false) {
