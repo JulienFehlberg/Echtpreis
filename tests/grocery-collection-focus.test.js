@@ -1,0 +1,12 @@
+"use strict";
+const assert=require("node:assert/strict"),Focus=require("../grocery-collection-focus"),Runner=require("../price-refresh-runner"),Sources=require("../price-sources").SOURCES;
+(async()=>{const before=Object.fromEntries(Object.keys(Sources).map(name=>[name,{nextAttemptAt:"2099-01-01T00:00:00.000Z"}])),states=structuredClone(before),seen=[];
+ const enabled=["Wolt EDEKA Berlin","ALDI Nord published assortment","REWE Berlin pickup"],paused=["HIT Berlin store assortment","dm online","Wolt nahkauf Berlin Wrangelstraße"];
+ for(const name of [...enabled,...paused])states[name]={nextAttemptAt:"2026-10-02T00:00:00.000Z"};
+ const originals=structuredClone(states),handlers=Object.fromEntries([...enabled,...paused].map(name=>[name,async()=>{assert(enabled.includes(name));seen.push(name);return{received:1,accepted:1,nextAttemptAt:"2099-01-01T00:00:00.000Z"};}]));
+ handlers.official_retailer=()=>assert.fail("A generic fallback must not restart a paused retailer");assert.equal(Focus.apply(handlers),handlers);assert.deepEqual(Object.keys(handlers).sort(),enabled.slice().sort());
+ await Runner.runDue(states,handlers,{nowMs:Date.parse("2026-10-02T10:00:00Z")});assert.deepEqual(seen.sort(),enabled.slice().sort());for(const name of paused)assert.deepEqual(states[name],originals[name]);
+ const supported={"Open Prices":()=>{},"Open Prices locations":()=>{},"Open Food Facts":()=>{},"unregistered retailer":()=>{}};Focus.apply(supported);assert.deepEqual(Object.keys(supported),["Open Prices","Open Prices locations","Open Food Facts"]);
+ const status=Focus.status();assert.deepEqual(status.retailers,["PENNY","EDEKA","Lidl","ALDI","Kaufland","REWE"]);assert.equal(status.coverageComplete,false);status.retailers.push("other");assert.equal(Focus.status().retailers.length,6);assert(paused.every(name=>Sources[name].active===true));
+ console.log("grocery-collection-focus: real runner keeps only priority retailer handlers, preserves paused checkpoints/cooldowns and saved evidence authority; supporting identity/geo work retained");
+})().catch(error=>{console.error(error);process.exitCode=1;});
