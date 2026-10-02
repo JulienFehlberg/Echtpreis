@@ -3,6 +3,7 @@
 const Current=typeof module==="object"&&module.exports?require("./current-price-client"):root.SparkorbCurrentPriceClient;
 const Products=typeof module==="object"&&module.exports?require("./published-product-client"):root.SparkorbPublishedProductClient;
 const Penny=typeof module==="object"&&module.exports?require("./penny-reference-client"):root.CaddyPennyReferenceClient;
+const Lidl=typeof module==="object"&&module.exports?require("./lidl-reference-client"):root.CaddyLidlReferenceClient;
 const retailers=Object.freeze(["ALDI","PENNY","REWE","Lidl","Kaufland","EDEKA"]),text=v=>typeof v==="string"?v.trim():"";
 function candidate(input,options={}){
  const offer=Current?.normalizePublishedReference(input?.offer,options),r=input?.reference;
@@ -19,7 +20,8 @@ function normalizeResponse(raw,options={}){
  if(!raw||raw.ok!==true||raw.city!=="Berlin"||raw.country!=="DE"||!Array.isArray(raw.items)||raw.items.length>200)return{ok:false,items:[],reason:"invalid-berlin-reference-response"};
  const groups=new Map(),conflicts=new Set();for(const input of raw.items){const row=candidate(input,options);if(!row)continue;const key=row.reference.key;if(groups.has(key)){conflicts.add(key);continue;}groups.set(key,row);}
  const publications=Penny?.normalizeResponse(raw,options).publications||[];
- return{ok:true,city:"Berlin",country:"DE",items:[...groups].filter(([key])=>!conflicts.has(key)).map(([,row])=>row),publications,coverageComplete:false,truncated:raw.truncated===true};
+ const dated=Lidl?.normalizeResponse(raw,options),datedPublications=dated?.datedPublications||[];
+ return{ok:true,city:"Berlin",country:"DE",items:[...groups].filter(([key])=>!conflicts.has(key)).map(([,row])=>row),publications,datedPublications,datedPublicationCoverage:dated?.datedPublicationCoverage||{publicationGroups:0,coverageComplete:false,fullAssortment:false},coverageComplete:false,truncated:raw.truncated===true};
 }
 function request(raw){
  if(!raw||typeof raw!=="object"||Array.isArray(raw)||Object.keys(raw).some(k=>!["search","gtin","pack","merchant","scopeChannel","limit"].includes(k)))throw Error("invalid-reference-search");

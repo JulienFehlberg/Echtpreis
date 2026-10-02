@@ -14,10 +14,13 @@ See [Berliner Händlerreferenzen](berlin-reference-prices.md) for the API and
 the exact identity, source, deposit and original-capture boundaries.
 
 `grocery-collection-focus.js` allows the automatic retailer collectors for
-REWE Berlin pickup, Wolt EDEKA Berlin and ALDI Nord published assortment.
+REWE Berlin pickup, Wolt EDEKA Berlin, ALDI Nord published assortment,
+PENNY Berlin regional price publications and Lidl dated national announcements.
 These are the implemented priority connectors, not proof of complete store
 coverage. PENNY, Lidl and Kaufland still need viable full-assortment price
 connectors. The policy must be extended when a reviewed connector is added.
+Lidl's dated publication groups remain separate from current-price coverage;
+checking document accessibility daily never renews their published price date.
 
 HIT, dm and Wolt nahkauf automatic collection is paused. Source registration,
 existing facts, checkpoints, leases and refusal deadlines are retained;
