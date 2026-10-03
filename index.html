@@ -2511,7 +2511,7 @@ function caddyLooksLikeOrdinaryShoppingTerm(term){
  if(tokens.some(t=>caddyGenericFoodHeads.has(t)))return true;
  return /(?:saft|kase|kaese|joghurt|quark|wurst|fleisch|fisch|brot|nudel|pasta|reis|gemuse|gemuese|obst|milch|drink|wasser|cola|limonade|schorle|chips|keks|riegel|sauce|sosse|creme)$/.test(n);
 }
-const caddyCommonTypos=new Map(Object.entries({
+const caddyCommonTyposRaw={
  "leerdamer":"leerdammer","leerdammerer":"leerdammer","coca kola":"coca cola","coka cola":"coca cola","coca kolla":"coca cola",
  "orangensafft":"orangensaft","orangesaft":"orangensaft","traubensafft":"traubensaft","apfelsafft":"apfelsaft",
  "hackfleich":"hackfleisch","hackfleischh":"hackfleisch","rinderhak":"rinderhack","rinderhackfleich":"rinderhackfleisch",
@@ -2523,12 +2523,19 @@ const caddyCommonTypos=new Map(Object.entries({
  "zwiebel":"zwiebeln","paprikka":"paprika","championgs":"champignons","champignongs":"champignons",
  "toiletenpapier":"toilettenpapier","klopappier":"klopapier","küchenrolle":"küchenrolle","kuchenrolle":"küchenrolle",
  "jäger meister":"jägermeister","jagermeister":"jägermeister","jaeger meister":"jaegermeister"
-}).map(([a,b])=>[String(a).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9%]+/g," ").replace(/\s+/g," ").trim(),b]));
+};
+let caddyCommonTypos=null;
+function getCaddyCommonTypos(){
+ if(caddyCommonTypos)return caddyCommonTypos;
+ caddyCommonTypos=new Map(Object.entries(caddyCommonTyposRaw).map(([a,b])=>[normalizeProduct(a),b]));
+ return caddyCommonTypos;
+}
 function caddyCorrectCommonTypos(term){
  const raw=String(term||""),n=normalizeProduct(raw);
- if(caddyCommonTypos.has(n))return caddyCommonTypos.get(n);
+ const typos=getCaddyCommonTypos();
+ if(typos.has(n))return typos.get(n);
  let out=n;
- for(const [wrong,right] of caddyCommonTypos){if(wrong.length>=5&&(" "+out+" ").includes(" "+wrong+" "))out=(" "+out+" ").replace(" "+wrong+" "," "+normalizeProduct(right)+" ").trim()}
+ for(const [wrong,right] of typos){if(wrong.length>=5&&(" "+out+" ").includes(" "+wrong+" "))out=(" "+out+" ").replace(" "+wrong+" "," "+normalizeProduct(right)+" ").trim()}
  return out===n?raw:out;
 }
 function groceryMatchIsSafe(term,key,score){
