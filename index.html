@@ -2367,14 +2367,15 @@ async function attachEANToDraft(rawText){
 }
 const spokenNumberWords={ein:1,eine:1,einen:1,einem:1,einer:1,eins:1,zwei:2,drei:3,vier:4,fuenf:5,sechs:6,sieben:7,acht:8,neun:9,zehn:10,elf:11,zwoelf:12};
 function normalizeSpokenQuantity(raw){
- // Voice input: remove conversational filler without losing the quantity/product phrase.
  let s=String(raw||"").trim()
-  .replace(/^\s*(?:ich\s+)?(?:hätte|haette|habe|will|möchte|moechte|brauch(?:e)?|nehme)\s+(?:gern(?:e)?\s+)?/i,"")
-  .replace(/^\s*(?:(?:bitte|noch|dazu|und|gern|gerne)\s+)+/i,"");
- return s.replace(/^\s*(ein|eine|einen|einem|einer|eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|elf|zwölf|zwoelf)\b/i,m=>{const k=normalizeProduct(m.trim());return String(spokenNumberWords[k]||m)});
+  .replace(/^\s*(?:ich\s+)?(?:hätte|haette|habe|will|möchte|moechte|brauch(?:e)?|bräuchte|braeuchte|nehme|kaufe|hole)\s+(?:gern(?:e)?\s+)?/i,"")
+  .replace(/^\s*(?:(?:bitte|noch|dazu|und|gern|gerne|mal|einmal)\s+)+/i,"")
+  .replace(/\s+(?:bitte|noch)\s*$/i,"").trim();
+ s=s.replace(/^\s*(ein|eine|einen|einem|einer|eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|elf|zwölf|zwoelf)\b/i,m=>{const k=normalizeProduct(m.trim());return String(spokenNumberWords[k]||m)});
+ return s.replace(/^1\s+(?=(?:kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|packung|packungen)\b)/i,"1 ");
 }
 function splitShoppingSpeech(text){
- let s=String(text||"").trim().replace(/(\d),(\d)/g,"$1§DEC§$2").replace(/[.;]+/g,",").replace(/\s+(?:und dann|danach|außerdem|ausserdem)\s+/gi,",").replace(/\s+und\s+/gi,",");
+ let s=String(text||"").trim().replace(/(\d),(\d)/g,"$1§DEC§$2").replace(/[.;]+/g,",").replace(/\s+(?:und dann|danach|außerdem|ausserdem|zusätzlich|zusaetzlich|dann noch|sowie)\s+/gi,",").replace(/\s+(?:und|plus)\s+/gi,",");
  const aliases=[...new Set(Object.entries(productAliases).flatMap(([key,rows])=>[catalog[key]?.label,key.replace(/_/g," "),...rows]).filter(Boolean).map(x=>normalizeProduct(x)).filter(Boolean))].map(x=>x.split(" ")).sort((a,b)=>b.length-a.length);
  const splitPart=part=>{
   let source=part.trim();if(!source)return[];
@@ -2681,10 +2682,8 @@ function automaticChoiceCandidate(result,now=Date.now()){
 function automaticChoiceHint(w){
  const state=automaticChoiceStates.get(w);if(!state)return"";
  if(state.status==="chosen"&&!automaticChoiceStillSelected(w,state)){automaticChoiceStates.delete(w);return"";}
- if(state.status==="pending")return'<div class="qty" data-auto-choice-status role="status">Passende Preisoption wird gesucht …</div>';
- if(state.status!=="chosen"||!automaticChoiceCandidate(state.result))return'<div class="qty" data-auto-choice-status role="status">Preis noch offen · Produkt und Menge kannst du jederzeit ändern.</div>';
- const result=state.result,offer=result.offer,channel=offer.scopeChannel==="physical-store"?"Im Laden":offer.scopeChannel==="pickup"?"Abholung":"Lieferreferenz",stamp=new Date(offer.capturedAt).toLocaleString("de-DE",{dateStyle:"short",timeStyle:"short"});
- return'<div class="qty" data-auto-choice-status role="status">Automatisch gewählt · günstigste gefundene Option<br><b>'+eur(offer.price)+'</b> Warenpreis · '+eur(result.unitPrice)+' / '+escHtml(result.unit)+'<br>'+escHtml(offer.merchant)+' · '+escHtml(channel)+' · Abruf '+escHtml(stamp)+'<br><a href="'+escHtml(offer.sourceUrl)+'" target="_blank" rel="noopener noreferrer">Quelle: '+escHtml(offer.sourceId)+'</a> · Pfand und zusätzliche Kosten offen</div>';
+ // Keep the shopping list calm: price-source machinery belongs in comparison/details.
+ return "";
 }
 function automaticChoiceStillSelected(w,state){const selected=state.result?.selection,unit=selected?.packUnit==="g"?"kg":selected?.packUnit==="ml"?"l":"piece",amount=selected?.packAmount*selected?.packCount*(unit==="piece"?1:.001);return !!selected&&window.SparkorbPublishedProductClient?.key(w.selectedProduct)===window.SparkorbPublishedProductClient?.key(selected)&&w.packLabel===selected.pack&&w.packUnit===unit&&Math.abs(w.packAmount-amount)<1e-9}
 function automaticChoicePassive(w){const state=automaticChoiceStates.get(w);return state&&state.status!=="chosen"&&!w.selectedProduct}
@@ -2746,10 +2745,9 @@ function restoreBasketItem(x){let saved=typeof x==="string"?{raw:x}:x,w=parseWis
 window.learnCustomAliasesFromReceipt=learnCustomAliasesFromReceipt;window.replaceSparkorbList=rows=>{basket=(Array.isArray(rows)?rows:[]).filter(x=>typeof x==="string"?x:x&&x.raw).slice(0,200).map(restoreBasketItem);editingItem=null;saveBasketState();drawList();renderQuickSuggestions();basketChanged();return basket.length};
 function keepCustomItem(w,count){if(!w)return w;w.customItem=true;w.key=null;w.matched=false;w.matchMode="custom";w.needsClarification=false;w.needsQuantity=false;w.resolvedKey=null;w.choice={};w.note="";w.quantityMode="packages";w.packCount=Math.max(1,Math.round(Number(count)||Number(w.amount)||1));w.packAmount=1;w.packUnit="piece";w.packLabel="Stück";w.unit="piece";w.amount=w.packCount;w.calcAmount=w.packCount;return w}
 function unknownWishEditor(w,i){
- if(w.customItem)return'<div class="detail custom-item-note" style="margin-top:6px">Kein Preisvergleich für diesen Artikel · du kannst ihn trotzdem auf der Liste lassen.</div>';
+ if(w.customItem)return"";
  if(w.needsQuantity){const amounts=w.unit==="piece"?[["200 g",.2],["250 g",.25],["500 g",.5],["1 kg",1]]:[];return '<div class="detail" style="margin-top:7px">Welche Menge ungefähr? '+amounts.map(([label,amount])=>'<button type="button" class="chip" data-resolve-index="'+i+'" data-resolve-amount="'+amount+'">'+label+'</button>').join(" ")+'</div>'}
- if(w.key)return"";
- const candidates=productCandidates(w.raw);return (candidates.length?'<div class="detail" style="margin-top:6px">Vielleicht meinst du:<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">'+candidates.map(c=>'<button type="button" class="chip" data-resolve-index="'+i+'" data-resolve-key="'+escHtml(c.key)+'">'+escHtml(c.label)+' · grober Richtwert</button>').join("")+'</div></div>':'<div class="detail" style="margin-top:6px">Beschreib den Artikel genauer.</div>')+'<button type="button" class="chip" data-custom-index="'+i+'" style="margin-top:7px">Als freien Artikel behalten</button>'
+ if(w.key)return"";return""
 }
 const kcalPerListUnit={
  bananen:890,"rote paprika":310,tomaten:180,aepfel:520,kartoffeln:770,suesskartoffeln:860,milch:500,
