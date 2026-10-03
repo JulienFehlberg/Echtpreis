@@ -57,9 +57,9 @@ function createMapper(options = {}) {
   const ruleIds = new Set(), assignedTypes = new Set(), familyIds = new Set();
   const ids = values => { if (!Array.isArray(values) || values.some(id => !types.has(id)) || new Set(values).size !== values.length) throw fail("invalid-grocery-type-rule-type"); };
   for (const rule of data.rules) {
-    if (!plain(rule) || Object.keys(rule).some(key => !["id", "productTypeId", "family", "aliases", "definitionTerms", "requireFacts", "excludeTerms", "suppresses", "ambiguousExclusions", "excludedCandidateTypeIds"].includes(key))
+    if (!plain(rule) || Object.keys(rule).some(key => !["id", "productTypeId", "family", "aliases", "definitionTerms", "requireFacts", "excludeTerms", "excludeRawVariant", "suppresses", "ambiguousExclusions", "excludedCandidateTypeIds"].includes(key))
       || !printable(rule.id, 120) || ruleIds.has(rule.id) || !types.has(rule.productTypeId) || assignedTypes.has(rule.productTypeId)
-      || !printable(rule.family, 80)) throw fail("invalid-grocery-type-rule");
+      || !printable(rule.family, 80) || Object.hasOwn(rule, "excludeRawVariant") && rule.excludeRawVariant !== true) throw fail("invalid-grocery-type-rule");
     ruleIds.add(rule.id); assignedTypes.add(rule.productTypeId);
     terms(rule.aliases); terms(rule.definitionTerms, true); terms(rule.excludeTerms, true);
     if (!Array.isArray(rule.requireFacts)) throw fail("invalid-grocery-type-rule-fact");
@@ -158,7 +158,12 @@ function createMapper(options = {}) {
     const definition = dish.length ? [] : available.slice(1).filter(field => rule.definitionTerms.some(term => normalize(term) === normalize(field.value)))
       .map(field => ({ field, hit: { term: rule.definitionTerms.find(term => normalize(term) === normalize(field.value)), index: 0 } }));
     if (!hits.length && !definition.length) return null;
-    const exclusions = available.flatMap(field => termHits(field.value, rule.excludeTerms).map(hit => ({ field, hit })));
+    const exclusionFields = available.slice();
+    // Opt-in rules may use an intact native description only to refuse an
+    // incompatible form. Recipe/ingredient text still supplies no type facts.
+    if (rule.excludeRawVariant && article.variant && !available.some(field => field.field === "variant" && field.value === article.variant))
+      exclusionFields.push({ field: "variant", value: article.variant });
+    const exclusions = exclusionFields.flatMap(field => termHits(field.value, rule.excludeTerms).map(hit => ({ field, hit })));
     const positives = [...hits.map(hit => evidence(headline, hit, rule.id, "explicit-native-product-term")),
       ...definition.map(({ field, hit }) => evidence(field, hit, rule.id, "explicit-native-product-definition"))];
     if (exclusions.length || dish.length) {
