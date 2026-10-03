@@ -2366,13 +2366,28 @@ async function attachEANToDraft(rawText){
  const ean=extractEAN(rawText);if(!ean)return null;return await enrichByEAN(ean);
 }
 const spokenNumberWords={ein:1,eine:1,einen:1,einem:1,einer:1,eins:1,zwei:2,drei:3,vier:4,fuenf:5,sechs:6,sieben:7,acht:8,neun:9,zehn:10,elf:11,zwoelf:12};
+const caddyContainerWords={
+ flasche:["flasche","flaschen"],dose:["dose","dosen"],packung:["packung","packungen","pack","packs"],beutel:["beutel","tüte","tuete","tüten","tueten"],glas:["glas","gläser","glaeser"],netz:["netz","netze"],bund:["bund"],kiste:["kiste","kisten","kasten","kästen","kaesten"]
+};
+function normalizeShoppingContainers(raw){
+ let s=String(raw||"").trim();
+ s=s.replace(/^(\d+)\s*(?:x\s*)?(flaschen?|dosen?|packungen?|packs?|beutel|tüten?|tueten?|gläser|glaeser|glas|netze?|bund|kisten?|kästen?|kaesten?)\s+(?:mit\s+|von\s+)?(.+)$/i,"$1 x $3");
+ s=s.replace(/^(?:eine?|einen?)\s+(flasche|dose|packung|beutel|tüte|tuete|glas|netz|bund|kiste|kasten)\s+(?:mit\s+|von\s+)?(.+)$/i,"1 x $2");
+ return s;
+}
+function normalizeShoppingCountPhrase(raw){
+ let s=normalizeShoppingContainers(raw);
+ s=s.replace(/^(\d+)\s*(?:mal|x)\s+(.+)$/i,"$1 x $2");
+ s=s.replace(/^(.+?)\s+(\d+)\s*(?:mal|x)$/i,"$2 x $1");
+ return s;
+}
 function normalizeSpokenQuantity(raw){
  let s=String(raw||"").trim()
   .replace(/^\s*(?:ich\s+)?(?:hätte|haette|habe|will|möchte|moechte|brauch(?:e)?|bräuchte|braeuchte|nehme|kaufe|hole)\s+(?:gern(?:e)?\s+)?/i,"")
   .replace(/^\s*(?:(?:bitte|noch|dazu|und|gern|gerne|mal|einmal)\s+)+/i,"")
   .replace(/\s+(?:bitte|noch)\s*$/i,"").trim();
  s=s.replace(/^\s*(ein|eine|einen|einem|einer|eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|elf|zwölf|zwoelf)\b/i,m=>{const k=normalizeProduct(m.trim());return String(spokenNumberWords[k]||m)});
- return s.replace(/^1\s+(?=(?:kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|packung|packungen)\b)/i,"1 ");
+ return normalizeShoppingCountPhrase(s.replace(/^1\s+(?=(?:kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|packung|packungen)\b)/i,"1 "));
 }
 function splitShoppingSpeech(text){
  let s=String(text||"").trim().replace(/(\d),(\d)/g,"$1§DEC§$2").replace(/[.;]+/g,",").replace(/\s+(?:und dann|danach|außerdem|ausserdem|zusätzlich|zusaetzlich|dann noch|sowie)\s+/gi,",").replace(/\s+(?:und|plus)\s+/gi,",");
@@ -2501,7 +2516,7 @@ function parseWish(raw){
  if(!multi){const natural=rawForAmount.match(/^(\d+)\s*(?:packungen?|packs?)\s+(.+?)\s+(?:à|a|je|zu\s+je)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)$/i);if(natural)multi=[natural[0],natural[1],natural[3],natural[4],natural[2]]}
  if(multi){const count=Math.max(1,parseInt(multi[1],10)),size=parseFloat(multi[2].replace(",",".")),u=multi[3].toLowerCase(),rest=multi[4];const factor=(u==="g"||u==="ml")?.001:1;unit=(u==="g"||u==="kg")?"kg":"l";amount=count*size*factor;explicit=true;multiPack={count,amount:size*factor,unit,label:size.toLocaleString("de-DE")+" "+u};displayTerm=rest.trim();t=normalizeProduct(rest)}
  else{
-   let m=rawForAmount.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|pcs?|x|packungen?|packs?)?\s+(.+)$/i);
+   let m=rawForAmount.match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|pcs?|x|packungen?|packs?|flaschen?|dosen?|beutel|tüten?|tueten?|gläser|glaeser|glas|netze?|bund|kisten?|kästen?|kaesten?)?\s+(.+)$/i);
    if(!m){const suffix=rawForAmount.match(/^(.+?)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm)$/i);if(suffix&&Object.keys(nutWishFamilies).some(key=>nutWishFamilyMatches(suffix[1],key)))m=[suffix[0],suffix[2],suffix[3],suffix[1]];}
   if(m){amount=parseFloat(m[1].replace(",","."));let u=(m[2]||"stück").toLowerCase(),rest=m[3];displayTerm=rest.trim();explicit=true;
    if(u==="g"||u==="gramm"){amount/=1000;unit="kg"}else if(u==="ml"){amount/=1000;unit="l"}else if(u==="kg"){unit="kg"}else if(u==="l"||u==="liter"){unit="l"}else unit="piece";t=normalizeProduct(rest);}
