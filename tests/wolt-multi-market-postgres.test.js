@@ -1,6 +1,14 @@
 "use strict";
 const assert=require("node:assert/strict"),{Pool}=require("pg"),Wolt=require("../wolt-retailer-price-service"),Refresh=require("../wolt-retailer-price-refresh"),Venues=require("../wolt-retailer-venues"),Inventory=require("../published-retailer-inventory");
 const Schema=require("../retailer-schema-lifecycle"),SalesPack=require("../wolt-sales-pack-validation");
+// This legacy rollback fixture retains its one actual connected SQL client.
+// Refresh's inner transaction maps to real SAVEPOINTs, never an outer COMMIT.
+function rollbackWritingPool(client){
+ let sequence=0,active=false;return{query:(...args)=>client.query(...args),connect:async()=>{
+  assert.equal(active,false);active=true;const savepoint="wolt_refresh_fixture_"+(++sequence);let begun=false,finished=false,released=false;
+  return{query:async(sql,params)=>{assert.equal(released,false);if(sql==="BEGIN"){assert.equal(begun,false);await client.query("SAVEPOINT "+savepoint);begun=true;return{rows:[]};}if(sql==="COMMIT"){assert(begun&&!finished);finished=true;return client.query("RELEASE SAVEPOINT "+savepoint);}if(sql==="ROLLBACK"){assert(begun&&!finished);await client.query("ROLLBACK TO SAVEPOINT "+savepoint);finished=true;return client.query("RELEASE SAVEPOINT "+savepoint);}return client.query(sql,params);},release(){assert(!begun||finished);assert.equal(released,false);released=true;active=false;}};
+ }};
+}
 function gtin(index){const body=String(989000000000+index),sum=[...body].reduce((n,d,i)=>n+Number(d)*(i%2?3:1),0);return body+(10-sum%10)%10;}
 async function main(){
  const connectionString=process.env.DATABASE_URL;assert(connectionString,"DATABASE_URL is required");const database=new URL(connectionString);assert.equal(database.hostname,"localhost");assert(database.pathname.endsWith("_test"),"Only a dedicated local test database is allowed");
@@ -35,12 +43,12 @@ async function main(){
   assert.equal((await Inventory.search(pool,{merchant:"nahkauf",gtin:shared,now})).items.length,1);assert.equal((await Inventory.search(pool,{merchant:"EDEKA",gtin:shared,now})).items.length,1);
   const badMix=await nahkauf.persist(pool,[{...nQuote,sourceId:edeka.SOURCE},{...nQuote,merchant:edeka.MERCHANT},{...nQuote,nativeVenueId:edeka.VENUE.nativeVenueId},{...nQuote,shop:eQuote.shop},{...nQuote,sourceUrl:eQuote.sourceUrl},{...nQuote,sourceResponseUrl:eQuote.sourceResponseUrl},{...nQuote,storeId:"invented"}],{now});assert.equal(badMix.accepted,0);assert.equal(badMix.rejected,7);
   for(const[assignment,value]of[["merchant=$2",edeka.MERCHANT],["native_venue_id=$2",edeka.VENUE.nativeVenueId],["source_id=$2",edeka.SOURCE]])await assert.rejects(()=>pool.query("UPDATE "+edeka.TABLE+" SET "+assignment+" WHERE source_id=$1 AND retailer_sku=$3",[nahkauf.SOURCE,value,nQuote.retailerSku]),error=>error.code==="23514","Database must reject valid-looking identities combined from different approved markets");
-  const checkpoint=await pool.connect();try{
+  const checkpoint=await pool.connect(),refreshPool=rollbackWritingPool(checkpoint);try{
    await checkpoint.query("BEGIN");await edekaRefresh.ensure(checkpoint);await checkpoint.query("DELETE FROM wolt_retailer_catalog_state WHERE source_id=ANY($1::text[])",[[edeka.SOURCE,nahkauf.SOURCE]]);
-   function batch(service,page){const hash=service===edeka?"4".repeat(64):"5".repeat(64),cursor={version:1,nativeVenueId:service.VENUE.nativeVenueId,nativeAssortmentId:service===edeka?"a".repeat(24):"b".repeat(24),assortmentHash:hash,categoryIndex:page-1,pageToken:null,pageNumber:1,received:page,pagesFetched:page};return{offers:[],rejected:[],complete:false,categoryCount:3,categoriesCompleted:page-1,pagesFetched:page,received:1,receivedCumulative:page,assortmentHash:hash,nextCursor:cursor,requests:3};}
-   await edekaRefresh.refresh({pool:checkpoint,now:()=>now},{fetchOffers:async()=>batch(edeka,1)});await nahkaufRefresh.refresh({pool:checkpoint,now:()=>now},{fetchOffers:async()=>batch(nahkauf,1)});
+   function batch(service,page){const hash=service===edeka?"4".repeat(64):"5".repeat(64),cursor={version:1,nativeVenueId:service.VENUE.nativeVenueId,nativeAssortmentId:service===edeka?"a".repeat(24):"b".repeat(24),assortmentHash:hash,categoryIndex:page-1,pageToken:null,pageNumber:1,received:page,pagesFetched:page};return{products:[],offers:[],rejected:[],complete:false,categoryCount:3,categoriesCompleted:page-1,pagesFetched:page,received:1,receivedCumulative:page,assortmentHash:hash,nextCursor:cursor,requests:3};}
+   await edekaRefresh.refresh({pool:refreshPool,now:()=>now},{fetchOffers:async()=>batch(edeka,1)});await nahkaufRefresh.refresh({pool:checkpoint,now:()=>now},{fetchOffers:async()=>batch(nahkauf,1)});
    const eState=await edekaRefresh.load(checkpoint),nState=await nahkaufRefresh.load(checkpoint);assert.equal(eState.cursor.nativeVenueId,edeka.VENUE.nativeVenueId);assert.equal(nState.cursor.nativeVenueId,nahkauf.VENUE.nativeVenueId);
-   await assert.rejects(()=>edekaRefresh.refresh({pool:checkpoint,now:()=>now},{fetchOffers:async()=>{throw Object.assign(Error("wolt-source-http-429"),{retryAfterMs:7200000});}}),/429/);
+   await assert.rejects(()=>edekaRefresh.refresh({pool:refreshPool,now:()=>now},{fetchOffers:async()=>{throw Object.assign(Error("wolt-source-http-429"),{retryAfterMs:7200000});}}),/429/);
    await nahkaufRefresh.refresh({pool:checkpoint,now:()=>now},{fetchOffers:async options=>{assert.deepEqual(options.cursor,nState.cursor);return batch(nahkauf,2);}});
    const eAfter=await edekaRefresh.status(checkpoint),nAfter=await nahkaufRefresh.status(checkpoint);assert.equal(eAfter.lastError,"wolt-source-http-429");assert.equal(new Date(eAfter.retryAfter).getTime(),now+7200000);assert.deepEqual(eAfter.cursor,eState.cursor);assert.equal(nAfter.lastError,null);assert.equal(nAfter.pagesFetched,2);assert.equal(nAfter.nativeVenueId,nahkauf.VENUE.nativeVenueId);assert.equal(nAfter.publishedAssortmentComplete,false);assert.equal(nAfter.physicalStoreAssortmentVerified,false);assert.equal(await edekaRefresh.resumeAt(checkpoint,now),new Date(now+7200000).toISOString());
   }finally{await checkpoint.query("ROLLBACK");checkpoint.release();}
