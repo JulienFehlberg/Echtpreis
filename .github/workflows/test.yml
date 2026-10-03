@@ -124,3 +124,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
         run: node tests/kaufland-berlin-publication-refresh-postgres.test.js
+
+      - name: Run PostgreSQL ALDI navigation original and category checkpoint integration test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
+        run: node tests/aldi-category-navigation-postgres.test.js
