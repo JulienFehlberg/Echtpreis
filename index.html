@@ -1280,6 +1280,11 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
  #planner #list .qty-buttons button{width:32px!important;height:32px!important;min-width:32px!important}
 }
 </style><style>
+/* v7.299 iOS input focus: keep planner at normal scale */
+#planner input,#planner select,#planner textarea{font-size:16px!important}
+#planner #productInput{font-size:16px!important}
+@media(max-width:430px){#planner #productInput{font-size:16px!important}}
+</style><style>
 /* v7.290 comparison result hierarchy */
 #results{margin-top:14px!important}
 #results>.winner{position:relative!important;border-radius:24px!important;padding:20px!important;margin:0 0 10px!important;box-shadow:0 14px 34px rgba(8,116,67,.16)!important}
@@ -2071,7 +2076,7 @@ const productAliases={
  rinderhack:["rinderhack","rinder hack","rinderhackfleisch","rind hack","hackfleisch rind"],hackfleisch:["hackfleisch","gemischtes hack","hack gemischt"],
  haehnchenbrust:["hähnchenbrust","haehnchenbrust","hähnchenfilet","haehnchenfilet"],energydrink:["energy drink","energydrink","red bull","monster energy"],tiefkuehlpizza:["tiefkühlpizza","tiefkuhlpizza","tk pizza","pizza ristorante","ristorante pizza","dr oetker ristorante","oetker ristorante"],croissants:["croissant","croissants","französische hörnchen","mini hörnchen","mini hornchen","mini horncher","mini hdrncher","mini hdrnchen"],eier:["ei","eier","bio eier","freiland eier","bodenhaltung eier","eier 10er"],
  milch:["milch","vollmilch","frischmilch","haltbare milch","h milch"],kokosmilch:["kokosmilch","kokosnussmilch","kokos milch"],haferdrink:["haferdrink","hafer drink","hafermilch","oat drink","alpro hafer"],
- butter:["butter"],kaese:["käse","kase","kaese","gouda","emmentaler","mozzarella"],streukaese:["streukäse","streukaese","geriebener käse","reibekäse","gratinkäse","pizzakäse","geriebener gouda","gouda gerieben","geriebener emmentaler","emmentaler gerieben"],joghurt:["joghurt","yoghurt"],skyr:["skyr"],quark:["quark","magerquark"],
+ butter:["butter"],kaese:["käse","kase","kaese","gouda","emmentaler","mozzarella","leerdammer","leerdammer käse","leerdammer kaese"],streukaese:["streukäse","streukaese","geriebener käse","reibekäse","gratinkäse","pizzakäse","geriebener gouda","gouda gerieben","geriebener emmentaler","emmentaler gerieben"],joghurt:["joghurt","yoghurt"],skyr:["skyr"],quark:["quark","magerquark"],
  nudeln:["nudeln","nudel","pasta","spaghetti","penne","fusilli","hörnchennudeln","hornchennudeln"],reis:["reis","basmatireis","jasminreis"],mehl:["mehl","weizenmehl"],zucker:["zucker"],
  brot:["brot","vollkornbrot","mischbrot"],toast:["toast","toastbrot"],wasser:["wasser","mineralwasser"],cola:["cola","coca cola","coca-cola","cola zero","coca cola zero"],
  orangensaft:["orangensaft","orange saft","o-saft"],kaffee:["kaffee","kaffeebohnen","filterkaffee"],toilettenpapier:["toilettenpapier","klopapier"],
@@ -2399,7 +2404,8 @@ function parseWish(raw){
  if(c&&unit==="piece"&&c.unit==="kg"&&c.unitWeight){calcAmount=amount*c.unitWeight;note="≈ "+calcAmount.toFixed(2).replace(".",",")+" kg für Preisvergleich";}
  else if(c&&unit!==c.unit&&c.unit==="piece"){note="Mengenangabe wird als Stück interpretiert";}
  const exactBrand=exactBrandNames.find(b=>normalized.includes(normalizeProduct(b)))||"";
- let wish=hydrateChoice({raw:original,label:c?(exactBrand?(displayTerm||original):(learned?.aliasRaw||c.label)):(displayTerm||original),amount,unit,calcAmount,key,matched:!!c,note,explicit,matchMode:learned?"learned":exactBrand?"exact":"comparable",exactBrand,learnedAlias:!!learned,learnedPackage:multiPack||(learned?learnedPackSize(learned.quantity,c?.unit):null)});
+ const meaningfulTypedLabel=c&&normalizeProduct(displayTerm||original)!==normalizeProduct(c.label||"")&&(displayTerm||original).trim().split(/\s+/).length>1;
+ let wish=hydrateChoice({raw:original,label:c?((exactBrand||meaningfulTypedLabel)?(displayTerm||original):(learned?.aliasRaw||c.label)):(displayTerm||original),amount,unit,calcAmount,key,matched:!!c,note,explicit,matchMode:learned?"learned":exactBrand?"exact":"comparable",exactBrand,learnedAlias:!!learned,learnedPackage:multiPack||(learned?learnedPackSize(learned.quantity,c?.unit):null)});
  if(ean&&c){wish.ean=ean;wish.matchMode="exact";wish.note="Exaktes Barcode-Produkt";}
  if(multiPack){wish.packCount=multiPack.count;wish.packAmount=multiPack.amount;wish.packUnit=multiPack.unit;wish.packLabel=multiPack.label;wish.quantityMode="packages";wish.amount=multiPack.count*multiPack.amount;wish.unit=multiPack.unit;wish.calcAmount=wish.amount;wish.needsQuantity=false}
  if(learned&&c?.unit!=="piece"&&!c?.unitWeight&&!wish.learnedPackage){wish.needsQuantity=true;wish.needsClarification=true}
