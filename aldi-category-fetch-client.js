@@ -1,5 +1,5 @@
 "use strict";
-const crypto=require("node:crypto"),Parser=require("./aldi-assortment-category-client");
+const crypto=require("node:crypto"),Parser=require("./aldi-assortment-category-client"),Rejected=require("./aldi-category-rejected-capture-store");
 const SOURCE=Parser.SOURCE,SEED="https://www.aldi-nord.de/sortiment/milchprodukte/milch-milchgetraenke.html",MAX_TARGETS=256;
 const fail=(code,extra={})=>Object.assign(new Error(code),{code,...extra});
 function targets(values){
@@ -45,7 +45,12 @@ async function fetchPage(target,options={}){
   const raw=Buffer.concat(chunks);let body;try{body=new TextDecoder("utf-8",{fatal:true,ignoreBOM:true}).decode(raw);}catch{throw fail("aldi-category-response-utf8-required",{requestStarted:true});}
   const time=now();if(!Number.isSafeInteger(time)||time<0)throw fail("aldi-category-clock-invalid",{requestStarted:true});
   const age=response.headers?.get?.("age"),meta={sourceResponseUrl:url,sourceResponseHash:crypto.createHash("sha256").update(raw).digest("hex"),sourceResponseDate:response.headers?.get?.("date"),sourceAgeSeconds:age==null?null:/^\d+$/.test(age)?Number(age):NaN,capturedAt:new Date(time).toISOString(),scopeCountry:"DE"};
-  const page=Parser.parsePage(raw,meta,{now:time});if(!page.freshCaptureVerified)throw fail("aldi-category-original-http-proof-required",{requestStarted:true});
+  let page;try{page=Parser.parsePage(raw,meta,{now:time});}catch(error){
+   // Preserve a bounded original only for a reproducible native-shape rejection.
+   // Non-enumerable bodies stay out of ordinary error logs and public responses.
+   if(Rejected.FAILURE_CODES.includes(error.code))Object.defineProperty(error,"rejectedCapture",{value:{status:200,failureCode:error.code,original:{body,meta},bytes},enumerable:false});
+   error.requestStarted=true;throw error;
+  }if(!page.freshCaptureVerified)throw fail("aldi-category-original-http-proof-required",{requestStarted:true});
   return{sourceId:SOURCE,page,original:{body,meta},discoveredTargets:navigationTargets(body),requests:1,bytes,truthEligible:false,assortmentComplete:false};
  }finally{controller.abort();clearTimeout(timer);}
 }
