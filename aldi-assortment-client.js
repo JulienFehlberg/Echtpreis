@@ -105,10 +105,13 @@ function parseProduct(raw={},meta={}){
  return{ok:true,product,offer,reasons:[],retailerSku:nativeSku};
 }
 function session(options={}){
+ if(options.canFetch!==undefined&&typeof options.canFetch!=="function")throw failure("aldi-shared-source-gate-invalid");
  const fetchImpl=options.fetchImpl||fetch,pause=options.sleep||sleep,now=options.now||(()=>new Date().toISOString()),maxRequests=integer(options.maxRequests,25,250),timeoutMs=integer(options.timeoutMs,15000,15000),maxResponseBytes=integer(options.maxResponseBytes,4*1024*1024,16*1024*1024),maxTotalBytes=integer(options.maxTotalBytes,8*1024*1024,64*1024*1024),maxDurationMs=integer(options.maxDurationMs,180000,300000),start=Date.now();let requests=0,bytes=0,lastStarted=0;
  async function request(value,{current=false}={}){
   const url=allowedUrl(value);if(requests>=maxRequests)throw failure("aldi-request-budget-exhausted");if(Date.now()-start>=maxDurationMs)throw failure("aldi-duration-budget-exhausted");
-  const wait=Math.max(0,1000-(Date.now()-lastStarted));if(wait)await pause(wait);requests++;lastStarted=Date.now();
+  const wait=Math.max(0,1000-(Date.now()-lastStarted));if(wait)await pause(wait);
+  if(options.canFetch){const permission=await options.canFetch();if(permission!==true){const at=typeof permission==="string"?Date.parse(permission):NaN;throw failure("aldi-shared-source-not-eligible",{requestStarted:false,retryAfterMs:Number.isFinite(at)?Math.max(60000,at-Date.now()):60000});}}
+  requests++;lastStarted=Date.now();
   const ac=new AbortController();let timer;const timed=new Promise((_,reject)=>{timer=setTimeout(()=>{ac.abort();reject(failure("aldi-source-timeout"))},Math.min(timeoutMs,maxDurationMs-(Date.now()-start)))});
   try{return await Promise.race([(async()=>{
    const res=await fetchImpl(url,{method:"GET",signal:ac.signal,redirect:"error",credentials:"omit",headers:{Accept:current?"text/html":"application/xml,text/xml","User-Agent":"Sparkorb-PriceSource/1.0 (public retail prices)"}});
