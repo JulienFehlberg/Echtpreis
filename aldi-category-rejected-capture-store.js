@@ -130,32 +130,126 @@ async function persist(tx, capture, options = {}) {
 }
 function printable(value, max = 300) { return typeof value === "string" && value.length <= max && !/[<>\u0000-\u001f\u007f]/.test(value) ? value : null; }
 function diagnosticSummary(capture, options = {}) {
-  const c = checked(capture, clock(options), false); let native = null;
-  const scripts = [...c.body.matchAll(/<script\b[^>]*\bid=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script\s*>/gi)];
-  if (scripts.length === 1) try { native = JSON.parse(scripts[0][1]); } catch { /* Invalid JSON remains only a dated diagnostic. */ }
-  const page = native?.props?.pageProps?.page, results = native?.props?.pageProps?.algoliaState?.initialResults, urls = new Map(), structures = []; let visited = 0;
-  function visit(value, at = "native", depth = 0) {
-    if (++visited > 10000 || depth > 12) return;
-    if (typeof value === "string") { let url; try { url = Parser.categoryUrl(value.startsWith("/sortiment/") ? Product.ORIGIN + value : value); } catch { return; }
-      if (urls.size < 128 && !urls.has(url)) urls.set(url, { url, originalValue: value, at: at.slice(0,300) }); return; }
-    if (!value || typeof value !== "object") return;
-    if (!Array.isArray(value) && /(?:componentList|opener|Navigation)/.test(at) && structures.length < 32) {
-      const keys = Object.keys(value).slice(0,32), values = {};
-      for (const key of keys.filter(k => ["@name","@path","mgnl:template","type","title","label","path"].includes(k))) { const text = printable(value[key],300); if (text !== null) values[key] = text; }
-      structures.push({ at: at.slice(0,300), keys: keys.map(k => printable(k,80)).filter(k => k !== null), values });
-    }
-    for (const [key, child] of Object.entries(value)) visit(child, at + "." + key, depth + 1);
+  const c = checked(capture, clock(options), false), flags = Object.fromEntries([
+    "visitedNodes", "depth", "structures", "localStructures", "componentNames", "keys", "urls", "indexes", "queryCategories", "results", "requests", "path", "strings", "unsafeValues"
+  ].map(k => [k, false]));
+  const sensitive = /(?:api[ _-]?key|access[ _-]?token|authorization|bearer|password|secret|session[ _-]?id|cookie)/i;
+  const kind = value => value === undefined ? "missing" : value === null ? "null" : Array.isArray(value) ? "array" : plain(value) ? "object" : typeof value;
+  function safeText(value, max = 180) {
+    if (typeof value !== "string") return null;
+    if (value.length > max) { flags.strings = true; return null; }
+    if (!printable(value, max) || sensitive.test(value) || /https?:\/\/|[?&][^\s]*=/.test(value)) { flags.unsafeValues = true; return null; }
+    return value;
   }
-  visit(native);
-  const indexNames = plain(results) ? Object.keys(results).filter(k => printable(k,120)).slice(0,16) : [];
-  return { sourceId: SOURCE, failureCode: c.failureCode, sourceResponseUrl: c.sourceResponseUrl, sourceResponseHash: c.sourceResponseHash,
+  function safeKey(value) {
+    if (typeof value !== "string" || value.length > 80) { flags.keys = true; return null; }
+    if (!/^(?:@?[A-Za-z][A-Za-z0-9:_-]*|\d+)$/.test(value) || sensitive.test(value) || ["__proto__", "prototype", "constructor"].includes(value)) { flags.unsafeValues = true; return null; }
+    return value;
+  }
+  function sourcePath(at) { if (at.length > 300) { flags.path = true; return at.slice(0, 300); } return at; }
+  function keysFor(value, allowed) {
+    if (!plain(value) && !Array.isArray(value)) return [];
+    const all = Object.keys(value); if (all.length > 32) flags.keys = true;
+    return all.slice(0,32).map(safeKey).filter(k => k !== null && (!allowed || allowed.includes(k)));
+  }
+  const integer = value => Number.isSafeInteger(value) && Math.abs(value) <= 1000000000 ? value : null;
+  const boolean = value => typeof value === "boolean" ? value : null;
+  function nativePath(value) {
+    if (typeof value !== "string") return null;
+    if (value.length > 300) { flags.strings = true; return null; }
+    if (sensitive.test(value)) { flags.unsafeValues = true; return null; }
+    if (/^\/germany\/sortiment\/[A-Za-z0-9/_-]+$/.test(value)) return value;
+    try { return Parser.categoryUrl(value.startsWith("/sortiment/") ? Product.ORIGIN + value : value); } catch { flags.unsafeValues = true; return null; }
+  }
+  const attribute = (tag, name) => { const matches = [...tag.matchAll(new RegExp("(?:^|\\s)" + name + "\\s*=\\s*([\"'])(.*?)\\1", "gi"))]; return matches.length === 1 ? matches[0][2] : null; };
+  const scripts = [...c.body.matchAll(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi)].filter(m => attribute(m[0].slice(0,m[0].indexOf(">")+1),"id") === "__NEXT_DATA__");
+  const links = [...c.body.matchAll(/<link\b[^>]*>/gi)].filter(m => attribute(m[0],"rel")?.toLowerCase() === "canonical");
+  let native = null, jsonParseState = scripts.length === 0 ? "missing" : scripts.length > 1 ? "duplicate" : "unsupported-type";
+  if (scripts.length === 1 && attribute(scripts[0][0].slice(0,scripts[0][0].indexOf(">")+1),"type") === "application/json") {
+    try { native = JSON.parse(scripts[0][0].slice(scripts[0][0].indexOf(">")+1).replace(/<\/script\s*>$/i,"")); jsonParseState = "parsed"; } catch { jsonParseState = "invalid-json"; }
+  }
+  let canonicalUrl = null, canonicalState = links.length === 0 ? "missing" : links.length > 1 ? "duplicate" : "invalid-url";
+  if (links.length === 1) try { const value = attribute(links[0][0],"href"); if (typeof value === "string" && sensitive.test(value)) { flags.unsafeValues = true; } else { canonicalUrl = Parser.categoryUrl(value); canonicalState = "valid"; } } catch { /* No foreign/query URL is echoed. */ }
+  const props = plain(native?.props?.pageProps) ? native.props.pageProps : null, page = plain(props?.page) ? props.page : null;
+  const results = plain(props?.algoliaState?.initialResults) ? props.algoliaState.initialResults : null;
+  const pageAt = "native.props.pageProps.page", urls = new Map(), localDescriptors = [], structures = [], seen = new WeakSet(); let visited = 0;
+  const cmsKeys = ["@name","@path","@nodeType","mgnl:template","@nodes","type","title","label","path","props","text","children","items","links","entries","categories","category","subcategories","pageLink","linkType","href","reference","richText","headline","componentType","mediaType"];
+  function descriptor(value, at) {
+    const values = {}, keys = keysFor(value).filter(k => cmsKeys.includes(k) || /^\d+$/.test(k) || /^subNavCol\d+$/.test(k));
+    for (const key of ["@name","@path","@nodeType","mgnl:template","type","title","label","path"]) {
+      const text = key === "@path" || key === "path" ? nativePath(value?.[key]) : safeText(value?.[key]); if (text !== null) values[key] = text;
+    }
+    return { at: sourcePath(at), kind: kind(value), keyCount: plain(value) || Array.isArray(value) ? Object.keys(value).length : 0, keys, values };
+  }
+  const components = page?.componentList, componentNames = [];
+  if (Array.isArray(components)) {
+    if (components.length > 32) flags.componentNames = true;
+    for (const value of components.slice(0,32)) { const name = safeText(value,80); if (name !== null) componentNames.push(name); }
+  }
+  function localArea(name) {
+    const value = page?.[name], root = descriptor(value,pageAt+"."+name), children = [];
+    if (plain(value) || Array.isArray(value)) {
+      const childKeys = Object.keys(value).filter(k => !k.startsWith("@") && (plain(value[k]) || Array.isArray(value[k])));
+      if (childKeys.length > 32) flags.localStructures = true;
+      for (const key of childKeys.slice(0,32)) {
+        const safe = safeKey(key); if (safe === null) continue;
+        const child = descriptor(value[key],pageAt+"."+name+"."+safe); children.push({ key:safe,...child });
+      }
+    }
+    if (root.kind === "object" || root.kind === "array") localDescriptors.push(root,...children);
+    return { ...root, childCount: plain(value) || Array.isArray(value) ? Object.keys(value).filter(k => !k.startsWith("@") && (plain(value[k]) || Array.isArray(value[k]))).length : 0, children };
+  }
+  const localCms = { componentList: { kind:kind(components), count:Array.isArray(components)?components.length:null, names:componentNames }, opener:localArea("opener"), openContent:localArea("openContent"), bannerContent:localArea("bannerContent") };
+  function visit(value, at, depth = 0) {
+    if (visited >= 10000) { flags.visitedNodes = true; return; } visited++;
+    if (depth > 12) { flags.depth = true; return; }
+    if (typeof value === "string") {
+      if (value.length > 2048) { flags.strings = true; return; }
+      if (sensitive.test(value)) { flags.unsafeValues = true; return; }
+      let url; try { url = Parser.categoryUrl(value.startsWith("/sortiment/") ? Product.ORIGIN+value : value); } catch { return; }
+      if (!urls.has(url)) {
+        if (urls.size >= 128) { flags.urls = true; return; }
+        const scope = ["opener","openContent","bannerContent"].some(name=>at.startsWith(pageAt+"."+name)) ? "page-local" : at.startsWith(pageAt+".header")||at.startsWith(pageAt+".footer") ? "global-navigation" : "other";
+        urls.set(url,{url,originalValue:value,at:sourcePath(at),scope,childParentBindingVerified:false});
+      }
+      return;
+    }
+    if (!value || typeof value !== "object" || seen.has(value)) return; seen.add(value);
+    if (plain(value) && (at.startsWith(pageAt+".header") || at.startsWith(pageAt+".footer")) && /Navigation/.test(at)) {
+      if (structures.length < 32) structures.push(descriptor(value,at)); else flags.structures = true;
+    }
+    const keys = Object.keys(value), maxKeys = Array.isArray(value) ? 256 : 64; if (keys.length > maxKeys) flags.keys = true;
+    for (const key of keys.slice(0,maxKeys)) { const safe = safeKey(key); if (safe === null) continue; visit(value[key],at+"."+safe,depth+1); if (visited >= 10000) { if (keys.indexOf(key) < keys.length-1) flags.visitedNodes = true; break; } }
+  }
+  // Local areas receive a separate structure budget and a shallow traversal
+  // origin before global navigation. The header cannot displace their evidence.
+  for (const name of ["opener","openContent","bannerContent","header","footer"]) visit(page?.[name],pageAt+"."+name);
+  visit(native,"native");
+  const allIndexKeys = results ? Object.keys(results) : [], indexKeys = allIndexKeys.slice(0,16), indexNames = [];
+  if (allIndexKeys.length > 16) flags.indexes = true;
+  function indexName(value) { if (typeof value !== "string") return null; if (value.length>120) {flags.strings=true;return null;} if (!/^an_[a-z0-9_]+$/.test(value)||sensitive.test(value)) {flags.unsafeValues=true;return null;} return value; }
+  function categoryFilter(value) { if (typeof value !== "string") return null; if (sensitive.test(value)) { flags.unsafeValues = true; return null; } return /^categoryIDs:[a-z0-9-]{1,120}$/.test(value) ? value : null; }
+  const queryShape = value => ({query:typeof value?.query==="string"&&value.query===""?"":null,queryPresent:typeof value?.query==="string",queryEmpty:typeof value?.query==="string"?value.query==="":null,
+    filters:categoryFilter(value?.filters),filtersPresent:typeof value?.filters==="string",index:indexName(value?.index),page:integer(value?.page),hitsPerPage:integer(value?.hitsPerPage)});
+  const stateQueryShapes = indexKeys.map((key,ordinal) => {
+    const entry = results[key], state = plain(entry?.state) ? entry.state : null, rs = entry?.results, requests = entry?.requestParams, index = indexName(key);
+    if (index !== null) indexNames.push(index);
+    if (Array.isArray(rs)&&rs.length>2) flags.results=true; if(Array.isArray(requests)&&requests.length>2) flags.requests=true;
+    return {indexName:index,ordinal,kind:kind(entry),keys:keysFor(state,["index","query","filters","page","hitsPerPage","facetsRefinements","facetsExcludes","disjunctiveFacetsRefinements","numericRefinements","tagRefinements","hierarchicalFacetsRefinements"]),...queryShape(state),resultArrays:Array.isArray(rs)?rs.length:null,requestArrays:Array.isArray(requests)?requests.length:null,
+      resultsKind:kind(rs),requestsKind:kind(requests),results:Array.isArray(rs)?rs.slice(0,2).map(r=>({kind:kind(r),...queryShape(r),nbHits:integer(r?.nbHits),nbPages:integer(r?.nbPages),actualHits:Array.isArray(r?.hits)?r.hits.length:null,hitsKind:kind(r?.hits),paramsPresent:typeof r?.params==="string",exhaustiveNbHits:boolean(r?.exhaustiveNbHits),exhaustiveCount:boolean(r?.exhaustive?.nbHits)})):[],
+      requests:Array.isArray(requests)?requests.slice(0,2).map(r=>({kind:kind(r),...queryShape(r),keys:keysFor(r,["index","query","filters","page","hitsPerPage"])})):[]};
+  });
+  const categories = native?.query?.categories; if (Array.isArray(categories)&&categories.length>6) flags.queryCategories=true;
+  if (localDescriptors.length+structures.length>32) flags.structures=true;
+  const responseUrl = sensitive.test(c.sourceResponseUrl) ? (flags.unsafeValues = true, null) : c.sourceResponseUrl;
+  return { sourceId: SOURCE, failureCode: c.failureCode, sourceResponseUrl: responseUrl, sourceResponseHash: c.sourceResponseHash,
     sourceResponseDate: c.sourceResponseDate, sourceAgeSeconds: c.sourceAgeSeconds, capturedAt: c.capturedAt, bytes: c.bytes, captureHash: c.captureHash,
-    nativeRoute: printable(native?.page,150), queryCategories: Array.isArray(native?.query?.categories) ? native.query.categories.filter(v => printable(v,100)).slice(0,6) : null,
-    locale: printable(native?.props?.pageProps?.locale ?? native?.locale,12),
-    nativePage: Object.fromEntries(["@name","@path","categoryKey","mgnl:template"].map(k => [k,printable(page?.[k],300)])),
-    algoliaIndexNames: indexNames, stateQueryShapes: indexNames.map(index => ({ index, keys: Object.keys(results[index]?.state || {}).filter(k => printable(k,80)).slice(0,32),
-      query: printable(results[index]?.state?.query,120), filters: printable(results[index]?.state?.filters,300), resultArrays: Array.isArray(results[index]?.results) ? results[index].results.length : null })),
-    presentCategoryUrls: [...urls.keys()], urlEvidence: [...urls.values()], cmsStructures: structures, diagnosticTraversalBounded: visited > 10000,
+    summaryVersion:2,nextData:{scriptCount:scripts.length,jsonParseState,nativeKind:kind(native)},canonical:{linkCount:links.length,parseState:canonicalState,url:canonicalUrl,matchesResponseUrl:canonicalUrl===null?null:canonicalUrl===c.sourceResponseUrl},
+    nativeRoute:safeText(native?.page,150),queryCategoriesKind:kind(categories),queryCategoryCount:Array.isArray(categories)?categories.length:null,queryCategories:Array.isArray(categories)?categories.slice(0,6).map(v=>safeText(v,100)).filter(v=>v!==null):null,locale:safeText(props?.locale??native?.locale,12),
+    nativePage:Object.fromEntries(["@name","@path","categoryKey","mgnl:template"].map(k=>[k,k==="@path"?nativePath(page?.[k]):safeText(page?.[k])])),
+    nativeFlags:{country:safeText(props?.country,12),hasError:boolean(props?.hasError),pageEdit:boolean(page?.isMagnoliaEdit),magnoliaEdit:boolean(props?.mgnlContext?.isMagnoliaEdit),magnoliaPreview:boolean(props?.mgnlContext?.isMagnoliaPreview)},
+    localCms,algoliaStateKind:kind(props?.algoliaState),initialResultsKind:kind(props?.algoliaState?.initialResults),nativeIndexCount:results?allIndexKeys.length:null,algoliaIndexNames:indexNames,stateQueryShapes,presentCategoryUrls:[...urls.keys()],urlEvidence:[...urls.values()],cmsStructures:[...localDescriptors,...structures].slice(0,32),globalNavigationStructures:structures,
+    truncation:flags,diagnosticTraversalBounded:Object.values(flags).some(Boolean),diagnosticVisitedNodes:visited,
     retainedOnly: true, discoveryOnly: true, admitted: false, current: false, fresh: false, expiresAt: null, availability: "unknown",
     truthEligible: false, currentPriceVerified: false, physicalStorePriceVerified: false, currentAvailabilityVerified: false,
     canonicalIdentityVerified: false, normalPriceClassificationVerified: false, assortmentComplete: false, articleRowsCreated: 0, priceRowsCreated: 0 };
