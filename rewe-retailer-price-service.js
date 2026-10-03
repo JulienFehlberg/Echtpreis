@@ -124,17 +124,32 @@ async function persist(pool,inputs=[],options={}){
  }
  const accepted=[];
  for(const captures of groups.values()){const clean=[];for(const capture of captures.values())if(capture.conflict)reject("same-capture-conflict",capture.count);else clean.push(capture.row);clean.sort((a,b)=>b.captured_at.localeCompare(a.captured_at));if(clean.length)accepted.push(clean[0]);}
- await ensure(pool);let upserted=0,acceptedCount=0;
+ // The catalog refresh prepares schema before BEGIN and writes on one assigned client.
+ // A pool or an idle client cannot opt out of initialization.
+ if(options.schemaEnsured===true){
+  if(typeof pool.release!=="function"||(await pool.query('SELECT txid_current_if_assigned() IS NOT NULL AS "transactionOpen"')).rows[0]?.transactionOpen!==true)throw fail("rewe-price-writing-transaction-required");
+ }else await ensure(pool);
+ let upserted=0,acceptedCount=0;const acceptedRetailerSkus=[];
  const updated=columns.filter(column=>!["source_id","native_market_id","retailer_sku"].includes(column)).map(column=>column+"=EXCLUDED."+column).join(",");
  for(let offset=0;offset<accepted.length;offset+=500){
   let rows=accepted.slice(offset,offset+500);
   const existing=await pool.query(`SELECT p.source_id,p.native_market_id,p.retailer_sku,p.captured_at,p.offer_hash FROM ${TABLE} p JOIN jsonb_to_recordset($1::jsonb) AS x(source_id text,native_market_id text,retailer_sku text) ON p.source_id=x.source_id AND p.native_market_id=x.native_market_id AND p.retailer_sku=x.retailer_sku`,[JSON.stringify(rows.map(r=>({source_id:r.source_id,native_market_id:r.native_market_id,retailer_sku:r.retailer_sku})))]);
   const stored=new Map(existing.rows.map(r=>[key(r),r]));
   rows=rows.filter(candidate=>{const previous=stored.get(key(candidate));if(previous&&new Date(previous.captured_at).toISOString()===candidate.captured_at&&previous.offer_hash!==candidate.offer_hash){reject("same-capture-conflict");return false;}return true;});
-  acceptedCount+=rows.length;if(!rows.length)continue;
+  acceptedCount+=rows.length;acceptedRetailerSkus.push(...rows.map(r=>r.retailer_sku));if(!rows.length)continue;
   const saved=await pool.query(`INSERT INTO ${TABLE}(${columns.join(",")}) SELECT ${columns.join(",")} FROM jsonb_to_recordset($1::jsonb) AS x(${TYPES}) WHERE true ON CONFLICT(source_id,native_market_id,retailer_sku) DO UPDATE SET ${updated},updated_at=now() WHERE EXCLUDED.captured_at>${TABLE}.captured_at`,[JSON.stringify(rows)]);upserted+=saved.rowCount;
  }
- return{received:inputs.length,accepted:acceptedCount,rejected,duplicates,upserted,unchanged:acceptedCount-upserted,reasons,scopeCountry:"DE",scopeChannel:"pickup",fulfillmentChannel:"pickup",truthEligible:false};
+ return{received:inputs.length,accepted:acceptedCount,rejected,duplicates,upserted,unchanged:acceptedCount-upserted,reasons,scopeCountry:"DE",scopeChannel:"pickup",fulfillmentChannel:"pickup",truthEligible:false,...(options.schemaEnsured===true&&options.includeAcceptedSkus===true?{acceptedRetailerSkus}:{})};
+}
+async function suppressHeldArticles(tx,options={}){
+ if(!tx||typeof tx.query!=="function"||typeof tx.release!=="function"||(await tx.query('SELECT txid_current_if_assigned() IS NOT NULL AS "transactionOpen"')).rows[0]?.transactionOpen!==true)throw fail("rewe-price-writing-transaction-required");
+ const Articles=require("./rewe-retailer-article-service");
+ const skus=options.identityRejectedSKUs??[];
+ if(!Array.isArray(skus)||skus.length>2000||skus.some(s=>typeof s!=="string"||!/^([1-9]\d{0,4})-[A-Z0-9]{1,40}-7ae33841-fa98-3b7e-9ee5-8132f39c189c$/.test(s)))throw fail("invalid-rewe-rejected-native-skus");
+ // The shared catalog transaction retains both original captures and the held
+ // identity. Remove its unsafe quote, including an older quote of the same SKU.
+ const result=await tx.query(`DELETE FROM ${TABLE} p WHERE p.source_id=$1 AND p.native_market_id=$3 AND (p.retailer_sku=ANY($4::text[]) OR EXISTS(SELECT 1 FROM ${Articles.TABLE} a WHERE a.source_id=$2 AND p.retailer_sku=a.retailer_sku AND a.held=true)) RETURNING p.retailer_sku`,[SOURCE,Articles.SOURCE,MARKET.nativeMarketId,[...new Set(skus)]]);
+ return{suppressed:result.rowCount||0,retailerSkus:result.rows.map(r=>r.retailer_sku)};
 }
 const FIELDS=`source_id AS "sourceId",merchant,native_market_id AS "nativeMarketId",native_store_id AS "nativeStoreId",retailer_sku AS "retailerSku",retailer_product_id AS "retailerProductId",native_article_id AS "nativeArticleId",gtin,name,brand,description,pack,pack_amount::float AS "packAmount",pack_unit AS "packUnit",pack_count AS "packCount",price::float,deposit::float,deposit_label AS "depositLabel",displayed_price::float AS "displayedPrice",original_price::float AS "originalPrice",currency,price_type AS "priceType",promotion_status AS "promotionStatus",availability,captured_at AS "capturedAt",expires_at AS "expiresAt",native_promotion_valid_to AS "nativePromotionValidTo",source_url AS "sourceUrl",source_response_url AS "sourceResponseUrl",proof_hash AS "proofHash",source_response_hash AS "sourceResponseHash",shop,scope_country AS "scopeCountry",scope_channel AS "scopeChannel"`;
 const fresh="captured_at<=$1::timestamptz AND captured_at>=$1::timestamptz-interval '24 hours' AND expires_at>$1::timestamptz";
@@ -163,4 +178,4 @@ async function status(pool,options={}){
  const markets=await pool.query(`SELECT merchant,source_id AS "sourceId",native_market_id AS "nativeMarketId",native_store_id AS "nativeStoreId",(array_agg(shop ORDER BY captured_at DESC,retailer_sku))[1] AS shop,count(*)::int AS "storedPrices",count(*) FILTER(WHERE ${fresh})::int AS "currentPrices",count(DISTINCT gtin) FILTER(WHERE ${fresh})::int AS "productsWithCurrentPublishedPrices",MAX(captured_at) AS "lastCapturedAt" FROM ${TABLE} WHERE source_id=$2 AND scope_country='DE' AND scope_channel='pickup' GROUP BY merchant,source_id,native_market_id,native_store_id ORDER BY native_market_id`,[now,SOURCE]);
  return{ok:true,...result.rows[0],markets:markets.rows,scopeCountry:"DE",scopeChannel:"pickup",fulfillmentChannel:"pickup",maxAgeHours:24,state:"published",truthEligible:false,shippingIncluded:false,serviceFeesIncluded:false,independentOfUserReceipts:true,note:"Öffentlich veröffentlichte REWE-Abholpreise für den Berliner Markt Hallesches Ufer 40; Filialkassenpreise und Servicegebühren sind nicht bestätigt. Unbelegte Normalpreis-/Aktionszuordnung bleibt unbekannt."};
 }
-module.exports={SOURCE,MERCHANT,DAY_MS,MARKET,TABLE,ensure,validateOffer,persist,querySpec,gtinQuerySpec,search,query:search,status,matchesProductQuery};
+module.exports={SOURCE,MERCHANT,DAY_MS,MARKET,TABLE,ensure,validateOffer,persist,suppressHeldArticles,querySpec,gtinQuerySpec,search,query:search,status,matchesProductQuery};
