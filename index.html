@@ -2448,6 +2448,40 @@ const caddyEverydayFoodRules=[
  {key:"nuss_nougat_creme",re:/\b(?:nuss\s*nougat\s*creme|haselnusscreme)\b/}
 ]
 function caddyEverydayFoodMatch(term){const n=normalizeProduct(term);const hit=caddyEverydayFoodRules.find(rule=>rule.re.test(n));return hit&&catalog[hit.key]?hit.key:null}
+const caddySemanticFamilies=[
+ {key:"orangensaft",tokens:["orange","orangen"],context:["saft","nektar"]},
+ {key:"traubensaft",tokens:["traube","trauben","weintraube","weintrauben"],context:["saft","nektar"]},
+ {key:"rindergulasch",tokens:["rind","rinder"],context:["gulasch","gulaschfleisch"]},
+ {key:"schweinegulasch",tokens:["schwein","schweine"],context:["gulasch","gulaschfleisch"]},
+ {key:"haehnchenbrust",tokens:["hahnchen","haehnchen","huhn"],context:["brust","filet"]},
+ {key:"haehnchenschenkel",tokens:["hahnchen","haehnchen","huhn"],context:["schenkel","keule"]},
+ {key:"kaese",tokens:["kase","kaese"],context:[]},
+ {key:"joghurt",tokens:["joghurt","yoghurt"],context:[]},
+ {key:"wasser",tokens:["wasser","mineralwasser"],context:[]},
+ {key:"cola",tokens:["cola","coke"],context:[]},
+ {key:"nudeln",tokens:["nudel","nudeln","pasta"],context:[]},
+ {key:"brot",tokens:["brot"],context:[]},
+ {key:"wurst",tokens:["wurst","aufschnitt"],context:[]}
+];
+const caddyGenericFoodHeads=new Set(["saft","nektar","kase","kaese","joghurt","brot","wurst","nudeln","pasta","reis","mehl","zucker","fleisch","fisch","gemuse","gemuese","obst","sauce","sosse","creme","drink","getrank","getraenk"]);
+function caddySemanticProductMatch(term){
+ const n=normalizeProduct(term),tokens=n.split(" ").filter(Boolean);if(!tokens.length)return null;
+ let best=null;
+ for(const family of caddySemanticFamilies){
+  if(!catalog[family.key])continue;
+  const tokenHit=family.tokens.some(t=>tokens.includes(t)||tokens.some(x=>x.length>=5&&(x.startsWith(t)||t.startsWith(x))));
+  if(!tokenHit)continue;
+  const contextHit=!family.context.length||family.context.some(t=>tokens.includes(t)||n.includes(t));
+  const score=contextHit?(family.context.length?.97:.9):.72;
+  if(!best||score>best.score)best={key:family.key,score,mode:"semantic-family"};
+ }
+ return best&&best.score>=.88?best:null;
+}
+function caddyLooksLikeOrdinaryShoppingTerm(term){
+ const n=normalizeProduct(term),tokens=n.split(" ").filter(Boolean);if(!tokens.length||tokens.length>7)return false;
+ if(tokens.some(t=>caddyGenericFoodHeads.has(t)))return true;
+ return /(?:saft|kase|kaese|joghurt|quark|wurst|fleisch|fisch|brot|nudel|pasta|reis|gemuse|gemuese|obst|milch|drink|wasser|cola|limonade|schorle|chips|keks|riegel|sauce|sosse|creme)$/.test(n);
+}
 function groceryMatchIsSafe(term,key,score){
  if(!key||!catalog[key])return false;
   if(nutWishFamilies[key])return nutWishFamilyMatches(term,key);
@@ -2474,6 +2508,7 @@ function parseWish(raw){
  t=t.replace(/^(frische|frischer|frisches)\s+/,"").trim();let key=null,best=0;
  for(const [k,aliases] of Object.entries(productAliases)){for(const alias of [k,...aliases]){const a=normalizeProduct(alias);let score=t===a?1:((" "+t+" ").includes(" "+a+" ")?0.9:tokenScore(t,a));if(score>best){best=score;key=k}}}
   const everydayKey=caddyEverydayFoodMatch(t);if(everydayKey){key=everydayKey;best=1}
+  const semanticKey=caddySemanticProductMatch(t);if(semanticKey&&semanticKey.score>best){key=semanticKey.key;best=semanticKey.score}
   const nutKey=Object.keys(nutWishFamilies).find(candidate=>nutWishFamilyMatches(t,candidate));if(nutKey){key=nutKey;best=Math.max(best,.9)}
   const learnedCandidate=learnedMatch(t),learned=nutKey&&learnedCandidate?.key!==nutKey?null:learnedCandidate;if(learned&&(!key||learned.score>=best)){key=learned.key;best=learned.score}
   if(best<0.72||!groceryMatchIsSafe(t,key,best)||nutWishFamilies[key]&&explicit&&(!Number.isFinite(amount)||amount<=0||unit!=="kg"&&unit!=="piece"))key=null;const c=key?catalog[key]:null;let calcAmount=amount,note="";
@@ -2665,7 +2700,7 @@ async function runAutomaticProductChoice(w){
  const count=Number(w.packCount)!==state.initialQuantity?Math.max(1,Number(w.packCount)||1):request.wish.requestedQuantity;
  if(!applyPublishedIdentity(w,candidate,count)){state.status="open";drawList();return;}state.status="chosen";state.result=result;w.note="Automatisch gewählt";saveBasketState();drawList();renderQuickSuggestions();basketChanged();
 }
-function add(raw,options={}){raw=(raw||$("productInput").value).trim();if(!raw)return false;$("suggestions").style.display="none";let w=parseWish(raw);if(options.fromVoice&&!w.key&&!w.customItem)keepCustomItem(w,w.amount);if(w.key&&!w.needsClarification)learnProductPreference(w);let signature=basketItemSignature(w),duplicate=basket.find(x=>basketItemSignature(x)===signature);if(duplicate){mergeBasketQuantity(duplicate,w);$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();appNotice((duplicate.label||duplicate.raw)+" · "+duplicate.packCount+"×");return true}w.checked=false;basket.push(w);learnFrequentProduct(raw);$("productInput").value="";saveBasketState();void suggestAutomaticProduct(w);drawList();renderQuickSuggestions();basketChanged();return true}
+function add(raw,options={}){raw=(raw||$("productInput").value).trim();if(!raw)return false;$("suggestions").style.display="none";let w=parseWish(raw);if(!w.key&&w.customItem&&caddyLooksLikeOrdinaryShoppingTerm(raw)){w.customItem=false;w.matchMode="unresolved-shopping";w.note="Alltagsartikel · Produktfamilie wird noch gelernt";w.needsClarification=false;w.needsQuantity=false;}if(options.fromVoice&&!w.key&&!w.customItem)keepCustomItem(w,w.amount);if(w.key&&!w.needsClarification)learnProductPreference(w);let signature=basketItemSignature(w),duplicate=basket.find(x=>basketItemSignature(x)===signature);if(duplicate){mergeBasketQuantity(duplicate,w);$("productInput").value="";saveBasketState();drawList();renderQuickSuggestions();basketChanged();appNotice((duplicate.label||duplicate.raw)+" · "+duplicate.packCount+"×");return true}w.checked=false;basket.push(w);learnFrequentProduct(raw);$("productInput").value="";saveBasketState();void suggestAutomaticProduct(w);drawList();renderQuickSuggestions();basketChanged();return true}
 renderQuickSuggestions();
 function addShoppingSpeech(text){const rows=splitShoppingSpeech(text).slice(0,100);let added=0;rows.forEach(raw=>{if(basket.length<200&&add(raw,{fromVoice:true}))added++});if(rows.length>1)showListMessage(added+" Artikel verarbeitet");return {rows,added}}
 function addShoppingInput(){const value=$("productInput").value.trim();if(!value)return;const rows=splitShoppingSpeech(value);if(rows.length>1)addShoppingSpeech(value);else add(value);window.sparkorbVoiceCommitted?.()}
