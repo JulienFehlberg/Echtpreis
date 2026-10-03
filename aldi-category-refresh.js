@@ -32,6 +32,10 @@ function nextState(previous,observed,time){
  const additions=observed.discoveredTargets.filter(eligibleNavigation).sort((a,b)=>priority(a)-priority(b)||a.localeCompare(b));
  for(const target of observed.discoveredTargets)if(!eligibleNavigation(target))excluded.add(target);
  for(const target of additions)if(!seen.has(target)){if(next.targets.length>=Fetch.MAX_TARGETS)throw fail("aldi-category-discovery-bound-exceeded");next.targets.push(target);seen.add(target);if(!proofs.has(target))next.targetProofs.push({target,from:observed.original.meta.sourceResponseUrl,sourceResponseHash:observed.original.meta.sourceResponseHash,capturedAt:observed.original.meta.capturedAt});}
+ // Newly witnessed everyday subcategories belong ahead of lower-priority
+ // pending navigation. Completed targets and their proof records stay intact.
+ const completed=next.targets.slice(0,next.nextIndex+1),pending=next.targets.slice(next.nextIndex+1);
+ pending.sort((a,b)=>priority(a)-priority(b)||a.localeCompare(b));next.targets=[...completed,...pending];
  if(excluded.size>Fetch.MAX_TARGETS)throw fail("aldi-category-discovery-bound-exceeded");next.excludedNavigationTargets=[...excluded].sort();next.nextIndex++;next.revision++;next.lastRunAt=new Date(time).toISOString();next.lastError=null;next.retryAfter=null;
  if(next.nextIndex===next.targets.length){next.completedPasses++;next.nextPassAt=new Date(time+REFRESH_MS).toISOString();}else next.nextPassAt=null;
  return state({cursor:next});
