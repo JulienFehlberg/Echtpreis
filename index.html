@@ -2375,8 +2375,21 @@ function normalizeShoppingContainers(raw){
  s=s.replace(/^(?:eine?|einen?)\s+(flasche|dose|packung|beutel|tüte|tuete|glas|netz|bund|kiste|kasten)\s+(?:mit\s+|von\s+)?(.+)$/i,"1 x $2");
  return s;
 }
+function normalizeCompoundShoppingQuantity(raw){
+ let s=String(raw||"").trim();
+ // "2 Flaschen Coca-Cola Zero 1,5 Liter" -> "2 x 1,5 l Coca-Cola Zero"
+ let m=s.match(/^(\d+)\s*(?:x\s*)?(?:flaschen?|dosen?|packungen?|packs?|beutel|tüten?|tueten?|gläser|glaeser|glas|netze?|bund|kisten?|kästen?|kaesten?)\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)\s*$/i);
+ if(m)return m[1]+" x "+m[3]+" "+m[4]+" "+m[2];
+ // "3 Packungen Leerdammer à 200 g" / "3 Packungen Leerdammer je 200 g"
+ m=s.match(/^(\d+)\s*(?:packungen?|packs?|beutel|dosen?|flaschen?)\s+(.+?)\s+(?:à|a|je|zu\s+je)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)\s*$/i);
+ if(m)return m[1]+" x "+m[3]+" "+m[4]+" "+m[2];
+ // "Coca-Cola Zero 1,5 Liter" -> "1,5 l Coca-Cola Zero"
+ m=s.match(/^(.+?)\s+(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)\s*$/i);
+ if(m&&!/^\d/.test(m[1]))return m[2]+" "+m[3]+" "+m[1];
+ return s;
+}
 function normalizeShoppingCountPhrase(raw){
- let s=normalizeShoppingContainers(raw);
+ let s=normalizeCompoundShoppingQuantity(raw);s=normalizeShoppingContainers(s);
  s=s.replace(/^(\d+)\s*(?:mal|x)\s+(.+)$/i,"$1 x $2");
  s=s.replace(/^(.+?)\s+(\d+)\s*(?:mal|x)$/i,"$2 x $1");
  return s;
@@ -2512,7 +2525,7 @@ function parseWish(raw){
  const original=normalizeSpokenQuantity(String(raw||"").trim()),ean=explicitShoppingEAN(original),term=ean?original.replace(ean,"").replace(/\b(?:ean|gtin|barcode)\s*:?\s*/gi,"").trim():original,normalized=normalizeProduct(term);let amount=1,unit="piece",explicit=false,t=normalized,displayTerm=term,multiPack=null;if(isClearlyNonGrocery(term)){let w={raw:original,label:term,amount:1,unit:"piece",calcAmount:1,key:null,matched:false,note:"",explicit:false,matchMode:"custom",customItem:true,needsClarification:false,needsQuantity:false,resolvedKey:null,choice:{}};return keepCustomItem(w,1)}
  const rawForAmount=term.toLowerCase().replace(/ß/g,"ss").trim();
  // v7.236 natural German multipack phrasing: "2 Packungen à 500 g Hackfleisch" / "2 Packs je 1 l Milch"
- let multi=rawForAmount.match(/^(\d+)\s*(?:x|×|packungen?|packs?)\s*(?:à|a|je|zu\s+je)?\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)\s+(.+)$/i);
+ let multi=rawForAmount.match(/^(\d+)\s*(?:x|×|packungen?|packs?|flaschen?|dosen?|beutel|tüten?|tueten?|gläser|glaeser|glas)\s*(?:à|a|je|zu\s+je)?\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)\s+(.+)$/i);
  if(!multi){const natural=rawForAmount.match(/^(\d+)\s*(?:packungen?|packs?)\s+(.+?)\s+(?:à|a|je|zu\s+je)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)$/i);if(natural)multi=[natural[0],natural[1],natural[3],natural[4],natural[2]]}
  if(multi){const count=Math.max(1,parseInt(multi[1],10)),size=parseFloat(multi[2].replace(",",".")),u=multi[3].toLowerCase(),rest=multi[4];const factor=(u==="g"||u==="ml")?.001:1;unit=(u==="g"||u==="kg")?"kg":"l";amount=count*size*factor;explicit=true;multiPack={count,amount:size*factor,unit,label:size.toLocaleString("de-DE")+" "+u};displayTerm=rest.trim();t=normalizeProduct(rest)}
  else{
