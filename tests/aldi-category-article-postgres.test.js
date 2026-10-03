@@ -386,7 +386,7 @@ async function main() {
         "pack_amount=0", "pack_amount='NaN'::numeric", "pack_count=0", "pack_count=1001",
         "pack_unit='kg'", "product_identity_url='https://example.org/product/1'",
         "category_response_url='https://www.aldi-nord.de/produkt/article-1.html'",
-        "source_response_hash='BAD'", "source_age_seconds=301",
+        "source_age_seconds=301",
         "source_response_date=observed_at-interval '6 minutes'", "native_product='[]'::jsonb",
         "witness_hash='BAD'", "held=true,conflict_capture=NULL", "held=true,conflict_capture='{}'::jsonb"];
       for (const change of violations) {
@@ -395,10 +395,22 @@ async function main() {
           + " WHERE retailer_sku=$1", [sku(0)]), error => error.code === "23514", change);
         await tx.query("ROLLBACK TO SAVEPOINT invalid_category_sql");
       }
-      await tx.query("SAVEPOINT category_fk");
-      await assert.rejects(() => tx.query("UPDATE " + Service.TABLE
-        + " SET source_response_hash=repeat('0',64) WHERE retailer_sku=$1", [sku(0)]), error => error.code === "23503");
-      await tx.query("ROLLBACK TO SAVEPOINT category_fk");
+      // The article's hash is constrained through its original-body FK. Its
+      // format CHECK belongs to the capture table, so test both boundaries
+      // separately instead of assuming PostgreSQL reports a child CHECK.
+      for (const missingHash of ["BAD", "0".repeat(64)]) {
+        await tx.query("SAVEPOINT category_fk");
+        await assert.rejects(() => tx.query("UPDATE " + Service.TABLE
+          + " SET source_response_hash=$2 WHERE retailer_sku=$1", [sku(0), missingHash]),
+        error => error.code === "23503" && error.constraint === Service.TABLE + "_source_response_hash_fkey",
+        "Missing original body: " + missingHash);
+        await tx.query("ROLLBACK TO SAVEPOINT category_fk");
+      }
+      await tx.query("SAVEPOINT category_body_hash");
+      await assert.rejects(() => tx.query("INSERT INTO " + Service.CAPTURE_TABLE
+        + "(source_response_hash,body,body_bytes) VALUES('BAD',$1,$2)", [first.body, Buffer.byteLength(first.body)]),
+      error => error.code === "23514" && error.constraint === Service.CAPTURE_TABLE + "_source_response_hash_check");
+      await tx.query("ROLLBACK TO SAVEPOINT category_body_hash");
       await tx.query("SAVEPOINT category_body_bound");
       await assert.rejects(() => tx.query("UPDATE " + Service.CAPTURE_TABLE + " SET body_bytes=0"), error => error.code === "23514");
       await tx.query("ROLLBACK TO SAVEPOINT category_body_bound");
