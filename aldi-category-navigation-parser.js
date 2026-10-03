@@ -56,19 +56,22 @@ function selectedEntry(entries, name) {
   if (!Array.isArray(value.res) || value.res.length > MAX_CHILDREN) throw fail("aldi-navigation-children-bound-exceeded");
   return value;
 }
-function referenceFor(row, parentPath) {
+function referenceFor(row, parentPath, allowNativeRefAlias = false) {
   if (!plain(row) || !safeText(row.categoryKey, 120) || !/^[a-z0-9-]+$/.test(row.categoryKey) || !safeText(row.title) || typeof row.hideInCategory !== "boolean" || typeof row.marketingCategory !== "boolean" || !Array.isArray(row.children) || row.children.length > MAX_CHILDREN || !plain(row.reference)) throw fail("aldi-navigation-child-schema-invalid");
   const reference = row.reference;
   if (Object.keys(reference).sort().join(",") !== "path,type" || reference.type !== "pages" || !categoryPath(reference.path)) throw fail("aldi-navigation-child-reference-invalid");
   // Native reference mapper ZV/$P adds .html to this pages path. Requiring an
   // immediate child plus matching native categoryKey prevents a guessed slug,
   // a header alias, a sibling from another parent or a nested grandchild.
-  if (reference.path !== parentPath + "/" + row.categoryKey) throw fail("aldi-navigation-child-parent-conflict");
+  // The retained CHILDREN original uses this one explicit native ID/path alias.
+  // Keep the native category ID and actual reference; never infer other aliases.
+  const witnessedAlias = allowNativeRefAlias && parentPath === "/sortiment/obst-gemuese" && row.categoryKey === "frisches-obst-gemuese" && reference.path === "/sortiment/obst-gemuese/frisch";
+  if (reference.path !== parentPath + "/" + row.categoryKey && !witnessedAlias) throw fail("aldi-navigation-child-parent-conflict");
   const sourceUrl = Parser.categoryUrl(Product.ORIGIN + reference.path + ".html");
   return { categoryId: row.categoryKey, title: row.title, sourceUrl, reference: { type: "pages", path: reference.path }, hidden: row.hideInCategory, marketingCategory: row.marketingCategory, nestedChildCount: row.children.length };
 }
-function childrenFor(value, parentPath) {
-  const children = value.res.map(row => referenceFor(row, parentPath)), ids = new Set(), urls = new Set();
+function childrenFor(value, parentPath, allowNativeRefAlias = false) {
+  const children = value.res.map(row => referenceFor(row, parentPath, allowNativeRefAlias)), ids = new Set(), urls = new Set();
   for (const child of children) { if (ids.has(child.categoryId) || urls.has(child.sourceUrl)) throw fail("aldi-navigation-duplicate-child"); ids.add(child.categoryId); urls.add(child.sourceUrl); }
   const visible = children.filter(child => !child.hidden);
   if (!visible.length) throw fail("aldi-navigation-visible-children-required");
@@ -93,7 +96,7 @@ function parseNavigationParent(raw, meta, options = {}) {
   if (code !== "aldi-category-native-index-conflict") throw fail("aldi-navigation-product-parser-conflict");
   const value = selectedEntry(contextEntries(native), CHILDREN);
   if (value.req.categoryPath !== path) throw fail("aldi-navigation-request-conflict");
-  const found = childrenFor(value, path);
+  const found = childrenFor(value, path, true);
   return { sourceId: SOURCE, merchant: "ALDI Nord", purpose: "category-navigation-candidate", parentCategoryId: categoryId, nativeTemplate: TEMPLATE, categoryProof: proof, contextKind: CHILDREN, request: { ...value.req }, ...found, discoveredTargets: found.children.map(child => child.sourceUrl), scopeCountry: "DE", scopeChannel: "category-navigation", locationScope: "unknown", freshCaptureVerified: true, offlineOnly: false, ...noAuthority() };
 }
 function parseSiblingTargets(raw, meta = {}, options = {}) {
