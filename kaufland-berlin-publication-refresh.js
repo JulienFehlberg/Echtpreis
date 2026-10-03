@@ -161,7 +161,7 @@ async function get(url, { fetchImpl = fetch, now = Date.now, canFetch, shouldCon
   let response, reader;
   try {
     try { response = await fetchImpl(url, { method: "GET", credentials: "omit", redirect: "error", signal: controller.signal,
-      headers: { Accept: url === Publications.PAGE_URL ? "text/html" : "application/json", "User-Agent": "CaddyPriceResearch/1.0 (public dated branch offer observation)" } }); }
+      headers: { Accept: url === Publications.PAGE_URL ? "text/html" : "application/json", "Cache-Control": "no-cache", "User-Agent": "CaddyPriceResearch/1.0 (public dated branch offer observation)" } }); }
     catch (cause) { throw fail(controller.signal.aborted ? "kaufland-source-timeout" : "kaufland-source-fetch-failed", { cause, requestStarted: true }); }
     if (response.status !== 200) {
       await response.body?.cancel?.().catch(() => {});

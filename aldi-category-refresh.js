@@ -1,5 +1,6 @@
 "use strict";
 const Fetch=require("./aldi-category-fetch-client"),Articles=require("./aldi-category-article-service"),Timestamp=require("./price-refresh-state-store"),Rejected=require("./aldi-category-rejected-capture-store");
+const Navigation=require("./aldi-category-navigation-parser");
 const SOURCE=Fetch.SOURCE,TABLE="aldi_category_catalog_state",CONTINUATION_MS=60000,REFRESH_MS=4*3600000,ERROR_WAIT_MS=3600000,MAX_REQUESTS=4;
 const fail=(code,extra={})=>Object.assign(new Error(code),{code,...extra});
 const iso=value=>typeof value==="string"&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString()===value;
@@ -60,24 +61,42 @@ async function retainFailure(pool,error,code,nextAttemptAt,time,service=Rejected
 async function refresh(options={},deps={}){
  const {pool}=options,now=options.now||Date.now;if(!pool)throw fail("database-required");if(typeof deps.canFetch!=="function")throw fail("aldi-shared-source-gate-required");if(running)return{received:0,accepted:0,skipped:"already-running"};
  const requested=options.maxRequests??MAX_REQUESTS;if(!Number.isSafeInteger(requested)||requested<1||requested>MAX_REQUESTS)throw fail("aldi-category-request-budget-invalid");
- running=true;let requests=0,bytes=0,received=0,accepted=0,identityReceived=0,identityAccepted=0,categoryRejected=0,pages=0;
+ running=true;let requests=0,bytes=0,received=0,accepted=0,identityReceived=0,identityAccepted=0,categoryRejected=0,pages=0,navigationPages=0;
  try{
   const saved=await(deps.load||load)(pool),start=now();if(dueAt(saved,start)>start)return{received:0,accepted:0,skipped:"category-not-due",nextAttemptAt:new Date(dueAt(saved,start)).toISOString()};let cursor=state(saved);
   const Prices=deps.prices||require("./aldi-category-price-service"),articleService=deps.articles||Articles;await(deps.ensure||ensure)(pool);await articleService.ensure(pool);await Prices.ensure(pool);
   if(cursor.nextIndex===cursor.targets.length)cursor={...cursor,nextIndex:0,nextPassAt:null};
   while(requests<requested&&now()-start<120000){
    if(requests)await(deps.sleep||((ms)=>new Promise(resolve=>setTimeout(resolve,ms))))(1000);
-   const gate=await deps.canFetch();if(gate!==true)return{received,accepted,identityReceived,identityAccepted,requests,bytes,pages,skipped:pages?undefined:"shared-source-not-eligible",nextAttemptAt:typeof gate==="string"?gate:new Date(now()+CONTINUATION_MS).toISOString(),captureSourceId:SOURCE};
+   const gate=await deps.canFetch();if(gate!==true)return{received,accepted,identityReceived,identityAccepted,requests,bytes,pages,navigationPages,skipped:pages?undefined:"shared-source-not-eligible",nextAttemptAt:typeof gate==="string"?gate:new Date(now()+CONTINUATION_MS).toISOString(),captureSourceId:SOURCE};
    const target=cursor.targets[cursor.nextIndex];let observed;try{observed=await(deps.fetchPage||Fetch.fetchPage)(target,{now});requests+=observed.requests;bytes+=observed.bytes;}catch(error){requests++;throw error;}
-   if(!observed||observed.requests!==1||!Number.isSafeInteger(observed.bytes)||observed.bytes<1||observed.bytes>4*1024*1024||bytes>16*1024*1024||observed.original?.meta?.sourceResponseUrl!==target||observed.page?.freshCaptureVerified!==true||!Array.isArray(observed.discoveredTargets)||JSON.stringify(observed.discoveredTargets)!==JSON.stringify(Fetch.navigationTargets(observed.original.body)))throw fail("aldi-category-result-unconfirmed");Fetch.targets(observed.discoveredTargets.length?observed.discoveredTargets:[target]);
+   const navigation=observed?.navigation!==undefined;
+   if(!observed||observed.requests!==1||!Number.isSafeInteger(observed.bytes)||observed.bytes<1||observed.bytes>4*1024*1024||bytes>16*1024*1024||observed.original?.meta?.sourceResponseUrl!==target||!Array.isArray(observed.discoveredTargets))throw fail("aldi-category-result-unconfirmed");
+   if(navigation){
+    const proof=Navigation.parseNavigationParent(observed.original.body,observed.original.meta,{now:now()});
+    if(observed.page!==undefined||JSON.stringify(observed.navigation)!==JSON.stringify(proof)||JSON.stringify(observed.rejectedCapture?.original)!==JSON.stringify(observed.original)||observed.rejectedCapture?.bytes!==observed.bytes)throw fail("aldi-category-navigation-result-unconfirmed");
+    Rejected.validateCapture(observed.rejectedCapture,{now:now()});
+   }else if(observed.page?.freshCaptureVerified!==true)throw fail("aldi-category-result-unconfirmed");
+   if(JSON.stringify(observed.discoveredTargets)!==JSON.stringify(Fetch.discoveryTargets(observed.original,{now:now(),navigation})))throw fail("aldi-category-result-unconfirmed");Fetch.targets(observed.discoveredTargets.length?observed.discoveredTargets:[target]);
+   const rejectedService=deps.rejected||Rejected;if(navigation)await rejectedService.ensure(pool);
    const next=nextState(cursor,observed,now()),tx=await pool.connect();let rollbackError;
-   try{await tx.query("BEGIN");await tx.query("SELECT txid_current()");const native=await articleService.persist(tx,observed.page,{now:now(),original:observed.original}),priced=await Prices.persist(tx,observed.page,{now:now(),original:observed.original});await(deps.checkpoint||checkpoint)(tx,next,cursor.revision);await tx.query("COMMIT");identityReceived+=native.received||0;identityAccepted+=native.accepted||0;received+=priced.received||0;accepted+=priced.accepted||0;categoryRejected+=observed.page.rejectedCount||0;pages++;cursor=next;}catch(error){try{await tx.query("ROLLBACK");}catch(rollback){rollbackError=rollback;}throw error;}finally{tx.release(rollbackError);}
+   try{
+    await tx.query("BEGIN");await tx.query("SELECT txid_current()");let native={received:0,accepted:0},priced={received:0,accepted:0};
+    if(navigation){
+     const permission=await deps.canFetch();if(permission!==true)throw fail("aldi-category-navigation-shared-source-not-eligible",{retryAfterMs:typeof permission==="string"&&Number.isFinite(Date.parse(permission))?Math.max(60000,Date.parse(permission)-now()):60000});
+     const retained=await rejectedService.persist(tx,observed.rejectedCapture,{now:now()});
+     if(retained?.held!==false||retained.sourceId!==SOURCE||retained.retainedOnly!==true||retained.captureHash!==Rejected.validateCapture(observed.rejectedCapture,{now:now()}).captureHash||retained.admissionPerformed!==false||retained.articleRowsCreated!==0||retained.priceRowsCreated!==0||retained.canonicalProductsCreated!==0||retained.cursorAdvanced!==false||retained.cooldownChanged!==false||retained.truthEligible!==false)throw fail("aldi-category-navigation-original-unconfirmed");
+    }else{native=await articleService.persist(tx,observed.page,{now:now(),original:observed.original});priced=await Prices.persist(tx,observed.page,{now:now(),original:observed.original});}
+    await(deps.checkpoint||checkpoint)(tx,next,cursor.revision);
+    if(navigation){const permission=await deps.canFetch();if(permission!==true)throw fail("aldi-category-navigation-shared-source-not-eligible",{retryAfterMs:typeof permission==="string"&&Number.isFinite(Date.parse(permission))?Math.max(60000,Date.parse(permission)-now()):60000});Rejected.validateCapture(observed.rejectedCapture,{now:now()});Navigation.parseNavigationParent(observed.original.body,observed.original.meta,{now:now()});}
+    await tx.query("COMMIT");identityReceived+=native.received||0;identityAccepted+=native.accepted||0;received+=priced.received||0;accepted+=priced.accepted||0;categoryRejected+=navigation?0:observed.page.rejectedCount||0;pages++;if(navigation)navigationPages++;cursor=next;
+   }catch(error){try{await tx.query("ROLLBACK");}catch(rollback){rollbackError=rollback;}if(navigation&&!error.rejectedCapture)Object.defineProperty(error,"rejectedCapture",{value:observed.rejectedCapture,enumerable:false});throw error;}finally{tx.release(rollbackError);}
    if(cursor.nextIndex===cursor.targets.length)break;
   }
-  return{received,accepted,identityReceived,identityAccepted,categoryRejected,requests,bytes,pages,captureSourceId:SOURCE,nextAttemptAt:new Date(cursor.nextIndex===cursor.targets.length?Date.parse(cursor.nextPassAt):now()+CONTINUATION_MS).toISOString(),catalog:{targetCategories:cursor.targets.length,scannedCategories:cursor.nextIndex,completedPasses:cursor.completedPasses,excludedNavigationTargets:cursor.excludedNavigationTargets,categoryTraversalFinished:cursor.nextIndex===cursor.targets.length,fullAssortment:false},scope:{country:"DE",channel:"assortment-publication",location:"unknown"},independentOfUserReceipts:true};
+  return{received,accepted,identityReceived,identityAccepted,categoryRejected,requests,bytes,pages,navigationPages,captureSourceId:SOURCE,nextAttemptAt:new Date(cursor.nextIndex===cursor.targets.length?Date.parse(cursor.nextPassAt):now()+CONTINUATION_MS).toISOString(),catalog:{targetCategories:cursor.targets.length,scannedCategories:cursor.nextIndex,completedPasses:cursor.completedPasses,excludedNavigationTargets:cursor.excludedNavigationTargets,categoryTraversalFinished:cursor.nextIndex===cursor.targets.length,childDiscoveryComplete:false,fullAssortment:false},scope:{country:"DE",channel:"assortment-publication",location:"unknown"},independentOfUserReceipts:true};
  }catch(error){
   const time=now(),nextAttemptAt=new Date(time+Math.max(ERROR_WAIT_MS,Number.isFinite(error.retryAfterMs)&&error.retryAfterMs>0?error.retryAfterMs:0)).toISOString(),code=String(error.code||"aldi-category-refresh-failed").slice(0,300);
-  await retainFailure(pool,error,code,nextAttemptAt,time,deps.rejected||Rejected);throw Object.assign(error,{nextAttemptAt,requests,bytes,pages});
+  await retainFailure(pool,error,code,nextAttemptAt,time,deps.rejected||Rejected);throw Object.assign(error,{nextAttemptAt,requests,bytes,pages,navigationPages});
  }finally{running=false;}
 }
 async function status(pool,now=Date.now()){const raw=await load(pool),cursor=state(raw);return{sourceId:SOURCE,targetCategories:cursor.targets.length,scannedCategories:cursor.nextIndex,completedPasses:cursor.completedPasses,lastRunAt:cursor.lastRunAt,lastError:raw.lastError||null,nextAttemptAt:new Date(dueAt(raw,now)).toISOString(),excludedNavigationTargets:cursor.excludedNavigationTargets,categoryTraversalFinished:cursor.nextIndex===cursor.targets.length,fullAssortment:false,scopeCountry:"DE",scopeChannel:"assortment-publication",locationScope:"unknown",normalPriceClassificationVerified:false,independentOfUserReceipts:true};}

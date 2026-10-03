@@ -1,5 +1,6 @@
 "use strict";
 const crypto=require("node:crypto"),Parser=require("./aldi-assortment-category-client"),Rejected=require("./aldi-category-rejected-capture-store");
+const Navigation=require("./aldi-category-navigation-parser");
 const SOURCE=Parser.SOURCE,SEED="https://www.aldi-nord.de/sortiment/milchprodukte/milch-milchgetraenke.html",MAX_TARGETS=256;
 const fail=(code,extra={})=>Object.assign(new Error(code),{code,...extra});
 function targets(values){
@@ -29,6 +30,16 @@ function retryAfter(headers,time){
  if(/^\d+$/.test(value)){const seconds=BigInt(value);return seconds>BigInt(Math.floor(remaining/1000))?remaining:Number(seconds)*1000;}
  const at=Date.parse(value);return Number.isFinite(at)&&at>time?at-time:null;
 }
+function discoveryTargets(original,options={}){
+ if(!options||typeof options!=="object"||Array.isArray(options)||![Object.prototype,null].includes(Object.getPrototypeOf(options)))throw fail("aldi-category-discovery-original-required");
+ const time=options.now??Date.now();if(!original||typeof original.body!=="string"||!Number.isSafeInteger(time)||time<0||!Number.isFinite(new Date(time).getTime())||Object.keys(options).some(k=>!["now","navigation"].includes(k))||options.navigation!==undefined&&typeof options.navigation!=="boolean")throw fail("aldi-category-discovery-original-required");
+ if(options.navigation)return Navigation.parseNavigationParent(original.body,original.meta,{now:time}).discoveredTargets;
+ const found=new Set(navigationTargets(original.body));
+ // Optional, bound native sibling references supplement independent header
+ // hints. A missing or ambiguous context never grants sibling discovery.
+ try{for(const target of Navigation.parseSiblingTargets(original.body,original.meta,{now:time}).discoveredTargets)found.add(target);}catch{}
+ if(found.size>MAX_TARGETS)throw fail("aldi-category-navigation-bound-exceeded");return[...found].sort();
+}
 async function fetchPage(target,options={}){
  const url=Parser.categoryUrl(target),fetchImpl=options.fetchImpl||fetch,now=options.now||Date.now,timeout=options.timeoutMs??15000,maxBytes=options.maxBytes??Parser.MAX_BYTES;
  if(!Number.isSafeInteger(timeout)||timeout<1||timeout>30000||!Number.isSafeInteger(maxBytes)||maxBytes<1||maxBytes>Parser.MAX_BYTES)throw fail("aldi-category-request-budget-invalid");
@@ -45,13 +56,17 @@ async function fetchPage(target,options={}){
   const raw=Buffer.concat(chunks);let body;try{body=new TextDecoder("utf-8",{fatal:true,ignoreBOM:true}).decode(raw);}catch{throw fail("aldi-category-response-utf8-required",{requestStarted:true});}
   const time=now();if(!Number.isSafeInteger(time)||time<0)throw fail("aldi-category-clock-invalid",{requestStarted:true});
   const age=response.headers?.get?.("age"),meta={sourceResponseUrl:url,sourceResponseHash:crypto.createHash("sha256").update(raw).digest("hex"),sourceResponseDate:response.headers?.get?.("date"),sourceAgeSeconds:age==null?null:/^\d+$/.test(age)?Number(age):NaN,capturedAt:new Date(time).toISOString(),scopeCountry:"DE"};
-  let page;try{page=Parser.parsePage(raw,meta,{now:time});}catch(error){
+  const original={body,meta};let page;try{page=Parser.parsePage(raw,meta,{now:time});}catch(error){
    // Preserve a bounded original only for a reproducible native-shape rejection.
    // Non-enumerable bodies stay out of ordinary error logs and public responses.
-   if(Rejected.FAILURE_CODES.includes(error.code))Object.defineProperty(error,"rejectedCapture",{value:{status:200,failureCode:error.code,original:{body,meta},bytes},enumerable:false});
+   if(Rejected.FAILURE_CODES.includes(error.code))Object.defineProperty(error,"rejectedCapture",{value:{status:200,failureCode:error.code,original,bytes},enumerable:false});
+   if(error.code==="aldi-category-native-index-conflict"){
+    let navigation;try{navigation=Navigation.parseNavigationParent(raw,meta,{now:time});}catch{}
+    if(navigation)return{sourceId:SOURCE,navigation,original,rejectedCapture:error.rejectedCapture,discoveredTargets:discoveryTargets(original,{now:time,navigation:true}),requests:1,bytes,truthEligible:false,assortmentComplete:false};
+   }
    error.requestStarted=true;throw error;
   }if(!page.freshCaptureVerified)throw fail("aldi-category-original-http-proof-required",{requestStarted:true});
-  return{sourceId:SOURCE,page,original:{body,meta},discoveredTargets:navigationTargets(body),requests:1,bytes,truthEligible:false,assortmentComplete:false};
+  return{sourceId:SOURCE,page,original,discoveredTargets:discoveryTargets(original,{now:time}),requests:1,bytes,truthEligible:false,assortmentComplete:false};
  }finally{controller.abort();clearTimeout(timer);}
 }
-module.exports={SOURCE,SEED,MAX_TARGETS,targets,navigationTargets,retryAfter,fetchPage};
+module.exports={SOURCE,SEED,MAX_TARGETS,targets,navigationTargets,discoveryTargets,retryAfter,fetchPage};
