@@ -22,7 +22,7 @@ function validateOffer(raw={},options={}){
  if(raw.storeId||raw.productId||raw.canonicalProductId||raw.canonicalStoreId||raw.nativeMarketId||raw.nativeVenueId)reasons.push("physical-identity-scope-unsupported");
  if(raw.scopeCountry!=="DE"||raw.scopeChannel!==CHANNEL||raw.locationScope!=="unknown")reasons.push("assortment-DE-scope-required");
  const parsed=pack?Client.exactPack(pack):null;
- if(!parsed||raw.variableWeight===true||raw.variantAmbiguous===true)reasons.push("known-fixed-pack-required");
+ if(!parsed||raw.variableWeight===true||raw.variantAmbiguous===true||Client.unresolvedVariant((variant||"")+" "+name))reasons.push("known-fixed-pack-required");
  if(parsed){const supplied=Identity.base(Number(raw.packAmount)*Number(raw.packCount??1),text(raw.packUnit,20));if(typeof raw.packAmount!=="number"||!Number.isFinite(raw.packAmount)||raw.packAmount<=0||!Number.isSafeInteger(raw.packCount)||raw.packCount!==parsed.count||supplied.unit!==parsed.total.unit||Math.abs(supplied.amount-parsed.total.amount)/Math.max(parsed.total.amount,1)>.001)reasons.push("pack-metadata-conflict");}
  const price=cents(raw.price)?Math.round(raw.price*100)/100:raw.price;if(!cents(price)||price<=0||price>10000)reasons.push("positive-cent-pack-price-required");
  if(raw.currency!=="EUR"||raw.priceBasis!=="pack")reasons.push("EUR-pack-price-required");
