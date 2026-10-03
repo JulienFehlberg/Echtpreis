@@ -114,3 +114,13 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
         run: node tests/aldi-category-rejected-capture-postgres.test.js
+
+      - name: Run PostgreSQL Kaufland Berliner publication integration test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
+        run: node tests/kaufland-berlin-publications-postgres.test.js
+
+      - name: Run PostgreSQL Kaufland real publication refresh transaction integration test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkorb_test
+        run: node tests/kaufland-berlin-publication-refresh-postgres.test.js
