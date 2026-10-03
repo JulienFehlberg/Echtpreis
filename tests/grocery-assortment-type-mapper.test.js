@@ -46,10 +46,10 @@ function boundary(overrides, reason) {
   assert(value.reasonCodes.includes(reason)); return value;
 }
 
-test("master hash and exact IDs bind 25 capabilities to 705 planning types", () => {
+test("master hash and exact IDs bind 40 capabilities to 705 planning types", () => {
   assert.equal(Mapper.metadata.taxonomySha256, crypto.createHash("sha256").update(taxonomyJSON.replace(/\r\n/g, "\n")).digest("hex"));
   assert.equal(Mapper.metadata.taxonomyProductTypes, 705);
-  assert.equal(Mapper.metadata.ruleCoveredProductTypes, 25); assert.equal(Mapper.metadata.unruledProductTypes, 680);
+  assert.equal(Mapper.metadata.ruleCoveredProductTypes, 40); assert.equal(Mapper.metadata.unruledProductTypes, 665);
   assert.equal(rules.initialPlanRuleCount, 23);
   assert.deepEqual(rules.additionalDisjointRules, ["kaffee-tee.gemahlener-kaffee", "kaffee-tee.kaffeebohnen"]);
   for (const rule of rules.rules) assert.equal(Mapper.ruleForType(rule.productTypeId).state, "mapping-supported");
@@ -159,13 +159,40 @@ test("salted Butter wins specific type without asserting unsalted elsewhere", ()
   const generic = mapped("Butter", "eier-fette.butter"); assert(!generic.evidence.some(e => /ungesalzen/.test(e.matchedTerm)));
 });
 test("native standalone salted variant overrides generic butter", () => mapped("Butter", "eier-fette.gesalzene-butter", "Gesalzene Butter"));
+
+test("margarine has its own planning type and never becomes butter", () => {
+  const value = mapped("Margarine", "eier-fette.margarine");
+  assert(!value.productTypeIds.includes("eier-fette.butter"));
+  assert(!value.productTypeIds.includes("eier-fette.gesalzene-butter"));
+  assert.equal(value.ruleSetVersion, 2);
+  assert.equal(value.productEquivalence, false);
+});
+
+for (const flag of [false, null, "true", 1, {}])
+  test("raw variant refusal opt-in rejects malformed rule flags " + JSON.stringify(flag), () => {
+    const copy = structuredClone(rules);
+    copy.rules.find(rule => rule.productTypeId === "milch-sahne.kefir").excludeRawVariant = flag;
+    assert.throws(() => Mapper.createMapper({ ruleData: copy }), error => error.code === "invalid-grocery-type-rule");
+  });
+
+test("raw variant opt-in refuses plant forms while never promoting description ingredients into positive facts", () => {
+  for (const [name, variant] of [["Kefir", "Pflanzlicher Kefir mit Hafer"], ["Trinkjoghurt", "Soja Trinkjoghurt mit Frucht"],
+    ["Kondensmilch", "Hafer Kondensmilch mit Zucker"]]) {
+    const result = open(name, "unassigned", variant);
+    assert(result.evidence.some(item => item.field === "variant" && item.value === variant && item.reason === "excluded-native-product-form"));
+    assert.equal(result.priceValidationPerformed, false); assert.equal(result.productEquivalence, false);
+  }
+  const positive = mapped("Kefir", "milch-sahne.kefir", "Milder Kefir mit Milch");
+  assert(positive.evidence.every(item => item.field === "name"));
+  open("Unit neutral", "unassigned", "Kefir mit Milch");
+});
 test("native salted-only qualifier needs actual butter name", () => {
   mapped("Butter", "eier-fette.gesalzene-butter", "gesalzen"); open("Unit neutral", "unassigned", "gesalzen");
 });
 test("contradictory salted choice cannot assign salted butter", () => open("Butter ungesalzen oder gesalzen"));
 for (const name of ["Zitronen Eis", "Limetten Sorbet", "Zitronen Marmelade"])
   test("citrus ingredient form is not fresh fruit " + name, () => open(name));
-for (const name of ["Margarine", "Margarine mit Butter", "Butter Streichmischung", "Butter mit Rapsöl", "Peanut Butter", "Butter Toast", "Kräuterbutter", "Pflanzliche Butter Alternative"])
+for (const name of ["Margarine mit Butter", "Butter Streichmischung", "Butter mit Rapsöl", "Peanut Butter", "Butter Toast", "Kräuterbutter", "Pflanzliche Butter Alternative"])
   test("butter alternatives and compounds are excluded " + name, () => open(name));
 for (const name of ["Paniermehl", "Semmelbrösel", "Brotmischung", "Paniermehl mit Butter", "Semmelbrösel mit Gouda"])
   test("breadcrumbs and bread mixes do not become bread or dairy " + name, () => open(name));
@@ -261,7 +288,7 @@ test("closed category display contract preserves original category versus PDP li
   assert.equal(result.sourceValidationPerformed, false); assert.equal(result.priceValidationPerformed, false);
   assert.equal(result.packValidationPerformed, false); assert.equal(result.identityValidationPerformed, false);
   assert.equal(result.sourceRevalidationRequired, true); assert.equal(result.truthEligible, false);
-  assert.equal(result.ruleCoveredProductTypes, 25); assert.equal(result.unruledProductTypes, 680);
+  assert.equal(result.ruleCoveredProductTypes, 40); assert.equal(result.unruledProductTypes, 665);
 });
 for (const overrides of [{ sourceUrl: "https://www.aldi-nord.de/produkt/unit-butter-1018999.html" },
   { sourceResponseUrl: "https://www.aldi-nord.de/produkt/unit-butter-1018999.html" },

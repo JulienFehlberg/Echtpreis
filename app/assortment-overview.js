@@ -9,10 +9,13 @@ const TYPE_SEEDS=Object.freeze({"milch-sahne.h-kuhmilch":"Milch","milch-sahne.fr
  "eier-fette.butter":"Butter","eier-fette.gesalzene-butter":"Butter","wurst-aufschnitt.salami":"Salami","wurst-aufschnitt.kochschinken":"Schinken","wurst-aufschnitt.fleischwurst":"Fleischwurst",
  "getreide-nudeln.spaghetti":"Spaghetti","getreide-nudeln.penne":"Penne","getreide-nudeln.basmatireis":"Reis","pflanzliche-alternativen.haferdrink":"Hafer",
  "getraenke.cola":"Cola","getraenke.sportgetrank":"Sportgetränk","obst.zitronen-und-limetten":"Zitrone",
- "kaffee-tee.gemahlener-kaffee":"Kaffee","kaffee-tee.kaffeebohnen":"Kaffee"});
+ "kaffee-tee.gemahlener-kaffee":"Kaffee","kaffee-tee.kaffeebohnen":"Kaffee",
+ "milch-sahne.kondensmilch":"Kondensmilch","milch-sahne.kaffeesahne":"Kaffeesahne","milch-sahne.kefir":"Kefir","milch-sahne.trinkjoghurt":"Trinkjoghurt",
+ "eier-fette.margarine":"Margarine","brot-backwaren.toastbrot":"Toast","haushalt.kuchenpapier":"Küchen","salat-kraeuter.eisbergsalat":"Eisbergsalat",
+ "gemuese.auberginen":"Aubergine","gemuese.lauch-und-lauchzwiebeln":"Porree","obst.apfel":"Äpfel","obst.birnen":"Birne","obst.bananen":"Banane","obst.trauben":"Traube","obst.avocado":"Avocado"});
 const plain=value=>value!==null&&typeof value==="object"&&!Array.isArray(value)&&[Object.prototype,null].includes(Object.getPrototypeOf(value));
 const NO_AUTHORITY=["sourceValidationPerformed","identityValidationPerformed","packValidationPerformed","priceValidationPerformed","priceVerifiedByAnnotation","packVerifiedByAnnotation","currentAvailabilityVerified","currentPriceVerified","physicalStorePriceVerified","truthEligible","productEquivalence","canonicalIdentityChanged","assortmentComplete"];
-function validMappingMetadata(raw){return plain(raw)&&raw.purpose==="planning-annotation"&&raw.taxonomySha256===TAXONOMY_HASH&&raw.taxonomyHashFormat==="sha256-utf8-LF"&&raw.ruleSetVersion===1&&raw.taxonomyProductTypes===705&&raw.ruleCoveredProductTypes===25&&raw.unruledProductTypes===680&&raw.sourceRevalidationRequired===true&&raw.matchMeaning==="planning-type-not-product-equivalence"&&NO_AUTHORITY.every(key=>raw[key]===false);}
+function validMappingMetadata(raw){return plain(raw)&&raw.purpose==="planning-annotation"&&raw.taxonomySha256===TAXONOMY_HASH&&raw.taxonomyHashFormat==="sha256-utf8-LF"&&raw.ruleSetVersion===2&&raw.taxonomyProductTypes===705&&raw.ruleCoveredProductTypes===40&&raw.unruledProductTypes===665&&raw.sourceRevalidationRequired===true&&raw.matchMeaning==="planning-type-not-product-equivalence"&&NO_AUTHORITY.every(key=>raw[key]===false);}
 function validateMapping(raw,master){
  const allowed=new Set(["ok","purpose","ruleSetVersion","taxonomySha256","taxonomyHashFormat","taxonomyProductTypes","ruleCoveredProductTypes","unruledProductTypes","sourceRevalidationRequired","matchMeaning","countMeaning","types",...NO_AUTHORITY]);
  if(!validMappingMetadata(raw)||raw.ok!==true||raw.countMeaning!=="rule-capabilities-not-article-or-retailer-coverage"||Object.keys(raw).some(key=>!allowed.has(key))||!Array.isArray(raw.types)||raw.types.length!==705)throw Error("invalid-type-mapping");

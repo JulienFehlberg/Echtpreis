@@ -72,11 +72,11 @@ function noAuthority(mapping) {
 }
 
 (async () => {
-  await test("705 exact type IDs expose 25 rule capabilities and 680 mapping-unavailable states", async () => {
+  await test("705 exact type IDs expose 40 rule capabilities and 665 mapping-unavailable states", async () => {
     const mapping = Service.mappingStatus(); assert.equal(mapping.types.length, 705);
     assert.equal(mapping.taxonomySha256, Mapper.metadata.taxonomySha256);
-    assert.equal(mapping.types.filter(t => t.state === "mapping-supported").length, 25);
-    assert.equal(mapping.types.filter(t => t.state === "mapping-unavailable").length, 680);
+    assert.equal(mapping.types.filter(t => t.state === "mapping-supported").length, 40);
+    assert.equal(mapping.types.filter(t => t.state === "mapping-unavailable").length, 665);
     assert.equal(new Set(mapping.types.map(t => t.productTypeId)).size, 705); noAuthority(mapping);
     assert(mapping.types.every(t => !Object.hasOwn(t, "price") && !Object.hasOwn(t, "gtin") && !Object.hasOwn(t, "merchant") && !Object.hasOwn(t, "rule")));
     mapping.types[0].name = "changed caller copy"; assert.notEqual(Service.mappingStatus().types[0].name, "changed caller copy");
@@ -129,6 +129,20 @@ function noAuthority(mapping) {
     assert.equal(listed.typeFilteredRows, 3); assert.equal(listed.scannedRows, 4); assert.equal(listed.nextOffset, 4);
     assert(!Object.hasOwn(h.calls[0].options, "productTypeId"), "Type is a post-validation planning filter, not SQL source input");
   });
+  for (const [productTypeId, names] of [["milch-sahne.kondensmilch", ["Kondensmilch", "Pudding mit Kondensmilch"]],
+    ["obst.apfel", ["Äpfel", "Apfel Saft"]], ["eier-fette.margarine", ["Margarine", "Margarine mit Butter"]]])
+    await test("expanded everyday type preserves actual native original bindings and excludes ingredient forms " + productTypeId, async () => {
+      const native = await nativeViews(names), before = JSON.stringify(native), h = harness(native.views);
+      const filtered = await Service.search(pool, { merchant: "ALDI", now, productTypeId }, h.deps);
+      assert.deepEqual(filtered.items.map(a => a.name), [names[0]]); assert.equal(filtered.typeAnnotations.length, 1);
+      assert.equal(filtered.typeMapping.ruleSetVersion, 2); assert.equal(filtered.typeMapping.ruleCoveredProductTypes, 40);
+      assert.equal(filtered.scannedRows, 2); assert.equal(filtered.nextOffset, 2); assert.equal(filtered.typeFilteredRows, 1);
+      assert.equal(JSON.stringify(native), before); noAuthority(filtered.typeAnnotations[0].annotation);
+      assert.deepEqual(filtered.typeAnnotations[0].binding, { sourceId: native.views[0].sourceId, scopeChannel: native.views[0].scopeChannel,
+        retailerSku: native.views[0].retailerSku, observedAt: native.views[0].observedAt, sourceResponseHash: native.views[0].sourceResponseHash });
+      assert.equal(filtered.items[0].price, undefined); assert.equal(filtered.items[0].productId, undefined);
+      assert(!Object.hasOwn(h.calls[0].options, "productTypeId"));
+    });
   for (const [productTypeId, names] of [["eier-fette.butter", ["Butterersatz", "Butter Ersatz", "Butter Aroma", "Butterkeks"]],
     ["kaese.gouda", ["Kartoffelchips Gouda Geschmack", "Gouda Aroma", "Gouda Aromapulver"]],
     ["getraenke.cola", ["Cola-Geschmack Wassereis"]]])
@@ -161,7 +175,7 @@ function noAuthority(mapping) {
       assert.equal(filtered.typeAnnotations[0].binding.sourceResponseHash, native.original.meta.sourceResponseHash);
       assert.equal(filtered.typeAnnotations[0].binding.observedAt, native.original.meta.capturedAt);
       assert(filtered.items.every(article => article.gtin === null && article.currentPriceVerified === false));
-      assert.equal(filtered.typeMapping.ruleCoveredProductTypes, 25); assert.equal(filtered.typeMapping.unruledProductTypes, 680);
+      assert.equal(filtered.typeMapping.ruleCoveredProductTypes, 40); assert.equal(filtered.typeMapping.unruledProductTypes, 665);
     });
   await test("filter leaves raw pagination intact when all visible matches are removed", async () => {
     const first = await nativeViews(["Gouda", "Milch", "Butter"]), second = await nativeViews(["Butter"]);
@@ -244,8 +258,8 @@ function noAuthority(mapping) {
     const h = harness([]), before = await h.directory.status(pool, { now }), saved = JSON.stringify(before);
     const status = await Service.status(pool, { now }, h.deps);
     assert.deepEqual(status.merchants, before.merchants); assert.equal(JSON.stringify(before), saved);
-    assert.equal(status.merchants[3].lastObservedArticles, 100); assert.equal(status.typeMapping.ruleCoveredProductTypes, 25);
-    assert.equal(status.typeMapping.unruledProductTypes, 680); assert.equal(status.typeMapping.types.length, 705);
+    assert.equal(status.merchants[3].lastObservedArticles, 100); assert.equal(status.typeMapping.ruleCoveredProductTypes, 40);
+    assert.equal(status.typeMapping.unruledProductTypes, 665); assert.equal(status.typeMapping.types.length, 705);
     assert.equal(status.total, null); assert.equal(status.currentPrices, undefined); assert.equal(status.mappedArticles, undefined);
     noAuthority(status.typeMapping); assert.deepEqual(h.calls.at(-1), { kind: "status", options: { now } });
   });
@@ -263,5 +277,5 @@ function noAuthority(mapping) {
     await assert.rejects(() => Service.search(pool, { merchant: "ALDI", now }, { url: "https://other.example" }), /invalid-grocery-article-type-dependencies/);
     assert.equal(h.calls.length, 0);
   });
-  console.log(`grocery-article-type-service: ${groups} offline groups passed; validated native Directory, closed category source, bound immutable annotations, exact 25/705 planning capabilities and raw pagination without coverage/price identity claims`);
+  console.log(`grocery-article-type-service: ${groups} offline groups passed; validated native Directory, closed category source, bound immutable annotations, exact 40/705 planning capabilities and raw pagination without coverage/price identity claims`);
 })().catch(error => { console.error(error); process.exitCode = 1; });
