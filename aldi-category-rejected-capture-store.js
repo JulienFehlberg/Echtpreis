@@ -3,6 +3,7 @@
 // Private diagnostics of rejected HTTP 200 originals. This is not an article,
 // navigation admission, price source, stock record or collector checkpoint.
 const crypto = require("node:crypto"), Parser = require("./aldi-assortment-category-client"), Product = require("./aldi-assortment-client");
+const Navigation = require("./aldi-category-navigation-parser");
 const SOURCE = Parser.SOURCE, TABLE = "aldi_category_rejected_captures", CAPTURE_TABLE = "aldi_category_rejected_capture_history", ORIGINAL_TABLE = "aldi_category_rejected_originals";
 const MAX_BYTES = Parser.MAX_BYTES, MAX_URLS = 256, MAX_CAPTURES = 1024, MAX_TOTAL_BYTES = 64 * 1024 * 1024, FRESH_MS = 300000;
 const FAILURE_CODES = Object.freeze([
@@ -248,7 +249,7 @@ function diagnosticSummary(capture, options = {}) {
     nativeRoute:safeText(native?.page,150),queryCategoriesKind:kind(categories),queryCategoryCount:Array.isArray(categories)?categories.length:null,queryCategories:Array.isArray(categories)?categories.slice(0,6).map(v=>safeText(v,100)).filter(v=>v!==null):null,locale:safeText(props?.locale??native?.locale,12),
     nativePage:Object.fromEntries(["@name","@path","categoryKey","mgnl:template"].map(k=>[k,k==="@path"?nativePath(page?.[k]):safeText(page?.[k])])),
     nativeFlags:{country:safeText(props?.country,12),hasError:boolean(props?.hasError),pageEdit:boolean(page?.isMagnoliaEdit),magnoliaEdit:boolean(props?.mgnlContext?.isMagnoliaEdit),magnoliaPreview:boolean(props?.mgnlContext?.isMagnoliaPreview)},
-    localCms,algoliaStateKind:kind(props?.algoliaState),initialResultsKind:kind(props?.algoliaState?.initialResults),nativeIndexCount:results?allIndexKeys.length:null,algoliaIndexNames:indexNames,stateQueryShapes,presentCategoryUrls:[...urls.keys()],urlEvidence:[...urls.values()],cmsStructures:[...localDescriptors,...structures].slice(0,32),globalNavigationStructures:structures,
+    localCms,nativeContext:Navigation.summarizeContext(native),algoliaStateKind:kind(props?.algoliaState),initialResultsKind:kind(props?.algoliaState?.initialResults),nativeIndexCount:results?allIndexKeys.length:null,algoliaIndexNames:indexNames,stateQueryShapes,presentCategoryUrls:[...urls.keys()],urlEvidence:[...urls.values()],cmsStructures:[...localDescriptors,...structures].slice(0,32),globalNavigationStructures:structures,
     truncation:flags,diagnosticTraversalBounded:Object.values(flags).some(Boolean),diagnosticVisitedNodes:visited,
     retainedOnly: true, discoveryOnly: true, admitted: false, current: false, fresh: false, expiresAt: null, availability: "unknown",
     truthEligible: false, currentPriceVerified: false, physicalStorePriceVerified: false, currentAvailabilityVerified: false,
