@@ -9,6 +9,59 @@ const REFRESH_MS = 6 * 3600000, MIN_RETRY_MS = 3600000, TIMEOUT_MS = 15000, MAX_
 const schemas = new WeakMap();
 let running = false;
 const fail = (code, extra = {}) => Object.assign(new Error(code), { code, ...extra });
+const HTTP_TIME_CODE = "kaufland-source-original-http-time-required", httpTimeFailures = new WeakMap();
+function diagnosticIso(value) {
+  if (typeof value !== "string") return null;
+  const time = Date.parse(value);
+  return Number.isFinite(time) && new Date(time).toISOString() === value ? value : null;
+}
+function checkedHttpTime(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)
+    || Object.keys(value).sort().join(",") !== "ageSeconds,ageValid,dateValid,httpDate,receivedAt,response"
+    || !["branch", "index"].includes(value.response) || !diagnosticIso(value.receivedAt) || Date.parse(value.receivedAt) < 0
+    || value.httpDate !== null && !diagnosticIso(value.httpDate)
+    || value.ageSeconds !== null && (!Number.isSafeInteger(value.ageSeconds) || value.ageSeconds < 0)
+    || typeof value.dateValid !== "boolean" || typeof value.ageValid !== "boolean") return null;
+  const dateValid = value.httpDate !== null && Math.abs(Date.parse(value.httpDate) - Date.parse(value.receivedAt)) <= 300000;
+  if (value.dateValid !== dateValid || value.ageSeconds !== null && value.ageValid !== (value.ageSeconds <= 300)
+    || value.dateValid && value.ageValid) return null;
+  return { response: value.response, receivedAt: value.receivedAt, httpDate: value.httpDate,
+    ageSeconds: value.ageSeconds, dateValid: value.dateValid, ageValid: value.ageValid };
+}
+function httpTimeFailure(url, time, dateTime, age) {
+  const ageNumber = age !== null && /^\d+$/.test(age) ? Number(age) : null;
+  const witness = checkedHttpTime({ response: url === Publications.PAGE_URL ? "branch" : "index", receivedAt: new Date(time).toISOString(),
+    httpDate: Number.isFinite(dateTime) ? new Date(dateTime).toISOString() : null,
+    ageSeconds: Number.isSafeInteger(ageNumber) && ageNumber >= 0 ? ageNumber : null,
+    dateValid: Number.isFinite(dateTime) && Math.abs(dateTime - time) <= 300000,
+    ageValid: age === null || /^\d+$/.test(age) && Number(age) <= 300 });
+  const error = fail(HTTP_TIME_CODE, { requestStarted: true });
+  // Only the actual transport can supply this closed witness. Caller extras,
+  // raw headers and bodies cannot enter the durable last_error serialization.
+  if (witness) httpTimeFailures.set(error, Object.freeze(witness));
+  return error;
+}
+function failureText(error) {
+  const witness = error?.code === HTTP_TIME_CODE ? checkedHttpTime(httpTimeFailures.get(error)) : null;
+  if (witness) {
+    const serialized = JSON.stringify({ v: 1, code: HTTP_TIME_CODE, httpTime: witness });
+    if (serialized.length <= 300) return serialized;
+  }
+  return String(error?.code || error?.message || "kaufland-refresh-failed").slice(0, 300);
+}
+function publicFailure(lastError) {
+  const result = { lastError, lastFailureHttpTime: null };
+  if (typeof lastError !== "string" || !/^[\[{]/.test(lastError.trimStart())) return result;
+  // The only serialized error format produced here is the clock diagnostic.
+  // Even a replaced/removed code or damaged envelope must not expose its JSON.
+  result.lastError = HTTP_TIME_CODE;
+  try {
+    const parsed = JSON.parse(lastError);
+    if (parsed?.code === HTTP_TIME_CODE && Object.keys(parsed).sort().join(",") === "code,httpTime,v" && parsed.v === 1)
+      result.lastFailureHttpTime = checkedHttpTime(parsed.httpTime);
+  } catch { /* A truncated/tampered clock envelope exposes only its safe code. */ }
+  return result;
+}
 function clock(now = Date.now) {
   const value = now();
   if (!Number.isSafeInteger(value) || value < 0 || value > MAX_TIME) throw fail("kaufland-refresh-clock-invalid");
@@ -138,7 +191,7 @@ async function get(url, { fetchImpl = fetch, now = Date.now, canFetch, shouldCon
     catch { throw fail("kaufland-source-utf8-required", { requestStarted: true }); }
     const time = clock(now), date = response.headers.get("date"), age = response.headers.get("age"), dateTime = Date.parse(date);
     if (!Number.isFinite(dateTime) || Math.abs(dateTime - time) > 300000 || age !== null && (!/^\d+$/.test(age) || Number(age) > 300))
-      throw fail("kaufland-source-original-http-time-required", { requestStarted: true });
+      throw httpTimeFailure(url, time, dateTime, age);
     const sourceResponseHash = crypto.createHash("sha256").update(bytes).digest("hex");
     if (Publications.hash(body) !== sourceResponseHash) throw fail("kaufland-source-utf8-hash-conflict", { requestStarted: true });
     continuing(shouldContinue);
@@ -188,7 +241,7 @@ async function saveFailure(pool, expected, error, time) {
   const nextAttemptAt = new Date(retryDeadline(error, time)).toISOString();
   const result = await pool.query(`INSERT INTO ${TABLE}(source_id,revision,last_error,next_attempt_at) VALUES($1,$2,$3,$4)
     ON CONFLICT(source_id) DO UPDATE SET revision=${TABLE}.revision+1,last_error=EXCLUDED.last_error,next_attempt_at=EXCLUDED.next_attempt_at,updated_at=now()
-    WHERE ${TABLE}.revision=$5 RETURNING revision`, [SOURCE, expected.revision + 1, String(error.code || error.message || "kaufland-refresh-failed").slice(0, 300),
+    WHERE ${TABLE}.revision=$5 RETURNING revision`, [SOURCE, expected.revision + 1, failureText(error),
     Store.timestampParameter(nextAttemptAt), expected.revision]);
   if (result.rowCount !== 1) throw fail("kaufland-refresh-checkpoint-moved");
   return nextAttemptAt;
@@ -238,7 +291,7 @@ async function refresh({ pool, now = Date.now, leaseOwner } = {}, deps = {}) {
 async function resumeAt(pool, time = Date.now()) { return new Date((await schedule(pool, time)).due).toISOString(); }
 async function status(pool, time = Date.now()) {
   const scheduled = await schedule(pool, time);
-  return { sourceId: SOURCE, ...scheduled.checkpoint, nextAttemptAt: new Date(scheduled.due).toISOString(), refreshIntervalMinutes: REFRESH_MS / 60000,
+  return { sourceId: SOURCE, ...scheduled.checkpoint, ...publicFailure(scheduled.checkpoint.lastError), nextAttemptAt: new Date(scheduled.due).toISOString(), refreshIntervalMinutes: REFRESH_MS / 60000,
     maximumOrdinaryRequests: 2, current: false, fullAssortment: false, nativeProductIdentities: 0, currentPhysicalPriceImports: 0,
     scopeCity: "Berlin", scopeCountry: "DE", scopeChannel: Publications.CHANNEL, physicalStorePriceVerified: false, normalPriceClassificationVerified: false };
 }
