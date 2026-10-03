@@ -8,11 +8,12 @@ class Clock{
  clear=timer=>this.timers.delete(timer.id);
  async advance(to){await flush();let visits=0;for(;;){const timer=[...this.timers.values()].filter(t=>t.at<=BASE+to).sort((a,b)=>a.at-b.at||a.id-b.id)[0];if(!timer)break;assert(++visits<100,"No extra wake busy loop");this.now=timer.at;if(timer.interval)timer.at+=timer.ms;else this.timers.delete(timer.id);timer.fn();await flush();}this.now=BASE+to;await flush();}
 }
-function fixture({duration=8000,refuse=false,globalFailure=false,skip=false,leaseUntil=null}={}){
+function fixture({duration=8000,refuse=false,globalFailure=false,skip=false,leaseUntil=null,aldi=false}={}){
  const clock=new Clock(),root=path.resolve("server.js"),nativeRequire=createRequire(root),starts=[],events=[],logs=[],state=Object.fromEntries(Object.keys(Sources).map(name=>[name,{nextAttemptAt:iso(BASE+86400000)}]));let maxConcurrent=0,concurrent=0,loads=0,nativeDue=null;
  class FakeDate extends RealDate{constructor(...args){super(...(args.length?args:[clock.now]));}static now(){return clock.now;}}
  global.Date=FakeDate;
  state[TARGET]=leaseUntil?{leaseOwner:"foreign-instance",leaseUntil:iso(BASE+leaseUntil)}:{};
+ const handlerArguments=[];if(aldi){state[TARGET]={nextAttemptAt:iso(BASE+86400000)};state["ALDI Nord published assortment"]={};}
  const processDouble=new EventEmitter();processDouble.env={DATABASE_URL:"postgres://LOCAL_TEST",PRICE_INVENTORY_ENABLED:"false",PRODUCT_CATALOG_ENABLED:"false"};processDouble.pid=42;processDouble.exit=code=>events.push("exit:"+code);
  const pool={query:async()=>({rows:[],rowCount:0}),end:async()=>events.push("pool-end")},server={listening:false,listen(_port,cb){this.listening=true;cb?.();},close(cb){this.listening=false;events.push("http-close");cb?.();}};
  const mocks={http:{createServer:()=>server},pg:{Pool:function(){return pool;}},
@@ -22,11 +23,12 @@ function fixture({duration=8000,refuse=false,globalFailure=false,skip=false,leas
   "./price-refresh-runner":Runner,
   "./rewe-retailer-price-refresh":{SOURCE:TARGET,resumeAt:async()=>nativeDue,refresh:async()=>{starts.push(clock.now-BASE);concurrent++;maxConcurrent=Math.max(maxConcurrent,concurrent);await new Promise(resolve=>clock.set(resolve,duration));concurrent--;if(skip)return{skipped:"LOCAL_TEST-no-progress"};nativeDue=iso(clock.now+(refuse?7200000:60000));if(refuse)throw Object.assign(Error("rewe-source-http-429"),{nextAttemptAt:nativeDue});return{received:6,accepted:6,nextAttemptAt:nativeDue};}}
  };
- for(const[file,name]of[["./edeka-counter-refresh","EDEKA Berlin counter preorder"],["./lidl-publication-refresh","Lidl DE dated price announcements"],["./penny-berlin-publication-refresh","PENNY Berlin regional price publications"],["./aldi-assortment-refresh","ALDI Nord published assortment"],["./hit-price-refresh","HIT Berlin store assortment"]])mocks[file]={SOURCE:name,resumeAt:async()=>null,refresh:async()=>assert.fail("No unrelated retailer request")};
+ for(const[file,name]of[["./edeka-counter-refresh","EDEKA Berlin counter preorder"],["./lidl-publication-refresh","Lidl DE dated price announcements"],["./penny-berlin-publication-refresh","PENNY Berlin regional price publications"],["./aldi-source-refresh","ALDI Nord published assortment"],["./hit-price-refresh","HIT Berlin store assortment"]])mocks[file]={SOURCE:name,resumeAt:async()=>null,refresh:async()=>assert.fail("No unrelated retailer request")};
+ if(aldi){const active=mocks["./rewe-retailer-price-refresh"];mocks["./aldi-source-refresh"]={SOURCE:"ALDI Nord published assortment",resumeAt:async()=>nativeDue,refresh:async(options,deps)=>{assert.equal(options.pool,pool);assert.equal(typeof options.leaseOwner,"string");assert(options.leaseOwner.length>0);assert.equal(options.maxRequests,16);assert.equal(deps.shouldContinue(),true);handlerArguments.push({options,deps});return active.refresh();}};}
  mocks["./wolt-retailer-price-refresh"]={SOURCE:"Wolt EDEKA Berlin",resumeAt:async()=>null,createRefresh:()=>({SOURCE:"Wolt nahkauf Berlin Wrangelstraße",resumeAt:async()=>null,refresh:async()=>assert.fail("No unrelated retailer request")})};
  const module={exports:{}},require=file=>Object.hasOwn(mocks,file)?mocks[file]:nativeRequire(file);require.main=module;
  vm.runInNewContext(fs.readFileSync(root,"utf8"),{require,module,exports:module.exports,process:processDouble,console:{log(...args){logs.push(args);},error(...args){logs.push(args);}},Buffer,URL,Date:FakeDate,Promise,setTimeout:clock.set,clearTimeout:clock.clear,setInterval:(fn,ms)=>clock.set(fn,ms,true),clearInterval:clock.clear},{filename:root});
- return{clock,api:module.exports,starts,events,logs,state,process:processDouble,maxConcurrent:()=>maxConcurrent,loads:()=>loads};
+ return{clock,api:module.exports,starts,events,logs,state,handlerArguments,process:processDouble,maxConcurrent:()=>maxConcurrent,loads:()=>loads};
 }
 async function main(){
  try{
@@ -51,7 +53,8 @@ async function main(){
   {
    const f=fixture();await f.clock.advance(4000);f.process.emit("SIGTERM");await flush();assert(!f.events.includes("pool-end"));await f.clock.advance(8000);assert.equal(f.events.filter(e=>e.startsWith("acquire:")).length,1);assert(f.events.indexOf("pool-end")>f.events.indexOf("release:"+TARGET));assert.equal(f.clock.timers.size,0);assert.equal(f.process.exitCode,0);await f.clock.advance(200000);assert.deepEqual(f.starts,[0]);
   }
-  console.log("server-refresh-wake: actual server wiring, precise native pause, no-progress/global-failure fallback, two-hour refusal, lease boundary, single batch and signal drain OK (7 cases; no network or DB)");
+  {const f=fixture({aldi:true});await f.clock.advance(4000);assert.equal(f.handlerArguments.length,1);assert(f.events.includes("acquire:ALDI Nord published assortment"));f.process.emit("SIGTERM");await flush();assert.equal(f.handlerArguments[0].deps.shouldContinue(),false,"The real ALDI wrapper receives the acquired owner and live shutdown gate");await f.clock.advance(8000);assert.equal(f.process.exitCode,0);assert.equal(f.events.at(-1),"pool-end");assert.deepEqual(f.starts,[0]);}
+  console.log("server-refresh-wake: actual server wiring, precise native pause, no-progress/global-failure fallback, two-hour refusal, lease boundary, shared ALDI owner/gate, single batch and signal drain OK (8 cases; no network or DB)");
  }finally{global.Date=RealDate;}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
