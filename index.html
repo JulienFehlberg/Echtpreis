@@ -2511,6 +2511,26 @@ function caddyLooksLikeOrdinaryShoppingTerm(term){
  if(tokens.some(t=>caddyGenericFoodHeads.has(t)))return true;
  return /(?:saft|kase|kaese|joghurt|quark|wurst|fleisch|fisch|brot|nudel|pasta|reis|gemuse|gemuese|obst|milch|drink|wasser|cola|limonade|schorle|chips|keks|riegel|sauce|sosse|creme)$/.test(n);
 }
+const caddyCommonTypos=new Map(Object.entries({
+ "leerdamer":"leerdammer","leerdammerer":"leerdammer","coca kola":"coca cola","coka cola":"coca cola","coca kolla":"coca cola",
+ "orangensafft":"orangensaft","orangesaft":"orangensaft","traubensafft":"traubensaft","apfelsafft":"apfelsaft",
+ "hackfleich":"hackfleisch","hackfleischh":"hackfleisch","rinderhak":"rinderhack","rinderhackfleich":"rinderhackfleisch",
+ "hänchen":"hähnchen","hänchenbrust":"hähnchenbrust","hähnchenbrusst":"hähnchenbrust","haenchen":"haehnchen",
+ "späzle":"spätzle","spaezle":"spätzle","spätzeln":"spätzle","frikadelle":"frikadellen","bulette":"buletten",
+ "mozarella":"mozzarella","mozzerella":"mozzarella","parmesahn":"parmesan","camember":"camembert",
+ "joughurt":"joghurt","jogurt":"joghurt","yogurt":"joghurt","mager quark":"magerquark",
+ "süsskartoffeln":"süßkartoffeln","suskartoffeln":"süßkartoffeln","kartoffel":"kartoffeln",
+ "zwiebel":"zwiebeln","paprikka":"paprika","championgs":"champignons","champignongs":"champignons",
+ "toiletenpapier":"toilettenpapier","klopappier":"klopapier","küchenrolle":"küchenrolle","kuchenrolle":"küchenrolle",
+ "jäger meister":"jägermeister","jagermeister":"jägermeister","jaeger meister":"jaegermeister"
+}).map(([a,b])=>[normalizeProduct(a),b]));
+function caddyCorrectCommonTypos(term){
+ const raw=String(term||""),n=normalizeProduct(raw);
+ if(caddyCommonTypos.has(n))return caddyCommonTypos.get(n);
+ let out=n;
+ for(const [wrong,right] of caddyCommonTypos){if(wrong.length>=5&&(" "+out+" ").includes(" "+wrong+" "))out=(" "+out+" ").replace(" "+wrong+" "," "+normalizeProduct(right)+" ").trim()}
+ return out===n?raw:out;
+}
 function groceryMatchIsSafe(term,key,score){
  if(!key||!catalog[key])return false;
   if(nutWishFamilies[key])return nutWishFamilyMatches(term,key);
@@ -2522,7 +2542,7 @@ function groceryMatchIsSafe(term,key,score){
  return tokens.length>1&&score>=.84;
 }
 function parseWish(raw){
- const original=normalizeSpokenQuantity(String(raw||"").trim()),ean=explicitShoppingEAN(original),term=ean?original.replace(ean,"").replace(/\b(?:ean|gtin|barcode)\s*:?\s*/gi,"").trim():original,normalized=normalizeProduct(term);let amount=1,unit="piece",explicit=false,t=normalized,displayTerm=term,multiPack=null;if(isClearlyNonGrocery(term)){let w={raw:original,label:term,amount:1,unit:"piece",calcAmount:1,key:null,matched:false,note:"",explicit:false,matchMode:"custom",customItem:true,needsClarification:false,needsQuantity:false,resolvedKey:null,choice:{}};return keepCustomItem(w,1)}
+ const original=normalizeSpokenQuantity(String(raw||"").trim()),ean=explicitShoppingEAN(original),typedTerm=ean?original.replace(ean,"").replace(/\b(?:ean|gtin|barcode)\s*:?\s*/gi,"").trim():original,term=caddyCorrectCommonTypos(typedTerm),normalized=normalizeProduct(term);let amount=1,unit="piece",explicit=false,t=normalized,displayTerm=typedTerm,multiPack=null;if(isClearlyNonGrocery(term)){let w={raw:original,label:term,amount:1,unit:"piece",calcAmount:1,key:null,matched:false,note:"",explicit:false,matchMode:"custom",customItem:true,needsClarification:false,needsQuantity:false,resolvedKey:null,choice:{}};return keepCustomItem(w,1)}
  const rawForAmount=term.toLowerCase().replace(/ß/g,"ss").trim();
  // v7.236 natural German multipack phrasing: "2 Packungen à 500 g Hackfleisch" / "2 Packs je 1 l Milch"
  let multi=rawForAmount.match(/^(\d+)\s*(?:x|×|packungen?|packs?|flaschen?|dosen?|beutel|tüten?|tueten?|gläser|glaeser|glas)\s*(?:à|a|je|zu\s+je)?\s*(\d+(?:[.,]\d+)?)\s*(kg|g|gramm|l|liter|ml)\s+(.+)$/i);
