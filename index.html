@@ -2523,7 +2523,7 @@ const caddyCommonTypos=new Map(Object.entries({
  "zwiebel":"zwiebeln","paprikka":"paprika","championgs":"champignons","champignongs":"champignons",
  "toiletenpapier":"toilettenpapier","klopappier":"klopapier","küchenrolle":"küchenrolle","kuchenrolle":"küchenrolle",
  "jäger meister":"jägermeister","jagermeister":"jägermeister","jaeger meister":"jaegermeister"
-}).map(([a,b])=>[normalizeProduct(a),b]));
+}).map(([a,b])=>[String(a).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9%]+/g," ").replace(/\s+/g," ").trim(),b]));
 function caddyCorrectCommonTypos(term){
  const raw=String(term||""),n=normalizeProduct(raw);
  if(caddyCommonTypos.has(n))return caddyCommonTypos.get(n);
