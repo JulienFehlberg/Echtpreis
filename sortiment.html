@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#174e35"><title>Caddy · Sortimentsübersicht</title>
+<link rel="stylesheet" href="app/assortment-overview.css">
+</head>
+<body>
+<header class="topbar"><a class="brand" href="index.html" aria-label="Caddy Einkaufsplaner"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 5h4l4 16h13l3-11H10M14 27h.01M24 27h.01" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Caddy</a><a class="back" href="index.html">Zum Einkaufsplaner <span aria-hidden="true">↗</span></a></header>
+<main>
+<section class="intro"><p class="eyebrow">UNSER SORTIMENT AUF EINEN BLICK</p><h1>Vom Apfel bis zur Zahnpasta.</h1><p class="lede">Erst der Überblick. Dann die konkreten Artikel bei PENNY, EDEKA, Lidl, ALDI, Kaufland und REWE.</p><div class="stats" aria-label="Umfang der allgemeinen Sortimentsliste"><div><strong id="categoryCount">–</strong><span>Bereiche</span></div><div><strong id="typeCount">–</strong><span>Produktarten</span></div><div><strong id="variantCount">–</strong><span>Beispielvarianten</span></div></div></section>
+<div class="workspace">
+<aside class="sidebar"><h2>Bereiche entdecken</h2><nav id="categoryNav" aria-label="Sortimentsbereiche"></nav><p class="side-note">Die Grundliste wächst mit unseren Artikelfunden. Aktionswaren und Kassenartikel hängen vom jeweiligen Markt ab.</p></aside>
+<section class="content" aria-label="Sortimentsliste">
+<div class="toolbar"><div class="tabs" role="tablist" aria-label="Ansicht"><button id="masterTab" role="tab" aria-selected="true" aria-controls="masterPanel">Grundsortiment</button><button id="articlesTab" role="tab" aria-selected="false" aria-controls="articlesPanel" tabindex="-1">Händlerartikel</button></div><label class="search"><span aria-hidden="true">⌕</span><input id="assortmentSearch" type="search" placeholder="Milch, Wurst, Käse, Waschmittel …" aria-label="Sortiment durchsuchen" maxlength="120"><button id="clearSearch" type="button" aria-label="Suche leeren" hidden>×</button></label></div>
+<section id="masterPanel" role="tabpanel" aria-labelledby="masterTab"><div class="view-heading"><div><h2>Was man im Supermarkt findet</h2><p>Produktarten mit Beispielen für ihre Varianten. Das ist unsere Suchgrundlage; konkrete Markenartikel und Packungen erfassen wir daneben.</p></div><button id="expandAll" class="text-button" type="button">Alle aufklappen</button></div><p id="masterResult" class="result-count" aria-live="polite"></p><div id="masterCategories"></div><p id="masterEmpty" class="empty" hidden>Keine Produktart gefunden. Versuche einen anderen Begriff.</p></section>
+<section id="articlesPanel" role="tabpanel" aria-labelledby="articlesTab" hidden><div class="view-heading"><div><h2>Konkrete Artikelfunde</h2><p>Produkte, die wir in einer Händlerquelle tatsächlich gefunden haben. Ein Artikelfund bestätigt noch keine heutige Verfügbarkeit in deiner Filiale.</p></div></div><div class="merchant-filter" id="merchantFilter" aria-label="Händler wählen"></div><p id="articleScope" class="scope-note"></p><p id="articleResult" class="result-count" aria-live="polite"></p><div id="articleList" class="article-grid"></div><button id="loadMore" class="more-button" type="button" hidden>Weitere Artikelfunde</button></section>
+<noscript><p class="empty">Aktiviere JavaScript, um die Liste zu durchsuchen. Die <a href="data/grocery-assortment.json">vollständige Grundliste</a> kannst du auch direkt öffnen.</p></noscript>
+</section></div>
+<footer><p>Produktarten, Artikelbestand und Preise werden getrennt erfasst. So wächst die Preisengine auf einer nachvollziehbaren Grundlage.</p><a href="data/grocery-assortment.json" download>Grundliste herunterladen (JSON)</a></footer>
+</main>
+<script src="app/assortment-overview.js"></script>
+</body></html>
