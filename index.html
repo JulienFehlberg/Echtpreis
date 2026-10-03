@@ -1264,6 +1264,22 @@ linear-gradient(90deg,#006044 0%,rgba(0,96,68,.60) 5%,rgba(0,96,68,.14) 15%,tran
  #planner .list-options-button{padding:5px 7px!important}
 }
 </style><style>
+/* v7.298 denser shopping-list overview */
+#planner #list .item{min-height:0!important;padding:8px 0!important;gap:6px!important}
+#planner #list .itemname{gap:5px!important}
+#planner #list .item-title{font-size:14px!important;line-height:1.12!important;padding:3px 1px!important}
+#planner #list .item>button[data-check]{width:28px!important;height:28px!important;flex-basis:28px!important;border-radius:8px!important;padding:0!important}
+#planner #list .item-pack-size{padding:4px 7px!important;font-size:9.5px!important;border-radius:9px!important}
+#planner #list .qty-stepper{gap:4px!important}
+#planner #list .pack-count{font-size:10px!important;padding:5px 6px!important}
+#planner #list .qty-buttons{gap:4px!important}
+#planner #list .qty-buttons button{width:34px!important;height:34px!important;min-width:34px!important;padding:0!important;border-radius:10px!important;font-size:18px!important}
+@media(max-width:430px){
+ #planner #list .item{padding:7px 0!important}
+ #planner #list .item-title{font-size:13.5px!important}
+ #planner #list .qty-buttons button{width:32px!important;height:32px!important;min-width:32px!important}
+}
+</style><style>
 /* v7.290 comparison result hierarchy */
 #results{margin-top:14px!important}
 #results>.winner{position:relative!important;border-radius:24px!important;padding:20px!important;margin:0 0 10px!important;box-shadow:0 14px 34px rgba(8,116,67,.16)!important}
