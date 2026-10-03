@@ -21,12 +21,14 @@ function responseFreshness({capturedAt,sourceResponseDate,sourceAgeSeconds},maxA
  if(sourceAgeSeconds!=null&&(!Number.isSafeInteger(sourceAgeSeconds)||sourceAgeSeconds<0||sourceAgeSeconds*1000>maxAgeMs))throw failure("aldi-source-cache-age-stale-or-invalid");
  return date;
 }
+function unresolvedVariant(value){return typeof value==="string"&&/verschieden(?:e|en)\s+(?:sorten|varianten|ausf[uü]hrungen|gewichte(?:n)?|gr(?:o|ö|oe)(?:ss|ß)en|mengen)|\bz\.?\s*b\.?(?=\s|\d|$)|je\s+nach\s+(?:sorte|ausf[uü]hrung|gewicht|gr(?:o|ö|oe)(?:ss|ß)e|menge)/i.test(value);}
 function exactPack(value){
  if(typeof value!=="string")return null;
  const units={liter:"l",milliliter:"ml",kilogramm:"kg",gramm:"g"};
  // Normalize explicit native salesUnit spelling, never a product title quantity.
  const normalized=value.replace(/\b(?:milliliter|liter|kilogramm|gramm)\b/gi,unit=>units[unit.toLowerCase()]).replace(/(\d)\s*-\s*(kg|g|ml|cl|l)\b/gi,"$1 $2").replace(/(\d)\s*[x×]\s*(?=\d)/gi,"$1 x ").replace(/\bSt\.(?=\s|[-]|$)/g,"Stück");
- if(/(?:\bca\.?\b|ungef[aä]hr|mindestens|~|\b(?:variabel|variiert|oder|je\s+nach)\b|\d\s*(?:[-–]|bis)\s*\d|\d\s*\/\s*\d|(?:^|[\s(:])[-+]\s*\d|(?:^|[\s(:])[.,]\d|[A-Za-zÀ-ÿ]\d+\s*[x×]|[x×]\s*[-+]\s*\d|\b(?:pro|je)\s+100\s*[- ]?g\b)/i.test(normalized))return null;
+ // Native examples or price-per-weight labels cannot establish a fixed sale pack.
+ if(unresolvedVariant(normalized)||/(?:\bca(?=\.|\s|\d|$)|\b(?:zum\s+beispiel|beispielsweise|circa|etwa|approx(?:imately)?|ungef[aä]hr|mindestens)\b|[~±]|\+\s*(?:\/\s*)?[-−]|\b(?:variabel|variiert|oder|or|alternativ|wahlweise|bzw|je\s+nach)\b|\b(?:ab|bis)(?=\s|\d|$)|\d\s*(?:[-–—−]|bis)\s*\d|\d\s*\/\s*\d|(?:^|[\s(:])[-+−]\s*\d|(?:^|[\s(:])[.,]\d|[A-Za-zÀ-ÿ]\d+\s*[x×]|[x×]\s*[-+−]\s*\d|\b(?:pro|per|je)\s*[- ]?\s*(?:\d+(?:[.,]\d+)?\s*[- ]?\s*)?(?:kg|g|ml|cl|l|st[uü]ck|stk|piece)\b|\/\s*(?:kg|g|ml|cl|l|st[uü]ck|stk|piece)\b)/i.test(normalized))return null;
  const quantities=normalized.match(/\b\d+(?:[.,]\d+)?\s*[- ]?\s*(?:kg|g|ml|cl|l|st[uü]ck|stk|rollen|piece)\b/gi)||[];
  if(quantities.length!==1)return null;
  return Inventory.productPack({quantity:normalized}).parsed;
@@ -79,7 +81,7 @@ function parseProduct(raw={},meta={}){
  if(!capturedAt)reasons.push("aldi-live-capture-time-required");
  if(!/^[a-f0-9]{64}$/.test(meta.sourceResponseHash||""))reasons.push("aldi-live-source-response-required");
  if(raw.isDrainedWeight===true&&(!Number.isFinite(raw.drainedWeightValue)||raw.drainedWeightValue<=0))reasons.push("aldi-drained-weight-unresolved");
- const ambiguousVariant=/verschiedene\s+(?:sorten|varianten|ausf[uü]hrungen)|(?:^|\s)z\.?\s*b\.?\s|je\s+nach\s+(?:sorte|ausf[uü]hrung)/i.test(variant+" "+name);
+ const ambiguousVariant=unresolvedVariant(variant+" "+name);
  if(ambiguousVariant)reasons.push("aldi-product-variant-unresolved");
  if(reasons.length)return{ok:false,reasons,retailerSku:nativeSku};
  const common={merchant:"ALDI Nord",sourceId:SOURCE,retailerSku:nativeSku,gtin:null,name,variant,brand,pack,packAmount:p.amount,packUnit:p.unit,packCount:p.count,sourceUrl:target.sourceUrl,scopeCountry:"DE",scopeChannel:"assortment-publication",locationScope:"unknown",storeId:null,truthEligible:false};
@@ -171,4 +173,4 @@ async function fetchProducts(input=[],options={}){
  const unresolvedTargets=[...gaps.values()].sort(gapOrder),complete=index===targets.length&&!unresolvedTargets.length,clock=Date.parse(timestamp(now())),deferredUntil=index===targets.length&&unresolvedTargets.length&&unresolvedTargets.every(gap=>Date.parse(gap.retryAfter)>clock)?unresolvedTargets[0].retryAfter:null;
  return{offers,products,rejected,confirmedTargets,processed,nextIndex:index,unresolvedTargets,gapAttempts,deferredUntil,requests:s.requests,bytes:s.bytes,complete,partialError,cursorReset,cursor:complete?null:{snapshotHash:normalized.snapshotHash,nextIndex:index,lastSku:index>0?targets[index-1].retailerSku:null,unresolvedTargets},snapshotHash:normalized.snapshotHash,targetCount:targets.length,sourceId:SOURCE,scopeCountry:"DE",scopeChannel:"assortment-publication",truthEligible:false};
 }
-module.exports={SOURCE,ORIGIN,SITEMAP_URL,GAP_CODES,GAP_RETRY_MS,targetForUrl,allowedUrl,stableTargets,parseSitemap,extractProducts,exactPack,parseProduct,responseFreshness,discoverTargets,fetchProducts};
+module.exports={SOURCE,ORIGIN,SITEMAP_URL,GAP_CODES,GAP_RETRY_MS,targetForUrl,allowedUrl,stableTargets,parseSitemap,extractProducts,unresolvedVariant,exactPack,parseProduct,responseFreshness,discoverTargets,fetchProducts};
