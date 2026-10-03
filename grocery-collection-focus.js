@@ -1,7 +1,7 @@
 "use strict";
 // Collection priorities do not change the authority or expiry of saved prices.
 const retailers = Object.freeze(["PENNY", "EDEKA", "Lidl", "ALDI", "Kaufland", "REWE"]);
-const retailerSources = Object.freeze(["Wolt EDEKA Berlin", "ALDI Nord published assortment", "REWE Berlin pickup", "PENNY Berlin regional price publications", "Lidl DE dated price announcements", "EDEKA Berlin counter preorder"]);
+const retailerSources = Object.freeze(["Wolt EDEKA Berlin", "ALDI Nord published assortment", "REWE Berlin pickup", "PENNY Berlin regional price publications", "Lidl DE dated price announcements", "EDEKA Berlin counter preorder", "Kaufland Berlin DE1980 public promotional publications"]);
 const supportingSources = Object.freeze(["Open Prices", "Open Prices locations", "Open Food Facts"]);
 const allowed = new Set([...retailerSources, ...supportingSources]);
 function apply(handlers) {
