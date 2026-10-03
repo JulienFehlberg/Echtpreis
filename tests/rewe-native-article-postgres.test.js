@@ -184,6 +184,8 @@ async function main() {
     await test("price-less originals create dated native identities only", async () => {
       const saved = await save([first, noGtin]);
       assert.equal(saved.accepted, 2); assert.equal(saved.upserted, 2); assert.equal(saved.rejected, 0);
+      assert.equal((await tx.query(`SELECT count(*)::int AS total FROM ${Service.TABLE} WHERE NOT held AND conflict_capture IS NULL`)).rows[0].total, 2,
+        "Unheld identities require SQL NULL, not the JSONB null value");
       assertDated((await search(0)).items[0], first);
       assert.equal((await search(0)).items[0].gtin, fixture.items[0].gtin);
       assert.equal((await search(1)).items[0].gtin, null);
