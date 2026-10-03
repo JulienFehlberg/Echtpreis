@@ -1,5 +1,5 @@
 "use strict";
-const Fetch=require("./aldi-category-fetch-client"),Articles=require("./aldi-category-article-service"),Timestamp=require("./price-refresh-state-store");
+const Fetch=require("./aldi-category-fetch-client"),Articles=require("./aldi-category-article-service"),Timestamp=require("./price-refresh-state-store"),Rejected=require("./aldi-category-rejected-capture-store");
 const SOURCE=Fetch.SOURCE,TABLE="aldi_category_catalog_state",CONTINUATION_MS=60000,REFRESH_MS=4*3600000,ERROR_WAIT_MS=3600000,MAX_REQUESTS=4;
 const fail=(code,extra={})=>Object.assign(new Error(code),{code,...extra});
 const iso=value=>typeof value==="string"&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString()===value;
@@ -40,6 +40,23 @@ async function checkpoint(tx,next,expected){
  const existing=(await tx.query(`SELECT cursor FROM ${TABLE} WHERE source_id=$1 FOR UPDATE`,[SOURCE])).rows[0];if(state(existing||{}).revision!==expected)throw fail("aldi-category-checkpoint-moved");
  await tx.query(`INSERT INTO ${TABLE}(source_id,cursor,last_error,retry_after,updated_at) VALUES($1,$2::jsonb,NULL,NULL,$3) ON CONFLICT(source_id) DO UPDATE SET cursor=EXCLUDED.cursor,last_error=NULL,retry_after=NULL,updated_at=EXCLUDED.updated_at`,[SOURCE,JSON.stringify(next),next.lastRunAt]);
 }
+async function failureCheckpoint(client,code,nextAttemptAt,time){
+ await client.query(`INSERT INTO ${TABLE}(source_id,cursor,last_error,retry_after,updated_at) VALUES($1,$2::jsonb,$3,$4,$5) ON CONFLICT(source_id) DO UPDATE SET last_error=EXCLUDED.last_error,retry_after=EXCLUDED.retry_after,updated_at=EXCLUDED.updated_at`,[SOURCE,JSON.stringify(initial()),code,Timestamp.timestampParameter(nextAttemptAt),new Date(time).toISOString()]);
+}
+async function retainFailure(pool,error,code,nextAttemptAt,time,service=Rejected){
+ if(!error.rejectedCapture){try{await failureCheckpoint(pool,code,nextAttemptAt,time);error.failureCheckpointPersisted=true;}catch(persistenceError){error.failureCheckpointPersisted=false;error.failurePersistenceErrorCode=String(persistenceError.code||"aldi-category-failure-checkpoint-failed").slice(0,150);}return;}
+ let tx,rollbackError;
+ try{
+  await service.ensure(pool);tx=await pool.connect();await tx.query("BEGIN");await tx.query("SELECT txid_current()");
+  await service.persist(tx,error.rejectedCapture,{now:time});await failureCheckpoint(tx,code,nextAttemptAt,time);await tx.query("COMMIT");error.failureCheckpointPersisted=true;
+ }catch(retentionError){
+  if(tx)try{await tx.query("ROLLBACK");}catch(rollback){rollbackError=rollback;}
+  if(tx){tx.release(rollbackError);tx=null;}
+  // A diagnostic write failure cannot erase the original source failure or pause.
+  error.retentionErrorCode=String(retentionError.code||"aldi-category-rejected-retention-failed").slice(0,150);
+  try{await failureCheckpoint(pool,code,nextAttemptAt,time);error.failureCheckpointPersisted=true;}catch(persistenceError){error.failureCheckpointPersisted=false;error.failurePersistenceErrorCode=String(persistenceError.code||"aldi-category-failure-checkpoint-failed").slice(0,150);}
+ }finally{tx?.release(rollbackError);}
+}
 async function refresh(options={},deps={}){
  const {pool}=options,now=options.now||Date.now;if(!pool)throw fail("database-required");if(typeof deps.canFetch!=="function")throw fail("aldi-shared-source-gate-required");if(running)return{received:0,accepted:0,skipped:"already-running"};
  const requested=options.maxRequests??MAX_REQUESTS;if(!Number.isSafeInteger(requested)||requested<1||requested>MAX_REQUESTS)throw fail("aldi-category-request-budget-invalid");
@@ -60,8 +77,8 @@ async function refresh(options={},deps={}){
   return{received,accepted,identityReceived,identityAccepted,categoryRejected,requests,bytes,pages,captureSourceId:SOURCE,nextAttemptAt:new Date(cursor.nextIndex===cursor.targets.length?Date.parse(cursor.nextPassAt):now()+CONTINUATION_MS).toISOString(),catalog:{targetCategories:cursor.targets.length,scannedCategories:cursor.nextIndex,completedPasses:cursor.completedPasses,excludedNavigationTargets:cursor.excludedNavigationTargets,categoryTraversalFinished:cursor.nextIndex===cursor.targets.length,fullAssortment:false},scope:{country:"DE",channel:"assortment-publication",location:"unknown"},independentOfUserReceipts:true};
  }catch(error){
   const time=now(),nextAttemptAt=new Date(time+Math.max(ERROR_WAIT_MS,Number.isFinite(error.retryAfterMs)&&error.retryAfterMs>0?error.retryAfterMs:0)).toISOString(),code=String(error.code||"aldi-category-refresh-failed").slice(0,300);
-  await pool.query(`INSERT INTO ${TABLE}(source_id,cursor,last_error,retry_after,updated_at) VALUES($1,$2::jsonb,$3,$4,$5) ON CONFLICT(source_id) DO UPDATE SET last_error=EXCLUDED.last_error,retry_after=EXCLUDED.retry_after,updated_at=EXCLUDED.updated_at`,[SOURCE,JSON.stringify(initial()),code,Timestamp.timestampParameter(nextAttemptAt),new Date(time).toISOString()]);throw Object.assign(error,{nextAttemptAt,requests,bytes,pages});
+  await retainFailure(pool,error,code,nextAttemptAt,time,deps.rejected||Rejected);throw Object.assign(error,{nextAttemptAt,requests,bytes,pages});
  }finally{running=false;}
 }
 async function status(pool,now=Date.now()){const raw=await load(pool),cursor=state(raw);return{sourceId:SOURCE,targetCategories:cursor.targets.length,scannedCategories:cursor.nextIndex,completedPasses:cursor.completedPasses,lastRunAt:cursor.lastRunAt,lastError:raw.lastError||null,nextAttemptAt:new Date(dueAt(raw,now)).toISOString(),excludedNavigationTargets:cursor.excludedNavigationTargets,categoryTraversalFinished:cursor.nextIndex===cursor.targets.length,fullAssortment:false,scopeCountry:"DE",scopeChannel:"assortment-publication",locationScope:"unknown",normalPriceClassificationVerified:false,independentOfUserReceipts:true};}
-module.exports={SOURCE,TABLE,CONTINUATION_MS,REFRESH_MS,MAX_REQUESTS,ensure,load,state,dueAt,priority,eligibleNavigation,nextState,checkpoint,refresh,status,resumeAt};
+module.exports={SOURCE,TABLE,CONTINUATION_MS,REFRESH_MS,MAX_REQUESTS,ensure,load,state,dueAt,priority,eligibleNavigation,nextState,checkpoint,failureCheckpoint,retainFailure,refresh,status,resumeAt};
