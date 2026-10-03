@@ -26,7 +26,11 @@ function exactPack(value){
  if(typeof value!=="string")return null;
  const units={liter:"l",milliliter:"ml",kilogramm:"kg",gramm:"g"};
  // Normalize explicit native salesUnit spelling, never a product title quantity.
- const normalized=value.replace(/\b(?:milliliter|liter|kilogramm|gramm)\b/gi,unit=>units[unit.toLowerCase()]).replace(/(\d)\s*-\s*(kg|g|ml|cl|l)\b/gi,"$1 $2").replace(/(\d)\s*[x×]\s*(?=\d)/gi,"$1 x ").replace(/\bSt\.(?=\s|[-]|$)/g,"Stück");
+ let normalized=value.replace(/\b(?:milliliter|liter|kilogramm|gramm)\b/gi,unit=>units[unit.toLowerCase()]).replace(/(\d)\s*-\s*(kg|g|ml|cl|l)\b/gi,"$1 $2").replace(/(\d)\s*[x×]\s*(?=\d)/gi,"$1 x ").replace(/\bSt\.(?=\s|[-]|$)/g,"Stück");
+ // German native salesUnit uses 1.000 g for 1000 g; an initial 0.250 remains decimal.
+ const grouped=/^[1-9]\d{0,2}(?:\.\d{3})+(?:,\d+)?$/;
+ for(const number of normalized.match(/\d[\d.,]*/g)||[])if(!grouped.test(number)&&(!/^\d+(?:[.,]\d+)?$/.test(number)||/^0\d+\.\d{3}$/.test(number)))return null;
+ normalized=normalized.replace(/\b[1-9]\d{0,2}(?:\.\d{3})+(?:,\d+)?(?=\s*(?:kg|g|ml|cl|l|st[uü]ck|stk|rollen|piece)\b)/gi,number=>number.replace(/\./g,""));
  // Native examples or price-per-weight labels cannot establish a fixed sale pack.
  if(unresolvedVariant(normalized)||/(?:\bca(?=\.|\s|\d|$)|\b(?:zum\s+beispiel|beispielsweise|circa|etwa|approx(?:imately)?|ungef[aä]hr|mindestens)\b|[~±]|\+\s*(?:\/\s*)?[-−]|\b(?:variabel|variiert|oder|or|alternativ|wahlweise|bzw|je\s+nach)\b|\b(?:ab|bis)(?=\s|\d|$)|\d\s*(?:[-–—−]|bis)\s*\d|\d\s*\/\s*\d|(?:^|[\s(:])[-+−]\s*\d|(?:^|[\s(:])[.,]\d|[A-Za-zÀ-ÿ]\d+\s*[x×]|[x×]\s*[-+−]\s*\d|\b(?:pro|per|je)\s*[- ]?\s*(?:\d+(?:[.,]\d+)?\s*[- ]?\s*)?(?:kg|g|ml|cl|l|st[uü]ck|stk|piece)\b|\/\s*(?:kg|g|ml|cl|l|st[uü]ck|stk|piece)\b)/i.test(normalized))return null;
  const quantities=normalized.match(/\b\d+(?:[.,]\d+)?\s*[- ]?\s*(?:kg|g|ml|cl|l|st[uü]ck|stk|rollen|piece)\b/gi)||[];

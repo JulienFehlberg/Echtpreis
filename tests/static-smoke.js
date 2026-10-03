@@ -281,8 +281,7 @@ assert(html.includes('function mergeBasketQuantity(target,incoming)')&&html.incl
 assert(html.includes('const incomingCount=Math.max(1,Number(incoming.packCount)||1)'),"explicit quantities should survive duplicate merging");
 assert(html.includes('normalizeSpokenQuantity')&&html.includes('spokenNumberWords'),"shopping input should normalize spoken German quantity words");
 assert(html.includes('elf:11'),"spoken German quantity normalization should include eleven");
-assert(html.includes('Voice input: remove conversational filler without losing the quantity/product phrase.'),"spoken quantity filler-word regression marker missing");
-assert(html.includes('replace(/^\\s*(?:(?:bitte|noch|dazu|und|gern|gerne)\\s+)+/i,"")'),"spoken quantity normalization should strip repeated shopping filler words");
+assert(html.includes('function normalizeShoppingContainers(raw)')&&html.includes('function normalizeCompoundShoppingQuantity(raw)')&&html.includes('function normalizeShoppingCountPhrase(raw)'),"shopping quantities need executable container, suffix-size and count normalization; runtime filler/container behavior is covered by browser smoke");
 assert(html.includes('q=q.replace(/^\\d+\\s*(?:x|packungen?|packs?)'),"shopping suggestions should strip multipack prefixes before matching products");
 assert(html.includes('kg|g|gramm|l|liter|ml|stück|stuck|stueck|stk|x'),"shopping parser should accept explicit unit and x-style quantity input");
 assert(html.includes('protectedDecimal=source.replace(/(\\d),(\\d)/g,"$1§DEC§$2")'),"pasted shopping lists must preserve German decimal commas");
@@ -290,7 +289,7 @@ assert(html.includes('function splitShoppingSpeech(text)')&&html.includes('repla
 assert(html.includes('function splitShoppingSpeech(text)')&&html.includes('trim().replace(/(\\d),(\\d)/g,"$1§DEC§$2").replace(/[.;]+/g,",")'),"voice decimal protection must run before punctuation normalization");
 assert(html.includes('replace(/§DEC§/g,",")'),"pasted list decimal protection must restore the original German quantity");
 
-assert(html.includes('let multi=rawForAmount.match(/^(\\d+)\\s*(?:x|×|packungen?|packs?)'),"shopping parser should recognize multipack quantity syntax");
+assert(html.includes('let multi=rawForAmount.match')&&html.includes('normalizeShoppingCountPhrase'),"shopping parser must retain its multipack path after container/count normalization; explicit totals are checked in browser smoke");
 assert(html.includes('multiPack={count,amount:size*factor,unit,label'),"multipack parser should retain count and per-pack size separately");
 assert(html.includes('wish.packCount=multiPack.count')&&html.includes('wish.amount=multiPack.count*multiPack.amount'),"multipacks should calculate total comparison quantity from pack count and pack size");
 assert(html.includes('packungen?|packs?'),"shopping parser should accept natural pack/Packungen wording");

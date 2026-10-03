@@ -311,6 +311,17 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  const defaultBlueberries=w.parseWish("Blaubeeren");assert.strictEqual(defaultBlueberries.calcAmount,.25,"unspecified blueberries should default to one 250 g punnet");
  const bananas=w.parseWish("5 Bananen");assert.strictEqual(bananas.packCount,5,"bananas should be counted as five individual pieces");assert(Math.abs(bananas.calcAmount-.9)<.001,"banana count should convert to estimated weight only internally for price calculation");
  const eggs=w.parseWish("Eier");assert.strictEqual(eggs.packCount,1,"eggs should default to one carton");assert.strictEqual(eggs.calcAmount,10,"one egg carton should default to ten eggs");
+ // Container/filler syntax expresses only the user's requested quantity, never a native article or quote.
+ const compoundQuantities=[
+  ["bitte noch dazu fünf Liter Milch","milch",5,1,"l",5],
+  ["mal einmal zwei Flaschen Coca-Cola Zero 1,5 Liter","cola",2,1.5,"l",3],
+  ["3 Packungen Leerdammer à 200 g","kaese",3,.2,"kg",.6],
+  ["4 Dosen Cola 330 ml","cola",4,.33,"l",1.32],
+  ["2 Beutel Mandeln 150 g","mandeln",2,.15,"kg",.3],
+  ["zwölf Dosen Cola 330 ml","cola",12,.33,"l",3.96],
+  ["2x500g Hackfleisch","hackfleisch",2,.5,"kg",1]
+ ];
+ for(const[raw,key,count,size,unit,total]of compoundQuantities){const wish=w.parseWish(raw);assert.strictEqual(wish.key,key,raw);assert.strictEqual(wish.packCount,count,raw+": requested container count");assert(Math.abs(wish.packAmount-size)<1e-9,raw+": per-container quantity");assert.strictEqual(wish.packUnit,unit,raw);assert(Math.abs(wish.calcAmount-total)<1e-9,raw+": combined requested amount");assert.strictEqual(wish.selectedProduct,undefined,raw+": a parsed wish is no retailer identity");assert.strictEqual(wish.gtin,undefined,raw);assert.strictEqual(wish.ean,undefined,raw);}
  w.replaceSparkorbList(["Blaubeeren"]);assert.strictEqual(await w.compare({skipLocation:true,scroll:false}),true,"one standard blueberry punnet should compare immediately");assert(d.getElementById("merchantResults").textContent.includes("1 × 250 g je Packung"),"price details should show the actual package count and size");w.replaceSparkorbList([]);
  p=w.parseWish("1 kg Süßkartoffeln");assert.strictEqual(p.key,"suesskartoffeln");
  for(const product of ["500 g Rinderhack","500 g Hackfleisch","1 kg Hähnchenbrust"]){const wish=w.parseWish(product);assert.strictEqual(w.activePrice(wish.key,"dm",wish),null,"dm must not claim to sell "+product);assert.strictEqual(w.activePrice(wish.key,"Rossmann",wish),null,"Rossmann must not claim to sell "+product)}
@@ -384,13 +395,15 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  const visibleMarkets=d.getElementById("merchantResults").cloneNode(true);visibleMarkets.querySelectorAll("details").forEach(x=>x.remove());
  assert(!visibleMarkets.textContent.includes("0 von 1 Preisen"),"market rows should not repeat technical coverage counts outside details");
  assert(d.querySelector("#merchantResults details summary"),"price provenance must remain available on demand");
- assert.strictEqual(w.parseWish("Rumpsteak").key,null,"an unknown cut must not silently become generic beef");
- w.replaceSparkorbList(["Rumpsteak"]);
+ const rumpsteak=w.parseWish("500 g Rumpsteak");assert.strictEqual(rumpsteak.key,"rumpsteak","the specific steak wish must retain its own category");assert.strictEqual(rumpsteak.label,"Rumpsteak");assert.strictEqual(rumpsteak.resolvedKey,undefined,"a named cut must not bind generic beef automatically");assert.strictEqual(rumpsteak.selectedProduct,undefined);assert.strictEqual(rumpsteak.ean,undefined);assert.strictEqual(w.activePrice("rumpsteak","ALDI Nord",rumpsteak),null,"a generic cut identity is no confirmed current price");
+ w.replaceSparkorbList(["500 g Rumpsteak"]);assert(!d.querySelector('#list [data-resolve-key="rindfleisch"]'),"recognized Rumpsteak must not silently become a beef substitute");assert.strictEqual(await w.compare({skipLocation:true,scroll:false}),true);assert.strictEqual(d.getElementById("winnerPrice").textContent,"—","a named cut without native quotes cannot create a winner");assert.strictEqual(d.getElementById("winnerLabel").textContent,"Noch kein vollständiger Vergleich","Missing prices stay an incomplete comparison rather than a retailer winner");
+ assert.strictEqual(w.parseWish("Hueftsteak").key,null,"a cut absent from the generic catalog must stay unknown until a deliberate substitution");
+ w.replaceSparkorbList(["Hueftsteak"]);
  assert(d.getElementById("list").textContent.includes("⚠ Artikel nicht erkannt"),"unknown products should show a clear warning");
  assert(!d.getElementById("list").textContent.includes("✓ erkannt"),"recognized products should not show a redundant status");
- assert(d.getElementById("list").textContent.includes("Rindfleisch · grober Richtwert"),"unknown steak should offer a plausible category as a choice");
- assert(!d.getElementById("list").textContent.includes("Schweinefleisch · grober Richtwert"),"unrelated meat should not be suggested as an equivalent");
- d.querySelector('#list [data-resolve-key="rindfleisch"]').click();
+ const unknownCandidates=Array.from(w.productCandidates("Hueftsteak"));assert(unknownCandidates.some(row=>row.key==="rindfleisch"),"the existing explicit substitute operation needs a plausible category");assert(!unknownCandidates.some(row=>row.key==="schweinefleisch"),"unrelated meat must not be suggested as an equivalent");assert.strictEqual(w.eval("basket[0].resolvedKey"),undefined,"No candidate can silently replace the unknown cut");
+ // The quiet list no longer forces category choices. Deliberately exercise the existing manual substitution operation.
+ assert.strictEqual(w.eval('resolveUnknownWish(basket[0],"rindfleisch")'),true);w.eval('saveBasketState();drawList()');assert.strictEqual(w.eval("basket[0].selectedProduct"),undefined);assert.strictEqual(w.eval("basket[0].ean"),undefined);
  assert(!d.getElementById("list").textContent.includes("Welche Menge ungefähr?"),"an accepted substitute should start with its standard pack size");
  assert.strictEqual(await w.compare({skipLocation:true,scroll:false}),true,"standard pack size should enable an approximate substitute comparison");
  assert.strictEqual(d.getElementById("winnerPrice").textContent,"—","substitute based only on reference prices must not create a retailer winner");assert.strictEqual(d.getElementById("winnerLabel").textContent,"Keine belastbare Rangfolge","approximate substitute comparisons must remain unranked until evidenced");
@@ -427,7 +440,7 @@ const {JSDOM,VirtualConsole}=require("jsdom");
  w.replaceSparkorbList(["500 Gramm Rinderhack"]);assert.strictEqual(d.querySelector("#list .item-title").textContent,"Rinderhack","ground beef should show a clean product name");assert.strictEqual(d.querySelector("#list .item-pack-size").textContent,"500 g","500 grams should be shown as the intended package size");assert.strictEqual(d.querySelector("#list .qty-stepper b").textContent,"1×","500 grams should start as one package");d.querySelector('[data-qty-index="0"][data-qty="1"]').click();assert.strictEqual(d.querySelector("#list .qty-stepper b").textContent,"2×","the right-side counter should count packages");assert.strictEqual(d.querySelector("#list .item-pack-size").textContent,"500 g","increasing package count should preserve the requested pack size");
  w.replaceSparkorbList(["Schlümpfe"]);
  assert(d.getElementById("list").textContent.includes("⚠ Artikel nicht erkannt"),"a private nickname should be clearly marked as unknown");
- d.querySelector('[data-custom-index="0"]').click();
+ assert.strictEqual(w.eval("basket[0].customItem"),undefined,"An unknown nickname is not silently turned into a priced or canonical article");w.eval('keepCustomItem(basket[0]);saveBasketState();drawList()');
  assert(d.getElementById("list").textContent.includes("Eigener Artikel · außerhalb des Preisvergleichs"),"users should be able to keep an unknown product as free text");
  d.querySelector('[data-qty-index="0"][data-qty="1"]').click();
  assert.strictEqual(d.querySelector("#list .qty-stepper b").textContent,"2×","free-text products should still have a pack count");

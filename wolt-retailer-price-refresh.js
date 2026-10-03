@@ -1,12 +1,12 @@
 "use strict";
-const Clients=require("./wolt-retailer-price-client"),PublishedServices=require("./wolt-retailer-price-service");
+const Clients=require("./wolt-retailer-price-client"),PublishedServices=require("./wolt-retailer-price-service"),NativeArticles=require("./wolt-retailer-article-service");
 const REFRESH_MS=15*60*1000,CONTINUATION_MS=60*1000,runningSources=new Set();
 // The former HTML cache timestamp gate is replaced by a fresh native venue response.
 // Only its local validation error may retry with the new proof; source denials stay paused.
 const LEGACY_VENUE_CACHE_ERROR="wolt-native-venue-stale-or-future";
 function createRefresh(profileKey="edekaBerlin"){
 if(arguments.length>1)throw Object.assign(new Error("wolt-venue-profile-not-approved"),{code:"wolt-venue-profile-not-approved"});
-const Client=Clients.createClient(profileKey),Published=PublishedServices.createService(profileKey),SOURCE=Client.SOURCE;
+const Client=Clients.createClient(profileKey),Published=PublishedServices.createService(profileKey),SOURCE=Client.SOURCE,nativeArticlesEnabled=profileKey==="edekaBerlin";
 const legacyCacheFailure=state=>profileKey==="edekaBerlin"&&state.lastError===LEGACY_VENUE_CACHE_ERROR;
 async function ensure(pool){
  if(!pool)throw new Error("database-required");
@@ -31,10 +31,23 @@ async function refresh({pool,maxRequests=24,now=Date.now}={},deps={}){
   const previousPages=state.cursor?.pagesFetched||0,previousReceived=state.cursor?.received||0;
   if(collected.stalled||collected.pagesFetched<=previousPages||(collected.receivedCumulative??collected.received)<previousReceived)throw new Error("wolt-catalog-progress-stalled");
   if(!collected.complete){const cursor=collected.nextCursor;if(!cursor||typeof cursor!=="object"||Array.isArray(cursor)||cursor.version!==1||cursor.nativeVenueId!==Client.VENUE_ID||!/^[a-f0-9]{24}$/.test(cursor.nativeAssortmentId||"")||!/^[a-f0-9]{64}$/.test(collected.assortmentHash||"")||cursor.assortmentHash!==collected.assortmentHash||cursor.categoryIndex!==collected.categoriesCompleted||cursor.pagesFetched!==collected.pagesFetched||cursor.received!==(collected.receivedCumulative??collected.received)||!Number.isSafeInteger(cursor.pageNumber)||cursor.pageNumber<1||!(cursor.pageToken===null||typeof cursor.pageToken==="string"&&cursor.pageToken.length>0&&cursor.pageToken.length<=4096)||cursor.pageToken===null&&cursor.pageNumber!==1)throw new Error("wolt-catalog-progress-unconfirmed");}else if(collected.nextCursor!=null)throw new Error("wolt-catalog-progress-unconfirmed");
+  if(nativeArticlesEnabled&&!Array.isArray(collected.products))throw new Error("wolt-native-article-batch-required");
+  if(nativeArticlesEnabled)await NativeArticles.ensure(pool);
   const saved=await(deps.persist||Published.persist)(pool,collected.offers,{now:now()});
   // Only completed native pages advance the cursor, and only after their quotes are saved.
-  await pool.query(`INSERT INTO wolt_retailer_catalog_state(source_id,cursor,last_completed_at,completed_cycles,category_count,categories_completed,pages_fetched,received_cumulative,assortment_hash,last_error,retry_after) VALUES($1,$2::jsonb,CASE WHEN $3 THEN $4::timestamptz ELSE NULL END,CASE WHEN $3 THEN 1 ELSE 0 END,$5,$6,$7,$8,$9,NULL,NULL) ON CONFLICT(source_id) DO UPDATE SET cursor=EXCLUDED.cursor,last_completed_at=CASE WHEN $3 THEN EXCLUDED.last_completed_at ELSE wolt_retailer_catalog_state.last_completed_at END,completed_cycles=wolt_retailer_catalog_state.completed_cycles+CASE WHEN $3 THEN 1 ELSE 0 END,category_count=EXCLUDED.category_count,categories_completed=EXCLUDED.categories_completed,pages_fetched=EXCLUDED.pages_fetched,received_cumulative=EXCLUDED.received_cumulative,assortment_hash=EXCLUDED.assortment_hash,last_error=NULL,retry_after=NULL,updated_at=now()`,[SOURCE,JSON.stringify(collected.complete?null:collected.nextCursor),collected.complete,new Date(now()).toISOString(),collected.categoryCount,collected.categoriesCompleted,Number(collected.pagesFetched)||0,Number(collected.receivedCumulative??collected.received)||0,collected.assortmentHash||null]);
-  return{...saved,sourceId:SOURCE,sourceRejected:collected.rejected?.length||0,requests:collected.requests,nextAttemptAt:collected.complete?null:new Date(now()+CONTINUATION_MS).toISOString(),catalog:{publishedAssortmentComplete:collected.complete,physicalStoreAssortmentVerified:false,categoryCount:collected.categoryCount,categoriesCompleted:collected.categoriesCompleted,pagesFetched:collected.pagesFetched,receivedCumulative:collected.receivedCumulative??collected.received,nextCursor:collected.complete?null:collected.nextCursor},scope:{country:"DE",channel:"online",city:"Berlin",nativeVenueId:Client.VENUE_ID},independentOfUserReceipts:true};
+  const checkpoint=writer=>writer.query(`INSERT INTO wolt_retailer_catalog_state(source_id,cursor,last_completed_at,completed_cycles,category_count,categories_completed,pages_fetched,received_cumulative,assortment_hash,last_error,retry_after) VALUES($1,$2::jsonb,CASE WHEN $3 THEN $4::timestamptz ELSE NULL END,CASE WHEN $3 THEN 1 ELSE 0 END,$5,$6,$7,$8,$9,NULL,NULL) ON CONFLICT(source_id) DO UPDATE SET cursor=EXCLUDED.cursor,last_completed_at=CASE WHEN $3 THEN EXCLUDED.last_completed_at ELSE wolt_retailer_catalog_state.last_completed_at END,completed_cycles=wolt_retailer_catalog_state.completed_cycles+CASE WHEN $3 THEN 1 ELSE 0 END,category_count=EXCLUDED.category_count,categories_completed=EXCLUDED.categories_completed,pages_fetched=EXCLUDED.pages_fetched,received_cumulative=EXCLUDED.received_cumulative,assortment_hash=EXCLUDED.assortment_hash,last_error=NULL,retry_after=NULL,updated_at=now()`,[SOURCE,JSON.stringify(collected.complete?null:collected.nextCursor),collected.complete,new Date(now()).toISOString(),collected.categoryCount,collected.categoriesCompleted,Number(collected.pagesFetched)||0,Number(collected.receivedCumulative??collected.received)||0,collected.assortmentHash||null]);
+  let nativeArticles=null;
+  if(nativeArticlesEnabled){
+   if(typeof pool.connect!=="function")throw new Error("wolt-native-article-pool-required");const tx=await pool.connect();let begun=false,releaseError;
+   try{
+    if(!tx||typeof tx.query!=="function"||typeof tx.release!=="function")throw new Error("wolt-native-article-transaction-required");
+    await tx.query("BEGIN");begun=true;await tx.query("SELECT txid_current()");
+    nativeArticles=await(deps.persistArticles||NativeArticles.persist)(tx,collected.products,{now:now()});
+    await checkpoint(tx);await tx.query("COMMIT");begun=false;
+   }catch(error){if(begun)try{await tx.query("ROLLBACK");}catch(rollbackError){releaseError=rollbackError;error.rollbackError=String(rollbackError.code||rollbackError.message||rollbackError);}throw error;}
+   finally{if(tx&&typeof tx.release==="function")tx.release(releaseError);}
+  }else await checkpoint(pool);
+  return{...saved,nativeArticles,sourceId:SOURCE,sourceRejected:collected.rejected?.length||0,requests:collected.requests,nextAttemptAt:collected.complete?null:new Date(now()+CONTINUATION_MS).toISOString(),catalog:{publishedAssortmentComplete:collected.complete,physicalStoreAssortmentVerified:false,categoryCount:collected.categoryCount,categoriesCompleted:collected.categoriesCompleted,pagesFetched:collected.pagesFetched,receivedCumulative:collected.receivedCumulative??collected.received,nextCursor:collected.complete?null:collected.nextCursor},scope:{country:"DE",channel:"online",city:"Berlin",nativeVenueId:Client.VENUE_ID},independentOfUserReceipts:true};
  }finally{runningSources.delete(SOURCE)}
 }
 async function resumeAt(pool,now=Date.now()){const state=await load(pool);if(legacyCacheFailure(state))return new Date(now).toISOString();const retry=state.retryAfter?new Date(state.retryAfter).getTime():NaN;if(Number.isFinite(retry)&&retry>now)return new Date(retry).toISOString();const updated=state.updatedAt?new Date(state.updatedAt).getTime():NaN;return state.cursor&&!state.lastError&&Number.isFinite(updated)?new Date(updated+CONTINUATION_MS).toISOString():null;}
