@@ -38,7 +38,7 @@ function row(a){const r={source_id:a.sourceId,merchant:a.merchant,retailer_sku:a
  // Different source response bytes alone do not make article identities conflict.
  r.identity_hash=hash(JSON.stringify([r.source_id,r.merchant,r.retailer_sku,r.name,r.brand,r.variant,r.pack,r.pack_amount,r.pack_unit,r.pack_count,r.source_url,r.scope_country,r.scope_channel,r.location_scope,r.publication_available]));r.capture_hash=hash(JSON.stringify(r));return r;}
 async function ensure(pool){
- if(!pool||typeof pool.query!=="function")throw fail("database-required");const cacheable=typeof pool.connect==="function";if(cacheable&&schemas.has(pool))return schemas.get(pool);
+ if(!pool||typeof pool.query!=="function")throw fail("database-required");const cacheable=typeof pool.connect==="function"&&typeof pool.release!=="function";if(cacheable&&schemas.has(pool))return schemas.get(pool);
  const job=pool.query(`SELECT pg_advisory_xact_lock(hashtext('ALDI native article schema'));
  CREATE TABLE IF NOT EXISTS ${TABLE}(
  source_id text NOT NULL CHECK(source_id='ALDI Nord published assortment'),merchant text NOT NULL CHECK(merchant='ALDI Nord'),retailer_sku text NOT NULL CHECK(retailer_sku~'^[1-9][0-9]{0,14}$'),gtin text CHECK(gtin IS NULL),name text NOT NULL CHECK(length(btrim(name)) BETWEEN 1 AND 400),brand text,variant text NOT NULL,pack text NOT NULL,
@@ -50,7 +50,7 @@ async function ensure(pool){
  CREATE INDEX IF NOT EXISTS aldi_article_latest_observed_idx ON ${TABLE}(observed_at DESC,retailer_sku);`);
  if(cacheable)schemas.set(pool,job);try{await job;}catch(e){if(cacheable)schemas.delete(pool);throw e;}
 }
-async function writingTransaction(tx){if(!tx||typeof tx.query!=="function"||typeof tx.release!=="function"||typeof tx.connect==="function")throw fail("article-transaction-client-required");const checked=await tx.query('SELECT txid_current_if_assigned() IS NOT NULL AS "transactionOpen"');if(checked.rows[0]?.transactionOpen!==true)throw fail("article-open-writing-transaction-required");await tx.query("SELECT pg_advisory_xact_lock(hashtext($1))",[SOURCE+":articles"]);}
+async function writingTransaction(tx){if(!tx||typeof tx.query!=="function"||typeof tx.release!=="function")throw fail("article-transaction-client-required");const checked=await tx.query('SELECT txid_current_if_assigned() IS NOT NULL AS "transactionOpen"');if(checked.rows[0]?.transactionOpen!==true)throw fail("article-open-writing-transaction-required");await tx.query("SELECT pg_advisory_xact_lock(hashtext($1))",[SOURCE+":articles"]);}
 async function persist(tx,inputs=[],options={}){
  if(!Array.isArray(inputs)||inputs.length>MAX_ROWS)throw fail("invalid-native-articles");const now=clock(options);await writingTransaction(tx);
  const candidates=[],reasons={};let rejected=0;for(const raw of inputs){const checked=validateArticle(raw,{now});if(!checked.ok){rejected++;for(const reason of checked.reasons)reasons[reason]=(reasons[reason]||0)+1;}else candidates.push(row(checked.article));}

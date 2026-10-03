@@ -18,8 +18,14 @@ async function main(){
  check(()=>assert(Service.querySpec({scopeChannel:"pickup",now}).sql.includes("false")));
  await assert.rejects(()=>Service.persist({query:async()=>({rows:[]})},[native],{now}),/transaction-client-required/);checks++;
  await assert.rejects(()=>Service.persist({release(){},query:async()=>({rows:[{transactionOpen:false}]})},[native],{now}),/open-writing-transaction-required/);checks++;
+ // node-postgres PoolClient inherits Client.connect: it is not a Pool discriminator.
+ const inheritedConnect=Object.create(require("pg").Client.prototype),transactionCalls=[];inheritedConnect.release=()=>{};inheritedConnect.query=async(sql,params)=>{transactionCalls.push({sql,params});return{rows:sql.includes("txid_current_if_assigned")?[{transactionOpen:true}]:[]};};
+ assert.equal(typeof inheritedConnect.connect,"function");assert.equal(Object.hasOwn(inheritedConnect,"connect"),false);const emptyTransaction=await Service.persist(inheritedConnect,[],{now});assert.equal(emptyTransaction.received,0);assert.equal(transactionCalls.length,2);assert(transactionCalls[1].sql.includes("pg_advisory_xact_lock"));checks++;
+ inheritedConnect.query=async()=>({rows:[{transactionOpen:false}]});await assert.rejects(()=>Service.persist(inheritedConnect,[],{now}),/open-writing-transaction-required/);checks++;
+ const genuinePool=new (require("pg").Pool)();await assert.rejects(()=>Service.persist(genuinePool,[],{now}),/transaction-client-required/);await genuinePool.end();checks++;
  let schemaCalls=0;const pool={connect(){},query:async()=>{schemaCalls++;return{rows:[]};}};await Service.ensure(pool);await Service.ensure(pool);assert.equal(schemaCalls,1);checks++;
  let clientCalls=0;const tx={release(){},query:async()=>{clientCalls++;return{rows:[]};}};await Service.ensure(tx);await Service.ensure(tx);assert.equal(clientCalls,2,"Rollback-prone clients must never cache schema completion");checks++;
+ let inheritedSchemaCalls=0;inheritedConnect.query=async()=>{inheritedSchemaCalls++;return{rows:[]};};await Service.ensure(inheritedConnect);await Service.ensure(inheritedConnect);assert.equal(inheritedSchemaCalls,2,"A client with inherited connect must retry schema after rollback instead of reusing a pool cache");checks++;
  let failOnce=true,failedCalls=0;const retryPool={connect(){},query:async()=>{failedCalls++;if(failOnce){failOnce=false;throw Error("synthetic-ddl-failure");}return{rows:[]};}};await assert.rejects(()=>Service.ensure(retryPool),/synthetic-ddl-failure/);await Service.ensure(retryPool);assert.equal(failedCalls,2);checks++;
  console.log(`aldi-assortment-article-service: ${checks} groups passed; genuine native identity independent of price, exact sales pack, no GTIN/stock/city upgrades, dated evidence, bounded reads and transaction/schema guards`);
 }
