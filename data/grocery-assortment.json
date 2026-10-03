@@ -1,0 +1,6181 @@
+{
+  "schemaVersion": 1,
+  "title": "Caddy · Gesamtsortiment als Suchgrundlage",
+  "country": "DE",
+  "purpose": "planning-taxonomy",
+  "retailerStockVerified": false,
+  "canonicalProductIdentities": false,
+  "currentPricesIncluded": false,
+  "complete": false,
+  "retailers": [
+    "PENNY",
+    "EDEKA",
+    "Lidl",
+    "ALDI",
+    "Kaufland",
+    "REWE"
+  ],
+  "explanation": "Breite allgemeine Suchstruktur für Supermärkte. Produktarten und Beispielvarianten sind keine erfassten Händlerartikel und keine Zusage, dass ein bestimmter Markt sie führt. Konkrete Artikel werden getrennt mit Händler, nativer Artikelkennung, Originalquelle und Erfassungsdatum zugeordnet.",
+  "variantAxes": [
+    "Marke und native Artikelvariante",
+    "Tier- oder Pflanzenbasis",
+    "Geschmack und Zutaten",
+    "Fettgehalt",
+    "Frisch, haltbar, gekühlt oder tiefgekühlt",
+    "Verarbeitungsart",
+    "Belegte Bio-, Vegan-, Laktosefrei- oder Glutenfrei-Eigenschaften",
+    "Verkaufspackung und Anzahl pro Packung",
+    "Lose Ware, Thekenware, variable Gewichte oder feste Verkaufspackung",
+    "Preisbasis pro Packung, Stück, kg oder Liter; gegebenenfalls Abtropfgewicht"
+  ],
+  "statistics": {
+    "categories": 37,
+    "productTypes": 705,
+    "exampleVariants": 1654
+  },
+  "categories": [
+    {
+      "id": "obst",
+      "name": "Obst",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "obst.apfel",
+          "name": "Äpfel",
+          "exampleVariants": [
+            "Tafeläpfel",
+            "Kochäpfel",
+            "verschiedene Sorten"
+          ]
+        },
+        {
+          "id": "obst.birnen",
+          "name": "Birnen",
+          "exampleVariants": [
+            "Tafelbirnen",
+            "Kochbirnen"
+          ]
+        },
+        {
+          "id": "obst.bananen",
+          "name": "Bananen",
+          "exampleVariants": [
+            "gelb",
+            "Kochbananen"
+          ]
+        },
+        {
+          "id": "obst.orangen",
+          "name": "Orangen",
+          "exampleVariants": [
+            "Speiseorangen",
+            "Saftorangen"
+          ]
+        },
+        {
+          "id": "obst.mandarinen-und-clementinen",
+          "name": "Mandarinen und Clementinen",
+          "exampleVariants": [
+            "Mandarinen",
+            "Clementinen",
+            "Satsumas"
+          ]
+        },
+        {
+          "id": "obst.zitronen-und-limetten",
+          "name": "Zitronen und Limetten",
+          "exampleVariants": [
+            "Zitronen",
+            "Limetten"
+          ]
+        },
+        {
+          "id": "obst.grapefruit-und-pomelo",
+          "name": "Grapefruit und Pomelo",
+          "exampleVariants": [
+            "weiß",
+            "rosa",
+            "rot"
+          ]
+        },
+        {
+          "id": "obst.trauben",
+          "name": "Trauben",
+          "exampleVariants": [
+            "hell",
+            "dunkel",
+            "mit oder ohne Kerne"
+          ]
+        },
+        {
+          "id": "obst.erdbeeren",
+          "name": "Erdbeeren",
+          "exampleVariants": [
+            "lose",
+            "Schale"
+          ]
+        },
+        {
+          "id": "obst.himbeeren",
+          "name": "Himbeeren",
+          "exampleVariants": [
+            "rot",
+            "gelb"
+          ]
+        },
+        {
+          "id": "obst.heidelbeeren",
+          "name": "Heidelbeeren",
+          "exampleVariants": [
+            "Kulturheidelbeeren",
+            "Waldheidelbeeren"
+          ]
+        },
+        {
+          "id": "obst.brombeeren",
+          "name": "Brombeeren",
+          "exampleVariants": [
+            "Schale",
+            "gemischte Beeren"
+          ]
+        },
+        {
+          "id": "obst.johannisbeeren",
+          "name": "Johannisbeeren",
+          "exampleVariants": [
+            "rot",
+            "schwarz",
+            "weiß"
+          ]
+        },
+        {
+          "id": "obst.kirschen",
+          "name": "Kirschen",
+          "exampleVariants": [
+            "Süßkirschen",
+            "Sauerkirschen"
+          ]
+        },
+        {
+          "id": "obst.pfirsiche-und-nektarinen",
+          "name": "Pfirsiche und Nektarinen",
+          "exampleVariants": [
+            "weißfleischig",
+            "gelbfleischig",
+            "Plattpfirsiche"
+          ]
+        },
+        {
+          "id": "obst.aprikosen",
+          "name": "Aprikosen",
+          "exampleVariants": [
+            "frisch",
+            "verschiedene Sorten"
+          ]
+        },
+        {
+          "id": "obst.pflaumen-und-zwetschgen",
+          "name": "Pflaumen und Zwetschgen",
+          "exampleVariants": [
+            "Pflaumen",
+            "Zwetschgen",
+            "Mirabellen"
+          ]
+        },
+        {
+          "id": "obst.melonen",
+          "name": "Melonen",
+          "exampleVariants": [
+            "Wassermelonen",
+            "Honigmelonen",
+            "Cantaloupe"
+          ]
+        },
+        {
+          "id": "obst.ananas",
+          "name": "Ananas",
+          "exampleVariants": [
+            "ganze Frucht",
+            "geschnitten"
+          ]
+        },
+        {
+          "id": "obst.mango",
+          "name": "Mango",
+          "exampleVariants": [
+            "ganze Frucht",
+            "geschnitten"
+          ]
+        },
+        {
+          "id": "obst.kiwi",
+          "name": "Kiwi",
+          "exampleVariants": [
+            "grün",
+            "gold"
+          ]
+        },
+        {
+          "id": "obst.granatapfel",
+          "name": "Granatäpfel",
+          "exampleVariants": [
+            "ganze Frucht",
+            "Kerne"
+          ]
+        },
+        {
+          "id": "obst.avocado",
+          "name": "Avocado",
+          "exampleVariants": [
+            "verschiedene Sorten",
+            "Reifegrade"
+          ]
+        },
+        {
+          "id": "obst.exotische-fruchte",
+          "name": "Exotische Früchte",
+          "exampleVariants": [
+            "Papaya",
+            "Maracuja",
+            "Physalis",
+            "Litschi"
+          ]
+        },
+        {
+          "id": "obst.obstsalat",
+          "name": "Obstsalat",
+          "exampleVariants": [
+            "geschnittenes Obst",
+            "Fruchtmischung"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gemuese",
+      "name": "Gemüse, Kartoffeln und Pilze",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "gemuese.tomaten",
+          "name": "Tomaten",
+          "exampleVariants": [
+            "Rispentomaten",
+            "Cocktailtomaten",
+            "Fleischtomaten"
+          ]
+        },
+        {
+          "id": "gemuese.gurken",
+          "name": "Gurken",
+          "exampleVariants": [
+            "Salatgurken",
+            "Minigurken",
+            "Einlegegurken"
+          ]
+        },
+        {
+          "id": "gemuese.paprika",
+          "name": "Paprika",
+          "exampleVariants": [
+            "rot",
+            "gelb",
+            "grün",
+            "Spitzpaprika"
+          ]
+        },
+        {
+          "id": "gemuese.karotten",
+          "name": "Karotten",
+          "exampleVariants": [
+            "Bundkarotten",
+            "lose Karotten"
+          ]
+        },
+        {
+          "id": "gemuese.zucchini",
+          "name": "Zucchini",
+          "exampleVariants": [
+            "grün",
+            "gelb"
+          ]
+        },
+        {
+          "id": "gemuese.auberginen",
+          "name": "Auberginen",
+          "exampleVariants": [
+            "violett",
+            "gestreift"
+          ]
+        },
+        {
+          "id": "gemuese.kartoffeln",
+          "name": "Kartoffeln",
+          "exampleVariants": [
+            "festkochend",
+            "vorwiegend festkochend",
+            "mehligkochend"
+          ]
+        },
+        {
+          "id": "gemuese.susskartoffeln",
+          "name": "Süßkartoffeln",
+          "exampleVariants": [
+            "orange",
+            "weiß",
+            "violett"
+          ]
+        },
+        {
+          "id": "gemuese.zwiebeln",
+          "name": "Zwiebeln",
+          "exampleVariants": [
+            "gelb",
+            "rot",
+            "weiß",
+            "Schalotten"
+          ]
+        },
+        {
+          "id": "gemuese.knoblauch",
+          "name": "Knoblauch",
+          "exampleVariants": [
+            "Knollen",
+            "einzelne Zehen"
+          ]
+        },
+        {
+          "id": "gemuese.lauch-und-lauchzwiebeln",
+          "name": "Lauch und Lauchzwiebeln",
+          "exampleVariants": [
+            "Porree",
+            "Frühlingszwiebeln"
+          ]
+        },
+        {
+          "id": "gemuese.brokkoli",
+          "name": "Brokkoli",
+          "exampleVariants": [
+            "Köpfe",
+            "Röschen"
+          ]
+        },
+        {
+          "id": "gemuese.blumenkohl",
+          "name": "Blumenkohl",
+          "exampleVariants": [
+            "weiß",
+            "Romanesco"
+          ]
+        },
+        {
+          "id": "gemuese.kohl",
+          "name": "Kohl",
+          "exampleVariants": [
+            "Weißkohl",
+            "Rotkohl",
+            "Spitzkohl",
+            "Wirsing"
+          ]
+        },
+        {
+          "id": "gemuese.rosenkohl",
+          "name": "Rosenkohl",
+          "exampleVariants": [
+            "lose",
+            "Schale"
+          ]
+        },
+        {
+          "id": "gemuese.grunkohl",
+          "name": "Grünkohl",
+          "exampleVariants": [
+            "Blätter",
+            "geschnitten"
+          ]
+        },
+        {
+          "id": "gemuese.spinat-und-mangold",
+          "name": "Spinat und Mangold",
+          "exampleVariants": [
+            "Babyspinat",
+            "Blattspinat",
+            "Mangold"
+          ]
+        },
+        {
+          "id": "gemuese.sellerie",
+          "name": "Sellerie",
+          "exampleVariants": [
+            "Knollensellerie",
+            "Stangensellerie"
+          ]
+        },
+        {
+          "id": "gemuese.rote-bete",
+          "name": "Rote Bete",
+          "exampleVariants": [
+            "roh",
+            "vorgegart"
+          ]
+        },
+        {
+          "id": "gemuese.kohlrabi",
+          "name": "Kohlrabi",
+          "exampleVariants": [
+            "weiß",
+            "violett"
+          ]
+        },
+        {
+          "id": "gemuese.radieschen-und-rettich",
+          "name": "Radieschen und Rettich",
+          "exampleVariants": [
+            "Radieschen",
+            "weißer Rettich",
+            "schwarzer Rettich"
+          ]
+        },
+        {
+          "id": "gemuese.kurbis",
+          "name": "Kürbis",
+          "exampleVariants": [
+            "Hokkaido",
+            "Butternut",
+            "Muskatkürbis"
+          ]
+        },
+        {
+          "id": "gemuese.spargel",
+          "name": "Spargel",
+          "exampleVariants": [
+            "weiß",
+            "grün"
+          ]
+        },
+        {
+          "id": "gemuese.fenchel",
+          "name": "Fenchel",
+          "exampleVariants": [
+            "Knollen",
+            "geschnitten"
+          ]
+        },
+        {
+          "id": "gemuese.grune-bohnen",
+          "name": "Grüne Bohnen",
+          "exampleVariants": [
+            "Buschbohnen",
+            "Stangenbohnen"
+          ]
+        },
+        {
+          "id": "gemuese.erbsen-und-zuckererbsen",
+          "name": "Erbsen und Zuckererbsen",
+          "exampleVariants": [
+            "frische Erbsen",
+            "Zuckerschoten"
+          ]
+        },
+        {
+          "id": "gemuese.mais",
+          "name": "Mais",
+          "exampleVariants": [
+            "Maiskolben",
+            "Zuckermais"
+          ]
+        },
+        {
+          "id": "gemuese.chili-und-peperoni",
+          "name": "Chili und Peperoni",
+          "exampleVariants": [
+            "mild",
+            "scharf",
+            "verschiedene Sorten"
+          ]
+        },
+        {
+          "id": "gemuese.wurzelgemuse",
+          "name": "Wurzelgemüse",
+          "exampleVariants": [
+            "Pastinaken",
+            "Petersilienwurzel",
+            "Steckrüben"
+          ]
+        },
+        {
+          "id": "gemuese.pilze",
+          "name": "Pilze",
+          "exampleVariants": [
+            "Champignons",
+            "Austernpilze",
+            "Shiitake",
+            "saisonale Pilze"
+          ]
+        },
+        {
+          "id": "gemuese.ingwer-und-kurkuma",
+          "name": "Ingwer und Kurkuma",
+          "exampleVariants": [
+            "frische Wurzeln",
+            "geschnitten"
+          ]
+        },
+        {
+          "id": "gemuese.suppengrun",
+          "name": "Suppengrün",
+          "exampleVariants": [
+            "Gemüsebündel",
+            "geschnittene Mischung"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "salat-kraeuter",
+      "name": "Salat und frische Kräuter",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "salat-kraeuter.kopfsalat",
+          "name": "Kopfsalat",
+          "exampleVariants": [
+            "grün",
+            "rot"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.eisbergsalat",
+          "name": "Eisbergsalat",
+          "exampleVariants": [
+            "ganzer Kopf",
+            "geschnitten"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.romersalat",
+          "name": "Römersalat",
+          "exampleVariants": [
+            "Romanasalat",
+            "Salatherzen"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.blattsalat",
+          "name": "Blattsalat",
+          "exampleVariants": [
+            "Lollo rosso",
+            "Lollo bianco",
+            "Eichblattsalat"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.feldsalat",
+          "name": "Feldsalat",
+          "exampleVariants": [
+            "lose",
+            "Schale"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.rucola",
+          "name": "Rucola",
+          "exampleVariants": [
+            "lose",
+            "Schale"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.chicoree-und-endivie",
+          "name": "Chicorée und Endivie",
+          "exampleVariants": [
+            "Chicorée",
+            "Frisée",
+            "Endiviensalat"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.salatmischungen",
+          "name": "Salatmischungen",
+          "exampleVariants": [
+            "Blattsalatmischung",
+            "Salat mit Zutaten"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.kresse-und-sprossen",
+          "name": "Kresse und Sprossen",
+          "exampleVariants": [
+            "Gartenkresse",
+            "Radieschensprossen",
+            "Keimlinge"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.basilikum",
+          "name": "Basilikum",
+          "exampleVariants": [
+            "Topf",
+            "Bund",
+            "geschnitten"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.petersilie",
+          "name": "Petersilie",
+          "exampleVariants": [
+            "glatt",
+            "kraus"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.schnittlauch",
+          "name": "Schnittlauch",
+          "exampleVariants": [
+            "Topf",
+            "Bund"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.dill-und-koriander",
+          "name": "Dill und Koriander",
+          "exampleVariants": [
+            "Dill",
+            "Koriander"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.rosmarin-und-thymian",
+          "name": "Rosmarin und Thymian",
+          "exampleVariants": [
+            "Rosmarin",
+            "Thymian"
+          ]
+        },
+        {
+          "id": "salat-kraeuter.weitere-frische-krauter",
+          "name": "Weitere frische Kräuter",
+          "exampleVariants": [
+            "Minze",
+            "Salbei",
+            "Oregano",
+            "Liebstöckel"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "milch-sahne",
+      "name": "Milch, Sahne und Milchgetränke",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "milch-sahne.frische-kuhmilch",
+          "name": "Frische Kuhmilch",
+          "exampleVariants": [
+            "Vollmilch",
+            "fettarme Milch",
+            "Magermilch"
+          ]
+        },
+        {
+          "id": "milch-sahne.h-kuhmilch",
+          "name": "H-Kuhmilch",
+          "exampleVariants": [
+            "Vollmilch",
+            "fettarme Milch",
+            "Magermilch"
+          ]
+        },
+        {
+          "id": "milch-sahne.esl-kuhmilch",
+          "name": "ESL-Kuhmilch",
+          "exampleVariants": [
+            "verschiedene Fettstufen",
+            "länger haltbar"
+          ]
+        },
+        {
+          "id": "milch-sahne.ziegenmilch",
+          "name": "Ziegenmilch",
+          "exampleVariants": [
+            "frisch",
+            "haltbar"
+          ]
+        },
+        {
+          "id": "milch-sahne.schafsmilch",
+          "name": "Schafsmilch",
+          "exampleVariants": [
+            "frisch",
+            "haltbar"
+          ]
+        },
+        {
+          "id": "milch-sahne.buttermilch",
+          "name": "Buttermilch",
+          "exampleVariants": [
+            "natur",
+            "aromatisiert"
+          ]
+        },
+        {
+          "id": "milch-sahne.kefir",
+          "name": "Kefir",
+          "exampleVariants": [
+            "natur",
+            "verschiedene Fettstufen"
+          ]
+        },
+        {
+          "id": "milch-sahne.dickmilch-und-sauermilch",
+          "name": "Dickmilch und Sauermilch",
+          "exampleVariants": [
+            "natur",
+            "verschiedene Fettstufen"
+          ]
+        },
+        {
+          "id": "milch-sahne.kondensmilch",
+          "name": "Kondensmilch",
+          "exampleVariants": [
+            "ungesüßt",
+            "gesüßt"
+          ]
+        },
+        {
+          "id": "milch-sahne.kaffeesahne",
+          "name": "Kaffeesahne",
+          "exampleVariants": [
+            "verschiedene Fettstufen",
+            "Portionsbecher"
+          ]
+        },
+        {
+          "id": "milch-sahne.schlagsahne",
+          "name": "Schlagsahne",
+          "exampleVariants": [
+            "frisch",
+            "haltbar"
+          ]
+        },
+        {
+          "id": "milch-sahne.kochsahne",
+          "name": "Kochsahne",
+          "exampleVariants": [
+            "verschiedene Fettstufen",
+            "Kochcreme"
+          ]
+        },
+        {
+          "id": "milch-sahne.saure-sahne",
+          "name": "Saure Sahne",
+          "exampleVariants": [
+            "verschiedene Fettstufen"
+          ]
+        },
+        {
+          "id": "milch-sahne.schmand",
+          "name": "Schmand",
+          "exampleVariants": [
+            "natur",
+            "verschiedene Fettstufen"
+          ]
+        },
+        {
+          "id": "milch-sahne.creme-fraiche",
+          "name": "Crème fraîche",
+          "exampleVariants": [
+            "natur",
+            "mit Kräutern"
+          ]
+        },
+        {
+          "id": "milch-sahne.milchmischgetranke",
+          "name": "Milchmischgetränke",
+          "exampleVariants": [
+            "Schokolade",
+            "Vanille",
+            "Erdbeere"
+          ]
+        },
+        {
+          "id": "milch-sahne.trinkjoghurt",
+          "name": "Trinkjoghurt",
+          "exampleVariants": [
+            "natur",
+            "Frucht"
+          ]
+        },
+        {
+          "id": "milch-sahne.milchpulver",
+          "name": "Milchpulver",
+          "exampleVariants": [
+            "Vollmilchpulver",
+            "Magermilchpulver"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "joghurt-quark",
+      "name": "Joghurt, Quark und gekühlte Desserts",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "joghurt-quark.naturjoghurt",
+          "name": "Naturjoghurt",
+          "exampleVariants": [
+            "mager",
+            "fettarm",
+            "Vollmilch"
+          ]
+        },
+        {
+          "id": "joghurt-quark.griechischer-joghurt",
+          "name": "Griechischer Joghurt",
+          "exampleVariants": [
+            "verschiedene Fettstufen",
+            "griechischer Art"
+          ]
+        },
+        {
+          "id": "joghurt-quark.fruchtjoghurt",
+          "name": "Fruchtjoghurt",
+          "exampleVariants": [
+            "Erdbeere",
+            "Kirsch",
+            "Pfirsich",
+            "gemischte Früchte"
+          ]
+        },
+        {
+          "id": "joghurt-quark.aromajoghurt",
+          "name": "Aromajoghurt",
+          "exampleVariants": [
+            "Vanille",
+            "Schokolade",
+            "Kaffee"
+          ]
+        },
+        {
+          "id": "joghurt-quark.joghurt-mit-topping",
+          "name": "Joghurt mit Topping",
+          "exampleVariants": [
+            "Müsli",
+            "Schokolade",
+            "Fruchtzubereitung"
+          ]
+        },
+        {
+          "id": "joghurt-quark.skyr",
+          "name": "Skyr",
+          "exampleVariants": [
+            "natur",
+            "Frucht"
+          ]
+        },
+        {
+          "id": "joghurt-quark.speisequark",
+          "name": "Speisequark",
+          "exampleVariants": [
+            "Magerquark",
+            "Halbfettstufe",
+            "Sahnequark"
+          ]
+        },
+        {
+          "id": "joghurt-quark.fruchtquark",
+          "name": "Fruchtquark",
+          "exampleVariants": [
+            "verschiedene Früchte",
+            "Kinderquark"
+          ]
+        },
+        {
+          "id": "joghurt-quark.krauterquark",
+          "name": "Kräuterquark",
+          "exampleVariants": [
+            "Kräuter",
+            "Knoblauch",
+            "Gewürze"
+          ]
+        },
+        {
+          "id": "joghurt-quark.huttenkase",
+          "name": "Hüttenkäse",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "joghurt-quark.pudding",
+          "name": "Pudding",
+          "exampleVariants": [
+            "Schokolade",
+            "Vanille",
+            "Karamell"
+          ]
+        },
+        {
+          "id": "joghurt-quark.milchreis",
+          "name": "Milchreis",
+          "exampleVariants": [
+            "natur",
+            "Zimt",
+            "Frucht"
+          ]
+        },
+        {
+          "id": "joghurt-quark.griessdessert",
+          "name": "Grießdessert",
+          "exampleVariants": [
+            "natur",
+            "Vanille",
+            "Frucht"
+          ]
+        },
+        {
+          "id": "joghurt-quark.mousse",
+          "name": "Mousse",
+          "exampleVariants": [
+            "Schokolade",
+            "Frucht"
+          ]
+        },
+        {
+          "id": "joghurt-quark.dessertcreme",
+          "name": "Dessertcreme",
+          "exampleVariants": [
+            "Vanille",
+            "Schokolade",
+            "Karamell"
+          ]
+        },
+        {
+          "id": "joghurt-quark.gotterspeise",
+          "name": "Götterspeise",
+          "exampleVariants": [
+            "Waldmeister",
+            "Himbeere",
+            "Zitrone"
+          ]
+        },
+        {
+          "id": "joghurt-quark.weitere-gekuhlte-desserts",
+          "name": "Weitere gekühlte Desserts",
+          "exampleVariants": [
+            "Tiramisu",
+            "Panna cotta",
+            "Crème brûlée"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kaese",
+      "name": "Käse und Käsetheke",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "kaese.gouda",
+          "name": "Gouda",
+          "exampleVariants": [
+            "jung",
+            "mittelalt",
+            "alt"
+          ]
+        },
+        {
+          "id": "kaese.edamer",
+          "name": "Edamer",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "kaese.tilsiter",
+          "name": "Tilsiter",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "kaese.emmentaler",
+          "name": "Emmentaler",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "kaese.butterkase",
+          "name": "Butterkäse",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "kaese.maasdammer-und-leerdammer-art",
+          "name": "Maasdammer und Leerdammer-Art",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "kaese.bergkase",
+          "name": "Bergkäse",
+          "exampleVariants": [
+            "jung",
+            "gereift"
+          ]
+        },
+        {
+          "id": "kaese.cheddar",
+          "name": "Cheddar",
+          "exampleVariants": [
+            "mild",
+            "gereift"
+          ]
+        },
+        {
+          "id": "kaese.weitere-schnittkase",
+          "name": "Weitere Schnittkäse",
+          "exampleVariants": [
+            "Provolone",
+            "Raclettekäse",
+            "Havarti"
+          ]
+        },
+        {
+          "id": "kaese.parmesan-und-grana",
+          "name": "Parmesan und Grana",
+          "exampleVariants": [
+            "Stück",
+            "gerieben"
+          ]
+        },
+        {
+          "id": "kaese.pecorino",
+          "name": "Pecorino",
+          "exampleVariants": [
+            "Stück",
+            "gerieben"
+          ]
+        },
+        {
+          "id": "kaese.mozzarella",
+          "name": "Mozzarella",
+          "exampleVariants": [
+            "Kugel",
+            "Mini",
+            "gerieben"
+          ]
+        },
+        {
+          "id": "kaese.burrata",
+          "name": "Burrata",
+          "exampleVariants": [
+            "Portion",
+            "mehrere Portionen"
+          ]
+        },
+        {
+          "id": "kaese.feta-und-hirtenkase",
+          "name": "Feta und Hirtenkäse",
+          "exampleVariants": [
+            "Schafmilch",
+            "Ziegenmilch",
+            "Kuhmilch"
+          ]
+        },
+        {
+          "id": "kaese.camembert",
+          "name": "Camembert",
+          "exampleVariants": [
+            "mild",
+            "gereift"
+          ]
+        },
+        {
+          "id": "kaese.brie",
+          "name": "Brie",
+          "exampleVariants": [
+            "Stück",
+            "Portion"
+          ]
+        },
+        {
+          "id": "kaese.weichkase-mit-rotschmiere",
+          "name": "Weichkäse mit Rotschmiere",
+          "exampleVariants": [
+            "Limburger",
+            "Romadur",
+            "Münster"
+          ]
+        },
+        {
+          "id": "kaese.blauschimmelkase",
+          "name": "Blauschimmelkäse",
+          "exampleVariants": [
+            "Gorgonzola",
+            "Roquefort",
+            "weitere Sorten"
+          ]
+        },
+        {
+          "id": "kaese.ziegenkase",
+          "name": "Ziegenkäse",
+          "exampleVariants": [
+            "Rolle",
+            "Weichkäse",
+            "Schnittkäse"
+          ]
+        },
+        {
+          "id": "kaese.frischkase",
+          "name": "Frischkäse",
+          "exampleVariants": [
+            "natur",
+            "Kräuter",
+            "Paprika"
+          ]
+        },
+        {
+          "id": "kaese.mascarpone",
+          "name": "Mascarpone",
+          "exampleVariants": [
+            "natur"
+          ]
+        },
+        {
+          "id": "kaese.ricotta",
+          "name": "Ricotta",
+          "exampleVariants": [
+            "natur"
+          ]
+        },
+        {
+          "id": "kaese.schmelzkase",
+          "name": "Schmelzkäse",
+          "exampleVariants": [
+            "Scheiben",
+            "Ecken",
+            "streichfähig"
+          ]
+        },
+        {
+          "id": "kaese.reibekase",
+          "name": "Reibekäse",
+          "exampleVariants": [
+            "Gouda",
+            "Emmentaler",
+            "Käsemischung"
+          ]
+        },
+        {
+          "id": "kaese.back-und-grillkase",
+          "name": "Back- und Grillkäse",
+          "exampleVariants": [
+            "Halloumi",
+            "Grillkäse",
+            "Backcamembert"
+          ]
+        },
+        {
+          "id": "kaese.sauermilchkase",
+          "name": "Sauermilchkäse",
+          "exampleVariants": [
+            "Harzer",
+            "Handkäse"
+          ]
+        },
+        {
+          "id": "kaese.kasesnacks",
+          "name": "Käsesnacks",
+          "exampleVariants": [
+            "Sticks",
+            "Würfel",
+            "Portionskäse"
+          ]
+        },
+        {
+          "id": "kaese.kaseauswahl",
+          "name": "Käseauswahl",
+          "exampleVariants": [
+            "Käseplatte",
+            "Mischpackung",
+            "Thekenstück"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "eier-fette",
+      "name": "Eier, Butter und Streichfette",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "eier-fette.rohe-huhnereier",
+          "name": "Rohe Hühnereier",
+          "exampleVariants": [
+            "Gewichtsklassen S",
+            "M",
+            "L",
+            "XL"
+          ]
+        },
+        {
+          "id": "eier-fette.gekochte-huhnereier",
+          "name": "Gekochte Hühnereier",
+          "exampleVariants": [
+            "natur",
+            "gefärbt"
+          ]
+        },
+        {
+          "id": "eier-fette.wachteleier",
+          "name": "Wachteleier",
+          "exampleVariants": [
+            "roh",
+            "gekocht"
+          ]
+        },
+        {
+          "id": "eier-fette.flussige-eiprodukte",
+          "name": "Flüssige Eiprodukte",
+          "exampleVariants": [
+            "Vollei",
+            "Eiweiß",
+            "Eigelb"
+          ]
+        },
+        {
+          "id": "eier-fette.butter",
+          "name": "Butter",
+          "exampleVariants": [
+            "Süßrahm",
+            "mildgesäuert",
+            "Sauerrahm"
+          ]
+        },
+        {
+          "id": "eier-fette.gesalzene-butter",
+          "name": "Gesalzene Butter",
+          "exampleVariants": [
+            "Meersalz",
+            "Salz"
+          ]
+        },
+        {
+          "id": "eier-fette.krauter-und-gewurzbutter",
+          "name": "Kräuter- und Gewürzbutter",
+          "exampleVariants": [
+            "Kräuter",
+            "Knoblauch",
+            "Gewürze"
+          ]
+        },
+        {
+          "id": "eier-fette.butter-fett-mischung",
+          "name": "Butter-Fett-Mischung",
+          "exampleVariants": [
+            "Butter und Pflanzenöl",
+            "streichfähig"
+          ]
+        },
+        {
+          "id": "eier-fette.margarine",
+          "name": "Margarine",
+          "exampleVariants": [
+            "Vollfett",
+            "Halbfett",
+            "verschiedene Pflanzenöle"
+          ]
+        },
+        {
+          "id": "eier-fette.pflanzliches-streichfett",
+          "name": "Pflanzliches Streichfett",
+          "exampleVariants": [
+            "Streichfett",
+            "Back- und Bratfett"
+          ]
+        },
+        {
+          "id": "eier-fette.butterschmalz",
+          "name": "Butterschmalz",
+          "exampleVariants": [
+            "natur"
+          ]
+        },
+        {
+          "id": "eier-fette.ghee",
+          "name": "Ghee",
+          "exampleVariants": [
+            "natur"
+          ]
+        },
+        {
+          "id": "eier-fette.kokosfett",
+          "name": "Kokosfett",
+          "exampleVariants": [
+            "fest",
+            "nativ"
+          ]
+        },
+        {
+          "id": "eier-fette.schmalz",
+          "name": "Schmalz",
+          "exampleVariants": [
+            "Schwein",
+            "Gans",
+            "gewürzt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "brot-backwaren",
+      "name": "Brot, Brötchen und Backwaren",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "brot-backwaren.weizenbrot",
+          "name": "Weizenbrot",
+          "exampleVariants": [
+            "hell",
+            "Mischbrot"
+          ]
+        },
+        {
+          "id": "brot-backwaren.roggenbrot",
+          "name": "Roggenbrot",
+          "exampleVariants": [
+            "Roggenmischbrot",
+            "Vollkornbrot"
+          ]
+        },
+        {
+          "id": "brot-backwaren.vollkornbrot",
+          "name": "Vollkornbrot",
+          "exampleVariants": [
+            "Weizen",
+            "Roggen",
+            "Mehrkorn"
+          ]
+        },
+        {
+          "id": "brot-backwaren.mehrkornbrot",
+          "name": "Mehrkornbrot",
+          "exampleVariants": [
+            "Saatenbrot",
+            "Körnerbrot"
+          ]
+        },
+        {
+          "id": "brot-backwaren.dinkelbrot",
+          "name": "Dinkelbrot",
+          "exampleVariants": [
+            "hell",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "brot-backwaren.land-und-bauernbrot",
+          "name": "Land- und Bauernbrot",
+          "exampleVariants": [
+            "verschiedene Getreidemischungen"
+          ]
+        },
+        {
+          "id": "brot-backwaren.sauerteigbrot",
+          "name": "Sauerteigbrot",
+          "exampleVariants": [
+            "Roggen",
+            "Weizen",
+            "gemischt"
+          ]
+        },
+        {
+          "id": "brot-backwaren.pumpernickel",
+          "name": "Pumpernickel",
+          "exampleVariants": [
+            "geschnitten",
+            "Portionspackung"
+          ]
+        },
+        {
+          "id": "brot-backwaren.toastbrot",
+          "name": "Toastbrot",
+          "exampleVariants": [
+            "Weizentoast",
+            "Vollkorntoast",
+            "Buttertoast"
+          ]
+        },
+        {
+          "id": "brot-backwaren.sandwichbrot",
+          "name": "Sandwichbrot",
+          "exampleVariants": [
+            "hell",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "brot-backwaren.baguette-und-ciabatta",
+          "name": "Baguette und Ciabatta",
+          "exampleVariants": [
+            "natur",
+            "mit Zutaten"
+          ]
+        },
+        {
+          "id": "brot-backwaren.fladenbrot-und-pita",
+          "name": "Fladenbrot und Pita",
+          "exampleVariants": [
+            "Weizen",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "brot-backwaren.wraps-und-tortillas",
+          "name": "Wraps und Tortillas",
+          "exampleVariants": [
+            "Weizen",
+            "Mais",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "brot-backwaren.burgerbrotchen",
+          "name": "Burgerbrötchen",
+          "exampleVariants": [
+            "Sesam",
+            "Brioche",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "brot-backwaren.hotdogbrotchen",
+          "name": "Hotdogbrötchen",
+          "exampleVariants": [
+            "natur",
+            "geschnitten"
+          ]
+        },
+        {
+          "id": "brot-backwaren.weizenbrotchen",
+          "name": "Weizenbrötchen",
+          "exampleVariants": [
+            "frisch",
+            "Aufbackbrötchen"
+          ]
+        },
+        {
+          "id": "brot-backwaren.kornerbrotchen",
+          "name": "Körnerbrötchen",
+          "exampleVariants": [
+            "Mehrkorn",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "brot-backwaren.laugengeback",
+          "name": "Laugengebäck",
+          "exampleVariants": [
+            "Brezeln",
+            "Laugenstangen",
+            "Laugenbrötchen"
+          ]
+        },
+        {
+          "id": "brot-backwaren.croissants",
+          "name": "Croissants",
+          "exampleVariants": [
+            "natur",
+            "Schokolade",
+            "gefüllt"
+          ]
+        },
+        {
+          "id": "brot-backwaren.hefezopf-und-milchbrotchen",
+          "name": "Hefezopf und Milchbrötchen",
+          "exampleVariants": [
+            "natur",
+            "Rosinen"
+          ]
+        },
+        {
+          "id": "brot-backwaren.knackebrot",
+          "name": "Knäckebrot",
+          "exampleVariants": [
+            "Roggen",
+            "Vollkorn",
+            "Saaten"
+          ]
+        },
+        {
+          "id": "brot-backwaren.zwieback",
+          "name": "Zwieback",
+          "exampleVariants": [
+            "natur",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "brot-backwaren.kuchen",
+          "name": "Kuchen",
+          "exampleVariants": [
+            "Rührkuchen",
+            "Blechkuchen",
+            "Obstkuchen"
+          ]
+        },
+        {
+          "id": "brot-backwaren.torten",
+          "name": "Torten",
+          "exampleVariants": [
+            "Sahnetorte",
+            "Cremetorte",
+            "Obsttorte"
+          ]
+        },
+        {
+          "id": "brot-backwaren.muffins-und-donuts",
+          "name": "Muffins und Donuts",
+          "exampleVariants": [
+            "verschiedene Füllungen",
+            "Glasuren"
+          ]
+        },
+        {
+          "id": "brot-backwaren.feingeback",
+          "name": "Feingebäck",
+          "exampleVariants": [
+            "Plunder",
+            "Teilchen",
+            "Berliner"
+          ]
+        },
+        {
+          "id": "brot-backwaren.frischer-teig",
+          "name": "Frischer Teig",
+          "exampleVariants": [
+            "Blätterteig",
+            "Pizzateig",
+            "Hefeteig"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fleisch",
+      "name": "Fleisch und Fleischtheke",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "fleisch.hahnchenbrust",
+          "name": "Hähnchenbrust",
+          "exampleVariants": [
+            "Filet",
+            "geschnitten"
+          ]
+        },
+        {
+          "id": "fleisch.hahnchenkeulen-und-flugel",
+          "name": "Hähnchenkeulen und Flügel",
+          "exampleVariants": [
+            "Keulen",
+            "Wings"
+          ]
+        },
+        {
+          "id": "fleisch.ganzes-hahnchen",
+          "name": "Ganzes Hähnchen",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "fleisch.putenfleisch",
+          "name": "Putenfleisch",
+          "exampleVariants": [
+            "Brust",
+            "Schnitzel",
+            "Geschnetzeltes"
+          ]
+        },
+        {
+          "id": "fleisch.enten-und-gansefleisch",
+          "name": "Enten- und Gänsefleisch",
+          "exampleVariants": [
+            "ganzer Vogel",
+            "Brust",
+            "Keulen"
+          ]
+        },
+        {
+          "id": "fleisch.rindfleisch-zum-braten",
+          "name": "Rindfleisch zum Braten",
+          "exampleVariants": [
+            "Steaks",
+            "Roastbeef",
+            "Rumpsteak"
+          ]
+        },
+        {
+          "id": "fleisch.rindfleisch-zum-kochen",
+          "name": "Rindfleisch zum Kochen",
+          "exampleVariants": [
+            "Gulasch",
+            "Suppenfleisch",
+            "Rouladen"
+          ]
+        },
+        {
+          "id": "fleisch.schweineschnitzel-und-filet",
+          "name": "Schweineschnitzel und Filet",
+          "exampleVariants": [
+            "Schnitzel",
+            "Filet",
+            "Medaillons"
+          ]
+        },
+        {
+          "id": "fleisch.schweinebraten",
+          "name": "Schweinebraten",
+          "exampleVariants": [
+            "Nacken",
+            "Schulter",
+            "Rücken"
+          ]
+        },
+        {
+          "id": "fleisch.schweinebauch-und-rippchen",
+          "name": "Schweinebauch und Rippchen",
+          "exampleVariants": [
+            "Bauch",
+            "Spareribs"
+          ]
+        },
+        {
+          "id": "fleisch.hackfleisch",
+          "name": "Hackfleisch",
+          "exampleVariants": [
+            "Rind",
+            "Schwein",
+            "gemischt",
+            "Geflügel"
+          ]
+        },
+        {
+          "id": "fleisch.lammfleisch",
+          "name": "Lammfleisch",
+          "exampleVariants": [
+            "Keule",
+            "Kotelett",
+            "Filet"
+          ]
+        },
+        {
+          "id": "fleisch.kalbfleisch",
+          "name": "Kalbfleisch",
+          "exampleVariants": [
+            "Schnitzel",
+            "Braten",
+            "Gulasch"
+          ]
+        },
+        {
+          "id": "fleisch.wildfleisch",
+          "name": "Wildfleisch",
+          "exampleVariants": [
+            "Reh",
+            "Hirsch",
+            "Wildschwein"
+          ]
+        },
+        {
+          "id": "fleisch.kaninchenfleisch",
+          "name": "Kaninchenfleisch",
+          "exampleVariants": [
+            "ganz",
+            "Teilstücke"
+          ]
+        },
+        {
+          "id": "fleisch.innereien",
+          "name": "Innereien",
+          "exampleVariants": [
+            "Leber",
+            "Herz",
+            "Nieren"
+          ]
+        },
+        {
+          "id": "fleisch.grillfleisch",
+          "name": "Grillfleisch",
+          "exampleVariants": [
+            "marinierte Steaks",
+            "Spieße",
+            "Grillplatte"
+          ]
+        },
+        {
+          "id": "fleisch.fleischzubereitungen",
+          "name": "Fleischzubereitungen",
+          "exampleVariants": [
+            "Geschnetzeltes",
+            "gefüllte Stücke",
+            "Cordon bleu"
+          ]
+        },
+        {
+          "id": "fleisch.frische-bratwurst",
+          "name": "Frische Bratwurst",
+          "exampleVariants": [
+            "Schwein",
+            "Rind",
+            "Geflügel"
+          ]
+        },
+        {
+          "id": "fleisch.suppen-und-knochenware",
+          "name": "Suppen- und Knochenware",
+          "exampleVariants": [
+            "Suppenknochen",
+            "Markknochen"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wurst-aufschnitt",
+      "name": "Wurst, Schinken und Aufschnitt",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "wurst-aufschnitt.fleischwurst",
+          "name": "Fleischwurst",
+          "exampleVariants": [
+            "Ring",
+            "Scheiben",
+            "Geflügel"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.lyoner",
+          "name": "Lyoner",
+          "exampleVariants": [
+            "natur",
+            "Paprika",
+            "Kräuter"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.mortadella",
+          "name": "Mortadella",
+          "exampleVariants": [
+            "natur",
+            "Pistazie",
+            "Geflügel"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.bierschinken",
+          "name": "Bierschinken",
+          "exampleVariants": [
+            "Schwein",
+            "Geflügel"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.jagdwurst",
+          "name": "Jagdwurst",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.bierwurst",
+          "name": "Bierwurst",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.salami",
+          "name": "Salami",
+          "exampleVariants": [
+            "Schwein",
+            "Rind",
+            "Geflügel",
+            "luftgetrocknet"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.cervelatwurst",
+          "name": "Cervelatwurst",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.chorizo",
+          "name": "Chorizo",
+          "exampleVariants": [
+            "mild",
+            "scharf"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.kochschinken",
+          "name": "Kochschinken",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.rohschinken",
+          "name": "Rohschinken",
+          "exampleVariants": [
+            "luftgetrocknet",
+            "geräuchert"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.schwarzwalder-schinken",
+          "name": "Schwarzwälder Schinken",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.serrano-und-parmaschinken",
+          "name": "Serrano- und Parmaschinken",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.schinkenspeck-und-bacon",
+          "name": "Schinkenspeck und Bacon",
+          "exampleVariants": [
+            "Scheiben",
+            "Würfel"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.kasseler-aufschnitt",
+          "name": "Kasseler-Aufschnitt",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.puten-und-hahnchenbrustaufschnitt",
+          "name": "Puten- und Hähnchenbrustaufschnitt",
+          "exampleVariants": [
+            "natur",
+            "geräuchert",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.rinderaufschnitt",
+          "name": "Rinderaufschnitt",
+          "exampleVariants": [
+            "Roastbeef",
+            "Pastrami",
+            "Corned Beef"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.leberwurst",
+          "name": "Leberwurst",
+          "exampleVariants": [
+            "fein",
+            "grob",
+            "Geflügel"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.teewurst",
+          "name": "Teewurst",
+          "exampleVariants": [
+            "fein",
+            "grob"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.mettwurst-und-zwiebelmettwurst",
+          "name": "Mettwurst und Zwiebelmettwurst",
+          "exampleVariants": [
+            "streichfähig",
+            "schnittfest"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.blutwurst-und-rotwurst",
+          "name": "Blutwurst und Rotwurst",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.sulze",
+          "name": "Sülze",
+          "exampleVariants": [
+            "Fleischsülze",
+            "Geflügelsülze"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.wiener-wurstchen",
+          "name": "Wiener Würstchen",
+          "exampleVariants": [
+            "Schwein",
+            "Geflügel"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.bockwurst-und-knackwurst",
+          "name": "Bockwurst und Knackwurst",
+          "exampleVariants": [
+            "Schwein",
+            "Rind",
+            "Geflügel"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.frankfurter-wurstchen",
+          "name": "Frankfurter Würstchen",
+          "exampleVariants": [
+            "verschiedene Fleischarten"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.bruh-und-grillwurst",
+          "name": "Brüh- und Grillwurst",
+          "exampleVariants": [
+            "Bratwurst",
+            "Käsekrainer",
+            "Currywurst"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.weisswurst",
+          "name": "Weißwurst",
+          "exampleVariants": [
+            "traditionell",
+            "Geflügel"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.fleischkase-und-leberkase",
+          "name": "Fleischkäse und Leberkäse",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.rohwurstspezialitaten",
+          "name": "Rohwurstspezialitäten",
+          "exampleVariants": [
+            "Landjäger",
+            "Cabanossi",
+            "Pfefferbeißer"
+          ]
+        },
+        {
+          "id": "wurst-aufschnitt.aufschnittauswahl",
+          "name": "Aufschnittauswahl",
+          "exampleVariants": [
+            "Mischpackung",
+            "Thekenaufschnitt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fisch",
+      "name": "Fisch und Meeresfrüchte",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "fisch.lachs",
+          "name": "Lachs",
+          "exampleVariants": [
+            "Filet",
+            "Steak",
+            "ganz"
+          ]
+        },
+        {
+          "id": "fisch.forelle",
+          "name": "Forelle",
+          "exampleVariants": [
+            "ganz",
+            "Filet"
+          ]
+        },
+        {
+          "id": "fisch.kabeljau-und-seelachs",
+          "name": "Kabeljau und Seelachs",
+          "exampleVariants": [
+            "Filet",
+            "Loins"
+          ]
+        },
+        {
+          "id": "fisch.weitere-frischfische",
+          "name": "Weitere Frischfische",
+          "exampleVariants": [
+            "Dorade",
+            "Wolfsbarsch",
+            "Zander"
+          ]
+        },
+        {
+          "id": "fisch.hering-und-matjes",
+          "name": "Hering und Matjes",
+          "exampleVariants": [
+            "Filet",
+            "eingelegt"
+          ]
+        },
+        {
+          "id": "fisch.makrele",
+          "name": "Makrele",
+          "exampleVariants": [
+            "frisch",
+            "geräuchert"
+          ]
+        },
+        {
+          "id": "fisch.thunfisch",
+          "name": "Thunfisch",
+          "exampleVariants": [
+            "Steak",
+            "Filet"
+          ]
+        },
+        {
+          "id": "fisch.raucherlachs",
+          "name": "Räucherlachs",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück"
+          ]
+        },
+        {
+          "id": "fisch.weitere-raucherfische",
+          "name": "Weitere Räucherfische",
+          "exampleVariants": [
+            "Forelle",
+            "Heilbutt",
+            "Sprotten"
+          ]
+        },
+        {
+          "id": "fisch.garnelen",
+          "name": "Garnelen",
+          "exampleVariants": [
+            "roh",
+            "gekocht",
+            "geschält"
+          ]
+        },
+        {
+          "id": "fisch.muscheln",
+          "name": "Muscheln",
+          "exampleVariants": [
+            "Miesmuscheln",
+            "Venusmuscheln"
+          ]
+        },
+        {
+          "id": "fisch.tintenfisch",
+          "name": "Tintenfisch",
+          "exampleVariants": [
+            "Ringe",
+            "Tuben",
+            "Pulpo"
+          ]
+        },
+        {
+          "id": "fisch.surimi",
+          "name": "Surimi",
+          "exampleVariants": [
+            "Sticks",
+            "geraspelt"
+          ]
+        },
+        {
+          "id": "fisch.fischrogen",
+          "name": "Fischrogen",
+          "exampleVariants": [
+            "Forellenrogen",
+            "weitere Arten"
+          ]
+        },
+        {
+          "id": "fisch.fischsalate",
+          "name": "Fischsalate",
+          "exampleVariants": [
+            "Heringssalat",
+            "Meeresfrüchtesalat"
+          ]
+        },
+        {
+          "id": "fisch.fischzubereitungen",
+          "name": "Fischzubereitungen",
+          "exampleVariants": [
+            "marinierter Fisch",
+            "Backfisch"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pflanzliche-alternativen",
+      "name": "Pflanzliche Alternativen",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "pflanzliche-alternativen.haferdrink",
+          "name": "Haferdrink",
+          "exampleVariants": [
+            "natur",
+            "Barista",
+            "aromatisiert"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.sojadrink",
+          "name": "Sojadrink",
+          "exampleVariants": [
+            "natur",
+            "Barista",
+            "aromatisiert"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.mandeldrink",
+          "name": "Mandeldrink",
+          "exampleVariants": [
+            "natur",
+            "aromatisiert"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.reis-und-kokosdrink",
+          "name": "Reis- und Kokosdrink",
+          "exampleVariants": [
+            "Reis",
+            "Kokos",
+            "Mischgetränk"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.weitere-pflanzendrinks",
+          "name": "Weitere Pflanzendrinks",
+          "exampleVariants": [
+            "Erbse",
+            "Cashew",
+            "Mischungen"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzliche-joghurtalternative",
+          "name": "Pflanzliche Joghurtalternative",
+          "exampleVariants": [
+            "Soja",
+            "Hafer",
+            "Kokos"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzliche-quarkalternative",
+          "name": "Pflanzliche Quarkalternative",
+          "exampleVariants": [
+            "verschiedene Pflanzenbasen"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzliche-dessertalternative",
+          "name": "Pflanzliche Dessertalternative",
+          "exampleVariants": [
+            "Pudding",
+            "Creme",
+            "Mousse"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzliche-sahnealternative",
+          "name": "Pflanzliche Sahnealternative",
+          "exampleVariants": [
+            "zum Kochen",
+            "zum Aufschlagen"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzliche-kasealternative",
+          "name": "Pflanzliche Käsealternative",
+          "exampleVariants": [
+            "Scheiben",
+            "Stück",
+            "gerieben"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzliche-frischkasealternative",
+          "name": "Pflanzliche Frischkäsealternative",
+          "exampleVariants": [
+            "natur",
+            "Kräuter"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.tofu",
+          "name": "Tofu",
+          "exampleVariants": [
+            "natur",
+            "geräuchert",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.tempeh",
+          "name": "Tempeh",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.seitan",
+          "name": "Seitan",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzlicher-aufschnitt",
+          "name": "Pflanzlicher Aufschnitt",
+          "exampleVariants": [
+            "Salami-Art",
+            "Schinken-Art",
+            "weitere Sorten"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzliche-wurstchen",
+          "name": "Pflanzliche Würstchen",
+          "exampleVariants": [
+            "Bratwurst-Art",
+            "Wiener-Art"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzliche-burger-und-hackalternative",
+          "name": "Pflanzliche Burger und Hackalternative",
+          "exampleVariants": [
+            "Burger",
+            "Hack",
+            "Bällchen"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzliche-schnitzel-und-nuggets",
+          "name": "Pflanzliche Schnitzel und Nuggets",
+          "exampleVariants": [
+            "verschiedene Pflanzenbasen"
+          ]
+        },
+        {
+          "id": "pflanzliche-alternativen.pflanzliche-fischalternative",
+          "name": "Pflanzliche Fischalternative",
+          "exampleVariants": [
+            "Stäbchen-Art",
+            "Filet-Art"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tiefkuehl",
+      "name": "Tiefkühlkost und Speiseeis",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "tiefkuehl.tiefkuhlgemuse",
+          "name": "Tiefkühlgemüse",
+          "exampleVariants": [
+            "einzelne Sorten",
+            "Gemüsemischungen"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlkrauter",
+          "name": "Tiefkühlkräuter",
+          "exampleVariants": [
+            "einzelne Kräuter",
+            "Kräutermischungen"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlobst",
+          "name": "Tiefkühlobst",
+          "exampleVariants": [
+            "Beeren",
+            "Mango",
+            "Obstmischungen"
+          ]
+        },
+        {
+          "id": "tiefkuehl.pommes-frites",
+          "name": "Pommes frites",
+          "exampleVariants": [
+            "gerade",
+            "gewellt",
+            "dünn"
+          ]
+        },
+        {
+          "id": "tiefkuehl.kartoffel-tiefkuhlprodukte",
+          "name": "Kartoffel-Tiefkühlprodukte",
+          "exampleVariants": [
+            "Kroketten",
+            "Rösti",
+            "Wedges"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlpizza",
+          "name": "Tiefkühlpizza",
+          "exampleVariants": [
+            "verschiedene Beläge",
+            "Mini-Pizza"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlflammkuchen",
+          "name": "Tiefkühlflammkuchen",
+          "exampleVariants": [
+            "klassisch",
+            "weitere Beläge"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlbackwaren",
+          "name": "Tiefkühlbackwaren",
+          "exampleVariants": [
+            "Brötchen",
+            "Croissants",
+            "Baguettes"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlkuchen-und-torten",
+          "name": "Tiefkühlkuchen und Torten",
+          "exampleVariants": [
+            "Kuchen",
+            "Sahnetorten"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlfertiggerichte",
+          "name": "Tiefkühlfertiggerichte",
+          "exampleVariants": [
+            "Pfannengerichte",
+            "Pasta",
+            "Aufläufe"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlfisch",
+          "name": "Tiefkühlfisch",
+          "exampleVariants": [
+            "Filets",
+            "ganzer Fisch"
+          ]
+        },
+        {
+          "id": "tiefkuehl.fischstabchen-und-schlemmerfilet",
+          "name": "Fischstäbchen und Schlemmerfilet",
+          "exampleVariants": [
+            "paniert",
+            "verschiedene Beläge"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlmeeresfruchte",
+          "name": "Tiefkühlmeeresfrüchte",
+          "exampleVariants": [
+            "Garnelen",
+            "Muscheln",
+            "Mischungen"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlfleisch-und-geflugel",
+          "name": "Tiefkühlfleisch und Geflügel",
+          "exampleVariants": [
+            "Filets",
+            "Teilstücke",
+            "ganze Tiere"
+          ]
+        },
+        {
+          "id": "tiefkuehl.tiefkuhlsnacks",
+          "name": "Tiefkühlsnacks",
+          "exampleVariants": [
+            "Frühlingsrollen",
+            "Nuggets",
+            "Snackmischung"
+          ]
+        },
+        {
+          "id": "tiefkuehl.familieneis",
+          "name": "Familieneis",
+          "exampleVariants": [
+            "Vanille",
+            "Schokolade",
+            "Frucht",
+            "Mischungen"
+          ]
+        },
+        {
+          "id": "tiefkuehl.eis-am-stiel",
+          "name": "Eis am Stiel",
+          "exampleVariants": [
+            "Milcheis",
+            "Fruchteis",
+            "Wassereis"
+          ]
+        },
+        {
+          "id": "tiefkuehl.eis-in-waffeln",
+          "name": "Eis in Waffeln",
+          "exampleVariants": [
+            "Hörnchen",
+            "Sandwich"
+          ]
+        },
+        {
+          "id": "tiefkuehl.sorbet",
+          "name": "Sorbet",
+          "exampleVariants": [
+            "verschiedene Früchte"
+          ]
+        },
+        {
+          "id": "tiefkuehl.eiswurfel",
+          "name": "Eiswürfel",
+          "exampleVariants": [
+            "Würfel",
+            "Crushed Ice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "getreide-nudeln",
+      "name": "Nudeln, Reis und Getreide",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "getreide-nudeln.spaghetti",
+          "name": "Spaghetti",
+          "exampleVariants": [
+            "Hartweizen",
+            "Vollkorn",
+            "Eier"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.penne",
+          "name": "Penne",
+          "exampleVariants": [
+            "Hartweizen",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.fusilli",
+          "name": "Fusilli",
+          "exampleVariants": [
+            "Hartweizen",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.weitere-trockene-nudeln",
+          "name": "Weitere trockene Nudeln",
+          "exampleVariants": [
+            "Farfalle",
+            "Makkaroni",
+            "Tagliatelle"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.lasagneplatten-und-cannelloni",
+          "name": "Lasagneplatten und Cannelloni",
+          "exampleVariants": [
+            "Hartweizen",
+            "Eier"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.suppennudeln",
+          "name": "Suppennudeln",
+          "exampleVariants": [
+            "Fadennudeln",
+            "Sternchen",
+            "Buchstabennudeln"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.spatzle-und-schupfnudeln",
+          "name": "Spätzle und Schupfnudeln",
+          "exampleVariants": [
+            "frisch",
+            "getrocknet"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.frische-gefullte-pasta",
+          "name": "Frische gefüllte Pasta",
+          "exampleVariants": [
+            "Tortellini",
+            "Ravioli",
+            "Cappelletti"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.gnocchi",
+          "name": "Gnocchi",
+          "exampleVariants": [
+            "Kartoffel",
+            "verschiedene Zutaten"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.asiatische-nudeln",
+          "name": "Asiatische Nudeln",
+          "exampleVariants": [
+            "Reisnudeln",
+            "Glasnudeln",
+            "Udon",
+            "Mie"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.pasta-aus-hulsenfruchten",
+          "name": "Pasta aus Hülsenfrüchten",
+          "exampleVariants": [
+            "Linsen",
+            "Kichererbsen",
+            "Erbsen"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.langkornreis",
+          "name": "Langkornreis",
+          "exampleVariants": [
+            "Parboiled",
+            "weiß"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.basmatireis",
+          "name": "Basmatireis",
+          "exampleVariants": [
+            "weiß",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.jasminreis",
+          "name": "Jasminreis",
+          "exampleVariants": [
+            "weiß",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.rundkornreis",
+          "name": "Rundkornreis",
+          "exampleVariants": [
+            "Milchreis",
+            "Risottoreis",
+            "Sushireis"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.natur-und-wildreis",
+          "name": "Natur- und Wildreis",
+          "exampleVariants": [
+            "Vollkornreis",
+            "Wildreismischung"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.couscous-und-bulgur",
+          "name": "Couscous und Bulgur",
+          "exampleVariants": [
+            "Weizen",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.quinoa",
+          "name": "Quinoa",
+          "exampleVariants": [
+            "weiß",
+            "rot",
+            "gemischt"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.hirse",
+          "name": "Hirse",
+          "exampleVariants": [
+            "geschält",
+            "verschiedene Körnungen"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.graupen-und-grunkern",
+          "name": "Graupen und Grünkern",
+          "exampleVariants": [
+            "Gerste",
+            "Dinkel"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.buchweizen",
+          "name": "Buchweizen",
+          "exampleVariants": [
+            "Körner",
+            "geschrotet"
+          ]
+        },
+        {
+          "id": "getreide-nudeln.polenta",
+          "name": "Polenta",
+          "exampleVariants": [
+            "fein",
+            "grob"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "konserven",
+      "name": "Konserven, Gläser und haltbare Zutaten",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "konserven.tomatenkonserven",
+          "name": "Tomatenkonserven",
+          "exampleVariants": [
+            "gehackt",
+            "ganz",
+            "passiert"
+          ]
+        },
+        {
+          "id": "konserven.tomatenmark",
+          "name": "Tomatenmark",
+          "exampleVariants": [
+            "verschiedene Konzentrationen"
+          ]
+        },
+        {
+          "id": "konserven.maiskonserven",
+          "name": "Maiskonserven",
+          "exampleVariants": [
+            "Zuckermais",
+            "Mini-Mais"
+          ]
+        },
+        {
+          "id": "konserven.erbsen-und-mohrenkonserven",
+          "name": "Erbsen und Möhrenkonserven",
+          "exampleVariants": [
+            "einzeln",
+            "gemischt"
+          ]
+        },
+        {
+          "id": "konserven.bohnenkonserven",
+          "name": "Bohnenkonserven",
+          "exampleVariants": [
+            "Kidneybohnen",
+            "weiße Bohnen",
+            "schwarze Bohnen"
+          ]
+        },
+        {
+          "id": "konserven.kichererbsen-und-linsenkonserven",
+          "name": "Kichererbsen und Linsenkonserven",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "konserven.pilzkonserven",
+          "name": "Pilzkonserven",
+          "exampleVariants": [
+            "Champignons",
+            "Mischpilze"
+          ]
+        },
+        {
+          "id": "konserven.weitere-gemusekonserven",
+          "name": "Weitere Gemüsekonserven",
+          "exampleVariants": [
+            "Spargel",
+            "Grünkohl",
+            "Rote Bete"
+          ]
+        },
+        {
+          "id": "konserven.sauerkraut-und-rotkohl",
+          "name": "Sauerkraut und Rotkohl",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "konserven.gewurzgurken",
+          "name": "Gewürzgurken",
+          "exampleVariants": [
+            "ganze Gurken",
+            "Scheiben",
+            "Cornichons"
+          ]
+        },
+        {
+          "id": "konserven.eingelegtes-gemuse",
+          "name": "Eingelegtes Gemüse",
+          "exampleVariants": [
+            "Paprika",
+            "Peperoni",
+            "Mixed Pickles"
+          ]
+        },
+        {
+          "id": "konserven.oliven",
+          "name": "Oliven",
+          "exampleVariants": [
+            "grün",
+            "schwarz",
+            "gefüllt"
+          ]
+        },
+        {
+          "id": "konserven.kapern",
+          "name": "Kapern",
+          "exampleVariants": [
+            "klein",
+            "Kapernäpfel"
+          ]
+        },
+        {
+          "id": "konserven.antipasti",
+          "name": "Antipasti",
+          "exampleVariants": [
+            "Artischocken",
+            "getrocknete Tomaten",
+            "Gemüsemischungen"
+          ]
+        },
+        {
+          "id": "konserven.obstkonserven",
+          "name": "Obstkonserven",
+          "exampleVariants": [
+            "Pfirsich",
+            "Ananas",
+            "Birne"
+          ]
+        },
+        {
+          "id": "konserven.obstmus-und-kompott",
+          "name": "Obstmus und Kompott",
+          "exampleVariants": [
+            "Apfelmus",
+            "Birnenkompott",
+            "Fruchtmischungen"
+          ]
+        },
+        {
+          "id": "konserven.fischkonserven",
+          "name": "Fischkonserven",
+          "exampleVariants": [
+            "Thunfisch",
+            "Sardinen",
+            "Makrelen"
+          ]
+        },
+        {
+          "id": "konserven.fleischkonserven",
+          "name": "Fleischkonserven",
+          "exampleVariants": [
+            "Würstchen",
+            "Corned Beef",
+            "Gulasch"
+          ]
+        },
+        {
+          "id": "konserven.suppen-und-eintopfkonserven",
+          "name": "Suppen und Eintopfkonserven",
+          "exampleVariants": [
+            "Gemüse",
+            "Hülsenfrüchte",
+            "Fleisch"
+          ]
+        },
+        {
+          "id": "konserven.kokosmilch-und-kokoscreme",
+          "name": "Kokosmilch und Kokoscreme",
+          "exampleVariants": [
+            "verschiedene Fettstufen"
+          ]
+        },
+        {
+          "id": "konserven.getrocknete-hulsenfruchte",
+          "name": "Getrocknete Hülsenfrüchte",
+          "exampleVariants": [
+            "Linsen",
+            "Bohnen",
+            "Kichererbsen",
+            "Erbsen"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feinkost-fertig",
+      "name": "Feinkost und Fertiggerichte",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "feinkost-fertig.kartoffelsalat",
+          "name": "Kartoffelsalat",
+          "exampleVariants": [
+            "mit Mayonnaise",
+            "mit Essig und Öl"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.nudelsalat",
+          "name": "Nudelsalat",
+          "exampleVariants": [
+            "verschiedene Zutaten"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.fleisch-und-wurstsalat",
+          "name": "Fleisch- und Wurstsalat",
+          "exampleVariants": [
+            "verschiedene Zubereitungen"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.eiersalat",
+          "name": "Eiersalat",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.krautsalat-und-coleslaw",
+          "name": "Krautsalat und Coleslaw",
+          "exampleVariants": [
+            "Weißkohl",
+            "Rotkohl"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.hummus",
+          "name": "Hummus",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.dips-und-feinkostcremes",
+          "name": "Dips und Feinkostcremes",
+          "exampleVariants": [
+            "Tzatziki",
+            "Guacamole",
+            "Aioli"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.gekuhlte-suppen",
+          "name": "Gekühlte Suppen",
+          "exampleVariants": [
+            "Gemüse",
+            "Fleisch",
+            "Mischungen"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.gekuhlte-fertiggerichte",
+          "name": "Gekühlte Fertiggerichte",
+          "exampleVariants": [
+            "Pasta",
+            "Aufläufe",
+            "Pfannengerichte"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.haltbare-fertiggerichte",
+          "name": "Haltbare Fertiggerichte",
+          "exampleVariants": [
+            "Reisgerichte",
+            "Pasta",
+            "Eintöpfe"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.instantgerichte",
+          "name": "Instantgerichte",
+          "exampleVariants": [
+            "Instantnudeln",
+            "Tassenmahlzeiten"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.pizzaboden-und-fertigpizza",
+          "name": "Pizzaböden und Fertigpizza",
+          "exampleVariants": [
+            "gekühlt",
+            "haltbar"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.sandwiches-und-belegte-brote",
+          "name": "Sandwiches und belegte Brote",
+          "exampleVariants": [
+            "verschiedene Füllungen"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.fertigsalate",
+          "name": "Fertigsalate",
+          "exampleVariants": [
+            "Salat mit Dressing",
+            "Salat mit Topping"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.sushi",
+          "name": "Sushi",
+          "exampleVariants": [
+            "Fisch",
+            "Gemüse",
+            "Auswahl"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.frikadellen-und-fleischballchen",
+          "name": "Frikadellen und Fleischbällchen",
+          "exampleVariants": [
+            "Fleisch",
+            "Geflügel",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.schnitzel-und-cordon-bleu",
+          "name": "Schnitzel und Cordon bleu",
+          "exampleVariants": [
+            "fertig gegart",
+            "gekühlt"
+          ]
+        },
+        {
+          "id": "feinkost-fertig.party-und-fingerfood",
+          "name": "Party- und Fingerfood",
+          "exampleVariants": [
+            "Mini-Snacks",
+            "gefüllte Teigtaschen"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "saucen",
+      "name": "Saucen, Dressings und Würzmittel",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "saucen.ketchup",
+          "name": "Ketchup",
+          "exampleVariants": [
+            "Tomate",
+            "Curry",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "saucen.mayonnaise",
+          "name": "Mayonnaise",
+          "exampleVariants": [
+            "klassisch",
+            "fettreduziert"
+          ]
+        },
+        {
+          "id": "saucen.senf",
+          "name": "Senf",
+          "exampleVariants": [
+            "mittelscharf",
+            "scharf",
+            "süß"
+          ]
+        },
+        {
+          "id": "saucen.salatdressing",
+          "name": "Salatdressing",
+          "exampleVariants": [
+            "Joghurt",
+            "Kräuter",
+            "Essig und Öl"
+          ]
+        },
+        {
+          "id": "saucen.pastasauce",
+          "name": "Pastasauce",
+          "exampleVariants": [
+            "Tomate",
+            "Sahne",
+            "Fleisch"
+          ]
+        },
+        {
+          "id": "saucen.pesto",
+          "name": "Pesto",
+          "exampleVariants": [
+            "Basilikum",
+            "Tomate",
+            "weitere Zutaten"
+          ]
+        },
+        {
+          "id": "saucen.bratensauce",
+          "name": "Bratensauce",
+          "exampleVariants": [
+            "hell",
+            "dunkel"
+          ]
+        },
+        {
+          "id": "saucen.sauce-zum-kochen",
+          "name": "Sauce zum Kochen",
+          "exampleVariants": [
+            "Hollandaise",
+            "Béchamel",
+            "Rahmsauce"
+          ]
+        },
+        {
+          "id": "saucen.grill-und-barbecuesauce",
+          "name": "Grill- und Barbecuesauce",
+          "exampleVariants": [
+            "rauchig",
+            "würzig",
+            "süß"
+          ]
+        },
+        {
+          "id": "saucen.chili-und-scharfe-sauce",
+          "name": "Chili- und scharfe Sauce",
+          "exampleVariants": [
+            "Sriracha",
+            "Tabasco-Art",
+            "Sambal"
+          ]
+        },
+        {
+          "id": "saucen.asiatische-wurzsauce",
+          "name": "Asiatische Würzsauce",
+          "exampleVariants": [
+            "Sojasauce",
+            "Teriyaki",
+            "Fischsauce"
+          ]
+        },
+        {
+          "id": "saucen.worcestersauce-und-wurzflussigkeit",
+          "name": "Worcestersauce und Würzflüssigkeit",
+          "exampleVariants": [
+            "verschiedene Rezepturen"
+          ]
+        },
+        {
+          "id": "saucen.bruhe",
+          "name": "Brühe",
+          "exampleVariants": [
+            "Pulver",
+            "Würfel",
+            "Paste"
+          ]
+        },
+        {
+          "id": "saucen.fond",
+          "name": "Fond",
+          "exampleVariants": [
+            "Gemüse",
+            "Rind",
+            "Geflügel",
+            "Fisch"
+          ]
+        },
+        {
+          "id": "saucen.fix-wurzmischung",
+          "name": "Fix-Würzmischung",
+          "exampleVariants": [
+            "verschiedene Gerichte"
+          ]
+        },
+        {
+          "id": "saucen.meerrettich",
+          "name": "Meerrettich",
+          "exampleVariants": [
+            "natur",
+            "Sahne"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "oel-essig",
+      "name": "Speiseöle und Essig",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "oel-essig.rapsol",
+          "name": "Rapsöl",
+          "exampleVariants": [
+            "raffiniert",
+            "kaltgepresst"
+          ]
+        },
+        {
+          "id": "oel-essig.sonnenblumenol",
+          "name": "Sonnenblumenöl",
+          "exampleVariants": [
+            "raffiniert",
+            "kaltgepresst"
+          ]
+        },
+        {
+          "id": "oel-essig.olivenol",
+          "name": "Olivenöl",
+          "exampleVariants": [
+            "nativ extra",
+            "raffiniert"
+          ]
+        },
+        {
+          "id": "oel-essig.maiskeim-und-erdnussol",
+          "name": "Maiskeim- und Erdnussöl",
+          "exampleVariants": [
+            "Maiskeim",
+            "Erdnuss"
+          ]
+        },
+        {
+          "id": "oel-essig.lein-und-walnussol",
+          "name": "Lein- und Walnussöl",
+          "exampleVariants": [
+            "Lein",
+            "Walnuss"
+          ]
+        },
+        {
+          "id": "oel-essig.sesamol",
+          "name": "Sesamöl",
+          "exampleVariants": [
+            "geröstet",
+            "ungeröstet"
+          ]
+        },
+        {
+          "id": "oel-essig.weitere-speiseole",
+          "name": "Weitere Speiseöle",
+          "exampleVariants": [
+            "Traubenkernöl",
+            "Kürbiskernöl",
+            "Mischöle"
+          ]
+        },
+        {
+          "id": "oel-essig.brat-und-frittierol",
+          "name": "Brat- und Frittieröl",
+          "exampleVariants": [
+            "verschiedene Pflanzenöle"
+          ]
+        },
+        {
+          "id": "oel-essig.aromatisiertes-speiseol",
+          "name": "Aromatisiertes Speiseöl",
+          "exampleVariants": [
+            "Kräuter",
+            "Knoblauch",
+            "Chili"
+          ]
+        },
+        {
+          "id": "oel-essig.weinessig",
+          "name": "Weinessig",
+          "exampleVariants": [
+            "weiß",
+            "rot"
+          ]
+        },
+        {
+          "id": "oel-essig.apfelessig",
+          "name": "Apfelessig",
+          "exampleVariants": [
+            "klar",
+            "naturtrüb"
+          ]
+        },
+        {
+          "id": "oel-essig.branntweinessig",
+          "name": "Branntweinessig",
+          "exampleVariants": [
+            "klar",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "oel-essig.balsamico",
+          "name": "Balsamico",
+          "exampleVariants": [
+            "dunkel",
+            "weiß",
+            "Creme"
+          ]
+        },
+        {
+          "id": "oel-essig.reisessig",
+          "name": "Reisessig",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "oel-essig.weitere-fruchtessige",
+          "name": "Weitere Fruchtessige",
+          "exampleVariants": [
+            "Himbeere",
+            "andere Früchte"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gewuerze",
+      "name": "Gewürze, Salz und Kochzutaten",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "gewuerze.speisesalz",
+          "name": "Speisesalz",
+          "exampleVariants": [
+            "mit oder ohne Jod",
+            "fein",
+            "grob"
+          ]
+        },
+        {
+          "id": "gewuerze.meersalz-und-steinsalz",
+          "name": "Meersalz und Steinsalz",
+          "exampleVariants": [
+            "fein",
+            "grob",
+            "Flocken"
+          ]
+        },
+        {
+          "id": "gewuerze.pfeffer",
+          "name": "Pfeffer",
+          "exampleVariants": [
+            "schwarz",
+            "weiß",
+            "grün",
+            "gemischt"
+          ]
+        },
+        {
+          "id": "gewuerze.paprikapulver",
+          "name": "Paprikapulver",
+          "exampleVariants": [
+            "edelsüß",
+            "rosenscharf",
+            "geräuchert"
+          ]
+        },
+        {
+          "id": "gewuerze.curry",
+          "name": "Curry",
+          "exampleVariants": [
+            "mild",
+            "scharf",
+            "Gewürzmischung"
+          ]
+        },
+        {
+          "id": "gewuerze.chili-und-cayenne",
+          "name": "Chili und Cayenne",
+          "exampleVariants": [
+            "gemahlen",
+            "Flocken"
+          ]
+        },
+        {
+          "id": "gewuerze.kummel-und-kreuzkummel",
+          "name": "Kümmel und Kreuzkümmel",
+          "exampleVariants": [
+            "ganz",
+            "gemahlen"
+          ]
+        },
+        {
+          "id": "gewuerze.muskat",
+          "name": "Muskat",
+          "exampleVariants": [
+            "ganz",
+            "gemahlen"
+          ]
+        },
+        {
+          "id": "gewuerze.zimt",
+          "name": "Zimt",
+          "exampleVariants": [
+            "gemahlen",
+            "Stangen"
+          ]
+        },
+        {
+          "id": "gewuerze.vanille",
+          "name": "Vanille",
+          "exampleVariants": [
+            "Schoten",
+            "gemahlen",
+            "Paste"
+          ]
+        },
+        {
+          "id": "gewuerze.getrocknete-kuchenkrauter",
+          "name": "Getrocknete Küchenkräuter",
+          "exampleVariants": [
+            "Basilikum",
+            "Oregano",
+            "Thymian",
+            "Rosmarin"
+          ]
+        },
+        {
+          "id": "gewuerze.lorbeer-und-wacholder",
+          "name": "Lorbeer und Wacholder",
+          "exampleVariants": [
+            "Blätter",
+            "Beeren"
+          ]
+        },
+        {
+          "id": "gewuerze.nelken-und-piment",
+          "name": "Nelken und Piment",
+          "exampleVariants": [
+            "ganz",
+            "gemahlen"
+          ]
+        },
+        {
+          "id": "gewuerze.ingwer-und-kurkumapulver",
+          "name": "Ingwer- und Kurkumapulver",
+          "exampleVariants": [
+            "gemahlen"
+          ]
+        },
+        {
+          "id": "gewuerze.gewurzmischungen",
+          "name": "Gewürzmischungen",
+          "exampleVariants": [
+            "Grill",
+            "Kartoffel",
+            "Gemüse",
+            "Fisch"
+          ]
+        },
+        {
+          "id": "gewuerze.gewurzpasten",
+          "name": "Gewürzpasten",
+          "exampleVariants": [
+            "Curry",
+            "Kräuter",
+            "Knoblauch"
+          ]
+        },
+        {
+          "id": "gewuerze.trockenknoblauch-und-zwiebelwurze",
+          "name": "Trockenknoblauch und Zwiebelwürze",
+          "exampleVariants": [
+            "Granulat",
+            "Pulver"
+          ]
+        },
+        {
+          "id": "gewuerze.safran-und-spezialgewurze",
+          "name": "Safran und Spezialgewürze",
+          "exampleVariants": [
+            "Safran",
+            "Kardamom",
+            "Sternanis"
+          ]
+        },
+        {
+          "id": "gewuerze.speisestarke",
+          "name": "Speisestärke",
+          "exampleVariants": [
+            "Mais",
+            "Kartoffel"
+          ]
+        },
+        {
+          "id": "gewuerze.saucenbinder",
+          "name": "Saucenbinder",
+          "exampleVariants": [
+            "hell",
+            "dunkel"
+          ]
+        },
+        {
+          "id": "gewuerze.paniermehl",
+          "name": "Paniermehl",
+          "exampleVariants": [
+            "klassisch",
+            "Panko"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "backen",
+      "name": "Mehl, Zucker und Backzutaten",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "backen.weizenmehl",
+          "name": "Weizenmehl",
+          "exampleVariants": [
+            "verschiedene Typen",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "backen.roggenmehl",
+          "name": "Roggenmehl",
+          "exampleVariants": [
+            "verschiedene Typen",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "backen.dinkelmehl",
+          "name": "Dinkelmehl",
+          "exampleVariants": [
+            "verschiedene Typen",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "backen.weitere-mehle",
+          "name": "Weitere Mehle",
+          "exampleVariants": [
+            "Mais",
+            "Reis",
+            "Buchweizen",
+            "Hülsenfrüchte"
+          ]
+        },
+        {
+          "id": "backen.kristallzucker",
+          "name": "Kristallzucker",
+          "exampleVariants": [
+            "weiß",
+            "braun"
+          ]
+        },
+        {
+          "id": "backen.rohr-und-rubenzucker",
+          "name": "Rohr- und Rübenzucker",
+          "exampleVariants": [
+            "verschiedene Körnungen"
+          ]
+        },
+        {
+          "id": "backen.puderzucker",
+          "name": "Puderzucker",
+          "exampleVariants": [
+            "klassisch",
+            "fein"
+          ]
+        },
+        {
+          "id": "backen.gelierzucker",
+          "name": "Gelierzucker",
+          "exampleVariants": [
+            "verschiedene Mischverhältnisse"
+          ]
+        },
+        {
+          "id": "backen.vanille-und-vanillinzucker",
+          "name": "Vanille- und Vanillinzucker",
+          "exampleVariants": [
+            "Vanille",
+            "Vanillin"
+          ]
+        },
+        {
+          "id": "backen.zuckerersatz-und-sussstoff",
+          "name": "Zuckerersatz und Süßstoff",
+          "exampleVariants": [
+            "Tabletten",
+            "flüssig",
+            "verschiedene Zutaten"
+          ]
+        },
+        {
+          "id": "backen.backpulver-und-natron",
+          "name": "Backpulver und Natron",
+          "exampleVariants": [
+            "Backpulver",
+            "Natron"
+          ]
+        },
+        {
+          "id": "backen.hefe",
+          "name": "Hefe",
+          "exampleVariants": [
+            "frisch",
+            "trocken"
+          ]
+        },
+        {
+          "id": "backen.backkakao",
+          "name": "Backkakao",
+          "exampleVariants": [
+            "ungesüßt"
+          ]
+        },
+        {
+          "id": "backen.kuverture-und-backschokolade",
+          "name": "Kuvertüre und Backschokolade",
+          "exampleVariants": [
+            "Zartbitter",
+            "Vollmilch",
+            "weiß"
+          ]
+        },
+        {
+          "id": "backen.schokotropfen-und-streusel",
+          "name": "Schokotropfen und Streusel",
+          "exampleVariants": [
+            "verschiedene Formen"
+          ]
+        },
+        {
+          "id": "backen.backnusse-und-mandeln",
+          "name": "Backnüsse und Mandeln",
+          "exampleVariants": [
+            "gemahlen",
+            "gehackt",
+            "Blättchen"
+          ]
+        },
+        {
+          "id": "backen.kokosraspeln",
+          "name": "Kokosraspeln",
+          "exampleVariants": [
+            "fein",
+            "grob"
+          ]
+        },
+        {
+          "id": "backen.backfruchte",
+          "name": "Backfrüchte",
+          "exampleVariants": [
+            "Rosinen",
+            "Orangeat",
+            "Zitronat"
+          ]
+        },
+        {
+          "id": "backen.gelatine-und-pflanzliche-geliermittel",
+          "name": "Gelatine und pflanzliche Geliermittel",
+          "exampleVariants": [
+            "Blätter",
+            "Pulver",
+            "Agar"
+          ]
+        },
+        {
+          "id": "backen.backaromen",
+          "name": "Backaromen",
+          "exampleVariants": [
+            "Zitrone",
+            "Vanille",
+            "Mandel"
+          ]
+        },
+        {
+          "id": "backen.tortenguss",
+          "name": "Tortenguss",
+          "exampleVariants": [
+            "klar",
+            "rot"
+          ]
+        },
+        {
+          "id": "backen.sahnesteif-und-cremepulver",
+          "name": "Sahnesteif und Cremepulver",
+          "exampleVariants": [
+            "verschiedene Zutaten"
+          ]
+        },
+        {
+          "id": "backen.marzipan-und-nougat-zum-backen",
+          "name": "Marzipan und Nougat zum Backen",
+          "exampleVariants": [
+            "Rohmasse",
+            "Backnougat"
+          ]
+        },
+        {
+          "id": "backen.backdekoration",
+          "name": "Backdekoration",
+          "exampleVariants": [
+            "Zuckerperlen",
+            "Fondant",
+            "essbare Dekoration"
+          ]
+        },
+        {
+          "id": "backen.backmischungen",
+          "name": "Backmischungen",
+          "exampleVariants": [
+            "Brot",
+            "Kuchen",
+            "Muffins"
+          ]
+        },
+        {
+          "id": "backen.tortenboden",
+          "name": "Tortenböden",
+          "exampleVariants": [
+            "Biskuit",
+            "Mürbeteig"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fruehstueck",
+      "name": "Frühstück und Brotaufstriche",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "fruehstueck.haferflocken",
+          "name": "Haferflocken",
+          "exampleVariants": [
+            "zart",
+            "kernig",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "fruehstueck.weitere-getreideflocken",
+          "name": "Weitere Getreideflocken",
+          "exampleVariants": [
+            "Dinkel",
+            "Roggen",
+            "Mischungen"
+          ]
+        },
+        {
+          "id": "fruehstueck.musli",
+          "name": "Müsli",
+          "exampleVariants": [
+            "Frucht",
+            "Nuss",
+            "Schokolade"
+          ]
+        },
+        {
+          "id": "fruehstueck.crunchy-musli-und-granola",
+          "name": "Crunchy-Müsli und Granola",
+          "exampleVariants": [
+            "verschiedene Zutaten"
+          ]
+        },
+        {
+          "id": "fruehstueck.cornflakes",
+          "name": "Cornflakes",
+          "exampleVariants": [
+            "natur",
+            "gesüßt"
+          ]
+        },
+        {
+          "id": "fruehstueck.fruhstuckscerealien",
+          "name": "Frühstückscerealien",
+          "exampleVariants": [
+            "Schokolade",
+            "Vollkorn",
+            "Formen"
+          ]
+        },
+        {
+          "id": "fruehstueck.porridge",
+          "name": "Porridge",
+          "exampleVariants": [
+            "natur",
+            "verschiedene Geschmacksrichtungen"
+          ]
+        },
+        {
+          "id": "fruehstueck.musliriegel",
+          "name": "Müsliriegel",
+          "exampleVariants": [
+            "Frucht",
+            "Nuss",
+            "Schokolade"
+          ]
+        },
+        {
+          "id": "fruehstueck.konfiture-und-marmelade",
+          "name": "Konfitüre und Marmelade",
+          "exampleVariants": [
+            "verschiedene Früchte"
+          ]
+        },
+        {
+          "id": "fruehstueck.fruchtaufstrich",
+          "name": "Fruchtaufstrich",
+          "exampleVariants": [
+            "verschiedene Fruchtanteile"
+          ]
+        },
+        {
+          "id": "fruehstueck.gelee",
+          "name": "Gelee",
+          "exampleVariants": [
+            "Apfel",
+            "Johannisbeere",
+            "weitere Früchte"
+          ]
+        },
+        {
+          "id": "fruehstueck.honig",
+          "name": "Honig",
+          "exampleVariants": [
+            "Blütenhonig",
+            "Waldhonig",
+            "verschiedene Sorten"
+          ]
+        },
+        {
+          "id": "fruehstueck.sirup-zum-sussen",
+          "name": "Sirup zum Süßen",
+          "exampleVariants": [
+            "Ahorn",
+            "Agave",
+            "Zuckerrübe"
+          ]
+        },
+        {
+          "id": "fruehstueck.nuss-nougat-creme",
+          "name": "Nuss-Nougat-Creme",
+          "exampleVariants": [
+            "Haselnuss",
+            "Schokolade"
+          ]
+        },
+        {
+          "id": "fruehstueck.schokoladenaufstrich",
+          "name": "Schokoladenaufstrich",
+          "exampleVariants": [
+            "dunkel",
+            "hell",
+            "weiß"
+          ]
+        },
+        {
+          "id": "fruehstueck.erdnussbutter",
+          "name": "Erdnussbutter",
+          "exampleVariants": [
+            "cremig",
+            "mit Stückchen"
+          ]
+        },
+        {
+          "id": "fruehstueck.nuss-und-mandelmus",
+          "name": "Nuss- und Mandelmus",
+          "exampleVariants": [
+            "Mandel",
+            "Cashew",
+            "Haselnuss"
+          ]
+        },
+        {
+          "id": "fruehstueck.fruchtmus-als-aufstrich",
+          "name": "Fruchtmus als Aufstrich",
+          "exampleVariants": [
+            "Pflaume",
+            "Apfel",
+            "weitere Früchte"
+          ]
+        },
+        {
+          "id": "fruehstueck.herzhafter-pflanzenaufstrich",
+          "name": "Herzhafter Pflanzenaufstrich",
+          "exampleVariants": [
+            "Gemüse",
+            "Hülsenfrüchte",
+            "Kräuter"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "suesswaren",
+      "name": "Süßwaren, Kekse und Gebäck",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "suesswaren.tafelschokolade",
+          "name": "Tafelschokolade",
+          "exampleVariants": [
+            "Vollmilch",
+            "Zartbitter",
+            "weiß"
+          ]
+        },
+        {
+          "id": "suesswaren.schokolade-mit-zutaten",
+          "name": "Schokolade mit Zutaten",
+          "exampleVariants": [
+            "Nüsse",
+            "Früchte",
+            "gefüllt"
+          ]
+        },
+        {
+          "id": "suesswaren.schokoriegel",
+          "name": "Schokoriegel",
+          "exampleVariants": [
+            "gefüllt",
+            "mit Nüssen",
+            "mit Keks"
+          ]
+        },
+        {
+          "id": "suesswaren.pralinen-und-truffel",
+          "name": "Pralinen und Trüffel",
+          "exampleVariants": [
+            "verschiedene Füllungen"
+          ]
+        },
+        {
+          "id": "suesswaren.schokoladenfiguren",
+          "name": "Schokoladenfiguren",
+          "exampleVariants": [
+            "Saisonformen",
+            "Geschenkformen"
+          ]
+        },
+        {
+          "id": "suesswaren.butterkekse",
+          "name": "Butterkekse",
+          "exampleVariants": [
+            "klassisch",
+            "Vollkorn"
+          ]
+        },
+        {
+          "id": "suesswaren.doppelkekse",
+          "name": "Doppelkekse",
+          "exampleVariants": [
+            "Kakao",
+            "Vanille",
+            "weitere Füllungen"
+          ]
+        },
+        {
+          "id": "suesswaren.cookies",
+          "name": "Cookies",
+          "exampleVariants": [
+            "Schokostücke",
+            "Nuss",
+            "Hafer"
+          ]
+        },
+        {
+          "id": "suesswaren.hafer-und-vollkornkekse",
+          "name": "Hafer- und Vollkornkekse",
+          "exampleVariants": [
+            "verschiedene Zutaten"
+          ]
+        },
+        {
+          "id": "suesswaren.waffeln",
+          "name": "Waffeln",
+          "exampleVariants": [
+            "gefüllt",
+            "ungefüllt"
+          ]
+        },
+        {
+          "id": "suesswaren.knusper-und-feingeback",
+          "name": "Knusper- und Feingebäck",
+          "exampleVariants": [
+            "Biskuit",
+            "Spritzgebäck",
+            "Gebäckmischung"
+          ]
+        },
+        {
+          "id": "suesswaren.fruchtgummi",
+          "name": "Fruchtgummi",
+          "exampleVariants": [
+            "verschiedene Formen",
+            "Geschmacksrichtungen"
+          ]
+        },
+        {
+          "id": "suesswaren.lakritz",
+          "name": "Lakritz",
+          "exampleVariants": [
+            "süß",
+            "salzig"
+          ]
+        },
+        {
+          "id": "suesswaren.bonbons",
+          "name": "Bonbons",
+          "exampleVariants": [
+            "Hartkaramellen",
+            "gefüllt",
+            "Kräuter"
+          ]
+        },
+        {
+          "id": "suesswaren.karamell-und-toffee",
+          "name": "Karamell und Toffee",
+          "exampleVariants": [
+            "weich",
+            "hart"
+          ]
+        },
+        {
+          "id": "suesswaren.kaubonbons-und-brause",
+          "name": "Kaubonbons und Brause",
+          "exampleVariants": [
+            "verschiedene Geschmacksrichtungen"
+          ]
+        },
+        {
+          "id": "suesswaren.kaugummi",
+          "name": "Kaugummi",
+          "exampleVariants": [
+            "Pfefferminz",
+            "Frucht",
+            "verschiedene Formen"
+          ]
+        },
+        {
+          "id": "suesswaren.schaumzucker-und-marshmallows",
+          "name": "Schaumzucker und Marshmallows",
+          "exampleVariants": [
+            "verschiedene Formen"
+          ]
+        },
+        {
+          "id": "suesswaren.marzipan",
+          "name": "Marzipan",
+          "exampleVariants": [
+            "natur",
+            "überzogen"
+          ]
+        },
+        {
+          "id": "suesswaren.saisongeback",
+          "name": "Saisongebäck",
+          "exampleVariants": [
+            "Lebkuchen",
+            "Spekulatius",
+            "Stollen"
+          ]
+        },
+        {
+          "id": "suesswaren.kleine-sussgebacke",
+          "name": "Kleine Süßgebäcke",
+          "exampleVariants": [
+            "Waffelriegel",
+            "Biskuitriegel"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "snacks-nuesse",
+      "name": "Salzige Snacks, Nüsse und Trockenfrüchte",
+      "area": "food",
+      "productTypes": [
+        {
+          "id": "snacks-nuesse.kartoffelchips",
+          "name": "Kartoffelchips",
+          "exampleVariants": [
+            "Paprika",
+            "Salz",
+            "weitere Gewürze"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.tortillachips",
+          "name": "Tortillachips",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.gemuse-und-hulsenfruchtchips",
+          "name": "Gemüse- und Hülsenfruchtchips",
+          "exampleVariants": [
+            "verschiedene Zutaten"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.salzstangen-und-brezeln",
+          "name": "Salzstangen und Brezeln",
+          "exampleVariants": [
+            "klassisch",
+            "Sesam"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.cracker-und-knabbergeback",
+          "name": "Cracker und Knabbergebäck",
+          "exampleVariants": [
+            "natur",
+            "gewürzt"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.popcorn",
+          "name": "Popcorn",
+          "exampleVariants": [
+            "süß",
+            "salzig",
+            "Mais zum Poppen"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.reis-und-maiswaffeln",
+          "name": "Reis- und Maiswaffeln",
+          "exampleVariants": [
+            "natur",
+            "gewürzt",
+            "überzogen"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.erdnusse",
+          "name": "Erdnüsse",
+          "exampleVariants": [
+            "natur",
+            "geröstet",
+            "gesalzen"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.cashewkerne",
+          "name": "Cashewkerne",
+          "exampleVariants": [
+            "natur",
+            "geröstet",
+            "gesalzen"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.mandeln",
+          "name": "Mandeln",
+          "exampleVariants": [
+            "natur",
+            "geröstet",
+            "gesalzen"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.walnusse",
+          "name": "Walnüsse",
+          "exampleVariants": [
+            "mit Schale",
+            "Kerne"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.haselnusse",
+          "name": "Haselnüsse",
+          "exampleVariants": [
+            "mit Schale",
+            "Kerne"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.pistazien",
+          "name": "Pistazien",
+          "exampleVariants": [
+            "mit Schale",
+            "Kerne",
+            "gesalzen"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.weitere-nusse",
+          "name": "Weitere Nüsse",
+          "exampleVariants": [
+            "Pekan",
+            "Paranuss",
+            "Macadamia"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.studentenfutter-und-nussmischungen",
+          "name": "Studentenfutter und Nussmischungen",
+          "exampleVariants": [
+            "mit Trockenfrüchten",
+            "Nussmix"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.sonnenblumen-und-kurbiskerne",
+          "name": "Sonnenblumen- und Kürbiskerne",
+          "exampleVariants": [
+            "natur",
+            "geröstet"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.samen",
+          "name": "Samen",
+          "exampleVariants": [
+            "Leinsamen",
+            "Chia",
+            "Sesam"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.trockenobst",
+          "name": "Trockenobst",
+          "exampleVariants": [
+            "Aprikosen",
+            "Pflaumen",
+            "Feigen",
+            "Datteln"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.rosinen-und-sultaninen",
+          "name": "Rosinen und Sultaninen",
+          "exampleVariants": [
+            "natur",
+            "verschiedene Sorten"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.fruchtchips-und-fruchtstucke",
+          "name": "Fruchtchips und Fruchtstücke",
+          "exampleVariants": [
+            "Banane",
+            "Apfel",
+            "Mango"
+          ]
+        },
+        {
+          "id": "snacks-nuesse.knabbermischungen",
+          "name": "Knabbermischungen",
+          "exampleVariants": [
+            "Nüsse",
+            "Cracker",
+            "gemischt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kaffee-tee",
+      "name": "Kaffee, Tee und Kakao",
+      "area": "drink",
+      "productTypes": [
+        {
+          "id": "kaffee-tee.gemahlener-kaffee",
+          "name": "Gemahlener Kaffee",
+          "exampleVariants": [
+            "Filterkaffee",
+            "verschiedene Röstungen"
+          ]
+        },
+        {
+          "id": "kaffee-tee.kaffeebohnen",
+          "name": "Kaffeebohnen",
+          "exampleVariants": [
+            "Espresso",
+            "Filterkaffee",
+            "verschiedene Röstungen"
+          ]
+        },
+        {
+          "id": "kaffee-tee.instantkaffee",
+          "name": "Instantkaffee",
+          "exampleVariants": [
+            "Granulat",
+            "Pulver"
+          ]
+        },
+        {
+          "id": "kaffee-tee.kaffeepads",
+          "name": "Kaffeepads",
+          "exampleVariants": [
+            "verschiedene Mischungen"
+          ]
+        },
+        {
+          "id": "kaffee-tee.kaffeekapseln",
+          "name": "Kaffeekapseln",
+          "exampleVariants": [
+            "verschiedene Systeme",
+            "Mischungen"
+          ]
+        },
+        {
+          "id": "kaffee-tee.kaffeegetrankepulver",
+          "name": "Kaffeegetränkepulver",
+          "exampleVariants": [
+            "Cappuccino",
+            "Latte",
+            "weitere Geschmacksrichtungen"
+          ]
+        },
+        {
+          "id": "kaffee-tee.getreidekaffee",
+          "name": "Getreidekaffee",
+          "exampleVariants": [
+            "verschiedene Zutaten"
+          ]
+        },
+        {
+          "id": "kaffee-tee.schwarzer-tee",
+          "name": "Schwarzer Tee",
+          "exampleVariants": [
+            "Assam",
+            "Darjeeling",
+            "Mischungen"
+          ]
+        },
+        {
+          "id": "kaffee-tee.gruner-tee",
+          "name": "Grüner Tee",
+          "exampleVariants": [
+            "verschiedene Sorten"
+          ]
+        },
+        {
+          "id": "kaffee-tee.weisser-tee-und-oolong",
+          "name": "Weißer Tee und Oolong",
+          "exampleVariants": [
+            "verschiedene Sorten"
+          ]
+        },
+        {
+          "id": "kaffee-tee.krautertee",
+          "name": "Kräutertee",
+          "exampleVariants": [
+            "Pfefferminze",
+            "Kamille",
+            "Mischungen"
+          ]
+        },
+        {
+          "id": "kaffee-tee.fruchtetee",
+          "name": "Früchtetee",
+          "exampleVariants": [
+            "einzelne Früchte",
+            "Mischungen"
+          ]
+        },
+        {
+          "id": "kaffee-tee.rooibostee",
+          "name": "Rooibostee",
+          "exampleVariants": [
+            "natur",
+            "aromatisiert"
+          ]
+        },
+        {
+          "id": "kaffee-tee.spezialtee",
+          "name": "Spezialtee",
+          "exampleVariants": [
+            "Ingwer",
+            "Chai",
+            "Matcha"
+          ]
+        },
+        {
+          "id": "kaffee-tee.kakaogetrankepulver",
+          "name": "Kakaogetränkepulver",
+          "exampleVariants": [
+            "gesüßt",
+            "verschiedene Zutaten"
+          ]
+        },
+        {
+          "id": "kaffee-tee.trinkschokolade",
+          "name": "Trinkschokolade",
+          "exampleVariants": [
+            "Pulver",
+            "Schokoladenstücke"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "getraenke",
+      "name": "Wasser, Saft und alkoholfreie Getränke",
+      "area": "drink",
+      "productTypes": [
+        {
+          "id": "getraenke.mineralwasser",
+          "name": "Mineralwasser",
+          "exampleVariants": [
+            "still",
+            "medium",
+            "classic"
+          ]
+        },
+        {
+          "id": "getraenke.quell-und-tafelwasser",
+          "name": "Quell- und Tafelwasser",
+          "exampleVariants": [
+            "still",
+            "mit Kohlensäure"
+          ]
+        },
+        {
+          "id": "getraenke.aromatisiertes-wasser",
+          "name": "Aromatisiertes Wasser",
+          "exampleVariants": [
+            "verschiedene Geschmacksrichtungen"
+          ]
+        },
+        {
+          "id": "getraenke.cola",
+          "name": "Cola",
+          "exampleVariants": [
+            "klassisch",
+            "ohne Zucker",
+            "ohne Koffein"
+          ]
+        },
+        {
+          "id": "getraenke.limonade",
+          "name": "Limonade",
+          "exampleVariants": [
+            "Orange",
+            "Zitrone",
+            "weitere Früchte"
+          ]
+        },
+        {
+          "id": "getraenke.spezi-und-cola-mix",
+          "name": "Spezi und Cola-Mix",
+          "exampleVariants": [
+            "verschiedene Mischungen"
+          ]
+        },
+        {
+          "id": "getraenke.schorle",
+          "name": "Schorle",
+          "exampleVariants": [
+            "Apfel",
+            "Traube",
+            "weitere Früchte"
+          ]
+        },
+        {
+          "id": "getraenke.fruchtsaft",
+          "name": "Fruchtsaft",
+          "exampleVariants": [
+            "Apfel",
+            "Orange",
+            "Traube",
+            "Mischungen"
+          ]
+        },
+        {
+          "id": "getraenke.fruchtnektar",
+          "name": "Fruchtnektar",
+          "exampleVariants": [
+            "verschiedene Früchte"
+          ]
+        },
+        {
+          "id": "getraenke.gemusesaft",
+          "name": "Gemüsesaft",
+          "exampleVariants": [
+            "Tomate",
+            "Karotte",
+            "Gemüsemischung"
+          ]
+        },
+        {
+          "id": "getraenke.smoothie",
+          "name": "Smoothie",
+          "exampleVariants": [
+            "Obst",
+            "Obst-Gemüse-Mischung"
+          ]
+        },
+        {
+          "id": "getraenke.fruchtsaftshot",
+          "name": "Fruchtsaftshot",
+          "exampleVariants": [
+            "Ingwer",
+            "Kurkuma",
+            "Frucht"
+          ]
+        },
+        {
+          "id": "getraenke.eistee",
+          "name": "Eistee",
+          "exampleVariants": [
+            "Pfirsich",
+            "Zitrone",
+            "weitere Geschmacksrichtungen"
+          ]
+        },
+        {
+          "id": "getraenke.energy-drink",
+          "name": "Energy-Drink",
+          "exampleVariants": [
+            "klassisch",
+            "ohne Zucker",
+            "verschiedene Geschmacksrichtungen"
+          ]
+        },
+        {
+          "id": "getraenke.sportgetrank",
+          "name": "Sportgetränk",
+          "exampleVariants": [
+            "isotonisch",
+            "Elektrolytgetränk"
+          ]
+        },
+        {
+          "id": "getraenke.tonic-und-bittergetranke",
+          "name": "Tonic und Bittergetränke",
+          "exampleVariants": [
+            "Tonic",
+            "Bitter Lemon",
+            "Ginger Ale"
+          ]
+        },
+        {
+          "id": "getraenke.malzgetrank",
+          "name": "Malzgetränk",
+          "exampleVariants": [
+            "verschiedene Rezepturen"
+          ]
+        },
+        {
+          "id": "getraenke.kombucha-und-fermentiertes-getrank",
+          "name": "Kombucha und fermentiertes Getränk",
+          "exampleVariants": [
+            "natur",
+            "aromatisiert"
+          ]
+        },
+        {
+          "id": "getraenke.getrankesirup",
+          "name": "Getränkesirup",
+          "exampleVariants": [
+            "Frucht",
+            "Cola",
+            "weitere Geschmacksrichtungen"
+          ]
+        },
+        {
+          "id": "getraenke.gekuhltes-kaffeegetrank",
+          "name": "Gekühltes Kaffeegetränk",
+          "exampleVariants": [
+            "Latte",
+            "Cappuccino",
+            "schwarzer Kaffee"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alkohol",
+      "name": "Bier, Wein und Spirituosen",
+      "area": "drink",
+      "productTypes": [
+        {
+          "id": "alkohol.pils",
+          "name": "Pils",
+          "exampleVariants": [
+            "verschiedene Brauereien",
+            "Stile"
+          ]
+        },
+        {
+          "id": "alkohol.helles-und-lager",
+          "name": "Helles und Lager",
+          "exampleVariants": [
+            "hell",
+            "Export"
+          ]
+        },
+        {
+          "id": "alkohol.weizenbier",
+          "name": "Weizenbier",
+          "exampleVariants": [
+            "hell",
+            "dunkel",
+            "Kristall"
+          ]
+        },
+        {
+          "id": "alkohol.dunkles-bier",
+          "name": "Dunkles Bier",
+          "exampleVariants": [
+            "Schwarzbier",
+            "Bock",
+            "Dunkelbier"
+          ]
+        },
+        {
+          "id": "alkohol.craft-und-spezialbier",
+          "name": "Craft- und Spezialbier",
+          "exampleVariants": [
+            "IPA",
+            "Pale Ale",
+            "Stout"
+          ]
+        },
+        {
+          "id": "alkohol.biermischgetrank",
+          "name": "Biermischgetränk",
+          "exampleVariants": [
+            "Radler",
+            "Cola-Bier",
+            "weitere Mischungen"
+          ]
+        },
+        {
+          "id": "alkohol.alkoholfreies-bier",
+          "name": "Alkoholfreies Bier",
+          "exampleVariants": [
+            "Pils",
+            "Weizen",
+            "Radler"
+          ]
+        },
+        {
+          "id": "alkohol.cider",
+          "name": "Cider",
+          "exampleVariants": [
+            "Apfel",
+            "Birne",
+            "aromatisiert"
+          ]
+        },
+        {
+          "id": "alkohol.weisswein",
+          "name": "Weißwein",
+          "exampleVariants": [
+            "trocken",
+            "halbtrocken",
+            "lieblich"
+          ]
+        },
+        {
+          "id": "alkohol.rotwein",
+          "name": "Rotwein",
+          "exampleVariants": [
+            "trocken",
+            "halbtrocken",
+            "lieblich"
+          ]
+        },
+        {
+          "id": "alkohol.rosewein",
+          "name": "Roséwein",
+          "exampleVariants": [
+            "trocken",
+            "halbtrocken",
+            "lieblich"
+          ]
+        },
+        {
+          "id": "alkohol.schaumwein-und-sekt",
+          "name": "Schaumwein und Sekt",
+          "exampleVariants": [
+            "brut",
+            "trocken",
+            "halbtrocken"
+          ]
+        },
+        {
+          "id": "alkohol.prosecco-und-perlwein",
+          "name": "Prosecco und Perlwein",
+          "exampleVariants": [
+            "verschiedene Stile"
+          ]
+        },
+        {
+          "id": "alkohol.alkoholfreier-wein-und-sekt",
+          "name": "Alkoholfreier Wein und Sekt",
+          "exampleVariants": [
+            "weiß",
+            "rot",
+            "rosé"
+          ]
+        },
+        {
+          "id": "alkohol.gluhwein-und-punsch",
+          "name": "Glühwein und Punsch",
+          "exampleVariants": [
+            "rot",
+            "weiß",
+            "Frucht"
+          ]
+        },
+        {
+          "id": "alkohol.wodka",
+          "name": "Wodka",
+          "exampleVariants": [
+            "natur",
+            "aromatisiert"
+          ]
+        },
+        {
+          "id": "alkohol.gin",
+          "name": "Gin",
+          "exampleVariants": [
+            "verschiedene Stile"
+          ]
+        },
+        {
+          "id": "alkohol.rum",
+          "name": "Rum",
+          "exampleVariants": [
+            "weiß",
+            "braun",
+            "gereift"
+          ]
+        },
+        {
+          "id": "alkohol.whisky-und-whiskey",
+          "name": "Whisky und Whiskey",
+          "exampleVariants": [
+            "verschiedene Herkunftsarten"
+          ]
+        },
+        {
+          "id": "alkohol.brandy-und-weinbrand",
+          "name": "Brandy und Weinbrand",
+          "exampleVariants": [
+            "verschiedene Stile"
+          ]
+        },
+        {
+          "id": "alkohol.tequila-und-agavenspirituose",
+          "name": "Tequila und Agavenspirituose",
+          "exampleVariants": [
+            "verschiedene Stile"
+          ]
+        },
+        {
+          "id": "alkohol.korn-und-obstbrand",
+          "name": "Korn und Obstbrand",
+          "exampleVariants": [
+            "Korn",
+            "Obstsorten"
+          ]
+        },
+        {
+          "id": "alkohol.likor",
+          "name": "Likör",
+          "exampleVariants": [
+            "Frucht",
+            "Kräuter",
+            "Sahne"
+          ]
+        },
+        {
+          "id": "alkohol.aperitif-und-bitter",
+          "name": "Aperitif und Bitter",
+          "exampleVariants": [
+            "verschiedene Rezepturen"
+          ]
+        },
+        {
+          "id": "alkohol.spirituosen-mischgetrank",
+          "name": "Spirituosen-Mischgetränk",
+          "exampleVariants": [
+            "Cocktail",
+            "Longdrink"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "baby",
+      "name": "Baby- und Kinderbedarf",
+      "area": "mixed",
+      "productTypes": [
+        {
+          "id": "baby.sauglingsanfangsnahrung",
+          "name": "Säuglingsanfangsnahrung",
+          "exampleVariants": [
+            "Pre",
+            "1",
+            "verschiedene Zubereitungen"
+          ]
+        },
+        {
+          "id": "baby.folge-und-kleinkindnahrung",
+          "name": "Folge- und Kleinkindnahrung",
+          "exampleVariants": [
+            "verschiedene Altersstufen"
+          ]
+        },
+        {
+          "id": "baby.babybrei",
+          "name": "Babybrei",
+          "exampleVariants": [
+            "Milch-Getreide",
+            "Getreide",
+            "Obst"
+          ]
+        },
+        {
+          "id": "baby.babyglaschen",
+          "name": "Babygläschen",
+          "exampleVariants": [
+            "Gemüse",
+            "Menü",
+            "Obst"
+          ]
+        },
+        {
+          "id": "baby.baby-und-kleinkindsnacks",
+          "name": "Baby- und Kleinkindsnacks",
+          "exampleVariants": [
+            "Fruchtriegel",
+            "Knabberartikel"
+          ]
+        },
+        {
+          "id": "baby.fruchtpuree-fur-kinder",
+          "name": "Fruchtpüree für Kinder",
+          "exampleVariants": [
+            "Beutel",
+            "Becher"
+          ]
+        },
+        {
+          "id": "baby.babytee-und-kindergetranke",
+          "name": "Babytee und Kindergetränke",
+          "exampleVariants": [
+            "verschiedene Sorten"
+          ]
+        },
+        {
+          "id": "baby.windeln",
+          "name": "Windeln",
+          "exampleVariants": [
+            "verschiedene Größen",
+            "Pants"
+          ]
+        },
+        {
+          "id": "baby.schwimmwindeln",
+          "name": "Schwimmwindeln",
+          "exampleVariants": [
+            "verschiedene Größen"
+          ]
+        },
+        {
+          "id": "baby.feuchttucher",
+          "name": "Feuchttücher",
+          "exampleVariants": [
+            "sensitiv",
+            "verschiedene Ausführungen"
+          ]
+        },
+        {
+          "id": "baby.babypflege",
+          "name": "Babypflege",
+          "exampleVariants": [
+            "Waschgel",
+            "Öl",
+            "Creme"
+          ]
+        },
+        {
+          "id": "baby.wundschutzcreme",
+          "name": "Wundschutzcreme",
+          "exampleVariants": [
+            "verschiedene Ausführungen"
+          ]
+        },
+        {
+          "id": "baby.babyzubehor",
+          "name": "Babyzubehör",
+          "exampleVariants": [
+            "Fläschchen",
+            "Sauger",
+            "Lätzchen"
+          ]
+        },
+        {
+          "id": "baby.wickelzubehor",
+          "name": "Wickelzubehör",
+          "exampleVariants": [
+            "Unterlagen",
+            "Windelbeutel"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "koerper-haar",
+      "name": "Körperpflege und Haarpflege",
+      "area": "nonfood",
+      "productTypes": [
+        {
+          "id": "koerper-haar.duschgel-und-duschcreme",
+          "name": "Duschgel und Duschcreme",
+          "exampleVariants": [
+            "verschiedene Düfte",
+            "sensitiv"
+          ]
+        },
+        {
+          "id": "koerper-haar.seife",
+          "name": "Seife",
+          "exampleVariants": [
+            "flüssig",
+            "Stück"
+          ]
+        },
+        {
+          "id": "koerper-haar.badezusatz",
+          "name": "Badezusatz",
+          "exampleVariants": [
+            "Schaumbad",
+            "Badesalz",
+            "Badeöl"
+          ]
+        },
+        {
+          "id": "koerper-haar.bodylotion-und-korpermilch",
+          "name": "Bodylotion und Körpermilch",
+          "exampleVariants": [
+            "verschiedene Hauttypen"
+          ]
+        },
+        {
+          "id": "koerper-haar.korpercreme-und-pflegeol",
+          "name": "Körpercreme und Pflegeöl",
+          "exampleVariants": [
+            "verschiedene Hauttypen"
+          ]
+        },
+        {
+          "id": "koerper-haar.handcreme",
+          "name": "Handcreme",
+          "exampleVariants": [
+            "verschiedene Hauttypen"
+          ]
+        },
+        {
+          "id": "koerper-haar.fusspflege",
+          "name": "Fußpflege",
+          "exampleVariants": [
+            "Creme",
+            "Peeling",
+            "Pflegebad"
+          ]
+        },
+        {
+          "id": "koerper-haar.deodorant",
+          "name": "Deodorant",
+          "exampleVariants": [
+            "Spray",
+            "Roll-on",
+            "Stick",
+            "Antitranspirant"
+          ]
+        },
+        {
+          "id": "koerper-haar.parfum-und-duftwasser",
+          "name": "Parfüm und Duftwasser",
+          "exampleVariants": [
+            "verschiedene Düfte"
+          ]
+        },
+        {
+          "id": "koerper-haar.shampoo",
+          "name": "Shampoo",
+          "exampleVariants": [
+            "verschiedene Haartypen"
+          ]
+        },
+        {
+          "id": "koerper-haar.conditioner-und-spulung",
+          "name": "Conditioner und Spülung",
+          "exampleVariants": [
+            "verschiedene Haartypen"
+          ]
+        },
+        {
+          "id": "koerper-haar.haarkur-und-haarmaske",
+          "name": "Haarkur und Haarmaske",
+          "exampleVariants": [
+            "verschiedene Haartypen"
+          ]
+        },
+        {
+          "id": "koerper-haar.haarstyling",
+          "name": "Haarstyling",
+          "exampleVariants": [
+            "Gel",
+            "Wachs",
+            "Spray",
+            "Schaum"
+          ]
+        },
+        {
+          "id": "koerper-haar.haarfarbe-und-tonung",
+          "name": "Haarfarbe und Tönung",
+          "exampleVariants": [
+            "verschiedene Farbtöne"
+          ]
+        },
+        {
+          "id": "koerper-haar.gesichtsreinigung",
+          "name": "Gesichtsreinigung",
+          "exampleVariants": [
+            "Waschgel",
+            "Reinigungsmilch",
+            "Mizellenwasser"
+          ]
+        },
+        {
+          "id": "koerper-haar.gesichtscreme",
+          "name": "Gesichtscreme",
+          "exampleVariants": [
+            "Tagespflege",
+            "Nachtpflege"
+          ]
+        },
+        {
+          "id": "koerper-haar.lippenpflege",
+          "name": "Lippenpflege",
+          "exampleVariants": [
+            "Stift",
+            "Balsam"
+          ]
+        },
+        {
+          "id": "koerper-haar.sonnenpflege",
+          "name": "Sonnenpflege",
+          "exampleVariants": [
+            "Sonnencreme",
+            "After Sun"
+          ]
+        },
+        {
+          "id": "koerper-haar.kosmetik",
+          "name": "Kosmetik",
+          "exampleVariants": [
+            "Make-up",
+            "Mascara",
+            "Lippenstift",
+            "Nagellack"
+          ]
+        },
+        {
+          "id": "koerper-haar.kosmetikzubehor",
+          "name": "Kosmetikzubehör",
+          "exampleVariants": [
+            "Wattepads",
+            "Pinsel",
+            "Abschminktücher"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hygiene",
+      "name": "Mundpflege, Rasur und persönliche Hygiene",
+      "area": "nonfood",
+      "productTypes": [
+        {
+          "id": "hygiene.zahnpasta",
+          "name": "Zahnpasta",
+          "exampleVariants": [
+            "verschiedene Rezepturen"
+          ]
+        },
+        {
+          "id": "hygiene.zahnburste",
+          "name": "Zahnbürste",
+          "exampleVariants": [
+            "Handzahnbürste",
+            "Kinderzahnbürste"
+          ]
+        },
+        {
+          "id": "hygiene.elektrische-zahnpflege",
+          "name": "Elektrische Zahnpflege",
+          "exampleVariants": [
+            "Zahnbürste",
+            "Ersatzköpfe"
+          ]
+        },
+        {
+          "id": "hygiene.mundspulung",
+          "name": "Mundspülung",
+          "exampleVariants": [
+            "verschiedene Rezepturen"
+          ]
+        },
+        {
+          "id": "hygiene.zahnseide-und-interdentalpflege",
+          "name": "Zahnseide und Interdentalpflege",
+          "exampleVariants": [
+            "Zahnseide",
+            "Interdentalbürsten"
+          ]
+        },
+        {
+          "id": "hygiene.zahnersatzpflege",
+          "name": "Zahnersatzpflege",
+          "exampleVariants": [
+            "Reinigungstabletten",
+            "Haftcreme"
+          ]
+        },
+        {
+          "id": "hygiene.rasierer",
+          "name": "Rasierer",
+          "exampleVariants": [
+            "Einwegrasierer",
+            "Systemrasierer"
+          ]
+        },
+        {
+          "id": "hygiene.rasierklingen",
+          "name": "Rasierklingen",
+          "exampleVariants": [
+            "verschiedene Systeme"
+          ]
+        },
+        {
+          "id": "hygiene.rasierschaum-und-rasiergel",
+          "name": "Rasierschaum und Rasiergel",
+          "exampleVariants": [
+            "verschiedene Hauttypen"
+          ]
+        },
+        {
+          "id": "hygiene.nach-rasur-pflege",
+          "name": "Nach-Rasur-Pflege",
+          "exampleVariants": [
+            "Balsam",
+            "Aftershave"
+          ]
+        },
+        {
+          "id": "hygiene.enthaarungsprodukte",
+          "name": "Enthaarungsprodukte",
+          "exampleVariants": [
+            "Creme",
+            "Wachs",
+            "Zubehör"
+          ]
+        },
+        {
+          "id": "hygiene.damenhygiene",
+          "name": "Damenhygiene",
+          "exampleVariants": [
+            "Binden",
+            "Tampons",
+            "Slipeinlagen",
+            "Menstruationstasse",
+            "Periodenunterwäsche"
+          ]
+        },
+        {
+          "id": "hygiene.inkontinenzprodukte",
+          "name": "Inkontinenzprodukte",
+          "exampleVariants": [
+            "Einlagen",
+            "Pants"
+          ]
+        },
+        {
+          "id": "hygiene.intimpflege",
+          "name": "Intimpflege",
+          "exampleVariants": [
+            "Waschprodukte",
+            "Tücher"
+          ]
+        },
+        {
+          "id": "hygiene.kondome-und-gleitgel",
+          "name": "Kondome und Gleitgel",
+          "exampleVariants": [
+            "verschiedene Ausführungen"
+          ]
+        },
+        {
+          "id": "hygiene.papierhygiene",
+          "name": "Papierhygiene",
+          "exampleVariants": [
+            "Taschentücher",
+            "Toilettenpapier",
+            "feuchtes Toilettenpapier"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gesundheit",
+      "name": "Gesundheit und Alltagsdrogerie",
+      "area": "nonfood",
+      "productTypes": [
+        {
+          "id": "gesundheit.pflaster",
+          "name": "Pflaster",
+          "exampleVariants": [
+            "Wundpflaster",
+            "Blasenpflaster"
+          ]
+        },
+        {
+          "id": "gesundheit.verbandmaterial",
+          "name": "Verbandmaterial",
+          "exampleVariants": [
+            "Mull",
+            "Kompressen",
+            "Fixierbinden"
+          ]
+        },
+        {
+          "id": "gesundheit.desinfektionsprodukte",
+          "name": "Desinfektionsprodukte",
+          "exampleVariants": [
+            "Handdesinfektion",
+            "Flächendesinfektion"
+          ]
+        },
+        {
+          "id": "gesundheit.fieberthermometer",
+          "name": "Fieberthermometer",
+          "exampleVariants": [
+            "verschiedene Ausführungen"
+          ]
+        },
+        {
+          "id": "gesundheit.warme-und-kalteprodukte",
+          "name": "Wärme- und Kälteprodukte",
+          "exampleVariants": [
+            "Wärmepflaster",
+            "Kühlkompresse"
+          ]
+        },
+        {
+          "id": "gesundheit.warmflasche",
+          "name": "Wärmflasche",
+          "exampleVariants": [
+            "verschiedene Ausführungen"
+          ]
+        },
+        {
+          "id": "gesundheit.nahrungserganzung",
+          "name": "Nahrungsergänzung",
+          "exampleVariants": [
+            "Vitamine",
+            "Mineralstoffe",
+            "verschiedene Formen"
+          ]
+        },
+        {
+          "id": "gesundheit.sporternahrung",
+          "name": "Sporternährung",
+          "exampleVariants": [
+            "Proteinriegel",
+            "Proteinpulver",
+            "Getränk"
+          ]
+        },
+        {
+          "id": "gesundheit.husten-und-halsbonbons",
+          "name": "Husten- und Halsbonbons",
+          "exampleVariants": [
+            "verschiedene Geschmacksrichtungen"
+          ]
+        },
+        {
+          "id": "gesundheit.kontaktlinsenpflege",
+          "name": "Kontaktlinsenpflege",
+          "exampleVariants": [
+            "Lösung",
+            "Behälter"
+          ]
+        },
+        {
+          "id": "gesundheit.lesebrille",
+          "name": "Lesebrille",
+          "exampleVariants": [
+            "verschiedene Stärken"
+          ]
+        },
+        {
+          "id": "gesundheit.alltagshilfen",
+          "name": "Alltagshilfen",
+          "exampleVariants": [
+            "Ohrstöpsel",
+            "Schlafmaske"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "waschen-reinigen",
+      "name": "Waschen, Putzen und Reinigen",
+      "area": "nonfood",
+      "productTypes": [
+        {
+          "id": "waschen-reinigen.vollwaschmittel",
+          "name": "Vollwaschmittel",
+          "exampleVariants": [
+            "Pulver",
+            "flüssig",
+            "Kapseln"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.colorwaschmittel",
+          "name": "Colorwaschmittel",
+          "exampleVariants": [
+            "Pulver",
+            "flüssig",
+            "Kapseln"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.fein-und-wollwaschmittel",
+          "name": "Fein- und Wollwaschmittel",
+          "exampleVariants": [
+            "flüssig",
+            "weitere Formen"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.weichspuler",
+          "name": "Weichspüler",
+          "exampleVariants": [
+            "verschiedene Düfte"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.wasche-zusatzprodukte",
+          "name": "Wäsche-Zusatzprodukte",
+          "exampleVariants": [
+            "Fleckensalz",
+            "Hygienespüler",
+            "Duftzusatz"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.fleckenentferner",
+          "name": "Fleckenentferner",
+          "exampleVariants": [
+            "Spray",
+            "Seife",
+            "Pulver"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.handspulmittel",
+          "name": "Handspülmittel",
+          "exampleVariants": [
+            "verschiedene Ausführungen"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.geschirrspultabs-und-pulver",
+          "name": "Geschirrspültabs und Pulver",
+          "exampleVariants": [
+            "Tabs",
+            "Pulver",
+            "Gel"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.spulmaschinen-zusatzprodukte",
+          "name": "Spülmaschinen-Zusatzprodukte",
+          "exampleVariants": [
+            "Klarspüler",
+            "Salz",
+            "Maschinenreiniger"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.allzweckreiniger",
+          "name": "Allzweckreiniger",
+          "exampleVariants": [
+            "flüssig",
+            "Spray"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.kuchenreiniger",
+          "name": "Küchenreiniger",
+          "exampleVariants": [
+            "Fettlöser",
+            "Backofenreiniger"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.badreiniger",
+          "name": "Badreiniger",
+          "exampleVariants": [
+            "Kalkreiniger",
+            "Sanitärreiniger"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.wc-reiniger",
+          "name": "WC-Reiniger",
+          "exampleVariants": [
+            "Gel",
+            "Tabs",
+            "Einhänger"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.glasreiniger",
+          "name": "Glasreiniger",
+          "exampleVariants": [
+            "Spray",
+            "Nachfüllpackung"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.bodenreiniger",
+          "name": "Bodenreiniger",
+          "exampleVariants": [
+            "Universal",
+            "Holz",
+            "Spezialboden"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.scheuermittel",
+          "name": "Scheuermittel",
+          "exampleVariants": [
+            "Milch",
+            "Pulver"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.entkalker",
+          "name": "Entkalker",
+          "exampleVariants": [
+            "flüssig",
+            "Pulver"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.abflussreiniger",
+          "name": "Abflussreiniger",
+          "exampleVariants": [
+            "flüssig",
+            "Granulat"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.spezialreiniger",
+          "name": "Spezialreiniger",
+          "exampleVariants": [
+            "Polster",
+            "Teppich",
+            "Edelstahl"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.raumduft-und-lufterfrischer",
+          "name": "Raumduft und Lufterfrischer",
+          "exampleVariants": [
+            "Spray",
+            "Duftspender",
+            "Duftstäbchen"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.reinigungszubehor",
+          "name": "Reinigungszubehör",
+          "exampleVariants": [
+            "Schwämme",
+            "Tücher",
+            "Bürsten",
+            "Handschuhe"
+          ]
+        },
+        {
+          "id": "waschen-reinigen.insekten-und-schadlingsmittel",
+          "name": "Insekten- und Schädlingsmittel",
+          "exampleVariants": [
+            "Köder",
+            "Fallen",
+            "Sprays"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "haushalt",
+      "name": "Papierwaren und Haushaltsverbrauch",
+      "area": "nonfood",
+      "productTypes": [
+        {
+          "id": "haushalt.kuchenpapier",
+          "name": "Küchenpapier",
+          "exampleVariants": [
+            "Rollen",
+            "verschiedene Lagen"
+          ]
+        },
+        {
+          "id": "haushalt.servietten",
+          "name": "Servietten",
+          "exampleVariants": [
+            "Papier",
+            "verschiedene Größen"
+          ]
+        },
+        {
+          "id": "haushalt.backpapier",
+          "name": "Backpapier",
+          "exampleVariants": [
+            "Bögen",
+            "Rolle"
+          ]
+        },
+        {
+          "id": "haushalt.alufolie",
+          "name": "Alufolie",
+          "exampleVariants": [
+            "Rolle",
+            "Zuschnitte"
+          ]
+        },
+        {
+          "id": "haushalt.frischhaltefolie",
+          "name": "Frischhaltefolie",
+          "exampleVariants": [
+            "Rolle",
+            "Zuschnitte"
+          ]
+        },
+        {
+          "id": "haushalt.gefrier-und-aufbewahrungsbeutel",
+          "name": "Gefrier- und Aufbewahrungsbeutel",
+          "exampleVariants": [
+            "verschiedene Größen"
+          ]
+        },
+        {
+          "id": "haushalt.mullbeutel",
+          "name": "Müllbeutel",
+          "exampleVariants": [
+            "verschiedene Größen",
+            "Biomüll"
+          ]
+        },
+        {
+          "id": "haushalt.einweggeschirr",
+          "name": "Einweggeschirr",
+          "exampleVariants": [
+            "Teller",
+            "Becher",
+            "Besteck"
+          ]
+        },
+        {
+          "id": "haushalt.trinkhalme",
+          "name": "Trinkhalme",
+          "exampleVariants": [
+            "verschiedene Materialien"
+          ]
+        },
+        {
+          "id": "haushalt.zahnstocher-und-spiesse",
+          "name": "Zahnstocher und Spieße",
+          "exampleVariants": [
+            "Zahnstocher",
+            "Grillspieße"
+          ]
+        },
+        {
+          "id": "haushalt.haushaltskerzen",
+          "name": "Haushaltskerzen",
+          "exampleVariants": [
+            "Teelichter",
+            "Stumpenkerzen"
+          ]
+        },
+        {
+          "id": "haushalt.streichholzer-und-feuerzeuge",
+          "name": "Streichhölzer und Feuerzeuge",
+          "exampleVariants": [
+            "verschiedene Ausführungen"
+          ]
+        },
+        {
+          "id": "haushalt.batterien",
+          "name": "Batterien",
+          "exampleVariants": [
+            "verschiedene Baugrößen"
+          ]
+        },
+        {
+          "id": "haushalt.leuchtmittel",
+          "name": "Leuchtmittel",
+          "exampleVariants": [
+            "verschiedene Bauformen"
+          ]
+        },
+        {
+          "id": "haushalt.klebeband-und-klebstoff",
+          "name": "Klebeband und Klebstoff",
+          "exampleVariants": [
+            "verschiedene Anwendungen"
+          ]
+        },
+        {
+          "id": "haushalt.schreib-und-schulbedarf",
+          "name": "Schreib- und Schulbedarf",
+          "exampleVariants": [
+            "Stifte",
+            "Hefte",
+            "Papier"
+          ]
+        },
+        {
+          "id": "haushalt.geschenkverpackung",
+          "name": "Geschenkverpackung",
+          "exampleVariants": [
+            "Geschenkpapier",
+            "Beutel",
+            "Schleifen"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kueche",
+      "name": "Küchen- und Haushaltswaren",
+      "area": "nonfood",
+      "productTypes": [
+        {
+          "id": "kueche.aufbewahrungsdose",
+          "name": "Aufbewahrungsdose",
+          "exampleVariants": [
+            "Kunststoff",
+            "Glas",
+            "Metall"
+          ]
+        },
+        {
+          "id": "kueche.trinkflasche-und-thermobecher",
+          "name": "Trinkflasche und Thermobecher",
+          "exampleVariants": [
+            "verschiedene Materialien"
+          ]
+        },
+        {
+          "id": "kueche.geschirr",
+          "name": "Geschirr",
+          "exampleVariants": [
+            "Teller",
+            "Tassen",
+            "Schüsseln"
+          ]
+        },
+        {
+          "id": "kueche.glaser",
+          "name": "Gläser",
+          "exampleVariants": [
+            "Trinkgläser",
+            "Weingläser"
+          ]
+        },
+        {
+          "id": "kueche.besteck-und-kuchenmesser",
+          "name": "Besteck und Küchenmesser",
+          "exampleVariants": [
+            "Besteck",
+            "verschiedene Messer"
+          ]
+        },
+        {
+          "id": "kueche.kuchenhelfer",
+          "name": "Küchenhelfer",
+          "exampleVariants": [
+            "Löffel",
+            "Wender",
+            "Schneebesen"
+          ]
+        },
+        {
+          "id": "kueche.schneidbrett",
+          "name": "Schneidbrett",
+          "exampleVariants": [
+            "verschiedene Materialien"
+          ]
+        },
+        {
+          "id": "kueche.topf-und-pfanne",
+          "name": "Topf und Pfanne",
+          "exampleVariants": [
+            "verschiedene Größen",
+            "Beschichtungen"
+          ]
+        },
+        {
+          "id": "kueche.backform",
+          "name": "Backform",
+          "exampleVariants": [
+            "Kuchenform",
+            "Muffinform",
+            "Auflaufform"
+          ]
+        },
+        {
+          "id": "kueche.sieb-und-reibe",
+          "name": "Sieb und Reibe",
+          "exampleVariants": [
+            "verschiedene Ausführungen"
+          ]
+        },
+        {
+          "id": "kueche.kuchenwaage-und-messzubehor",
+          "name": "Küchenwaage und Messzubehör",
+          "exampleVariants": [
+            "Waage",
+            "Messbecher"
+          ]
+        },
+        {
+          "id": "kueche.haushaltstextilien",
+          "name": "Haushaltstextilien",
+          "exampleVariants": [
+            "Geschirrtücher",
+            "Handtücher",
+            "Topflappen"
+          ]
+        },
+        {
+          "id": "kueche.waschezubehor",
+          "name": "Wäschezubehör",
+          "exampleVariants": [
+            "Wäscheklammern",
+            "Wäschekorb"
+          ]
+        },
+        {
+          "id": "kueche.reinigungsgerate",
+          "name": "Reinigungsgeräte",
+          "exampleVariants": [
+            "Besen",
+            "Wischmopp",
+            "Eimer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tierbedarf",
+      "name": "Tiernahrung und Tierbedarf",
+      "area": "pet",
+      "productTypes": [
+        {
+          "id": "tierbedarf.katzenfutter-nass",
+          "name": "Katzenfutter (nass)",
+          "exampleVariants": [
+            "Stückchen",
+            "Pastete",
+            "verschiedene Fleischarten"
+          ]
+        },
+        {
+          "id": "tierbedarf.katzenfutter-trocken",
+          "name": "Katzenfutter (trocken)",
+          "exampleVariants": [
+            "verschiedene Rezepturen"
+          ]
+        },
+        {
+          "id": "tierbedarf.katzensnacks",
+          "name": "Katzensnacks",
+          "exampleVariants": [
+            "Sticks",
+            "Leckerlis",
+            "Pasten"
+          ]
+        },
+        {
+          "id": "tierbedarf.katzenstreu",
+          "name": "Katzenstreu",
+          "exampleVariants": [
+            "klumpend",
+            "nicht klumpend"
+          ]
+        },
+        {
+          "id": "tierbedarf.hundefutter-nass",
+          "name": "Hundefutter (nass)",
+          "exampleVariants": [
+            "verschiedene Fleischarten"
+          ]
+        },
+        {
+          "id": "tierbedarf.hundefutter-trocken",
+          "name": "Hundefutter (trocken)",
+          "exampleVariants": [
+            "verschiedene Rezepturen"
+          ]
+        },
+        {
+          "id": "tierbedarf.hundesnacks",
+          "name": "Hundesnacks",
+          "exampleVariants": [
+            "Kaustangen",
+            "Leckerlis"
+          ]
+        },
+        {
+          "id": "tierbedarf.kleintierfutter",
+          "name": "Kleintierfutter",
+          "exampleVariants": [
+            "Nager",
+            "Kaninchen"
+          ]
+        },
+        {
+          "id": "tierbedarf.heu-und-kleintierstreu",
+          "name": "Heu und Kleintierstreu",
+          "exampleVariants": [
+            "Heu",
+            "Einstreu"
+          ]
+        },
+        {
+          "id": "tierbedarf.vogelfutter",
+          "name": "Vogelfutter",
+          "exampleVariants": [
+            "Ziervögel",
+            "Wildvögel"
+          ]
+        },
+        {
+          "id": "tierbedarf.fischfutter",
+          "name": "Fischfutter",
+          "exampleVariants": [
+            "Flocken",
+            "Granulat"
+          ]
+        },
+        {
+          "id": "tierbedarf.tierpflege",
+          "name": "Tierpflege",
+          "exampleVariants": [
+            "Shampoo",
+            "Bürste",
+            "Hygiene"
+          ]
+        },
+        {
+          "id": "tierbedarf.tierausstattung",
+          "name": "Tierausstattung",
+          "exampleVariants": [
+            "Napf",
+            "Leine",
+            "Halsband"
+          ]
+        },
+        {
+          "id": "tierbedarf.tierspielzeug",
+          "name": "Tierspielzeug",
+          "exampleVariants": [
+            "Hunde",
+            "Katzen",
+            "Kleintiere"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blumen-pflanzen",
+      "name": "Blumen, Pflanzen und Gartenbedarf",
+      "area": "seasonal",
+      "productTypes": [
+        {
+          "id": "blumen-pflanzen.schnittblumen",
+          "name": "Schnittblumen",
+          "exampleVariants": [
+            "Strauß",
+            "einzelne Blumen"
+          ]
+        },
+        {
+          "id": "blumen-pflanzen.topfpflanzen",
+          "name": "Topfpflanzen",
+          "exampleVariants": [
+            "Grünpflanzen",
+            "Blühpflanzen"
+          ]
+        },
+        {
+          "id": "blumen-pflanzen.saisonpflanzen",
+          "name": "Saisonpflanzen",
+          "exampleVariants": [
+            "Balkon",
+            "Garten"
+          ]
+        },
+        {
+          "id": "blumen-pflanzen.saatgut-und-zwiebeln",
+          "name": "Saatgut und Zwiebeln",
+          "exampleVariants": [
+            "Blumen",
+            "Gemüse",
+            "Kräuter"
+          ]
+        },
+        {
+          "id": "blumen-pflanzen.pflanzerde",
+          "name": "Pflanzerde",
+          "exampleVariants": [
+            "Universal",
+            "Spezialsubstrat"
+          ]
+        },
+        {
+          "id": "blumen-pflanzen.dunger",
+          "name": "Dünger",
+          "exampleVariants": [
+            "flüssig",
+            "Granulat"
+          ]
+        },
+        {
+          "id": "blumen-pflanzen.gartenzubehor",
+          "name": "Gartenzubehör",
+          "exampleVariants": [
+            "Töpfe",
+            "Handschuhe",
+            "kleine Geräte"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kasse-tabak",
+      "name": "Tabak und Kassenartikel (je nach Markt)",
+      "area": "optional",
+      "productTypes": [
+        {
+          "id": "kasse-tabak.zigaretten",
+          "name": "Zigaretten",
+          "exampleVariants": [
+            "verschiedene Marken und Packungen"
+          ]
+        },
+        {
+          "id": "kasse-tabak.dreh-und-stopftabak",
+          "name": "Dreh- und Stopftabak",
+          "exampleVariants": [
+            "verschiedene Marken und Packungen"
+          ]
+        },
+        {
+          "id": "kasse-tabak.zigarren-und-zigarillos",
+          "name": "Zigarren und Zigarillos",
+          "exampleVariants": [
+            "verschiedene Marken und Packungen"
+          ]
+        },
+        {
+          "id": "kasse-tabak.tabakzubehor",
+          "name": "Tabakzubehör",
+          "exampleVariants": [
+            "Filter",
+            "Papier",
+            "Hülsen"
+          ]
+        },
+        {
+          "id": "kasse-tabak.feuerzeuge-und-streichholzer",
+          "name": "Feuerzeuge und Streichhölzer",
+          "exampleVariants": [
+            "Einweg",
+            "nachfüllbar",
+            "Streichhölzer"
+          ]
+        },
+        {
+          "id": "kasse-tabak.gutscheine-und-geschenkkarten",
+          "name": "Gutscheine und Geschenkkarten",
+          "exampleVariants": [
+            "Händlergutschein",
+            "Drittanbieter"
+          ]
+        },
+        {
+          "id": "kasse-tabak.prepaid-guthaben",
+          "name": "Prepaid-Guthaben",
+          "exampleVariants": [
+            "Mobilfunk",
+            "andere tatsächlich angebotene Guthaben"
+          ]
+        },
+        {
+          "id": "kasse-tabak.briefmarken-und-postbedarf",
+          "name": "Briefmarken und Postbedarf",
+          "exampleVariants": [
+            "je nach Markt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "saison-aktion",
+      "name": "Wechselnde Aktions- und Saisonwaren",
+      "area": "seasonal",
+      "productTypes": [
+        {
+          "id": "saison-aktion.festtagslebensmittel",
+          "name": "Festtagslebensmittel",
+          "exampleVariants": [
+            "Weihnachten",
+            "Ostern",
+            "saisonale Spezialitäten"
+          ]
+        },
+        {
+          "id": "saison-aktion.back-und-geschenkaktionen",
+          "name": "Back- und Geschenkaktionen",
+          "exampleVariants": [
+            "Geschenkpackungen",
+            "Saisonformen"
+          ]
+        },
+        {
+          "id": "saison-aktion.grillbedarf",
+          "name": "Grillbedarf",
+          "exampleVariants": [
+            "Holzkohle",
+            "Briketts",
+            "Anzünder"
+          ]
+        },
+        {
+          "id": "saison-aktion.grillzubehor",
+          "name": "Grillzubehör",
+          "exampleVariants": [
+            "Werkzeuge",
+            "Grillgeräte"
+          ]
+        },
+        {
+          "id": "saison-aktion.bekleidung",
+          "name": "Bekleidung",
+          "exampleVariants": [
+            "Oberteile",
+            "Hosen",
+            "Nachtwäsche"
+          ]
+        },
+        {
+          "id": "saison-aktion.unterwasche-und-strumpfe",
+          "name": "Unterwäsche und Strümpfe",
+          "exampleVariants": [
+            "Unterwäsche",
+            "Socken",
+            "Strumpfhosen"
+          ]
+        },
+        {
+          "id": "saison-aktion.schuhe",
+          "name": "Schuhe",
+          "exampleVariants": [
+            "Haus",
+            "Freizeit",
+            "Saison"
+          ]
+        },
+        {
+          "id": "saison-aktion.kinderbekleidung",
+          "name": "Kinderbekleidung",
+          "exampleVariants": [
+            "verschiedene Altersstufen"
+          ]
+        },
+        {
+          "id": "saison-aktion.heimtextilien",
+          "name": "Heimtextilien",
+          "exampleVariants": [
+            "Bettwäsche",
+            "Decken",
+            "Kissen"
+          ]
+        },
+        {
+          "id": "saison-aktion.dekoration",
+          "name": "Dekoration",
+          "exampleVariants": [
+            "Saison",
+            "Wohnen"
+          ]
+        },
+        {
+          "id": "saison-aktion.spielzeug-und-spiele",
+          "name": "Spielzeug und Spiele",
+          "exampleVariants": [
+            "Brettspiele",
+            "Spielsachen"
+          ]
+        },
+        {
+          "id": "saison-aktion.sport-und-freizeitbedarf",
+          "name": "Sport- und Freizeitbedarf",
+          "exampleVariants": [
+            "Fitness",
+            "Camping",
+            "Outdoor"
+          ]
+        },
+        {
+          "id": "saison-aktion.reisezubehor",
+          "name": "Reisezubehör",
+          "exampleVariants": [
+            "Taschen",
+            "Koffer",
+            "Reiseartikel"
+          ]
+        },
+        {
+          "id": "saison-aktion.werkzeug-und-heimwerkerbedarf",
+          "name": "Werkzeug und Heimwerkerbedarf",
+          "exampleVariants": [
+            "Handwerkzeug",
+            "Zubehör"
+          ]
+        },
+        {
+          "id": "saison-aktion.kleine-elektrogerate",
+          "name": "Kleine Elektrogeräte",
+          "exampleVariants": [
+            "Küche",
+            "Haushalt",
+            "Körperpflege"
+          ]
+        },
+        {
+          "id": "saison-aktion.technikzubehor",
+          "name": "Technikzubehör",
+          "exampleVariants": [
+            "Kabel",
+            "Ladegerät",
+            "Kopfhörer"
+          ]
+        },
+        {
+          "id": "saison-aktion.medien-und-lesestoff",
+          "name": "Medien und Lesestoff",
+          "exampleVariants": [
+            "Zeitschriften",
+            "Bücher",
+            "Rätselhefte"
+          ]
+        },
+        {
+          "id": "saison-aktion.auto-und-fahrradzubehor",
+          "name": "Auto- und Fahrradzubehör",
+          "exampleVariants": [
+            "Pflege",
+            "Zubehör"
+          ]
+        },
+        {
+          "id": "saison-aktion.sonstige-wechselnde-waren",
+          "name": "Sonstige wechselnde Waren",
+          "exampleVariants": [
+            "je nach tatsächlich beobachtetem Aktionssortiment"
+          ]
+        }
+      ]
+    }
+  ]
+}

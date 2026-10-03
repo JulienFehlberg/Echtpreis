@@ -1,5 +1,5 @@
 "use strict";
-const Client=require("./aldi-assortment-client"),Published=require("./aldi-assortment-price-service");
+const Client=require("./aldi-assortment-client"),Published=require("./aldi-assortment-price-service"),Articles=require("./aldi-assortment-article-service");
 const SOURCE=Client.SOURCE,TABLE="aldi_assortment_catalog_state",REFRESH_MS=15*60*1000,CONTINUATION_MS=60*1000;
 let running=false;
 const failure=(code,extra={})=>Object.assign(new Error(code),{code,...extra});
@@ -154,16 +154,27 @@ async function refresh({pool,maxRequests=16,now=Date.now}={},deps={}){
    await pool.query(`INSERT INTO ${TABLE}(source_id,last_error,retry_after,updated_at) VALUES($1,$2,$3,$4) ON CONFLICT(source_id) DO UPDATE SET last_error=EXCLUDED.last_error,retry_after=EXCLUDED.retry_after,updated_at=EXCLUDED.updated_at`,[SOURCE,code,nextAttemptAt,new Date(time).toISOString()]);
    throw Object.assign(error instanceof Error?error:failure(code),{nextAttemptAt});
   }
+  if(typeof pool.connect!=="function")throw failure("aldi-catalog-transaction-pool-required");
+  // Schema creation belongs to the pool, outside the article/checkpoint transaction.
+  await Articles.ensure(pool);
+  // Keep price admission independent; a failed article checkpoint replays these original captures.
   const saved=await(deps.persist||Published.persist)(pool,collected.offers,{now:now()});
   const partial=collected.partialError,complete=collected.complete&&!partial,checkpointAt=now(),checkpointISO=new Date(checkpointAt).toISOString();
   if(rescanFinished)regular={...regular,lastCompletedAt:checkpointISO,completedPasses:regular.completedPasses+1,nextPassAt:new Date(checkpointAt+REFRESH_MS).toISOString(),passStartedAt:null};
   if(complete)regular={...regular,nextIndex:0,lastSku:null,nextPassAt:null,passStartedAt:null};
   else if(verified.nextIndex===verified.targetCount&&verified.unresolvedCount&&regular.passStartedAt===null&&regular.nextPassAt===null)regular.nextPassAt=new Date(checkpointAt+REFRESH_MS).toISOString();
   const projected={cursor:complete?null:collected.cursor,targetCount:verified.targetCount,priceRefreshState:regular,updatedAt:checkpointISO,lastError:null},nextAttemptAt=partial?retryTime(partial,checkpointAt):complete?null:nextRun(projected,checkpointAt);
-  // Confirmed native pages advance only after their valid price evidence has been saved.
-  // A page without a current price remains scanned without becoming a priced product.
-  await pool.query(`INSERT INTO ${TABLE}(source_id,cursor,last_completed_at,completed_cycles,target_count,next_index,processed_cumulative,snapshot_hash,last_error,retry_after,updated_at,price_refresh_state) VALUES($1,$2::jsonb,CASE WHEN $3 THEN $4::timestamptz ELSE NULL END,CASE WHEN $3 THEN 1 ELSE 0 END,$5,$6,$7,$8,$9,$10,$4,$11::jsonb) ON CONFLICT(source_id) DO UPDATE SET cursor=EXCLUDED.cursor,last_completed_at=CASE WHEN $3 THEN EXCLUDED.last_completed_at ELSE ${TABLE}.last_completed_at END,completed_cycles=${TABLE}.completed_cycles+CASE WHEN $3 THEN 1 ELSE 0 END,target_count=EXCLUDED.target_count,next_index=EXCLUDED.next_index,processed_cumulative=EXCLUDED.processed_cumulative,snapshot_hash=EXCLUDED.snapshot_hash,last_error=EXCLUDED.last_error,retry_after=EXCLUDED.retry_after,updated_at=EXCLUDED.updated_at,price_refresh_state=EXCLUDED.price_refresh_state`,[SOURCE,JSON.stringify(complete?null:collected.cursor),complete,checkpointISO,verified.targetCount,verified.nextIndex,verified.processedCumulative,discovery.snapshotHash,partial?.code?.slice(0,300)||null,partial?nextAttemptAt:null,JSON.stringify(regular)]);
-  const result={...saved,sourceId:SOURCE,runKind,regularRefresh:regularStatus(projected,checkpointAt),sourceRejected:collected.rejected.length,identityOnlyProducts:collected.products.length-collected.offers.length,processed:collected.processed,gapAttempts:collected.gapAttempts,requests:discovery.requests+collected.requests,bytes:(Number(discovery.bytes)||0)+collected.bytes,nextAttemptAt,deferredUntil:verified.deferredUntil,cursorReset:verified.cursorReset,catalog:{publishedAssortmentComplete:complete,physicalStoreAssortmentVerified:false,targetCount:verified.targetCount,nextIndex:verified.nextIndex,scannedCount:verified.scannedCount,unresolvedCount:verified.unresolvedCount,processedCumulative:verified.processedCumulative,snapshotHash:discovery.snapshotHash,nextCursor:complete?null:collected.cursor},scope:{country:"DE",channel:"assortment-publication",location:"unknown"},independentOfUserReceipts:true};
+  // Native identities, including price-less articles, commit with their exact traversal checkpoint.
+  const tx=await pool.connect();let transactionOpen=false,nativeArticlesCounts;
+  try{
+   await tx.query("BEGIN");transactionOpen=true;
+   await tx.query("SELECT txid_current()");
+   nativeArticlesCounts=await(deps.persistArticles||Articles.persist)(tx,collected.products,{now:now()});
+   await tx.query(`INSERT INTO ${TABLE}(source_id,cursor,last_completed_at,completed_cycles,target_count,next_index,processed_cumulative,snapshot_hash,last_error,retry_after,updated_at,price_refresh_state) VALUES($1,$2::jsonb,CASE WHEN $3 THEN $4::timestamptz ELSE NULL END,CASE WHEN $3 THEN 1 ELSE 0 END,$5,$6,$7,$8,$9,$10,$4,$11::jsonb) ON CONFLICT(source_id) DO UPDATE SET cursor=EXCLUDED.cursor,last_completed_at=CASE WHEN $3 THEN EXCLUDED.last_completed_at ELSE ${TABLE}.last_completed_at END,completed_cycles=${TABLE}.completed_cycles+CASE WHEN $3 THEN 1 ELSE 0 END,target_count=EXCLUDED.target_count,next_index=EXCLUDED.next_index,processed_cumulative=EXCLUDED.processed_cumulative,snapshot_hash=EXCLUDED.snapshot_hash,last_error=EXCLUDED.last_error,retry_after=EXCLUDED.retry_after,updated_at=EXCLUDED.updated_at,price_refresh_state=EXCLUDED.price_refresh_state`,[SOURCE,JSON.stringify(complete?null:collected.cursor),complete,checkpointISO,verified.targetCount,verified.nextIndex,verified.processedCumulative,discovery.snapshotHash,partial?.code?.slice(0,300)||null,partial?nextAttemptAt:null,JSON.stringify(regular)]);
+   await tx.query("COMMIT");transactionOpen=false;
+  }catch(error){if(transactionOpen){try{await tx.query("ROLLBACK");}catch(rollbackError){error.rollbackError=rollbackError;}}throw error;
+  }finally{tx.release();}
+  const result={...saved,nativeArticlesCounts,sourceId:SOURCE,runKind,regularRefresh:regularStatus(projected,checkpointAt),sourceRejected:collected.rejected.length,identityOnlyProducts:collected.products.length-collected.offers.length,processed:collected.processed,gapAttempts:collected.gapAttempts,requests:discovery.requests+collected.requests,bytes:(Number(discovery.bytes)||0)+collected.bytes,nextAttemptAt,deferredUntil:verified.deferredUntil,cursorReset:verified.cursorReset,catalog:{publishedAssortmentComplete:complete,physicalStoreAssortmentVerified:false,targetCount:verified.targetCount,nextIndex:verified.nextIndex,scannedCount:verified.scannedCount,unresolvedCount:verified.unresolvedCount,processedCumulative:verified.processedCumulative,snapshotHash:discovery.snapshotHash,nextCursor:complete?null:collected.cursor},scope:{country:"DE",channel:"assortment-publication",location:"unknown"},independentOfUserReceipts:true};
   if(partial)throw failure(partial.code,{status:partial.status||null,retryAfterMs:partial.retryAfterMs??null,nextAttemptAt,partialResult:result,received:result.received??collected.offers.length,accepted:result.accepted??0,checkpointSaved:true});
   return result;
  }finally{running=false;}
