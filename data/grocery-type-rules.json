@@ -1,0 +1,1051 @@
+{
+  "schemaVersion": 1,
+  "purpose": "planning-annotation",
+  "version": 1,
+  "taxonomySha256": "e96a8f6c17a83ffe223d900f96bef2a7a6e96e05e56d20231794343df5d5d3ec",
+  "taxonomyProductTypes": 705,
+  "initialPlanRuleCount": 23,
+  "additionalDisjointRules": [
+    "kaffee-tee.gemahlener-kaffee",
+    "kaffee-tee.kaffeebohnen"
+  ],
+  "notes": "25 geschlossene Typregeln sind Annotationsfähigkeiten, keine Händler-, Artikel- oder Preisabdeckung. Marke, Packung, GTIN und Zutaten beweisen keine Produktart. Generischer Kaffee ohne Mahlform bleibt mehrdeutig.",
+  "sourceContracts": [
+    {
+      "sourceId": "ALDI Nord published assortment",
+      "merchants": [
+        "ALDI",
+        "ALDI Nord"
+      ],
+      "sourceMerchant": "ALDI Nord",
+      "scopeChannel": "assortment-publication",
+      "locationScope": "unknown",
+      "host": "www.aldi-nord.de"
+    },
+    {
+      "sourceId": "Wolt EDEKA Berlin",
+      "merchants": [
+        "EDEKA"
+      ],
+      "sourceMerchant": "EDEKA",
+      "scopeChannel": "online",
+      "locationScope": "native-venue",
+      "sourceUrl": "https://wolt.com/de/deu/berlin/venue/edeka-hilbrecht"
+    },
+    {
+      "sourceId": "REWE Berlin pickup",
+      "merchants": [
+        "REWE"
+      ],
+      "sourceMerchant": "REWE",
+      "scopeChannel": "pickup",
+      "locationScope": "pickup-market",
+      "host": "www.rewe.de"
+    }
+  ],
+  "definitionDisqualifiers": [
+    "zutaten",
+    "rezept",
+    "serviervorschlag",
+    "verwendung",
+    "spuren",
+    "geeignet",
+    "ideal",
+    "enthält",
+    "enthalten",
+    "mit"
+  ],
+  "dishDisqualifiers": [
+    "pizza",
+    "salat",
+    "sauce",
+    "soße",
+    "suppe",
+    "keks",
+    "kekse",
+    "gebäck",
+    "kuchen",
+    "riegel",
+    "fruchtgummi",
+    "paniermehl",
+    "semmelbrösel",
+    "backmischung",
+    "brotmischung",
+    "lotion",
+    "shampoo",
+    "reinigungsmilch",
+    "handcreme",
+    "geschmack",
+    "aroma",
+    "aromen",
+    "aromapulver",
+    "ersatz",
+    "kartoffelchips",
+    "wassereis",
+    "cracker",
+    "knabbergebäck",
+    "eis",
+    "lutscher",
+    "blätterteig"
+  ],
+  "ingredientPrefixes": [
+    "mit",
+    "aus",
+    "auf",
+    "ohne",
+    "enthält",
+    "enthalten",
+    "plus",
+    "with",
+    "contains",
+    "zutaten",
+    "kein",
+    "keine",
+    "keinen",
+    "nicht",
+    "no",
+    "not"
+  ],
+  "families": [
+    {
+      "id": "milk",
+      "terms": [
+        "milch",
+        "vollmilch",
+        "kuhmilch"
+      ],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "milchdrink",
+        "milchmischgetränk",
+        "schokomilch",
+        "vanillemilch",
+        "milchschokolade",
+        "milchpulver",
+        "babymilch",
+        "milchnahrung",
+        "lotion",
+        "reinigungsmilch"
+      ],
+      "candidateTypeIds": [
+        "milch-sahne.h-kuhmilch",
+        "milch-sahne.frische-kuhmilch",
+        "milch-sahne.esl-kuhmilch"
+      ],
+      "missingFacts": [
+        "processing-and-species"
+      ]
+    },
+    {
+      "id": "yogurt",
+      "terms": [
+        "joghurt"
+      ],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "dressing",
+        "sauce"
+      ],
+      "candidateTypeIds": [
+        "joghurt-quark.naturjoghurt",
+        "joghurt-quark.griechischer-joghurt",
+        "joghurt-quark.fruchtjoghurt",
+        "joghurt-quark.aromajoghurt"
+      ],
+      "missingFacts": [
+        "yogurt-kind"
+      ]
+    },
+    {
+      "id": "coffee",
+      "terms": [
+        "kaffee",
+        "röstkaffee",
+        "espresso",
+        "kaffeebohnen"
+      ],
+      "excludeTerms": [
+        "pads",
+        "kaffeepads",
+        "kapseln",
+        "kaffeekapseln",
+        "instant",
+        "instantkaffee",
+        "löslich",
+        "getränkepulver",
+        "kaffeegetränk",
+        "keks",
+        "schokolade",
+        "dragées",
+        "bonbons",
+        "dessert",
+        "cappuccino"
+      ],
+      "candidateTypeIds": [
+        "kaffee-tee.gemahlener-kaffee",
+        "kaffee-tee.kaffeebohnen"
+      ],
+      "missingFacts": [
+        "grinding-form"
+      ]
+    },
+    {
+      "id": "rice",
+      "terms": [
+        "reis"
+      ],
+      "excludeTerms": [
+        "reisgericht",
+        "curry",
+        "fertiggericht",
+        "express"
+      ],
+      "candidateTypeIds": [
+        "getreide-nudeln.basmatireis",
+        "getreide-nudeln.langkornreis",
+        "getreide-nudeln.jasminreis"
+      ],
+      "missingFacts": [
+        "rice-variety-and-processing"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "type-milch-sahne-h-kuhmilch",
+      "productTypeId": "milch-sahne.h-kuhmilch",
+      "family": "milk",
+      "aliases": [
+        "h milch",
+        "h vollmilch",
+        "h kuhmilch",
+        "haltbare milch",
+        "haltbare kuhmilch"
+      ],
+      "definitionTerms": [
+        "h kuhmilch",
+        "haltbare kuhmilch"
+      ],
+      "requireFacts": [
+        {
+          "id": "species-cow",
+          "terms": [
+            "kuhmilch",
+            "kuh milch"
+          ]
+        },
+        {
+          "id": "processing-uht",
+          "terms": [
+            "h milch",
+            "h vollmilch",
+            "h kuhmilch",
+            "haltbare milch",
+            "haltbare kuhmilch",
+            "uht",
+            "ultrahocherhitzt"
+          ]
+        }
+      ],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "milchdrink",
+        "milchmischgetränk",
+        "schokomilch",
+        "vanillemilch",
+        "milchschokolade",
+        "milchpulver",
+        "babymilch",
+        "milchnahrung",
+        "lotion",
+        "reinigungsmilch",
+        "esl",
+        "frisch",
+        "frische",
+        "ziegenmilch",
+        "schafsmilch",
+        "buttermilch",
+        "milchreis",
+        "kondensmilch"
+      ]
+    },
+    {
+      "id": "type-milch-sahne-frische-kuhmilch",
+      "productTypeId": "milch-sahne.frische-kuhmilch",
+      "family": "milk",
+      "aliases": [
+        "frische kuhmilch",
+        "kuhmilch frisch",
+        "frischmilch",
+        "frische milch"
+      ],
+      "definitionTerms": [
+        "frische kuhmilch"
+      ],
+      "requireFacts": [
+        {
+          "id": "species-cow",
+          "terms": [
+            "kuhmilch",
+            "kuh milch"
+          ]
+        },
+        {
+          "id": "processing-fresh",
+          "terms": [
+            "frische kuhmilch",
+            "kuhmilch frisch",
+            "frischmilch",
+            "frische milch"
+          ]
+        }
+      ],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "milchdrink",
+        "milchmischgetränk",
+        "schokomilch",
+        "vanillemilch",
+        "milchschokolade",
+        "milchpulver",
+        "babymilch",
+        "milchnahrung",
+        "lotion",
+        "reinigungsmilch",
+        "uht",
+        "ultrahocherhitzt",
+        "esl",
+        "haltbare",
+        "ziegenmilch",
+        "schafsmilch",
+        "buttermilch",
+        "h milch",
+        "h vollmilch",
+        "h kuhmilch"
+      ]
+    },
+    {
+      "id": "type-milch-sahne-buttermilch",
+      "productTypeId": "milch-sahne.buttermilch",
+      "family": "milk",
+      "aliases": [
+        "buttermilch"
+      ],
+      "definitionTerms": [
+        "buttermilch"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "brot",
+        "kuchen",
+        "pancakes",
+        "pfannkuchen"
+      ]
+    },
+    {
+      "id": "type-joghurt-quark-naturjoghurt",
+      "productTypeId": "joghurt-quark.naturjoghurt",
+      "family": "yogurt",
+      "aliases": [
+        "naturjoghurt",
+        "natur joghurt",
+        "joghurt natur"
+      ],
+      "definitionTerms": [
+        "naturjoghurt",
+        "joghurt natur"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "frucht",
+        "fruchtjoghurt",
+        "vanille",
+        "aroma",
+        "topping",
+        "dressing",
+        "sauce"
+      ]
+    },
+    {
+      "id": "type-joghurt-quark-griechischer-joghurt",
+      "productTypeId": "joghurt-quark.griechischer-joghurt",
+      "family": "yogurt",
+      "aliases": [
+        "griechischer joghurt"
+      ],
+      "definitionTerms": [
+        "griechischer joghurt"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "griechische art",
+        "dressing",
+        "sauce"
+      ]
+    },
+    {
+      "id": "type-joghurt-quark-skyr",
+      "productTypeId": "joghurt-quark.skyr",
+      "family": "yogurt",
+      "aliases": [
+        "skyr"
+      ],
+      "definitionTerms": [
+        "skyr"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "riegel",
+        "dessert",
+        "kuchen"
+      ]
+    },
+    {
+      "id": "type-joghurt-quark-speisequark",
+      "productTypeId": "joghurt-quark.speisequark",
+      "family": "quark",
+      "aliases": [
+        "speisequark",
+        "magerquark",
+        "sahnequark"
+      ],
+      "definitionTerms": [
+        "speisequark",
+        "magerquark",
+        "sahnequark"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "fruchtquark",
+        "kräuterquark",
+        "kuchen",
+        "gebäck"
+      ]
+    },
+    {
+      "id": "type-kaese-gouda",
+      "productTypeId": "kaese.gouda",
+      "family": "cheese",
+      "aliases": [
+        "gouda"
+      ],
+      "definitionTerms": [
+        "gouda"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "pizza",
+        "salat",
+        "sauce",
+        "chips",
+        "cracker",
+        "knabbergebäck",
+        "gebäck",
+        "füllung",
+        "gefüllt",
+        "auswahl"
+      ]
+    },
+    {
+      "id": "type-kaese-mozzarella",
+      "productTypeId": "kaese.mozzarella",
+      "family": "cheese",
+      "aliases": [
+        "mozzarella"
+      ],
+      "definitionTerms": [
+        "mozzarella"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "pizza",
+        "salat",
+        "sauce",
+        "chips",
+        "gebäck",
+        "füllung",
+        "gefüllt",
+        "auswahl"
+      ]
+    },
+    {
+      "id": "type-kaese-frischkase",
+      "productTypeId": "kaese.frischkase",
+      "family": "cheese",
+      "aliases": [
+        "frischkäse"
+      ],
+      "definitionTerms": [
+        "frischkäse"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "pizza",
+        "salat",
+        "sauce",
+        "chips",
+        "gebäck",
+        "füllung",
+        "gefüllt",
+        "auswahl"
+      ]
+    },
+    {
+      "id": "type-kaese-feta-und-hirtenkase",
+      "productTypeId": "kaese.feta-und-hirtenkase",
+      "family": "cheese",
+      "aliases": [
+        "feta",
+        "hirtenkäse"
+      ],
+      "definitionTerms": [
+        "feta",
+        "hirtenkäse"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "pizza",
+        "salat",
+        "sauce",
+        "chips",
+        "gebäck",
+        "füllung",
+        "gefüllt",
+        "auswahl",
+        "dip"
+      ]
+    },
+    {
+      "id": "type-eier-fette-butter",
+      "productTypeId": "eier-fette.butter",
+      "family": "butter",
+      "aliases": [
+        "butter"
+      ],
+      "definitionTerms": [
+        "butter",
+        "ungesalzene butter",
+        "butter ungesalzen"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "margarine",
+        "streichfett",
+        "streichmischung",
+        "mischfett",
+        "buttermilch",
+        "butterschmalz",
+        "butterkeks",
+        "buttertoast",
+        "buttertoastbrot",
+        "toast",
+        "toastbrot",
+        "keks",
+        "gebäck",
+        "blätterteig",
+        "croissant",
+        "gemüse",
+        "chicken",
+        "sauce",
+        "soße",
+        "erdnussbutter",
+        "peanut butter",
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "rapsöl",
+        "pflanzenöl",
+        "kräuterbutter",
+        "gewürzbutter",
+        "knoblauchbutter",
+        "gesalzene butter",
+        "butter gesalzen",
+        "butter mit salz",
+        "butter mit meersalz",
+        "gesalzen",
+        "gesalzene"
+      ]
+    },
+    {
+      "id": "type-eier-fette-gesalzene-butter",
+      "productTypeId": "eier-fette.gesalzene-butter",
+      "family": "butter",
+      "aliases": [
+        "gesalzene butter",
+        "butter gesalzen",
+        "butter mit salz",
+        "butter mit meersalz",
+        "butter"
+      ],
+      "definitionTerms": [
+        "gesalzene butter",
+        "butter gesalzen",
+        "butter mit salz",
+        "butter mit meersalz"
+      ],
+      "requireFacts": [
+        {
+          "id": "explicit-salted-form",
+          "terms": [
+            "gesalzen",
+            "gesalzene butter",
+            "butter mit salz",
+            "butter mit meersalz"
+          ]
+        }
+      ],
+      "excludeTerms": [
+        "margarine",
+        "streichfett",
+        "streichmischung",
+        "mischfett",
+        "buttermilch",
+        "butterschmalz",
+        "butterkeks",
+        "buttertoast",
+        "buttertoastbrot",
+        "toast",
+        "toastbrot",
+        "keks",
+        "gebäck",
+        "blätterteig",
+        "croissant",
+        "gemüse",
+        "chicken",
+        "sauce",
+        "soße",
+        "erdnussbutter",
+        "peanut butter",
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "rapsöl",
+        "pflanzenöl",
+        "kräuterbutter",
+        "gewürzbutter",
+        "knoblauchbutter",
+        "ungesalzen",
+        "ungesalzene"
+      ],
+      "suppresses": [
+        "eier-fette.butter"
+      ]
+    },
+    {
+      "id": "type-wurst-aufschnitt-salami",
+      "productTypeId": "wurst-aufschnitt.salami",
+      "family": "sausage",
+      "aliases": [
+        "salami"
+      ],
+      "definitionTerms": [
+        "salami"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "pizza",
+        "salat",
+        "wurstsalat",
+        "fleischsalat",
+        "gebäck",
+        "auswahl",
+        "aufschnittauswahl"
+      ]
+    },
+    {
+      "id": "type-wurst-aufschnitt-kochschinken",
+      "productTypeId": "wurst-aufschnitt.kochschinken",
+      "family": "sausage",
+      "aliases": [
+        "kochschinken"
+      ],
+      "definitionTerms": [
+        "kochschinken"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "pizza",
+        "salat",
+        "wurstsalat",
+        "fleischsalat",
+        "gebäck",
+        "auswahl",
+        "aufschnittauswahl"
+      ]
+    },
+    {
+      "id": "type-wurst-aufschnitt-fleischwurst",
+      "productTypeId": "wurst-aufschnitt.fleischwurst",
+      "family": "sausage",
+      "aliases": [
+        "fleischwurst"
+      ],
+      "definitionTerms": [
+        "fleischwurst"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pflanzlich",
+        "vegan",
+        "alternative",
+        "pizza",
+        "salat",
+        "wurstsalat",
+        "fleischsalat",
+        "gebäck",
+        "auswahl",
+        "aufschnittauswahl"
+      ]
+    },
+    {
+      "id": "type-getreide-nudeln-spaghetti",
+      "productTypeId": "getreide-nudeln.spaghetti",
+      "family": "pasta",
+      "aliases": [
+        "spaghetti"
+      ],
+      "definitionTerms": [
+        "spaghetti trocken",
+        "trockene spaghetti"
+      ],
+      "requireFacts": [
+        {
+          "id": "dry-unprepared",
+          "terms": [
+            "trocken",
+            "trockene",
+            "ungekocht",
+            "roh"
+          ]
+        }
+      ],
+      "excludeTerms": [
+        "eis",
+        "spaghetti eis",
+        "fruchtgummi",
+        "sauce",
+        "fertiggericht",
+        "nudelgericht",
+        "gekocht",
+        "vorgegart",
+        "frisch",
+        "hülsenfrüchte",
+        "linsennudeln",
+        "kichererbsen"
+      ]
+    },
+    {
+      "id": "type-getreide-nudeln-penne",
+      "productTypeId": "getreide-nudeln.penne",
+      "family": "pasta",
+      "aliases": [
+        "penne"
+      ],
+      "definitionTerms": [
+        "penne trocken",
+        "trockene penne"
+      ],
+      "requireFacts": [
+        {
+          "id": "dry-unprepared",
+          "terms": [
+            "trocken",
+            "trockene",
+            "ungekocht",
+            "roh"
+          ]
+        }
+      ],
+      "excludeTerms": [
+        "eis",
+        "spaghetti eis",
+        "fruchtgummi",
+        "sauce",
+        "fertiggericht",
+        "nudelgericht",
+        "gekocht",
+        "vorgegart",
+        "frisch",
+        "hülsenfrüchte",
+        "linsennudeln",
+        "kichererbsen"
+      ]
+    },
+    {
+      "id": "type-getreide-nudeln-basmatireis",
+      "productTypeId": "getreide-nudeln.basmatireis",
+      "family": "rice",
+      "aliases": [
+        "basmatireis",
+        "basmati reis",
+        "basmati"
+      ],
+      "definitionTerms": [
+        "basmatireis trocken",
+        "basmati reis trocken"
+      ],
+      "requireFacts": [
+        {
+          "id": "dry-unprepared",
+          "terms": [
+            "trocken",
+            "trockener",
+            "ungekocht",
+            "roh"
+          ]
+        }
+      ],
+      "excludeTerms": [
+        "wildreis",
+        "mischung",
+        "mischreis",
+        "reismix",
+        "mix",
+        "express",
+        "vorgegart",
+        "gekocht",
+        "reisgericht",
+        "curry",
+        "fertiggericht",
+        "reismischung"
+      ],
+      "ambiguousExclusions": [
+        "wildreis",
+        "mischung",
+        "mischreis",
+        "reismix",
+        "mix",
+        "reismischung"
+      ],
+      "excludedCandidateTypeIds": [
+        "getreide-nudeln.natur-und-wildreis"
+      ]
+    },
+    {
+      "id": "type-pflanzliche-alternativen-haferdrink",
+      "productTypeId": "pflanzliche-alternativen.haferdrink",
+      "family": "plant-drink",
+      "aliases": [
+        "haferdrink",
+        "hafer drink"
+      ],
+      "definitionTerms": [
+        "haferdrink",
+        "hafer drink"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "kaffeegetränk",
+        "cappuccino",
+        "mischgetränk",
+        "kuchen",
+        "gebäck"
+      ]
+    },
+    {
+      "id": "type-getraenke-cola",
+      "productTypeId": "getraenke.cola",
+      "family": "cola",
+      "aliases": [
+        "cola"
+      ],
+      "definitionTerms": [
+        "cola"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "spezi",
+        "mix",
+        "cola mix",
+        "sirup",
+        "colasirup",
+        "fruchtgummi",
+        "gummibärchen",
+        "bonbons",
+        "eis",
+        "lutscher",
+        "kuchen",
+        "aroma"
+      ]
+    },
+    {
+      "id": "type-getraenke-sportgetrank",
+      "productTypeId": "getraenke.sportgetrank",
+      "family": "sport-drink",
+      "aliases": [
+        "sportgetränk"
+      ],
+      "definitionTerms": [
+        "isotonisches sportgetränk",
+        "sportgetränk"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "pulver",
+        "riegel"
+      ]
+    },
+    {
+      "id": "type-obst-zitronen-und-limetten",
+      "productTypeId": "obst.zitronen-und-limetten",
+      "family": "citrus",
+      "aliases": [
+        "zitronen",
+        "limetten"
+      ],
+      "definitionTerms": [
+        "zitronen",
+        "limetten"
+      ],
+      "requireFacts": [],
+      "excludeTerms": [
+        "saft",
+        "zitronensaft",
+        "limettensaft",
+        "limonade",
+        "kuchen",
+        "bonbons",
+        "gezuckert",
+        "konserviert",
+        "eis",
+        "sorbet",
+        "dessert",
+        "aroma",
+        "pulver",
+        "marmelade",
+        "konfitüre"
+      ]
+    },
+    {
+      "id": "type-kaffee-tee-gemahlener-kaffee",
+      "productTypeId": "kaffee-tee.gemahlener-kaffee",
+      "family": "coffee",
+      "aliases": [
+        "kaffee",
+        "röstkaffee",
+        "espresso",
+        "kaffeebohnen"
+      ],
+      "definitionTerms": [
+        "gemahlener kaffee",
+        "kaffee gemahlen",
+        "röstkaffee gemahlen",
+        "espresso gemahlen"
+      ],
+      "requireFacts": [
+        {
+          "id": "ground-form",
+          "terms": [
+            "gemahlen",
+            "gemahlener",
+            "gemahlene",
+            "gemahlenen",
+            "ground coffee"
+          ]
+        }
+      ],
+      "excludeTerms": [
+        "pads",
+        "kaffeepads",
+        "kapseln",
+        "kaffeekapseln",
+        "instant",
+        "instantkaffee",
+        "löslich",
+        "getränkepulver",
+        "kaffeegetränk",
+        "keks",
+        "schokolade",
+        "dragées",
+        "bonbons",
+        "dessert",
+        "cappuccino"
+      ]
+    },
+    {
+      "id": "type-kaffee-tee-kaffeebohnen",
+      "productTypeId": "kaffee-tee.kaffeebohnen",
+      "family": "coffee",
+      "aliases": [
+        "kaffee",
+        "röstkaffee",
+        "espresso",
+        "kaffeebohnen"
+      ],
+      "definitionTerms": [
+        "kaffeebohnen",
+        "kaffee ganze bohnen",
+        "röstkaffee ganze bohnen",
+        "espresso ganze bohnen"
+      ],
+      "requireFacts": [
+        {
+          "id": "whole-bean-form",
+          "terms": [
+            "kaffeebohnen",
+            "ganze bohnen",
+            "whole beans"
+          ]
+        }
+      ],
+      "excludeTerms": [
+        "pads",
+        "kaffeepads",
+        "kapseln",
+        "kaffeekapseln",
+        "instant",
+        "instantkaffee",
+        "löslich",
+        "getränkepulver",
+        "kaffeegetränk",
+        "keks",
+        "schokolade",
+        "dragées",
+        "bonbons",
+        "dessert",
+        "cappuccino"
+      ]
+    }
+  ]
+}
