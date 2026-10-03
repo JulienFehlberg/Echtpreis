@@ -27,7 +27,7 @@ async function nativeViews(names) {
 }
 function harness(pages, statusPatch) {
   const calls = [], statuses = Directory.MERCHANTS.map(merchant => ({ merchant,
-    status: ["ALDI", "EDEKA"].includes(merchant) ? "observed-articles" : "unsupported-source",
+    status: ["ALDI", "EDEKA", "REWE"].includes(merchant) ? "observed-articles" : "unsupported-source",
     lastObservedArticles: merchant === "ALDI" ? 100 : null, countBasis: merchant === "ALDI" ? "native-article-ledger" : "no-captured-article-source" }));
   const nativeProvider = { search: async (_pool, options) => {
     assert.equal(_pool, pool); const rows = typeof pages === "function" ? pages(options) : pages;
@@ -45,7 +45,7 @@ function harness(pages, statusPatch) {
 function display(name, merchant = "ALDI", patch = {}) {
   const sources = { ALDI: ["ALDI Nord published assortment", "ALDI Nord", "assortment-publication", "unknown", "https://www.aldi-nord.de/produkt/unit-1041000.html"],
     EDEKA: ["Wolt EDEKA Berlin", "EDEKA", "online", "native-venue", "https://wolt.com/de/deu/berlin/venue/edeka-hilbrecht"],
-    REWE: ["REWE Berlin pickup", "REWE", "pickup", "pickup-market", "https://www.rewe.de/shop/p/unit/1041000"] };
+    REWE: ["REWE Berlin pickup articles", "REWE", "pickup", "pickup-market", "https://www.rewe.de/shop/p/unit/1041000"] };
   const [sourceId, sourceMerchant, scopeChannel, locationScope, sourceUrl] = sources[merchant];
   return { identityKey: JSON.stringify([sourceId, scopeChannel, "1041000"]), kind: "native-retailer-article",
     state: "last-observed", merchant, sourceMerchant, sourceId, scopeCountry: "DE", scopeChannel, locationScope,
@@ -55,7 +55,7 @@ function display(name, merchant = "ALDI", patch = {}) {
     assortmentComplete: false, ...patch };
 }
 function result(items, merchant = "ALDI", patch = {}) {
-  const paged = ["ALDI", "EDEKA"].includes(merchant);
+  const paged = ["ALDI", "EDEKA", "REWE"].includes(merchant);
   return { ok: true, merchant, scopeCountry: "DE", truthEligible: false, currentPriceVerified: false,
     physicalStorePriceVerified: false, assortmentComplete: false, total: null, limit: 50, offset: 0,
     items, returnedCount: items.length, excludedRows: 0, offsetSupported: paged,
@@ -89,7 +89,7 @@ function noAuthority(mapping) {
   for (const options of [null, [], {}, { merchant: "aldi" }, { merchant: "HIT" }, { merchant: "ALDI", unknown: true },
     { merchant: "ALDI", search: "a" }, { merchant: "ALDI", search: "x".repeat(121) }, { merchant: "ALDI", search: ["milk"] },
     { merchant: "ALDI", limit: 201 }, { merchant: "ALDI", limit: true }, { merchant: "ALDI", offset: 10001 },
-    { merchant: "REWE", offset: 1 }, { merchant: "ALDI", gtin: "4046700026519" }, { merchant: "ALDI", scopeChannel: "physical-store" }])
+    { merchant: "PENNY", offset: 1 }, { merchant: "ALDI", gtin: "4046700026519" }, { merchant: "ALDI", scopeChannel: "physical-store" }])
     await test("ordinary Directory query boundaries survive the wrapper " + JSON.stringify(options), async () => {
       const h = harness([]); await assert.rejects(() => Service.search(pool, options, h.deps), /invalid-|offset-not-supported/);
       assert.equal(h.calls.length, 0);
@@ -225,16 +225,16 @@ function noAuthority(mapping) {
     assert.equal(listed.status, "unsupported-source"); assert.equal(listed.reason, "no-captured-article-source");
     assert.equal(listed.scanPerformed, false); assert.deepEqual(listed.items, []); assert.equal(listed.total, null);
   });
-  await test("nonpaged REWE receives no synthesized zero-offset request", async () => {
+  await test("REWE native pagination and observation survive typed annotation", async () => {
     let called = 0;
     const deps = { directory: { search: async (_db, options) => {
-      called++; assert.equal(Object.hasOwn(options, "offset"), false);
+      called++; assert.equal(options.offset, 0);
       assert.equal(Directory.queryOptions(options).offset, 0);
       return result([display("Gouda", "REWE")], "REWE");
     }, status: async () => { throw Error("No status request expected"); } } };
     const selected = await Service.search(pool, { merchant: "REWE", now, productTypeId: "kaese.gouda" }, deps);
-    assert.equal(called, 1); assert.equal(selected.items.length, 1); assert.equal(selected.scannedRows, null);
-    assert.equal(selected.offsetSupported, false); assert.equal(selected.typeAnnotations[0].binding.scopeChannel, "pickup");
+    assert.equal(called, 1); assert.equal(selected.items.length, 1); assert.equal(selected.scannedRows, 1);
+    assert.equal(selected.offsetSupported, true); assert.equal(selected.typeAnnotations[0].binding.scopeChannel, "pickup");
   });
   for (const patch of [{ truthEligible: true }, { currentPriceVerified: true }, { physicalStorePriceVerified: true },
     { assortmentComplete: true }, { merchant: "EDEKA" }, { total: 100 }, { returnedCount: 2 }, { ok: false }])

@@ -62,19 +62,24 @@ async function main(){
    const onlyPickup=await Inventory.search(composite,{merchant:"REWE",gtin:shared,now});assert.equal(onlyPickup.items.length,1);assert.equal(onlyPickup.scopeChannel,"pickup");assert.deepEqual(onlyPickup.scopeChannels,["pickup"]);
   }finally{await composite.query("ROLLBACK");composite.release();}
 
-  // Checkpoint SQL advances only after persisted quotes and survives a failed next batch unchanged.
+  // Legacy flat quote fixtures cannot stand in for native original pages or a
+  // leased catalog run. Actual joint-TX success/CAS/final-gate rollback is covered
+  // by rewe-native-article-postgres.test.js against its isolated PostgreSQL 18 schema.
   const checkpoint=await pool.connect();
   try{
-   await checkpoint.query("BEGIN");await Refresh.ensure(checkpoint);await checkpoint.query("DELETE FROM rewe_retailer_catalog_state WHERE source_id=$1",[Service.SOURCE]);
+   await checkpoint.query("BEGIN");await Refresh.ensure(checkpoint);
+   const checkpointBefore=(await checkpoint.query("SELECT * FROM rewe_retailer_catalog_state ORDER BY source_id")).rows;
+   const pricesBefore=(await checkpoint.query("SELECT count(*)::int AS total,md5(string_agg(row_to_json(p)::text,chr(10) ORDER BY row_to_json(p)::text)) AS hash FROM rewe_retailer_published_prices p")).rows;
    const hash="f".repeat(64),cursor={version:1,nativeMarketId:market.nativeMarketId,scopeChannel:"pickup",serviceType:"PICKUP",assortmentHash:hash,categoryIndex:0,pageNumber:2,received:1,pagesFetched:1};
    const first={offers:[fixture(8000)],rejected:[],complete:false,categoryCount:2,categoriesCompleted:0,pagesFetched:1,received:1,receivedCumulative:1,assortmentHash:hash,nextCursor:cursor,requests:2};
-   assert.equal((await Refresh.refresh({pool:checkpoint,now:()=>now},{fetchOffers:async()=>first})).accepted,1);
-   let state=await Refresh.status(checkpoint);assert.deepEqual(state.cursor,cursor);assert.equal(state.pagesFetched,1);assert.equal(state.receivedCumulative,1);assert.equal(state.publishedAssortmentComplete,false);
-   const next={...first,offers:[fixture(8001)],pagesFetched:2,received:2,receivedCumulative:2,nextCursor:{...cursor,pageNumber:3,received:2,pagesFetched:2}};
-   await assert.rejects(()=>Refresh.refresh({pool:checkpoint,now:()=>now},{fetchOffers:async()=>next,persist:async()=>{throw Error("POSTGRES TEST write failed")}}),/write failed/);
-   state=await Refresh.status(checkpoint);assert.deepEqual(state.cursor,cursor);assert.equal(state.pagesFetched,1);assert.equal(state.receivedCumulative,1,"A failed batch cannot skip its native page");
-   await assert.rejects(()=>Refresh.refresh({pool:checkpoint,now:()=>now},{fetchOffers:async()=>{throw Object.assign(Error("rewe-source-http-429"),{retryAfterMs:7200000})}}),/429/);
-   state=await Refresh.status(checkpoint);assert.equal(new Date(state.retryAfter).getTime(),now+7200000);assert.deepEqual(state.cursor,cursor);assert.equal(state.publishedAssortmentComplete,false);assert.equal(state.lastError,"rewe-source-http-429");
+   let fetched=0;const fetchOffers=async()=>{fetched++;return first;};
+   await assert.rejects(()=>Refresh.refresh({pool:checkpoint,now:()=>now,leaseOwner:"POSTGRES TEST unowned lease"},{fetchOffers}),/rewe-refresh-transaction-pool-required/);
+   await assert.rejects(()=>Refresh.refresh({pool,now:()=>now},{fetchOffers}),/rewe-source-lease-owner-required/);
+   await assert.rejects(()=>Refresh.refresh({pool,now:()=>now,leaseOwner:""},{fetchOffers}),/rewe-source-lease-owner-required/);
+   assert.throws(()=>Refresh.nativeBatch(first,{},2,now),/rewe-native-original-batch-required/);
+   assert.equal(fetched,0,"Structural and original-proof guards prevent a synthetic source request");
+   assert.deepEqual((await checkpoint.query("SELECT * FROM rewe_retailer_catalog_state ORDER BY source_id")).rows,checkpointBefore,"Rejected legacy admission preserves the actual checkpoint");
+   assert.deepEqual((await checkpoint.query("SELECT count(*)::int AS total,md5(string_agg(row_to_json(p)::text,chr(10) ORDER BY row_to_json(p)::text)) AS hash FROM rewe_retailer_published_prices p")).rows,pricesBefore,"Rejected legacy admission preserves all native price rows exactly");
   }finally{await checkpoint.query("ROLLBACK");checkpoint.release();}
 
   process.env.PORT="0";api=require("../server");await new Promise((resolve,reject)=>{api.server.once("error",reject);api.server.listen(0,"127.0.0.1",()=>{api.server.off("error",reject);resolve()})});const base="http://127.0.0.1:"+api.server.address().port;
@@ -86,7 +91,7 @@ async function main(){
   assert.equal((await Service.search(pool,{now:now+Service.DAY_MS+1})).items.length,0);
   await pool.query("UPDATE rewe_retailer_published_prices SET captured_at=$2::timestamptz,expires_at=$2::timestamptz+interval '24 hours' WHERE retailer_sku=$1",[fixtures[1].retailerSku,new Date(now+1000).toISOString()]);assert.equal((await Service.search(pool,{gtin:gtin(1),now})).items.length,0,"Future stored captures must not be current");
   for(const[table,count]of Object.entries(baseline)){if(count===null)assert.equal(await exists(table),false,"Separate REWE evidence must not create "+table);else assert.equal((await pool.query("SELECT count(*)::int AS count FROM "+table)).rows[0].count,count,"Separate REWE evidence must not mutate "+table);}
-  console.log("rewe-retailer-price-postgres: 501 TEST native pickup prices, deposit separation, source validity expiry, real cross-ledger GTIN union, persisted/failure-safe SQL checkpoints, HTTP pickup alternatives and canonical brand handling, idempotent writes, conflict/future/expiry gates and unchanged preexisting physical/receipt/retailer records OK");
+  console.log("rewe-retailer-price-postgres: 501 TEST native pickup prices, deposit separation, source validity expiry, real cross-ledger GTIN union, legacy catalog-admission guards (actual atomic checkpoints in the separate PG18 program), HTTP pickup alternatives and canonical brand handling, idempotent writes, conflict/future/expiry gates and unchanged preexisting physical/receipt/retailer records OK");
  }finally{if(api){if(api.server.listening)await new Promise((resolve,reject)=>api.server.close(error=>error?reject(error):resolve()));await api.closeDb();}await pool.end();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

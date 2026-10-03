@@ -37,7 +37,7 @@ function safeTypeAnnotation(sidecar,article,productTypeId){
 }
 function typedItems(data,merchant,productTypeId,requestedOffset){
  if(!plain(data)||data.ok!==true||data.merchant!==merchant||data.scopeCountry!=="DE"||data.truthEligible!==false||data.currentPriceVerified!==false||data.physicalStorePriceVerified!==false||data.assortmentComplete!==false||data.total!==null||data.limit!==50||data.offset!==requestedOffset||!Array.isArray(data.items)||data.items.length>50||data.returnedCount!==data.items.length||!Array.isArray(data.typeAnnotations)||data.typeAnnotations.length!==data.items.length||!validMappingMetadata(data.typeMapping)||data.typeMapping.productTypeId!==productTypeId||data.typeMapping.state!=="mapping-supported")throw Error("invalid-typed-article-response");
- if(data.offsetSupported===true){if(!["ALDI","EDEKA"].includes(merchant)||!Number.isSafeInteger(data.scannedRows)||data.scannedRows<data.items.length||data.scannedRows>50||data.nextOffset!==requestedOffset+data.scannedRows||data.hasMore!==(data.scannedRows===50&&data.nextOffset<=10000))throw Error("invalid-typed-pagination");}
+ if(data.offsetSupported===true){if(!["ALDI","EDEKA","REWE"].includes(merchant)||!Number.isSafeInteger(data.scannedRows)||data.scannedRows<data.items.length||data.scannedRows>50||data.nextOffset!==requestedOffset+data.scannedRows||data.hasMore!==(data.scannedRows===50&&data.nextOffset<=10000))throw Error("invalid-typed-pagination");}
  else if(data.offsetSupported!==false||data.scannedRows!=null||data.nextOffset!=null||data.hasMore!=null&&data.hasMore!==false)throw Error("invalid-typed-pagination");
  const seen=new Set();return data.items.map((raw,index)=>{const article=safeArticle(raw);if(!article||Object.keys(article).some(key=>!categoryArticleKeys.has(key))||article.kind!=="native-retailer-article"||article.truthEligible!==false||article.physicalStorePriceVerified!==false||article.normalPriceClassificationVerified!==false||typeof article.name!=="string"||/[<>\u0000-\u001f\u007f]/.test(article.name)||!Number.isFinite(article.packAmount)||article.packAmount<=0||article.packAmount>100000000||!["g","ml","piece"].includes(article.packUnit)||!Number.isSafeInteger(article.packCount)||article.packCount<1||article.packCount>1000||article.merchant!==merchant||seen.has(article.identityKey)||!safeTypeAnnotation(data.typeAnnotations[index],article,productTypeId))throw Error("invalid-typed-article-binding");seen.add(article.identityKey);return article;});
 }
@@ -67,11 +67,20 @@ function safeCategoryArticle(raw){
  for(const [key,max,nullable]of[["name",400,false],["brand",120,true],["variant",2000,true],["pack",400,false]]){const value=raw[key];if(nullable&&value===null)continue;if(typeof value!=="string"||!value||value!==value.trim()||value.length>max||/[<>\u0000-\u001f\u007f]/.test(value))return null;}
  return raw;
 }
+function safeReweArticle(raw){
+ const fields=["identityKey","kind","merchant","sourceMerchant","name","brand","variant","pack","packAmount","packUnit","packCount","retailerSku","gtin","sourceId","sourceUrl","observedAt","sourceResponseHash","scopeCountry","scopeChannel","locationScope","scopeLabel","shop","availability","state","truthEligible","currentPriceVerified","physicalStorePriceVerified","normalPriceClassificationVerified","assortmentComplete","pricedOnly","independentOfPrice"];
+ if(Object.keys(raw).some(k=>!fields.includes(k))||raw.kind!=="native-retailer-article"||raw.identityKey!==JSON.stringify([raw.sourceId,"pickup",raw.retailerSku])||raw.merchant!=="REWE"||raw.sourceMerchant!=="REWE"||raw.scopeChannel!=="pickup"||raw.locationScope!=="pickup-market"||raw.pricedOnly!==false||raw.independentOfPrice!==true||["truthEligible","physicalStorePriceVerified","normalPriceClassificationVerified"].some(k=>raw[k]!==false))return null;
+ if(!/^[1-9]\d{0,4}-[A-Z0-9]{1,40}-7ae33841-fa98-3b7e-9ee5-8132f39c189c$/.test(raw.retailerSku)||!/^https:\/\/www\.rewe\.de\/shop\/p\/[a-z0-9]+(?:-[a-z0-9]+)*\/[1-9]\d{0,11}$/.test(raw.sourceUrl)||!/^[a-f0-9]{64}$/.test(raw.sourceResponseHash||""))return null;
+ if(!plain(raw.shop)||raw.shop.nativeMarketId!=="8321066"||raw.shop.nativeStoreId!=="7ae33841-fa98-3b7e-9ee5-8132f39c189c"||raw.shop.name!=="REWE Steven Horn oHG"||raw.shop.address!=="Hallesches Ufer 40"||raw.shop.postalCode!=="10963"||raw.shop.city!=="Berlin"||raw.shop.country!=="DE"||raw.shop.serviceType!=="PICKUP")return null;
+ if(!Number.isFinite(raw.packAmount)||raw.packAmount<=0||raw.packAmount*raw.packCount>100000000||!["g","ml","piece"].includes(raw.packUnit)||!Number.isSafeInteger(raw.packCount)||raw.packCount<1||raw.packCount>1000||new Date(raw.observedAt).toISOString()!==raw.observedAt)return null;
+ return raw;
+}
 function safeArticle(raw){
  if(!raw||raw.state!=="last-observed"||raw.scopeCountry!=="DE"||raw.availability!=="unknown"||raw.currentPriceVerified!==false||raw.assortmentComplete!==false||typeof raw.name!=="string"||!raw.name||typeof raw.retailerSku!=="string"||!raw.retailerSku||typeof raw.pack!=="string"||!raw.pack||!Number.isFinite(Date.parse(raw.observedAt))||Date.parse(raw.observedAt)>Date.now()||!safeSource(raw.sourceUrl))return null;
  if(raw.sourceId===ALDI_CATEGORY_SOURCE)return safeCategoryArticle(raw);
+ if(raw.sourceId==="REWE Berlin pickup articles")return safeReweArticle(raw);
  if(raw.sourceId==="ALDI Nord published assortment"&&(!/^[1-9]\d{0,14}$/.test(raw.retailerSku)||!new RegExp("^https://www\\.aldi-nord\\.de/produkt/[a-z0-9-]+-"+raw.retailerSku+"\\.html$").test(raw.sourceUrl)||["originalCategoryResponseUrl","productIdentityUrl","proofKind"].some(key=>Object.hasOwn(raw,key))))return null;
- const sources={"ALDI Nord published assortment":["ALDI","ALDI Nord","assortment-publication","www.aldi-nord.de"],"Wolt EDEKA Berlin":["EDEKA","EDEKA","online","wolt.com"],"REWE Berlin pickup":["REWE","REWE","pickup","www.rewe.de"]},expected=sources[raw.sourceId];
+ const sources={"ALDI Nord published assortment":["ALDI","ALDI Nord","assortment-publication","www.aldi-nord.de"],"Wolt EDEKA Berlin":["EDEKA","EDEKA","online","wolt.com"],"REWE Berlin pickup articles":["REWE","REWE","pickup","www.rewe.de"]},expected=sources[raw.sourceId];
  if(!expected||raw.merchant!==expected[0]||raw.sourceMerchant!==expected[1]||raw.scopeChannel!==expected[2]||new URL(raw.sourceUrl).hostname!==expected[3])return null;
  return raw;
 }
@@ -98,7 +107,7 @@ function mount(document,fetcher=root.fetch.bind(root),publicationView=root.Caddy
  async function loadArticles(more=false){
   const token=++articleToken,search=get("assortmentSearch").value.trim(),list=get("articleList"),requestedMerchant=merchant,type=selectedType;
   if(!more){offset=0;articleItems=[];list.replaceChildren();}const requestedOffset=offset;
-  get("loadMore").hidden=true;get("articleScope").textContent=requestedMerchant==="ALDI"?"ALDI Nord: veröffentlichte Artikel in Deutschland. Die Quelle bestätigt keine Berliner Filiale. Artikelfunde bleiben auch ohne aktuellen Preis erhalten.":requestedMerchant==="EDEKA"?"Datierte Artikel aus dem Berliner Lieferangebot von EDEKA Hilbrecht. Artikelfunde bleiben auch ohne aktuellen Preis erhalten; heutiger Bestand und Filialpreis sind damit nicht bestätigt.":requestedMerchant==="REWE"?"Hier sehen wir bisher Artikel aus erfassten Berliner Abholangeboten. Preislose Artikelfunde dieser Quelle werden noch nicht separat gespeichert.":"Für "+requestedMerchant+" gibt es hier noch keinen eigenen Artikelkatalog. Die allgemeine Grundliste bleibt unsere Suchgrundlage.";
+  get("loadMore").hidden=true;get("articleScope").textContent=requestedMerchant==="ALDI"?"ALDI Nord: veröffentlichte Artikel in Deutschland. Die Quelle bestätigt keine Berliner Filiale. Artikelfunde bleiben auch ohne aktuellen Preis erhalten.":requestedMerchant==="EDEKA"?"Datierte Artikel aus dem Berliner Lieferangebot von EDEKA Hilbrecht. Artikelfunde bleiben auch ohne aktuellen Preis erhalten; heutiger Bestand und Filialpreis sind damit nicht bestätigt.":requestedMerchant==="REWE"?"Datierte Artikel aus dem Berliner REWE-Abholangebot am Halleschen Ufer 40. Artikelfunde bleiben auch ohne aktuellen Preis erhalten; heutiger Bestand und Filialpreis sind damit nicht bestätigt.":"Für "+requestedMerchant+" gibt es hier noch keinen eigenen Artikelkatalog. Die allgemeine Grundliste bleibt unsere Suchgrundlage.";
   if(search.length===1){clearPublications();get("articleResult").textContent="Gib mindestens zwei Zeichen ein oder leere die Suche.";return;}
   if(!more)loadPublications(token,search,requestedMerchant);
   get("articleResult").textContent="Artikelfunde werden geladen …";let typed=false;
@@ -107,7 +116,7 @@ function mount(document,fetcher=root.fetch.bind(root),publicationView=root.Caddy
    catch{if(token!==articleToken||activeTab!=="articles")return;type.mode="failed";}
    renderTypeFilter();
   }
-  const params=new URLSearchParams({merchant:requestedMerchant,limit:"50"});if(search)params.set("search",search);if(more&&["ALDI","EDEKA"].includes(requestedMerchant))params.set("offset",String(requestedOffset));if(typed)params.set("productTypeId",type.id);
+  const params=new URLSearchParams({merchant:requestedMerchant,limit:"50"});if(search)params.set("search",search);if(more&&["ALDI","EDEKA","REWE"].includes(requestedMerchant))params.set("offset",String(requestedOffset));if(typed)params.set("productTypeId",type.id);
   try{
    const response=await fetcher(API+"/v1/assortment/"+(typed?"typed-articles":"articles")+"?"+params);if(!response.ok)throw Error("article-source-unavailable");const data=await response.json();if(token!==articleToken||activeTab!=="articles")return;
    if(data.merchant!==requestedMerchant||data.assortmentComplete!==false||!Array.isArray(data.items))throw Error("invalid-article-response");

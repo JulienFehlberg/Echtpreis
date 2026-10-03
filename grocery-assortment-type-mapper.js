@@ -9,6 +9,8 @@ const DEFAULT_RULES = require("./data/grocery-type-rules.json");
 const CATEGORY_SOURCE = "ALDI Nord category publication";
 const CATEGORY_CONTRACT = { sourceId: CATEGORY_SOURCE, merchants: ["ALDI", "ALDI Nord"], sourceMerchant: "ALDI Nord",
   scopeChannel: "assortment-publication", locationScope: "unknown", host: "www.aldi-nord.de" };
+const REWE_ARTICLE_CONTRACT = { sourceId: "REWE Berlin pickup articles", merchants: ["REWE"], sourceMerchant: "REWE",
+  scopeChannel: "pickup", locationScope: "pickup-market", host: "www.rewe.de" };
 const plain = value => value !== null && typeof value === "object" && !Array.isArray(value)
   && [Object.prototype, null].includes(Object.getPrototypeOf(value));
 const fail = code => Object.assign(new Error(code), { code });
@@ -77,7 +79,7 @@ function createMapper(options = {}) {
       || !printable(family.id, 80) || familyIds.has(family.id)) throw fail("invalid-grocery-type-family");
     familyIds.add(family.id); terms(family.terms); terms(family.excludeTerms, true); ids(family.candidateTypeIds); terms(family.missingFacts);
   }
-  const sourceIds = new Set(), sourceContracts = [...data.sourceContracts, clone(CATEGORY_CONTRACT)];
+  const sourceIds = new Set(), sourceContracts = [...data.sourceContracts, clone(CATEGORY_CONTRACT), clone(REWE_ARTICLE_CONTRACT)];
   for (const source of sourceContracts) {
     if (!plain(source) || Object.keys(source).some(key => !["sourceId", "merchants", "sourceMerchant", "scopeChannel", "locationScope", "host", "sourceUrl"].includes(key))
       || !printable(source.sourceId, 120) || sourceIds.has(source.sourceId) || !printable(source.sourceMerchant, 120)

@@ -1,13 +1,13 @@
 "use strict";
 
 // A native article directory is not the generic taxonomy, stock or price authority.
-const Aldi=require("./aldi-assortment-article-service"),AldiClient=require("./aldi-assortment-client"),AldiCategory=require("./aldi-category-article-service"),AldiDirectory=require("./aldi-native-article-directory"),Wolt=require("./wolt-retailer-article-service"),Rewe=require("./rewe-retailer-price-service"),Discovery=require("./price-query-discovery");
+const Aldi=require("./aldi-assortment-article-service"),AldiClient=require("./aldi-assortment-client"),AldiCategory=require("./aldi-category-article-service"),AldiDirectory=require("./aldi-native-article-directory"),Wolt=require("./wolt-retailer-article-service"),Rewe=require("./rewe-retailer-article-service");
 const MERCHANTS=Object.freeze(["PENNY","EDEKA","Lidl","ALDI","Kaufland","REWE"]),DEFAULT_LIMIT=50,MAX_LIMIT=200,MAX_OFFSET=10000;
 const defaults=Object.freeze({aldi:AldiDirectory,wolt:Wolt,rewe:Rewe});
 const configs=Object.freeze({
  ALDI:Object.freeze({key:"aldi",service:AldiDirectory,sourceId:AldiDirectory.SOURCE,sourceMerchant:Aldi.MERCHANT,scopeChannel:"assortment-publication",locationScope:"unknown",pricedOnly:false,scopeLabel:"Öffentliche ALDI-Nord-Produkt- und Kategoriebelege in Deutschland. Jede native Artikelkennung zählt einmal; Berliner Filiale und heutiger Bestand sind nicht bestätigt."}),
  EDEKA:Object.freeze({key:"wolt",service:Wolt,sourceId:Wolt.SOURCE,sourceMerchant:Wolt.MERCHANT,scopeChannel:"online",locationScope:"native-venue",pricedOnly:false,scopeLabel:"Datierte Artikelfunde im Wolt-Lieferangebot von EDEKA Hilbrecht in Berlin; heutiger Bestand und Filialkassenpreis sind nicht bestätigt."}),
- REWE:Object.freeze({key:"rewe",service:Rewe,sourceId:Rewe.SOURCE,sourceMerchant:Rewe.MERCHANT,scopeChannel:"pickup",locationScope:"pickup-market",pricedOnly:true,scopeLabel:"REWE-Abholangebot am Halleschen Ufer 40 in Berlin; kein bestätigter Filialbestand oder Filialkassenpreis."})
+ REWE:Object.freeze({key:"rewe",service:Rewe,sourceId:Rewe.SOURCE,sourceMerchant:Rewe.MERCHANT,scopeChannel:"pickup",locationScope:"pickup-market",pricedOnly:false,scopeLabel:"Datierte Artikelfunde im REWE-Abholangebot am Halleschen Ufer 40 in Berlin; heutiger Bestand und Filialkassenpreis sind nicht bestätigt."})
 });
 const fail=code=>Object.assign(new Error(code),{code});
 const plain=value=>value!==null&&typeof value==="object"&&!Array.isArray(value)&&[Object.prototype,null].includes(Object.getPrototypeOf(value));
@@ -23,7 +23,7 @@ function queryOptions(options={}){
  let search;
  if(options.search!==undefined){if(typeof options.search!=="string"||/[\u0000-\u001f\u007f]/.test(options.search))throw fail("invalid-article-directory-search");search=options.search.trim();if(search.length<2||search.length>120)throw fail("invalid-article-directory-search");}
  const limit=integer(options.limit,DEFAULT_LIMIT,1,MAX_LIMIT,"limit"),offset=integer(options.offset,0,0,MAX_OFFSET,"offset");
- if(options.offset!==undefined&&!["ALDI","EDEKA"].includes(options.merchant))throw fail("article-directory-offset-not-supported");
+ if(options.offset!==undefined&&!["ALDI","EDEKA","REWE"].includes(options.merchant))throw fail("article-directory-offset-not-supported");
  return{merchant:options.merchant,search,limit,offset,now:clock(options)};
 }
 function dependencies(overrides){if(overrides===undefined)return defaults;if(!plain(overrides)||Object.keys(overrides).some(key=>!["aldi","wolt","rewe"].includes(key)))throw fail("invalid-article-directory-dependencies");return{...defaults,...overrides};}
@@ -44,16 +44,7 @@ function normalizeAldi(raw,now){
  if(!checked.ok||raw.packAmount!==checked.article.packAmount||raw.packUnit!==checked.article.packUnit||raw.packCount!==checked.article.packCount)return null;
  return item("ALDI",checked.article);
 }
-function normalizePriced(merchant,raw,now){
- if(!plain(raw))return null;
- const service=configs[merchant].service,checked=service.validateOffer(raw,{now});if(!checked.ok)return null;
- const offer=checked.offer,captured=Date.parse(offer.capturedAt),expires=iso(raw.expiresAt);
- const parsed=Discovery.pack(raw.pack);if(!parsed||parsed.count>1000||parsed.amount*parsed.count>100000000||!Discovery.samePack(parsed,Discovery.productPack(offer)))return null;
- // Validate the stored original deadline; revalidation must not renew an old capture.
- if(!expires||expires!==offer.expiresAt||Date.parse(expires)<=now||captured>now||now-captured>=86400000)return null;
- if(raw.validationIssue!=null||raw.validation_issue!=null)return null;
- return item(merchant,offer);
-}
+function normalizeRewe(raw,now){const checked=Rewe.validateView(raw,{now});return checked.ok?item("REWE",checked.article):null;}
 function normalizeWolt(raw,now){const checked=Wolt.validateView(raw,{now});return checked.ok?item("EDEKA",checked.article):null;}
 function approvedResultSource(merchant,result){return merchant==="ALDI"?[AldiDirectory.SOURCE,Aldi.SOURCE,AldiCategory.SOURCE].includes(result.sourceId):result.sourceId===configs[merchant].sourceId;}
 function identity(value){return JSON.stringify([value.sourceId,value.scopeChannel,value.retailerSku,value.gtin,value.name,value.brand,value.variant,value.pack,value.packAmount,value.packUnit,value.packCount,value.sourceUrl]);}
@@ -69,14 +60,14 @@ function uniqueArticles(items){
 }
 async function search(pool,options={},overrides){
  const query=queryOptions(options),services=dependencies(overrides);poolRequired(pool);
- const metadata=sourceMetadata(query.merchant),config=configs[query.merchant],base={ok:true,...metadata,items:[],returnedCount:0,excludedRows:0,total:null,limit:query.limit,offset:query.offset,offsetSupported:["ALDI","EDEKA"].includes(query.merchant),matchMeaning:"text-search-not-product-equivalence"};
+ const metadata=sourceMetadata(query.merchant),config=configs[query.merchant],base={ok:true,...metadata,items:[],returnedCount:0,excludedRows:0,total:null,limit:query.limit,offset:query.offset,offsetSupported:["ALDI","EDEKA","REWE"].includes(query.merchant),matchMeaning:"text-search-not-product-equivalence"};
  if(!config)return{...base,status:"unsupported-source",reason:"no-captured-article-source",note:metadata.scopeLabel};
  const service=services[config.key];if(!service||typeof service.search!=="function")throw fail("invalid-article-directory-dependencies");
- const request={merchant:config.sourceMerchant,limit:query.limit,scopeChannel:config.scopeChannel,now:query.now,...(query.search===undefined?{}:{search:query.search}),...(["ALDI","EDEKA"].includes(query.merchant)?{offset:query.offset}:{})};
+ const request={merchant:config.sourceMerchant,limit:query.limit,scopeChannel:config.scopeChannel,now:query.now,...(query.search===undefined?{}:{search:query.search}),...(["ALDI","EDEKA","REWE"].includes(query.merchant)?{offset:query.offset}:{})};
  const result=await service.search(pool,request);
  if(!plain(result)||result.ok===false||result.scopeCountry!=="DE"||result.scopeChannel!==config.scopeChannel||result.truthEligible!==false||!config.pricedOnly&&!approvedResultSource(query.merchant,result)||!Array.isArray(result.items)||result.items.length>query.limit)throw fail("invalid-article-directory-source-response");
  let pagination={scannedRows:null,nextOffset:null,hasMore:false};if(!config.pricedOnly){if(!Number.isSafeInteger(result.scannedRows)||!Number.isSafeInteger(result.nextOffset))throw fail("invalid-article-directory-source-pagination");const scanned=count(result.scannedRows),next=count(result.nextOffset);if(scanned<result.items.length||scanned>query.limit||next!==query.offset+scanned||result.hasMore!==(scanned===query.limit&&next<=MAX_OFFSET))throw fail("invalid-article-directory-source-pagination");pagination={scannedRows:scanned,nextOffset:next,hasMore:result.hasMore};}
- const normalized=result.items.map(raw=>query.merchant==="ALDI"?normalizeAldi(raw,query.now):query.merchant==="EDEKA"?normalizeWolt(raw,query.now):normalizePriced(query.merchant,raw,query.now)).filter(Boolean),unique=uniqueArticles(normalized);
+ const normalized=result.items.map(raw=>query.merchant==="ALDI"?normalizeAldi(raw,query.now):query.merchant==="EDEKA"?normalizeWolt(raw,query.now):normalizeRewe(raw,query.now)).filter(Boolean),unique=uniqueArticles(normalized);
  return{...base,...pagination,items:unique.items,status:unique.items.length?"observed-articles":"no-observed-articles",reason:unique.items.length?null:"no-matching-captured-articles",returnedCount:unique.items.length,excludedRows:(pagination.scannedRows===null?0:pagination.scannedRows-result.items.length)+result.items.length-normalized.length+unique.conflicts,note:metadata.scopeLabel+(config.pricedOnly?" Artikelbelege stammen ausschließlich aus derzeit gültigen veröffentlichten Preiszeilen; ein eigener preisunabhängiger Artikelbestand besteht dafür noch nicht.":" Der ursprüngliche Artikelabruf bleibt datiert, auch wenn kein aktueller Preis vorliegt.")};
 }
 async function status(pool,options={},overrides){

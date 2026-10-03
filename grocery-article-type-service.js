@@ -49,7 +49,7 @@ function assertSearchResponse(result, query) {
       || result.scannedRows != null || result.nextOffset != null || result.hasMore != null && result.hasMore !== false)
       throw fail("grocery-article-type-source-pagination-conflict");
   } else if (result.offsetSupported) {
-    if (result.offsetSupported !== true || !["ALDI", "EDEKA"].includes(query.merchant)
+    if (result.offsetSupported !== true || !["ALDI", "EDEKA", "REWE"].includes(query.merchant)
       || !Number.isSafeInteger(result.scannedRows) || result.scannedRows < result.items.length || result.scannedRows > query.limit
       || !Number.isSafeInteger(result.nextOffset) || result.nextOffset !== query.offset + result.scannedRows
       || result.hasMore !== (result.scannedRows === query.limit && result.nextOffset <= Directory.MAX_OFFSET))
@@ -80,7 +80,7 @@ async function search(pool, options = {}, deps) {
   const request = { ...query.directory };
   // Directory deliberately rejects even an explicitly supplied zero offset
   // for nonpaged sources; its normalized default is not a caller request.
-  if (!["ALDI", "EDEKA"].includes(request.merchant)) delete request.offset;
+  if (!["ALDI", "EDEKA", "REWE"].includes(request.merchant)) delete request.offset;
   const result = await service.search(pool, request); assertSearchResponse(result, query.directory);
   const paired = result.items.map(article => ({ article, sidecar: annotationFor(article, query.directory) }));
   const selected = query.type ? paired.filter(value => value.sidecar.annotation.state === "assigned"
