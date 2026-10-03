@@ -321,7 +321,7 @@ async function main() {
       await tx.query("ROLLBACK TO SAVEPOINT native_original_fk");
     });
     await test("actual SQL retains native country channel and held conflict bounds", async () => {
-      for (const change of ["source_id='REWE another market'", "source_response_hash='BAD'",
+      for (const change of ["source_id='REWE another market'",
         "article=jsonb_set(article,'{scopeCountry}','\"AT\"'::jsonb)",
         "article=jsonb_set(article,'{scopeChannel}','\"physical-store\"'::jsonb)",
         "article=jsonb_set(article,'{nativeMarketId}','\"999\"'::jsonb)",
@@ -332,6 +332,13 @@ async function main() {
           [Service.SOURCE, sku(5)]), error => error.code === "23514", change);
         await tx.query("ROLLBACK TO SAVEPOINT invalid_native_article_sql");
       }
+      const before = await snapshot(tx, Service.TABLE);
+      await tx.query("SAVEPOINT invalid_native_body_reference");
+      await assert.rejects(() => tx.query(`UPDATE ${Service.TABLE} SET source_response_hash='BAD' WHERE source_id=$1 AND retailer_sku=$2`,
+        [Service.SOURCE, sku(5)]), error => error.code === "23503",
+      "The article body reference is protected by its actual original-body foreign key");
+      await tx.query("ROLLBACK TO SAVEPOINT invalid_native_body_reference");
+      assert.deepEqual(await snapshot(tx, Service.TABLE), before, "Rejected body-reference update leaves the entire article table unchanged");
     });
     await test("tampered retained body is excluded by original revalidation", async () => {
       const original = capture(6, base); await save([original]); const before = await Service.status(tx, { now });
