@@ -1,5 +1,5 @@
 "use strict";
-const Fetch=require("./aldi-category-fetch-client"),Articles=require("./aldi-category-article-service");
+const Fetch=require("./aldi-category-fetch-client"),Articles=require("./aldi-category-article-service"),Timestamp=require("./price-refresh-state-store");
 const SOURCE=Fetch.SOURCE,TABLE="aldi_category_catalog_state",CONTINUATION_MS=60000,REFRESH_MS=4*3600000,ERROR_WAIT_MS=3600000,MAX_REQUESTS=4;
 const fail=(code,extra={})=>Object.assign(new Error(code),{code,...extra});
 const iso=value=>typeof value==="string"&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString()===value;
@@ -60,7 +60,7 @@ async function refresh(options={},deps={}){
   return{received,accepted,identityReceived,identityAccepted,categoryRejected,requests,bytes,pages,captureSourceId:SOURCE,nextAttemptAt:new Date(cursor.nextIndex===cursor.targets.length?Date.parse(cursor.nextPassAt):now()+CONTINUATION_MS).toISOString(),catalog:{targetCategories:cursor.targets.length,scannedCategories:cursor.nextIndex,completedPasses:cursor.completedPasses,excludedNavigationTargets:cursor.excludedNavigationTargets,categoryTraversalFinished:cursor.nextIndex===cursor.targets.length,fullAssortment:false},scope:{country:"DE",channel:"assortment-publication",location:"unknown"},independentOfUserReceipts:true};
  }catch(error){
   const time=now(),nextAttemptAt=new Date(time+Math.max(ERROR_WAIT_MS,Number.isFinite(error.retryAfterMs)&&error.retryAfterMs>0?error.retryAfterMs:0)).toISOString(),code=String(error.code||"aldi-category-refresh-failed").slice(0,300);
-  await pool.query(`INSERT INTO ${TABLE}(source_id,cursor,last_error,retry_after,updated_at) VALUES($1,$2::jsonb,$3,$4,$5) ON CONFLICT(source_id) DO UPDATE SET last_error=EXCLUDED.last_error,retry_after=EXCLUDED.retry_after,updated_at=EXCLUDED.updated_at`,[SOURCE,JSON.stringify(initial()),code,nextAttemptAt,new Date(time).toISOString()]);throw Object.assign(error,{nextAttemptAt,requests,bytes,pages});
+  await pool.query(`INSERT INTO ${TABLE}(source_id,cursor,last_error,retry_after,updated_at) VALUES($1,$2::jsonb,$3,$4,$5) ON CONFLICT(source_id) DO UPDATE SET last_error=EXCLUDED.last_error,retry_after=EXCLUDED.retry_after,updated_at=EXCLUDED.updated_at`,[SOURCE,JSON.stringify(initial()),code,Timestamp.timestampParameter(nextAttemptAt),new Date(time).toISOString()]);throw Object.assign(error,{nextAttemptAt,requests,bytes,pages});
  }finally{running=false;}
 }
 async function status(pool,now=Date.now()){const raw=await load(pool),cursor=state(raw);return{sourceId:SOURCE,targetCategories:cursor.targets.length,scannedCategories:cursor.nextIndex,completedPasses:cursor.completedPasses,lastRunAt:cursor.lastRunAt,lastError:raw.lastError||null,nextAttemptAt:new Date(dueAt(raw,now)).toISOString(),excludedNavigationTargets:cursor.excludedNavigationTargets,categoryTraversalFinished:cursor.nextIndex===cursor.targets.length,fullAssortment:false,scopeCountry:"DE",scopeChannel:"assortment-publication",locationScope:"unknown",normalPriceClassificationVerified:false,independentOfUserReceipts:true};}

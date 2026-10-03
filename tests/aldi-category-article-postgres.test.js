@@ -171,6 +171,12 @@ function offlineFixtureCheck() {
   assert.notEqual(validPDP.article.sourceId, Service.SOURCE);
   assert.equal(Directory.querySpec({ gtin: "3017620422003", now }).sql.includes(" WHERE false"), true);
   assert.throws(() => Directory.querySpec({ gtin: "GTIN:3017620422003", now }), /invalid-article-gtin/);
+  const Store = require("../price-refresh-state-store");
+  const maximum = "+275760-09-13T00:00:00.000Z", parameter = Store.timestampParameter(maximum);
+  assert(parameter instanceof Date); assert.equal(parameter.getTime(), 8640000000000000);
+  assert.equal(parameter.toISOString(), maximum);
+  assert.equal(Fetch.retryAfter(new Headers({ "retry-after": "999999999999999999999999999999" }), now),
+    parameter.getTime() - now);
   assert.deepEqual(value, before, "Offline validation does not modify captures or native input");
   console.log("aldi-category-article-postgres: offline synthetic original/category/pack/priceless, independent service admission, price/deposit and actual-handler fixture checks passed; no DB or HTTP");
 }
@@ -206,7 +212,7 @@ async function main() {
       "aldi_assortment_published_prices", "aldi_assortment_articles", "wolt_retailer_articles",
       "hit_price_import_evidence", "hit_assortment_refresh_state", "aldi_assortment_catalog_state",
       "rewe_retailer_catalog_state", "wolt_retailer_catalog_state", "aldi_category_published_prices",
-      "aldi_category_catalog_state", Service.TABLE, Service.CAPTURE_TABLE];
+      "aldi_category_catalog_state", "price_source_refresh_state", Service.TABLE, Service.CAPTURE_TABLE];
     const before = {};
     for (const table of immutableTables) before[table] = await snapshot(table);
     await pool.query("CREATE SCHEMA " + schemaName); schemaCreated = true;
@@ -795,24 +801,66 @@ async function main() {
         assert.deepEqual(await frontierSnapshot(table), frontierBefore[table], "Frontier test restores own " + table);
     });
 
-    await test("native extreme Retry-After clamp roundtrips the actual PostgreSQL deadline parameter", async () => {
+    await test("overflow Retry-After roundtrips the actual Category handler and global source checkpoint", async () => {
       const Refresh = require("../aldi-category-refresh"), Fetch = require("../aldi-category-fetch-client");
+      const Store = require("../price-refresh-state-store"), Prices = require("../aldi-category-price-service");
       const milliseconds = Fetch.retryAfter(new Headers({ "retry-after": "999999999999999999999999999999" }), now);
       assert.equal(milliseconds, 8640000000000000 - now);
       const deadline = new Date(now + milliseconds).toISOString();
       assert.equal(deadline, "+275760-09-13T00:00:00.000Z");
+      const parameter = Store.timestampParameter(deadline);
+      assert(parameter instanceof Date, "Use the production serializer for expanded positive years");
+      assert.equal(parameter.getTime(), 8640000000000000);
+      assert.equal(parameter.toISOString(), deadline, "No truncation or shorter source cooldown");
+      await Store.ensure(articlesPool);
+      const storeTable = "price_source_refresh_state";
+      assert((await articlesPool.query("SELECT 1 FROM information_schema.tables WHERE table_schema=$1 AND table_name=$2",
+        [schemaName, storeTable])).rowCount === 1, "The global checkpoint test stays in its isolated schema");
       const before = (await articlesPool.query("SELECT * FROM " + Refresh.TABLE + " WHERE source_id=$1", [Service.SOURCE])).rows[0];
+      const beforeGlobal = await frontierSnapshot(storeTable), nativeBefore = {};
+      for (const table of [Service.TABLE, Service.CAPTURE_TABLE, Prices.TABLE])
+        nativeBefore[table] = await frontierSnapshot(table);
       await tx.query("BEGIN"); await tx.query("SELECT txid_current()");
-      // Same String parameter type as the production retry_after checkpoint;
-      // no conversion to a fake Date object or a reduced, easier horizon.
-      await tx.query("UPDATE " + Refresh.TABLE + " SET retry_after=$2::timestamptz WHERE source_id=$1", [Service.SOURCE, deadline]);
+      // Make this isolated source due through real SQL. The error occurs before
+      // any article transaction, so the genuine assigned PoolClient keeps both
+      // production checkpoint writes inside this test's rollback boundary.
+      await tx.query("UPDATE " + Refresh.TABLE
+        + " SET cursor=jsonb_set(cursor,'{nextPassAt}',to_jsonb($2::text)),retry_after=NULL,last_error=NULL WHERE source_id=$1",
+      [Service.SOURCE, new Date(now).toISOString()]);
+      const due = await Refresh.load(tx), dueCursor = clone(due.cursor);
+      assert.equal(Refresh.dueAt(due, now), now);
+      const sourceError = Object.assign(new Error("POSTGRES TEST native source denied with overflow Retry-After"),
+        { code: "aldi-category-http-403", status: 403, requestStarted: true, retryAfterMs: milliseconds });
+      let attempted = 0;
+      await assert.rejects(() => Refresh.refresh({ pool: tx, maxRequests: 1, now: () => now }, {
+        canFetch: async () => true,
+        fetchPage: async target => { assert.equal(target, Fetch.SEED); attempted++; throw sourceError; }
+      }), error => error === sourceError && error.nextAttemptAt === deadline && error.requests === 1 && error.pages === 0);
+      assert.equal(attempted, 1, "Exactly one synthetic failed source attempt, without HTTP or denial retry");
       const loaded = await Refresh.load(tx);
+      assert.deepEqual(loaded.cursor, dueCursor, "Source failure retains the exact traversal cursor");
+      assert.equal(loaded.lastError, "aldi-category-http-403");
       assert.equal(new Date(loaded.retryAfter).getTime(), 8640000000000000);
       assert.equal(new Date(loaded.retryAfter).toISOString(), deadline);
       assert.equal(Refresh.dueAt(loaded, now), 8640000000000000);
+      assert.equal(await Refresh.resumeAt(tx, now), deadline);
+      const owner = "POSTGRES TEST max-retry owner";
+      assert.equal(await Store.acquire(tx, Service.SOURCE, owner), true);
+      assert.equal(await Store.save(tx, Service.SOURCE, {
+        lastAttemptAt: new Date(now).toISOString(), lastError: sourceError.code,
+        consecutiveFailures: 1, lastReceived: 0, lastAccepted: 0, nextAttemptAt: sourceError.nextAttemptAt
+      }, owner), true);
+      const global = (await Store.loadAll(tx))[Service.SOURCE];
+      assert.equal(new Date(global.nextAttemptAt).getTime(), 8640000000000000);
+      assert.equal(new Date(global.nextAttemptAt).toISOString(), deadline);
+      assert.equal(global.lastError, sourceError.code); assert.equal(global.consecutiveFailures, 1);
+      assert.equal(global.leaseOwner, null); assert.equal(global.leaseUntil, null);
       await tx.query("ROLLBACK");
       const restored = (await articlesPool.query("SELECT * FROM " + Refresh.TABLE + " WHERE source_id=$1", [Service.SOURCE])).rows[0];
-      assert.deepEqual(restored, before, "Extreme deadline fixture rolls back its actual source checkpoint");
+      assert.deepEqual(restored, before, "Extreme deadline fixture rolls back its actual Category checkpoint");
+      assert.deepEqual(await frontierSnapshot(storeTable), beforeGlobal, "Global attempt/lease/deadline checkpoint rolls back");
+      for (const table of [Service.TABLE, Service.CAPTURE_TABLE, Prices.TABLE])
+        assert.deepEqual(await frontierSnapshot(table), nativeBefore[table], "Source failure never rewrites native " + table);
     });
 
     await test("genuine client temporary-schema ensure cannot cache rolled-back DDL", async () => {
